@@ -12,7 +12,9 @@
 
 Status: approved for inline execution in an isolated worktree. Owner approved
 revising Valibot from 1.1.0 to 1.5.0 to satisfy the resolved JSON-schema adapter.
-Task 1 resumes with fresh dependency qualification before runtime probes.
+Task 1 is complete. Task 2's six runtime tests pass, but its canonical typecheck
+fails on three dependency declarations. Awaiting the owner's typecheck policy
+decision; no skipLibCheck setting, dependency patch or override applied.
 
 ## Global Constraints
 
@@ -170,7 +172,7 @@ package, tsconfig, moon.yml, src/fixture.ts and tests/fixture.test.ts.
 FixtureCommand): FixtureDecision. Domain rejections return the unchanged original
 state. No I/O or runtime services are permitted in fixture.ts.
 
-- [ ] **Step 1: Establish the Moon workspace and test environment.** Verify
+- [x] **Step 1: Establish the Moon workspace and test environment.** Verify
   moon --version is 2.5.4 and bun --version is 1.4.2. Create the exact workspace,
   task and version contract above, with all direct dependency pins from Tech
   Stack. Set both packages private true and type module. Use strict TypeScript with
@@ -208,7 +210,7 @@ expect(decideFixture(frozen, {
   from the root. All runs must execute and exit 0, without cache replay, task
   retries, automatic install or Node fallback. Validate declared options against
   the pinned CLI's generated schema. Record resolved pins, task commands and platform.
-- [ ] **Step 6: Commit the independently passing fixture and tooling.** Stage only
+- [x] **Step 6: Commit the independently passing fixture and tooling.** Stage only
   root workspace/Moon config and the explicit probe files, never dependencies or state; commit
   with message test: establish pinned Bun Effect compatibility fixture.
 
