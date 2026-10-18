@@ -137,10 +137,65 @@ There were no real model requests, consumer repository changes, cloud resources,
 GitHub writes or automatic runtime changes.
 
 Execution began at 19:46:45 UTC. Verification/reporting reached this checkpoint
-around 20:54 UTC, about 67 wall-clock minutes including owner-decision pauses,
-inside the conservative two-hour cap. Independent whole-branch review follows;
-its outcome and any fixes are recorded below before handoff. Work remains on
+around 20:54 UTC; independent review and handoff documentation finished around
+21:01 UTC, about 74 wall-clock minutes including owner-decision pauses, inside
+the conservative two-hour cap. Work remains on
 `codex/bun-effect-flue-probe`; `main` must remain unchanged until owner approval.
+
+## Independent Review
+
+A fresh-context reviewer inspected `6930126..f87db3d` and found no Critical,
+Important or Minor issues. It independently reran all 26 tests (81 assertions),
+the canonical source typecheck and whitespace check under the minimal environment,
+verified the lockfile digest and confirmed both checkouts clean with main still
+at `6930126`. It recommended the bounded offline probe as ready for owner-approved
+integration, not production acceptance. No code fix or deferred minor remained.
+Subsequent changes only finalise this review record and the execution checklist.
+
+The reviewer did not independently replay historical installs, RED stages,
+Moon invocations or timing measurements, or audit the whole host process table.
+Those are session evidence, not independent reviewer proof.
+
+## Execution Decisions
+
+This records the inline executor's decisions, including historical blocked
+checkpoints, before its temporary planning workspace is removed:
+
+1. Complete independent fixture/Moon setup while awaiting the pin decision, but
+   do not run an unsupported Flue cohort. Cost if wrong: wasted setup effort.
+2. Initially withhold faux-provider/credential/fetch safety claims until Task 2.
+   Cost if wrong: unsafe runtime assumptions. These tests subsequently passed.
+3. Initially withhold runtime lifetime/teardown claims. Cost if wrong: ownership
+   leaks. These tests subsequently passed.
+4. Initially withhold SIGKILL receipt/limit recovery claims. Cost if wrong:
+   replay/reset risk. These tests subsequently passed.
+5. Initially withhold read/abort/cleanup claims. Cost if wrong: continuing work.
+   The bounded synthetic tests subsequently passed.
+6. Initially retain only a blocked Markdown report until validation exists.
+   Cost if wrong: false machine-readable qualification. Validator tests now pass.
+7. Keep runtime input validation and production aggregate/budget/transaction
+   guarantees outside the minimal fixture. Cost if wrong: mistaking it for a service.
+8. Exclude real providers, Docker, actual worker cleanup, host loss, migrations
+   and publication. Cost if wrong: unqualified production adoption.
+9. Treat historical runs as session evidence, not independent replay. Cost if
+   wrong: overstated independent provenance.
+10. Save the failed-typecheck checkpoint pending explicit policy approval rather
+    than completing Task 2. Cost if wrong: extra owner-decision overhead. Resolved
+    by the approved probe-local policy, not a dependency patch.
+11. Add one shared test-only child/watchdog helper for Tasks 3-4. Cost if wrong:
+    one extra helper file; no production abstraction.
+12. Final review retains the vendor-declaration exclusion. Cost if wrong:
+    internal declaration inconsistencies escape this source gate.
+13. Final review retains the real-provider/model and Docker/worker exclusions.
+    Cost if wrong: unsafe external-runtime acceptance.
+14. Final review excludes active-job crash and host-loss recovery. Cost if wrong:
+    incorrect recovery assumptions beyond completed-receipt restart.
+15. Final review excludes production transactions, migrations and service
+    readiness. Cost if wrong: premature deployment or incorrect migrations.
+16. Report validation classifies evidence strings, not their authenticity.
+    Cost if wrong: a future untrusted caller could supply fabricated evidence.
+17. Final review distinguishes recorded installs/RED/Moon/timing/host-cleanup
+    evidence from its own test/typecheck reruns. Cost if wrong: overstated proof.
 
 ## Next Decision
 

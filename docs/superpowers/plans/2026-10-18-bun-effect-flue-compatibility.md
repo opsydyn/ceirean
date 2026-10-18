@@ -14,8 +14,9 @@ Status: approved for inline execution in an isolated worktree. Owner approved
 revising Valibot from 1.1.0 to 1.5.0 to satisfy the resolved JSON-schema adapter.
 Owner also approved probe-local skipLibCheck, matching Flue's configuration,
 while retaining strict source/API checking and documenting vendor errors. All
-four phase suites and canonical typecheck pass; final verification and independent
-review precede handoff. No dependency patch or override applied.
+four phase suites and canonical typecheck pass; final repeated verification and
+independent whole-branch review are complete with no findings. No dependency
+patch or override applied. The branch remains isolated pending owner integration.
 
 ## Global Constraints
 
@@ -364,7 +365,7 @@ tests use the same minimal environment and child cleanup discipline as Task 3.
   digest, task commands and effective cache/retry/env-file options, test outcomes,
   elapsed effort, temporary-state cleanup and exclusions. Keep raw databases,
   credentials and transcripts out of Git. Add the report link to the README.
-- [ ] **Step 7: Commit the final probe and evidence.** Stage only named source,
+- [x] **Step 7: Commit the final probe and evidence.** Stage only named source,
   tests and sanitised documentation; commit with message docs: record offline
   Bun Effect Flue compatibility evidence. Stop for owner review of the findings.
 

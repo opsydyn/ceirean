@@ -110,7 +110,8 @@ architecture remain unqualified.
 
 Approved for inline execution in an isolated worktree. Its four phases pass with
 the approved Valibot 1.5.0 correction and probe-local `skipLibCheck` policy. A
-fresh whole-branch review precedes handoff. The plan covers a credential-free offline probe using
+fresh whole-branch review found no issues and independently reran the tests and
+typecheck. The plan covers a credential-free offline probe using
 the real Flue runtime with a synthetic provider; it does not implement the
 upgrade service or qualify real models, containers or deployment.
 
