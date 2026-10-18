@@ -395,7 +395,13 @@ stop and reshape rather than claiming success from a manifest-only bump.
    dispatch or unattended scheduling. Keep one owner per Flue conversation.
 4. Evaluate the preregistered corpus and maintainer effort before broader rollout.
    Keep failed and blocked cases in the denominator.
-5. Only then consider campaigns, performance budgets, Jev, compiled packaging and
+5. Add organisation discovery and configuration self-PRs as a separately designed
+   expansion; see the [local roadmap](../../roadmap.md). New eligible repos produce
+   disabled, reviewable central configuration proposals in Leviathan itself, not
+   automatic consumer execution or self-modifying application code. Reconcile
+   inventory and publication outcomes without duplicate PRs or lost human edits.
+   GitHub access and durable unattended-operation gates above still apply.
+6. Only then consider campaigns, performance budgets, Jev, compiled packaging and
    external users. None are implicit scope for this implementation.
 
 ## Sources And Evidence Boundaries

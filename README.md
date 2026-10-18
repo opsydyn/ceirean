@@ -83,6 +83,10 @@ The product plan contains the proposed pilot roadmap, evaluation thresholds and
 stop conditions. Its budgets and later phases remain proposals, not authority to
 run paid jobs or change external systems.
 
+[Local delivery roadmap](docs/roadmap.md) tracks the next slices, including later
+organisation discovery and config-only self-PRs against Leviathan for new repos.
+Discovery does not automatically enable migrations or grant execution access.
+
 ## Architecture Draft
 
 [Internal Upgrade Service Design](docs/superpowers/specs/2026-10-18-internal-upgrade-service-design.md)

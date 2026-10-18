@@ -35,6 +35,9 @@ artifact store, publisher, remote, scheduled service, global budget reservation
 or real consumer migration is included. Do not import production decisions from
 the compatibility fixture or expand that fixture into the application.
 
+Organisation discovery and configuration self-PRs are a later
+[roadmap item](../../roadmap.md), not an extension of this tracer.
+
 ## Ownership And Files
 
 The following paths are proposed implementation boundaries, not files to scaffold
