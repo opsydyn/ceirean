@@ -11,6 +11,10 @@ Agreed: a dedicated service repository, Bun and TypeScript first, Flue at the
 core, FoldKit experiments first and the postcode client second. Keep service
 machinery outside the public Astro and Viz packages. Rust is parked.
 
+Effect's proposed role and the pure domain boundary are recorded in
+[ADR-0001](../../decisions/0001-adopt-effect-and-domain-boundaries.md). The written
+ADR is proposed for review; no compatibility probe has been executed.
+
 This document proposes the remaining architecture. It does not approve credentials,
 model data access, infrastructure, pilot spending, GitHub installation or PR
 publication. Written-spec approval precedes an implementation plan and its review.
@@ -65,6 +69,33 @@ Start as one application with small internal modules, not a monorepo of services
 | Docker worker driver | Create, execute, terminate and remove isolated workers |
 | Verifier | Evaluate a frozen patch against the approved acceptance contract |
 | Ledger and evidence | Persist application state and content-addressed results |
+
+## Domain And Effect Ownership
+
+Upgrade Management is the first bounded context. UpgradeRun is an aggregate root
+with immutable state, validated identities, commands, facts and typed rejections.
+Pure decision functions enforce transitions using explicit time and policy facts;
+they perform no I/O and import no Flue, Docker, database, GitHub or Alchemy code.
+Store current state and append-only transition history rather than requiring full
+event sourcing or a distributed event system.
+
+An Effect RunCoordinator owns application execution. Context.Service contracts
+describe RunRepository, WorkerExecutor, MigrationAgent and ArtifactStore; live
+Layers are composed once at the CLI boundary. Local helpers consume services
+directly instead of provisioning their own runtime dependencies. Domain refusals
+are not transient failures and cannot trigger automatic operational retries.
+
+Effect provides scoped execution, not durable application history. The application
+ledger owns run recovery; Flue owns agent conversation recovery. The Flue adapter
+bridges Promise errors and cancellation explicitly through the shared application
+runtime. A completed agent turn is not qualification, and interrupted fibers do
+not prove that model calls or containers stopped.
+
+Cross-run budgets require atomic application-ledger reservations, not a per-run
+aggregate or eventually consistent report alone. Do not introduce an additional
+workflow engine to manage the same run. Alchemy Domain and infrastructure
+provisioning remain separate future decisions; see ADR-0001 for the assessment
+and revisit conditions.
 
 ## Request And Repository Profile
 
@@ -169,10 +200,12 @@ Flue receives neither a qualification tool nor a publishing tool. Source content
 AGENTS instructions, release notes, logs and generated artifacts are untrusted
 input and cannot grant capabilities.
 
-Before building migration features, pin a Flue release and Bun release and test
-agent startup, tool calls, subprocess cancellation, SQLite persistence and process
-restart recovery under Bun. The neighbouring postcode agent uses an older Flue
-API; it is an example, not the API contract for this service.
+Before building migration features, pin Flue, Effect and Bun releases and test
+service composition, agent startup, tool calls, explicit cancellation propagation,
+SQLite persistence and process restart recovery under Bun. Separate offline
+adapter tests from real-provider and container acceptance. The neighbouring
+postcode agent uses an older Flue API; it is an example, not the API contract for
+this service.
 
 The first compatibility probe has a proposed two-hour effort cap within the first
 slice. Failure blocks migration implementation. Do not switch the controller to
@@ -362,4 +395,5 @@ stop and reshape rather than claiming success from a manifest-only bump.
 Review this written design before an implementation plan is created. In
 particular, approve or revise the initial single-owner CLI deployment, worker
 boundary, local-only persistence guarantee, immutable verification contract and
-first-slice scope. Host selection and paid-run approval remain execution gates.
+first-slice scope, together with the proposed Effect and domain ownership in
+ADR-0001. Host selection and paid-run approval remain execution gates.
