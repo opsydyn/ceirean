@@ -8,14 +8,16 @@ compatibility probe and pinned workspace configuration are scaffolded.
 
 ## Status
 
-Partial offline compatibility probe only. All 13 current fixture/Flue/Effect
-tests pass through Moon. The Valibot peer conflict is resolved, but the canonical
-typecheck fails on three dependency declaration errors. Restart and cancellation
-remain unrun. There is no
+Offline compatibility probe only: 26 tests cover pure decisions, real Flue tools
+through Effect, process-kill recovery and distinct read/abort semantics. The
+canonical typecheck passes with strict source checking and the owner-approved
+probe-local vendor declaration policy. This does not qualify production use.
+There is no
 production application, GitHub remote, scheduled job or deployment.
 
 [Measured compatibility checkpoint](docs/assessments/bun-effect-flue-compatibility.md)
-records the dependency blocker, exact pins, verified subset and untested phases.
+records exact pins, measured results, dependency declaration limitations and
+excluded systems.
 
 The initial product outcome is a reviewable dependency migration with reproducible
 qualification evidence and less maintainer effort. Producing more version-bump
@@ -70,7 +72,7 @@ execution budgets.
 - [ ] Approve worker isolation, credentials, persistence and recovery design.
 - [ ] Select a historical migration and define acceptance evidence and budgets.
 - [ ] Review the written design specification.
-- [ ] Review an implementation plan and select execution method.
+- [x] Review an implementation plan and select execution method (compatibility probe only).
 - [ ] Implement and qualify the first dry run.
 - [ ] Separately approve a GitHub remote, app installation and draft PR publication.
 
@@ -98,20 +100,21 @@ host-loss recovery and GitHub dispatch are deferred.
 
 Status: accepted on 2026-10-18. It defines service ownership, dependency
 boundaries and the scope of the Bun/Effect/Flue compatibility probe. The pure
-fixture and initial Flue/Effect tool loop are tested; full runtime, restart and
-cancellation qualification remains incomplete.
+fixture, Flue/Effect tool loop, same-host completed-receipt restart and synthetic
+cancellation semantics are tested. Real providers, containers and production
+architecture remain unqualified.
 
 ## First Implementation Plan
 
 [Bun Effect Flue Compatibility](docs/superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
 
-Approved for inline execution in an isolated worktree. Task 1 is complete with
-the approved Valibot 1.5.0 correction. Task 2's runtime tests pass but its typecheck
-gate is blocked by dependency declarations. Tasks 3-4 have not started. The plan covers a credential-free offline probe using
+Approved for inline execution in an isolated worktree. Its four phases pass with
+the approved Valibot 1.5.0 correction and probe-local `skipLibCheck` policy. A
+fresh whole-branch review precedes handoff. The plan covers a credential-free offline probe using
 the real Flue runtime with a synthetic provider; it does not implement the
 upgrade service or qualify real models, containers or deployment.
 
-## Planned Monorepo Layout
+## Monorepo Layout
 
 ```text
 .moon/                      Project graph, toolchains and development tasks

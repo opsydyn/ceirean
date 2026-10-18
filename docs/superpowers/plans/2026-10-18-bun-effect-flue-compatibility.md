@@ -12,9 +12,10 @@
 
 Status: approved for inline execution in an isolated worktree. Owner approved
 revising Valibot from 1.1.0 to 1.5.0 to satisfy the resolved JSON-schema adapter.
-Task 1 is complete. Task 2's six runtime tests pass, but its canonical typecheck
-fails on three dependency declarations. Awaiting the owner's typecheck policy
-decision; no skipLibCheck setting, dependency patch or override applied.
+Owner also approved probe-local skipLibCheck, matching Flue's configuration,
+while retaining strict source/API checking and documenting vendor errors. All
+four phase suites and canonical typecheck pass; final verification and independent
+review precede handoff. No dependency patch or override applied.
 
 ## Global Constraints
 
@@ -238,7 +239,7 @@ and toolCalls(): number. Stable wrapper errors have code 'runtime', 'aborted' or
 waitForBlockedResponse(): Promise<void> and releaseBlockedResponse(): void as
 synthetic-provider test controls; release is idempotent.
 
-- [ ] **Step 1: Write failing tests.** 'two tool calls share one recorder' expects
+- [x] **Step 1: Write failing tests.** 'two tool calls share one recorder' expects
   counts 1 then 2, total 2 and one Layer acquisition. 'faux-only startup ignores
   ambient credentials' supplies env {} and records zero outbound fetches.
   'unknown provider fails closed' must not resolve a built-in fallback. 'stop then
@@ -246,9 +247,9 @@ synthetic-provider test controls; release is idempotent.
   'tool failure is observed' injects a rejecting record callback and checks the
   error is represented in the runtime/tool outcome, not reported as successful
   recording. Use test-scoped fetch tripwires, restoring them in finally.
-- [ ] **Step 2: Confirm red.** Run bun --no-env-file --no-install test
+- [x] **Step 2: Confirm red.** Run bun --no-env-file --no-install test
   tests/flue.test.ts --timeout 15000. Missing bridge implementation must fail.
-- [ ] **Step 3: Implement the bridge.** Use ManagedRuntime.make once in
+- [x] **Step 3: Implement the bridge.** Use ManagedRuntime.make once in
   composition.ts; callbacks run service effects through that instance. Flue uses
   start and sqlite from @flue/runtime/node, plus init, useModel, useTool and
   defineTool from public exports. Use fauxProvider, fauxAssistantMessage and
@@ -258,15 +259,15 @@ synthetic-provider test controls; release is idempotent.
   faux factory. For each submission, script one recorder tool call followed by
   text probe-complete; the shared-counter test sends two submissions.
   Use Valibot to validate the tool's token string. No sandbox is attached.
-- [ ] **Step 4: Enforce lifecycle.** Flue exposes no host shell or consumer files.
+- [x] **Step 4: Enforce lifecycle.** Flue exposes no host shell or consumer files.
   Run singleton lifecycle tests serially; always stop Flue before disposing the
   Effect bridge. Fail on a tool callback invoked after bridge disposal. No
   callback dispatches and reads its own currently executing conversation.
-- [ ] **Step 5: Confirm green.** From the root run explicit Moon targets probe:flue,
+- [x] **Step 5: Confirm green.** From the root run explicit Moon targets probe:flue,
   probe:domain and probe:typecheck with --force --no-actions, one at a time.
   Record that this used the real Flue tool loop with a synthetic provider, not a
   real model. Do not replace a failing Flue startup with a mocked runtime.
-- [ ] **Step 6: Commit the passing runtime bridge.** Stage the four named files;
+- [x] **Step 6: Commit the passing runtime bridge.** Stage the four named files;
   commit with message test: probe Flue tools through a shared Effect runtime.
 
 ### Task 3: File Backed Recovery Across A Process Kill
@@ -281,30 +282,30 @@ restart-child.ts accepts write or read and a unique stateDir. It writes one JSON
 result line with state, receipt, reply and providerCalls; a separate COMMITTED
 line signals that both durable writes completed.
 
-- [ ] **Step 1: Write the failing parent-process test.** 'completed receipt and
+- [x] **Step 1: Write the failing parent-process test.** 'completed receipt and
   limits survive process death' starts a writer, awaits COMMITTED, sends SIGKILL
   and awaits exit, then starts a reader on the same two database files. Assert
   fixed state fields are unchanged, submissionId is identical, reply text is
   probe-complete, and reader providerCalls is 0. Check app.db and flue.db are
   distinct files. An absent application row is an explicit failure, not a reset.
-- [ ] **Step 2: Confirm red.** Run bun --no-env-file --no-install test
+- [x] **Step 2: Confirm red.** Run bun --no-env-file --no-install test
   tests/restart.test.ts --timeout 15000; expect the missing child/ledger to fail.
-- [ ] **Step 3: Implement the child and ledger.** The writer completes one faux
+- [x] **Step 3: Implement the child and ledger.** The writer completes one faux
   submission, saves its completed receipt and frozen fixture in app.db, emits
   COMMITTED, then waits for the deliberate kill without graceful teardown. The
   reader bootstraps the same agent identity with file-backed flue.db and reads the
   stored receipt using its original instance ID. Do not dispatch a new message.
   Never inspect Flue's tables or copy only the main file from a live WAL database.
-- [ ] **Step 4: Bound processes and state.** Use the absolute current Bun binary
+- [x] **Step 4: Bound processes and state.** Use the absolute current Bun binary
   and --no-env-file --no-install for children, an explicit minimal environment,
   fresh owner-only temporary directories and a 5-second COMMITTED/read watchdog.
   Parent finally blocks kill and await any remaining child, then remove only
   their newly created fixture directory. No consumer path can be an output target.
-- [ ] **Step 5: Confirm green.** Run explicit Moon targets probe:restart, probe:flue,
+- [x] **Step 5: Confirm green.** Run explicit Moon targets probe:restart, probe:flue,
   probe:domain and probe:typecheck with --force --no-actions, one at a time.
   A retained state test within one process does not satisfy this
   task. Record same-host recovery only; no active-job or host-loss claim.
-- [ ] **Step 6: Commit the restart probe.** Stage the three new files and any
+- [x] **Step 6: Commit the restart probe.** Stage the three new files and any
   explicitly reviewed adapter change; commit with message test: verify probe
   persistence across Bun process restart.
 
@@ -330,7 +331,7 @@ On success it emits JSON with readerOutcome ('read_cancelled' or 'aborted'),
 submissionOutcome ('completed' or 'aborted') and cleanup 'confirmed'. Parent
 tests use the same minimal environment and child cleanup discipline as Task 3.
 
-- [ ] **Step 1: Write failing cancellation tests.** 'read cancellation does not
+- [x] **Step 1: Write failing cancellation tests.** 'read cancellation does not
   abort the submission' cancels only read's signal, observes read_cancelled, then
   releases the barrier and reads a completed result using the same receipt.
   'explicit abort settles synthetic work' calls abort, then reads until the
@@ -338,27 +339,27 @@ tests use the same minimal environment and child cleanup discipline as Task 3.
   'late completion cannot advance cancelled fixture' exercises Task 1's decision
   after the barrier releases. Tests need deterministic barriers, not arbitrary
   sleeps. Abort and cleanup have a 5-second external watchdog.
-- [ ] **Step 2: Write failing reporting tests.** A missing, failed, duplicate or
+- [x] **Step 2: Write failing reporting tests.** A missing, failed, duplicate or
   evidence-free phase cannot yield offline-compatible. A complete four-phase pass
   retains all three not_run fields and productionQualification false. A thrown
   startup failure remains visible; no test.skip is counted as a phase pass.
-- [ ] **Step 3: Confirm red.** Run bun --no-env-file --no-install test
+- [x] **Step 3: Confirm red.** Run bun --no-env-file --no-install test
   tests/cancellation.test.ts tests/report.test.ts --timeout 15000. Expect missing
   blocked mode/report behaviour to fail before implementing it.
-- [ ] **Step 4: Implement the minimal cancellation and report logic.** Use Flue's
+- [x] **Step 4: Implement the minimal cancellation and report logic.** Use Flue's
   explicit abort path and await settlement; stopping a read does not substitute.
   Keep the synthetic provider signal-aware. Report real-provider cancellation
   and actual worker cleanup as untested, even when the fake-provider tests pass.
   The watchdog kills an unresponsive probe child and records a failure rather
   than leaving execution running or claiming cleanup succeeded.
-- [ ] **Step 5: Run final verification.** From the root run
+- [x] **Step 5: Run final verification.** From the root run
   bun install --frozen-lockfile --ignore-scripts, then
   moon run probe:typecheck --force --no-actions and
   moon run probe:test --force --no-actions sequentially. Run probe:test twice to
   confirm evidence is rerun rather than restored. Also run git diff --check and
   confirm no nested lockfile or unplanned package exists. All claimed passing phases require recorded
   commands and exit codes; cap exhaustion or a missing phase means blocked.
-- [ ] **Step 6: Write and review measured evidence.** Record OS/architecture,
+- [x] **Step 6: Write and review measured evidence.** Record OS/architecture,
   exact Moon/Bun/plugin identities, resolved dependency cohort and root lockfile
   digest, task commands and effective cache/retry/env-file options, test outcomes,
   elapsed effort, temporary-state cleanup and exclusions. Keep raw databases,

@@ -32,8 +32,9 @@ export async function openFlueProbe(options: {
   mode: 'tool' | 'blocked';
   record: (token: string) => Promise<number>;
 }): Promise<ProbeHandle> {
-  if (options.mode === 'blocked') throw new Error('Blocked mode is not implemented yet');
   const faux = fauxProvider({ provider: 'leviathan-probe', models: [{ id: 'fixture' }] });
+  const entered = Promise.withResolvers<void>();
+  const release = Promise.withResolvers<void>();
   let toolCalls = 0;
   const recordToken = defineTool({
     name: 'record_token',
@@ -49,15 +50,37 @@ export async function openFlueProbe(options: {
     useTool(recordToken);
     return 'Record the synthetic token once, then report completion.';
   }
-  const runtime = await start({
-    agents: [LeviathanProbe], db: sqlite(join(options.stateDir, 'flue.db')),
-    env: {}, providers: [faux.provider],
-  });
+  let runtime: Awaited<ReturnType<typeof start>>;
+  try {
+    runtime = await start({
+      agents: [LeviathanProbe], db: sqlite(join(options.stateDir, 'flue.db')),
+      env: {}, providers: [faux.provider],
+    });
+  } catch (cause) { throw new ProbeError('runtime', cause); }
   const agent = init(LeviathanProbe, { id: options.instanceId });
   let stopping: Promise<void> | undefined;
   return {
     async dispatch(message) {
-      faux.appendResponses([
+      if (options.mode === 'blocked') {
+        faux.appendResponses([async (_context, providerOptions) => {
+          const signal = providerOptions?.signal;
+          if (!signal) throw new Error('Synthetic provider requires a cancellation signal');
+          entered.resolve();
+          await new Promise<void>((resolve, reject) => {
+            const onAbort = () => {
+              signal.removeEventListener('abort', onAbort);
+              reject(new DOMException('Synthetic provider aborted', 'AbortError'));
+            };
+            if (signal.aborted) { onAbort(); return; }
+            signal.addEventListener('abort', onAbort, { once: true });
+            void release.promise.then(() => {
+              signal.removeEventListener('abort', onAbort);
+              resolve();
+            });
+          });
+          return fauxAssistantMessage('probe-complete');
+        }]);
+      } else faux.appendResponses([
         fauxAssistantMessage(fauxToolCall('record_token', { token: message }), { stopReason: 'toolUse' }),
         (context) => {
           const result = context.messages.findLast((entry) => entry.role === 'toolResult');
@@ -82,10 +105,14 @@ export async function openFlueProbe(options: {
     async abort() {
       try { await agent.abort(); } catch (cause) { throw new ProbeError('runtime', cause); }
     },
-    stop() { return stopping ??= runtime.stop(); },
+    stop() {
+      release.resolve();
+      return stopping ??= runtime.stop();
+    },
     providerCalls: () => faux.state.callCount,
     toolCalls: () => toolCalls,
-    waitForBlockedResponse: () => Promise.reject(new Error('Not a blocked probe')),
-    releaseBlockedResponse() {},
+    waitForBlockedResponse: () => options.mode === 'blocked' ? entered.promise
+      : Promise.reject(new Error('Not a blocked probe')),
+    releaseBlockedResponse: () => release.resolve(),
   };
 }

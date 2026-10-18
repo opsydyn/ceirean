@@ -1,12 +1,13 @@
 import { expect, test } from 'bun:test';
-import { chmod, mkdtemp, rm } from 'node:fs/promises';
+import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { AgentRunError, init, useModel } from '@flue/runtime';
 import { start, sqlite } from '@flue/runtime/node';
 import { fauxProvider } from '@earendil-works/pi-ai/providers/faux';
 import { createRecorderBridge } from '../src/composition.ts';
-import { openFlueProbe, type ProbeHandle } from '../src/flue-probe.ts';
+import { openFlueProbe, ProbeError, type ProbeHandle } from '../src/flue-probe.ts';
+import { withStateDirectory } from './process.ts';
 
 async function withProbe(
   body: (probe: ProbeHandle, bridge: ReturnType<typeof createRecorderBridge>) => Promise<void>,
@@ -119,4 +120,23 @@ test('callback after bridge disposal fails', async () => {
   await bridge.dispose();
   await expect(bridge.record('late')).rejects.toThrow();
   expect(bridge.lifecycle()).toEqual({ acquired: 1, released: 1 });
+});
+
+test('startup failure remains visible with a sanitized cause', async () => {
+  await withStateDirectory(async (directory) => {
+    const notDirectory = join(directory, 'not-a-directory');
+    await writeFile(notDirectory, 'synthetic fixture');
+    const result = await openFlueProbe({ stateDir: notDirectory,
+      instanceId: 'startup-failure', mode: 'tool', record: async () => 0,
+    }).then(() => undefined, (cause: unknown) => cause);
+    expect(result).toBeInstanceOf(ProbeError);
+    if (result instanceof ProbeError) {
+      expect(result.code).toBe('runtime');
+      expect(result.cause).toEqual({ name: 'Error' });
+      expect(JSON.stringify(result.cause)).not.toContain(directory);
+    }
+    await withProbe(async (probe) => {
+      expect((await probe.read(await probe.dispatch('after-failed-start'))).text).toBe('probe-complete');
+    });
+  });
 });

@@ -253,7 +253,15 @@ variables are configured by this ADR. There is no existing code or data migratio
 - [Alchemy Domain platform](https://github.com/alchemy-run/alchemy/blob/main/packages/alchemy/src/Domain/Platform.ts)
 - [Alchemy published metadata](https://registry.npmjs.org/alchemy/latest)
 
-Accepted by the project owner on 2026-10-18. The compatibility probe has not been
-run, and no dependency compatibility or runtime acceptance is claimed. The
+Accepted by the project owner on 2026-10-18. At acceptance, the compatibility
+probe had not run and no dependency compatibility or runtime acceptance was
+claimed. The
 [compatibility implementation plan](../superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
-requires review and execution-method selection before work begins.
+required review and execution-method selection before work began.
+
+Subsequent implementation: the owner approved inline execution in an isolated
+worktree. The [offline probe report](../assessments/bun-effect-flue-compatibility.md)
+records the pinned cohort, strict source/vendor declaration policy, same-host
+completed-receipt restart and synthetic cancellation results. This does not close
+the production aggregate, real worker/model, active-job or host-loss verification
+items above, or authorise the next service slice.

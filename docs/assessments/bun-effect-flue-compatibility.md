@@ -1,131 +1,149 @@
 # Bun Effect Flue Compatibility
 
-Status: **blocked at dependency declaration checking**, 2026-10-18. The Valibot
-cohort is corrected and the initial real Flue/Effect tests pass. Restart and
-cancellation remain unrun; the whole probe is not yet qualified.
+Measured on 2026-10-18. Verdict: **offline-compatible under the approved
+source-typecheck policy**. This is a private synthetic-provider probe, not
+production qualification or authority to implement/deploy the upgrade service.
 
-## Dependency Gate
+## Qualified Combination
 
-The approved exact direct pins installed successfully with scripts disabled:
-Effect 4.0.5, Flue runtime 2.3.0, Pi AI 1.3.0, Valibot 1.5.0, TypeScript 7.0.2
-and bun-types 1.4.2. Frozen installation made no changes. Pi agent-core resolves
-to 1.3.0 and shares a single Pi AI 1.3.0 cohort with Flue and the probe.
+| Component | Exact identity |
+| --- | --- |
+| Platform | Darwin 25.6.0, arm64 |
+| Moon | 2.5.4 |
+| Moon plugins | Bun 1.0.4; JavaScript 1.3.1 |
+| Proto used by Moon | 0.60.2 |
+| Bun | 1.4.2 (`744846f84`) |
+| Effect | 4.0.5 |
+| Flue runtime | 2.3.0 |
+| Pi AI / agent-core | 1.3.0 / 1.3.0, single shared AI cohort |
+| Valibot / JSON-schema converter | 1.5.0 / 1.8.0 |
+| TypeScript / bun-types | 7.0.2 / 1.4.2 |
 
-The original Valibot 1.1.0 pin caused a peer warning: Flue's converter dependency
-resolved to `@valibot/to-json-schema 1.8.0`, which requires `valibot ^1.5.0`.
-The owner approved changing Valibot to 1.5.0. Fresh normal/frozen installs exit 0
-without the warning; `bun why valibot` confirms one compatible 1.5.0 cohort.
-
-No overrides, transitive downgrades, package patches or runtime fallback were
-applied. The root lockfile changed only the direct Valibot pin and resolved
-Valibot package identity.
-
-Root `bun.lock` SHA-256 at this checkpoint:
+Root `bun.lock` SHA-256:
 `538f6783ab0a56e2df0681655929e878b3a19e4887dea6b867c76efe6453b266`.
+Only one root lockfile and one private probe workspace exist. No production
+packages were scaffolded. Direct versions are exact; transitives are locked.
 
-## Current Type Gate
+Explicit `moon setup` exited 0, reusing installed Proto and Bun; all four setup
+actions were skipped. No new runtime download was reported. Moon resolves Bun to
+`~/.proto/tools/bun/1.4.2/bun`; there is no Node runtime/toolchain fallback.
+Dependency installation used `--ignore-scripts`. A final frozen install made no
+changes and emitted no peer warning. No package patch or override was applied.
 
-Once Flue is imported, the unchanged strict compiler reports three errors inside
-dependencies, with no remaining probe-source diagnostics:
+## Approved Corrections
+
+The first install exposed an overly narrow Valibot 1.1.0 plan pin. Flue declares
+`valibot ^1.1.0`, while its resolved converter 1.8.0 requires `^1.5.0`. The owner
+approved 1.5.0; both ranges now resolve to one compatible Valibot version.
+
+Once Flue was imported, full dependency-declaration checking exposed:
 
 | Diagnostic | Published declaration | Cause |
 | --- | --- | --- |
 | TS2846 | `@flue/runtime/types/index.d.ts:4` | Value re-export directly from `../dist/index.d.mts` |
-| TS2307 | `@google/genai/dist/genai.d.ts:1` | Missing `@modelcontextprotocol/sdk/client/index.js` declaration |
-| TS2416 | `gaxios/build/esm/src/gaxios.d.ts:52` | Fetch interface lacks Bun's `preconnect` property |
+| TS2307 | `@google/genai/dist/genai.d.ts:1` | Missing MCP SDK declaration import |
+| TS2416 | `gaxios/build/esm/src/gaxios.d.ts:52` | Fetch declaration lacks Bun's `preconnect` |
 
-The same diagnostics reproduce with only `export { init } from '@flue/runtime'`
-and the probe's strict compiler options. No bridge implementation is needed to
-trigger them. The reproduction runs from the probe dependency context; a scratch
-file outside that workspace initially could not resolve Flue and was relocated.
+A one-line Flue import reproduces all three without our bridge implementation.
+The owner approved probe-local `skipLibCheck: true`, matching
+[Flue's own base configuration](https://github.com/withastro/flue/blob/main/tsconfig.base.json).
+`strict: true` remains enabled for every probe source and test, including public
+API usage. Canonical typechecking now passes. **Vendor declaration consistency
+is not qualified**; disabling `skipLibCheck` still exposes these known errors.
+This is not a claim that the published dependency declarations are clean.
 
-[Flue's own base tsconfig](https://github.com/withastro/flue/blob/main/tsconfig.base.json)
-enables both `strict: true` and `skipLibCheck: true`. A diagnostic-only run using
-`tsc --noEmit --project probes/bun-effect-flue/tsconfig.json --skipLibCheck`
-exits 0. This checks our source/API usage, not dependency declaration internals.
-The flag is **not persisted**; owner approval was requested before changing the
-qualification policy. The canonical Moon typecheck still exits 1.
+## Evidence
 
-## Verified Subset
+Every test/typecheck target is launched with only PATH, HOME and TMPDIR inherited
+through `env -i`. Bun receives `--no-env-file --no-install`; Flue receives `env: {}`
+and an explicit faux-only provider list. This is environment hygiene, not a
+hostile-code sandbox guarantee. Only synthetic ambient credentials are used by
+the credential-resistance test, and restored in its finally block.
 
-Platform: Darwin 25.6.0, arm64. Bun 1.4.2 (`744846f84`), Moon 2.5.4.
-Moon reports Bun plugin 1.0.4 and JavaScript plugin 1.3.1. Explicit `moon setup`
-exited 0, reusing installed Proto 0.60.2 and Bun 1.4.2; all four setup actions
-were skipped. No new runtime download was reported. Moon's Bun executable is
-`~/.proto/tools/bun/1.4.2/bun`; no Node toolchain is configured.
+Moon's resolved graph contains only project `probe` with seven explicit tasks.
+Every task has `cache: false`, `retryCount: 0`, `envFile: false`, and no raw state
+or transcript outputs. Commands below run from the repository root, sequentially,
+with `--force --no-actions`: no affected-only skip, cache replay, automatic retry,
+dependency installation or workspace sync during qualification.
 
-Tests and typechecking ran with only PATH, HOME and TMPDIR inherited, using
-`env -i`. This is environment hygiene, not hostile-code containment.
-
-| Command | Exit | Observed outcome |
+| Command | Exit | Observed result |
 | --- | --- | --- |
-| `bun install --ignore-scripts` after pin correction | 0 | No peer warning |
-| `bun install --frozen-lockfile --ignore-scripts` | 0 | No lockfile or install changes |
-| `bun why @earendil-works/pi-ai` | 0 | One 1.3.0 cohort |
-| `bun why valibot` | 0 | One compatible 1.5.0 cohort |
-| `moon setup` | 0 | Pinned workspace configuration accepted |
-| `moon query projects` | 0 | Only probe project; seven explicit targets |
-| `moon run probe:domain --force --no-actions` (twice) | 0, 0 | Seven actual test executions each time, no cache replay |
-| `moon run probe:flue --force --no-actions` | 0 | Six real Flue/Effect tests, 27 assertions |
-| `moon run probe:test --force --no-actions` | 0 | 13 tests, 40 assertions |
-| `moon run probe:typecheck --force --no-actions` | 1 | Three dependency declaration diagnostics above |
-| Strict source check with CLI-only `--skipLibCheck` | 0 | Diagnostic only, not canonical qualification |
+| `bun install --ignore-scripts` after correction | 0 | Compatible pinned cohort |
+| `bun install --frozen-lockfile --ignore-scripts` | 0 | No changes or peer warning |
+| `bun why valibot` | 0 | One 1.5.0, satisfies both ranges |
+| `bun why @earendil-works/pi-ai` | 0 | One shared 1.3.0 |
+| `moon query projects` | 0 | One probe, seven tasks, declared options accepted |
+| `moon run probe:domain --force --no-actions` (repeated) | 0 | 7 tests, 13 assertions each run |
+| `moon run probe:flue --force --no-actions` | 0 | 7 tests, 33 assertions |
+| `moon run probe:restart --force --no-actions` | 0 | 2 tests, 13 assertions |
+| `moon run probe:cancellation --force --no-actions` | 0 | 3 tests, 9 assertions |
+| `moon run probe:report --force --no-actions` | 0 | 7 tests, 13 assertions |
+| `moon run probe:typecheck --force --no-actions` | 0 | Strict source/API checking; vendor policy above |
+| `moon run probe:test --force --no-actions` (twice) | 0, 0 | 26 executed tests, 81 assertions each run |
+| `git diff --check` | 0 | No whitespace errors |
 
-The direct TDD run first failed because `src/fixture.ts` did not exist. After
-implementation, all seven tests passed (13 assertions): phase gating, digest
-identity, stale generation, cancellation, rejected-state identity and fixed limits.
-This fixture is deliberately not a production UpgradeRun aggregate.
-
-Task 2 also followed missing-implementation RED, then exercised the published
-Flue SQLite adapter and real tool loop with Pi's faux provider. Two submissions
-recorded counts 1 then 2 through one Effect ManagedRuntime/Layer; acquisition and
-release each occurred once. Other tests cover synthetic ambient credentials with
-zero outbound fetches, an unknown provider failing closed without a fallback,
-stop/restart of singleton ownership, observed tool failure, and rejection of a
-callback after bridge disposal. No real provider was used.
-
-The unknown-provider read returns an AgentRunError failed settlement. Flue emits
-its provider diagnostic during shutdown; the test inspects that diagnostic only
-after draining the runtime. Tool failure is confirmed by the actual tool-result
-error reaching the next faux response, not by an invented success response.
-
-Moon accepted the v2 plural toolchains configuration. Its resolved project
-configuration records every target with `cache: false`, `retryCount: 0` and
-`envFile: false`; tasks also pass Bun `--no-env-file --no-install`. No database or
-transcript is a declared output. Qualified commands use `--force --no-actions`
-to execute explicitly without dependency setup or affected-only skipping.
-
-Only root `bun.lock` exists. There are no empty production packages. The general
-`probe:test` target currently covers the fixture and initial runtime tests; its exit status must not
-be treated as the four-phase compatibility verdict.
+The final repeated aggregate commands actually execute the tests, rather than
+restore output. No skipped test is counted as passing evidence. Each task's
+missing implementation was observed RED before implementation; startup error
+sanitization additionally failed with a real invalid SQLite directory before
+the exported wrapper caught/sanitized it. A missing-directory stimulus was
+corrected because Flue legitimately creates directories recursively.
 
 ## Phase Results
 
-| Phase | Status | Evidence or gap |
+| Phase | Status | What was demonstrated |
 | --- | --- | --- |
-| Domain | pass | Seven fixture tests executed twice through uncached Moon |
-| Flue / Effect bridge | partial | Six runtime tests pass; canonical typecheck fails |
-| Process-kill restart | not_run | Depends on Flue gate |
-| Read cancellation and abort | not_run | Depends on Flue gate |
+| Domain | pass | Generation first; phase/digest gates; rejected state identity; fixed limits retained |
+| Flue / Effect | pass | Real tool loop, two recordings through one Layer/runtime, observed tool errors, faux-only environment, fail-closed unknown provider, disposal and clean restart |
+| Same-host restart | pass | Writer completes receipt, persists app state, emits COMMITTED, receives SIGKILL; new process reads identical receipt/limits with zero provider calls |
+| Cancellation | pass | Local reader cancellation leaves work running; explicit abort reaches aborted settlement; completed late work cannot advance cancelled fixture |
 
-Verdict: **blocked**. Real providers, Docker, host-loss recovery, actual worker
-cleanup and production qualification are **not run / not qualified**. No model
-calls to real providers, real credentials, consumer repository access, GitHub
-writes or cloud resources were used. Tests stopped Flue before disposing Effect
-and removed their owned temporary Flue databases. No application ledger or
-process-kill/recovery child was created. Blocked-provider mode and its controls
-are deliberately unfinished pending Task 4 and must not be treated as usable.
-Installed dependencies and Moon's ignored local cache remain for resumption.
+App state uses its own `bun:sqlite` file and schema-validated checkpoint. Flue
+uses its unmodified published SQLite adapter in a distinct file. No direct
+queries of Flue tables, live-WAL copying, new dispatch on recovery, resetting
+missing limits, or same-process reopening stands in for the kill test.
 
-## Resume
+Cancellation children wait on a deterministic provider-entry barrier, not a
+sleep. The faux provider observes the supplied AbortSignal. The read-only case
+releases the barrier twice (idempotently) and reads the original receipt to
+completion. Abort intent acknowledgement alone is insufficient: the child must
+observe a distinct aborted read outcome. Cleanup is reported only after Flue
+stops and the shared Effect runtime is disposed; acquisition/release counts are
+checked. Parent watchdogs bound commit/read/abort/cleanup to five seconds and
+kill/await a stuck child instead of reporting success.
 
-1. Resolve whether to mirror Flue's `skipLibCheck` policy or retain the strict
-   dependency-declaration gate. Do not silently suppress the known diagnostics.
-2. Rerun the canonical typecheck under the explicitly chosen policy.
-3. Complete Task 2 of the approved plan, then the real process-kill and
-   cancellation probes. Keep all remaining phases `not_run` until measured.
+The report validator requires exactly one evidenced pass for every phase.
+Missing, failed, unrun or blank-evidence phases block compatibility; duplicate
+and unknown identifiers throw. Caller mutation cannot erase captured evidence.
+The validator classifies supplied evidence; it is not a production qualification
+authority or a proof that arbitrary evidence strings are truthful.
 
-Execution began at 19:46:45 UTC; this checkpoint was recorded at approximately
-20:39 UTC, within the two-hour engineering cap. This includes an owner-decision
-pause between the first checkpoint and resumption at 20:31 UTC. The work is isolated on
-`codex/bun-effect-flue-probe`; `main` is not merged or changed.
+## Cleanup And Limits
+
+Each process test owns a fresh mode-0700 temporary directory, explicitly starts
+the absolute current Bun binary with a minimal environment, and kills/awaits any
+remaining child before removing that directory. Flue stops before Effect disposal.
+The writer's SIGKILL deliberately bypasses graceful shutdown. No raw database,
+transcript, credential, downloaded dependency or Moon cache is tracked in Git.
+An additional host-wide process-table audit was unavailable (`pgrep` could not
+access sysmond); cleanup claims refer to the test-owned children that were
+explicitly awaited, not an independent scan of every host process.
+
+Real-provider behavior/cancellation, Docker, actual worker cleanup, host-loss
+recovery, active-job crash recovery, production budget transactions, consumer
+migrations, browser evidence, GitHub publication and deployment remain **not_run**.
+`productionQualification` is always false, even for four passing offline phases.
+There were no real model requests, consumer repository changes, cloud resources,
+GitHub writes or automatic runtime changes.
+
+Execution began at 19:46:45 UTC. Verification/reporting reached this checkpoint
+around 20:54 UTC, about 67 wall-clock minutes including owner-decision pauses,
+inside the conservative two-hour cap. Independent whole-branch review follows;
+its outcome and any fixes are recorded below before handoff. Work remains on
+`codex/bun-effect-flue-probe`; `main` must remain unchanged until owner approval.
+
+## Next Decision
+
+A passing probe permits planning the production domain/port tracer, not starting
+it. Review the dependency-declaration policy and this evidence before choosing
+that slice. Real-provider and container qualification require separate approval.
