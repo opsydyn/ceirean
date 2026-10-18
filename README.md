@@ -3,6 +3,9 @@
 An internal dependency migration service, built to dogfood across Opsydyn
 repositories before considering a broader product.
 
+Repository direction: a Moon-managed Bun workspace monorepo. The workspace and
+Moon configuration are planned, not scaffolded yet.
+
 ## Status
 
 Planning only. This repository has no application code, installed dependencies,
@@ -15,6 +18,8 @@ pull requests is not the success measure.
 ## Agreed Direction
 
 - Bun and TypeScript first, with Flue at the core of bounded agent reasoning.
+- Moon owns the monorepo project graph and development tasks; Bun owns workspace
+  dependencies, the lockfile and application execution.
 - Effect for application orchestration, with pure domain decisions and explicit
   infrastructure adapters, recorded in accepted ADR-0001.
 - A dedicated central service, independent of its consumer repositories.
@@ -54,6 +59,7 @@ execution budgets.
 - [x] Create the local Leviathan repository.
 - [x] Agree the Effect, pure-domain and Flue ownership direction.
 - [x] Review and accept the written Effect and domain-boundary ADR.
+- [x] Require a Moon-managed Bun workspace monorepo.
 - [ ] Approve the manual workflow and repository profile contract.
 - [ ] Approve worker isolation, credentials, persistence and recovery design.
 - [ ] Select a historical migration and define acceptance evidence and budgets.
@@ -95,3 +101,21 @@ has not been run; no dependencies or runtime compatibility are qualified.
 Pending review and execution-method selection. This plan covers a credential-free
 offline probe using the real Flue runtime with a synthetic provider. It does not
 implement the upgrade service or qualify real models, containers or deployment.
+
+## Planned Monorepo Layout
+
+```text
+.moon/                      Project graph, toolchains and development tasks
+.prototools                 Exact Moon and Bun tool pins
+package.json                Private Bun workspace root
+bun.lock                    One root dependency lockfile
+apps/cli/                   Future CLI and live dependency composition
+packages/domain/            Future pure upgrade model and decisions
+packages/engine/            Future Effect use cases, ports and adapters
+probes/bun-effect-flue/      First Moon project, private compatibility fixture
+docs/                       Decisions, specifications, plans and evidence
+```
+
+Only the probe project is created in the first slice. Do not scaffold empty
+production packages. Stateful probe tasks run uncached with no automatic retries;
+Moon is not Leviathan's durable run coordinator or container security boundary.

@@ -164,24 +164,34 @@ when an approved cloud control-plane design makes its tradeoffs worthwhile.
 
 ## Implementation Impact And Probe Plan
 
+### Repository Structure Amendment
+
+On 2026-10-18 the owner additionally required a Moon monorepo. Use one private Bun
+workspace root and root bun.lock, with Moon for the project/task graph. Moon does
+not replace Effect execution, Flue reasoning or the durable run ledger. Keep
+stateful compatibility and future qualification tasks uncached, with task retries
+disabled; do not substitute cache hits or affected-only selection for evidence.
+
+Only the compatibility project is instantiated in the initial slice. The future
+package boundaries below are planned, not additional implementation scope.
+
 This section identifies future work, not permission to execute it. The named paths
 are proposed; none exist as application code today. The later implementation plan
 must preserve these boundaries or obtain review for a change.
 
 | Proposed path | Responsibility |
 | --- | --- |
-| src/domain/upgrade-run.ts | Immutable state, commands, facts and pure decisions |
-| src/domain/identities.ts | Validated identities and digests |
-| src/application/ports.ts | Typed Effect service contracts |
-| src/application/run-coordinator.ts | Application use cases and invariant application |
-| src/adapters/flue/migration-agent.ts | Flue bridge, errors and cancellation |
-| src/adapters/docker/worker-executor.ts | Scoped worker execution and cleanup |
-| src/adapters/sqlite/run-repository.ts | Transactional ledger and reconciliation data |
-| src/adapters/filesystem/artifact-store.ts | Validated artifact storage |
-| src/composition/cli.ts | Live Layers and the single controller runtime |
-| tests/domain/ and tests/application/ | Pure rules and fake-port orchestration tests |
-| tests/contracts/ | Real adapter and restart qualification |
-| probes/bun-effect-flue/ | Bounded compatibility probe and evidence report |
+| packages/domain/src/upgrade-run.ts | Immutable state, commands, facts and pure decisions |
+| packages/domain/src/identities.ts | Validated identities and digests |
+| packages/engine/src/ports.ts | Typed Effect service contracts |
+| packages/engine/src/run-coordinator.ts | Application use cases and invariant application |
+| packages/engine/src/adapters/flue/migration-agent.ts | Flue bridge, errors and cancellation |
+| packages/engine/src/adapters/docker/worker-executor.ts | Scoped worker execution and cleanup |
+| packages/engine/src/adapters/sqlite/run-repository.ts | Transactional ledger and reconciliation data |
+| packages/engine/src/adapters/filesystem/artifact-store.ts | Validated artifact storage |
+| apps/cli/src/composition.ts | Live Layers and the single controller runtime |
+| packages/domain/tests/ and packages/engine/tests/ | Pure rules, fake-port orchestration and adapter contracts |
+| probes/bun-effect-flue/ | First Moon project: bounded compatibility fixture |
 
 Future dependencies are constrained to Effect >=4.0.0 <4.1.0 and one exact Flue
 release chosen from its published supported API. Record and lock exact versions
@@ -229,6 +239,8 @@ variables are configured by this ADR. There is no existing code or data migratio
 - [ ] Real cancellation tests confirm worker removal; fake tests are labelled.
 - [ ] A probe report records exact versions, commands, failures and evidence gaps.
 - [ ] No Alchemy dependency, extra workflow engine or publication capability is added.
+- [ ] Moon manages the project graph; Bun owns one root workspace lockfile.
+- [ ] Stateful qualification tasks bypass caching and automatic task retries.
 
 ## References And Review
 

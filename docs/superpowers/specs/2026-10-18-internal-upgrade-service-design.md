@@ -60,7 +60,9 @@ The controller owns policy, run transitions, budgets, container lifecycle and
 evidence. Flue owns model reasoning and conversation state, not the authority to
 qualify or publish a migration. Repository commands execute only inside workers.
 
-Start as one application with small internal modules, not a monorepo of services:
+Use a Moon-managed Bun workspace monorepo, as required by the owner on 2026-10-18.
+Keep one deployable service with explicit package boundaries, not independently
+deployed microservices:
 
 | Boundary | Responsibility |
 | --- | --- |
@@ -71,6 +73,28 @@ Start as one application with small internal modules, not a monorepo of services
 | Docker worker driver | Create, execute, terminate and remove isolated workers |
 | Verifier | Evaluate a frozen patch against the approved acceptance contract |
 | Ledger and evidence | Persist application state and content-addressed results |
+
+## Monorepo And Task Ownership
+
+The private root package declares apps/*, packages/* and probes/* as Bun
+workspaces, with one root bun.lock. Moon manages project discovery, dependency
+ordering and development tasks. Bun remains the dependency manager and application
+runtime. Moon does not orchestrate durable upgrade runs or supply worker isolation.
+
+Planned boundaries are apps/cli for the entry point and live composition,
+packages/domain for pure decisions, packages/engine for Effect use cases, ports
+and adapters, and probes/bun-effect-flue for the initial compatibility fixture.
+Dependencies point from CLI to engine to domain, never in reverse. Domain must
+not depend on an application or adapter. Keep adapters as engine modules until a
+real independent consumer justifies more workspace packages.
+
+The first slice creates only the private probe workspace and minimal root/Moon
+configuration. Do not generate empty production projects or a second lockfile.
+Qualification commands select explicit Moon targets, run uncached with zero task
+retries and cannot be skipped through affected-only selection. Fresh evidence is
+not a build-cache result. Automatic dependency installation and environment-file
+loading stay disabled on evidence tasks; dependency setup is a separate approved
+operation. Remote task caching and distributed execution are outside this pilot.
 
 ## Domain And Effect Ownership
 
