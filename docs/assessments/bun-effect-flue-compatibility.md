@@ -161,9 +161,11 @@ Those are session evidence, not independent reviewer proof.
 The separately approved Oxlint/oxfmt adoption adds schema codecs at JSON
 boundaries, inferred recorder channels, explicit SQLite resource ownership and
 Promise cleanup without changing the tested probe outcomes. Four new codec tests
-bring the suite to 30 tests and 87 assertions. The full ruleset and canonical
-source typecheck pass; the vendor declaration policy and all production
-qualification exclusions above remain unchanged.
+brought the suite to 30 tests and 87 assertions. The subsequent approved SQLite
+cleanup fix adds six failure/lifetime tests, bringing it to 36 tests and 104
+assertions. The full ruleset and canonical source typecheck pass; the vendor
+declaration policy and all production qualification exclusions above remain
+unchanged.
 
 The current graph has two Moon projects and ten tasks: the existing seven probe
 tasks plus three uncached root quality targets. Node 24.15.0 is explicitly pinned

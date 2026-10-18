@@ -84,7 +84,7 @@ not cache replays or dependency installs.
 | `bun run check`                                 | Exit 0; zero lint errors/warnings; formatting clean             |
 | `moon run workspace:check --force --no-actions` | Exit 0; lint and formatting clean                               |
 | `moon run probe:typecheck --force --no-actions` | Exit 0; strict owned source                                     |
-| `moon run probe:test --force --no-actions`      | Exit 0; 30 tests, 87 assertions                                 |
+| `moon run probe:test --force --no-actions`      | Exit 0; 36 tests, 104 assertions                                |
 | Installed config audit                          | 141 Effect rules; no non-error entries; one plugin registration |
 | Strict-only negative control                    | Exit 1; `no-unknown-public-error-channel` reported              |
 | Inferred-channel clean control                  | Exit 0; no diagnostics                                          |
@@ -103,13 +103,49 @@ introduced by the change. It independently checked the 141-error-rule map,
 checkpoint schema parity and cleanup ordering. It did not rerun stateful tests;
 the command results above are executor evidence.
 
-The pre-existing SQLite initialization failure path remains: if a PRAGMA or table
-creation throws after opening the database, no ledger handle is returned to close
-it. Scope ownership now covers the normal returned handle, not that failure path.
-Cleanup-rejection paths also lack failure-injection tests. Codec tests primarily
-prove round trips, not an independently maintained legacy-payload compatibility
-matrix. These are explicit probe limitations to address before production adapter
-work, not evidence of qualified resource recovery.
+That review identified a pre-existing SQLite initialization leak and missing
+cleanup-failure coverage. The separately approved follow-up below addresses
+those adapter paths. Codec tests still primarily prove round trips, not an
+independently maintained legacy-payload compatibility matrix.
+
+## SQLite Cleanup Follow-Up
+
+Initialization now executes inside the Effect that owns the acquired database.
+If either PRAGMA or table creation throws, `onError` closes its scope before the
+synchronous adapter throws to its caller. Successful initialization retains the
+open scope until the returned handle is explicitly closed; repeat close remains
+idempotent.
+
+The boundary uses `runSyncExit` rather than `runSync` because squashing a combined
+initialization/cleanup cause otherwise exposes only its first error. A single
+native error retains object identity; multiple defects become an `AggregateError`
+containing both original errors. A cleanup failure is never reported as success.
+
+Six tests cover failures at each of the three initialization statements, normal
+handle lifetime and idempotent close, explicit-close error visibility, and
+combined initialization/cleanup failures. Fault injection patches only a native
+statement or close method: real SQLite databases are acquired and closed. Tests
+assert that the database cannot be queried after initialization failure, not just
+that a mocked close method was called. Spies are restored in finalizers.
+
+All three statement tests were observed RED against the old implementation:
+`SELECT 1` still succeeded after failed initialization. The double-failure test
+was separately observed RED with only the initialization error reported. The
+focused suite is now six passes and 17 assertions; the aggregate is 36 passes
+and 104 assertions. No dependency, lockfile, lint-policy or application API change
+was required.
+
+These tests demonstrate adapter ownership and error reporting under injected
+faults. They do not guarantee that native SQLite can release a handle when its
+own close operation fails before doing so; the close-failure fixture closes the
+real database before throwing. They do not qualify production storage recovery.
+
+A fresh read-only review of the follow-up against `78b0124` found no actionable
+findings. It verified finalizer registration, scope closure semantics and error
+preservation against installed Effect 4.0.5, and independently ran typecheck and
+lint. It did not rerun stateful tests during executor verification. The focused
+tests use in-memory databases, not disk-backed WAL failure fixtures; exact native
+close call counts and aggregate ordering are not asserted.
 
 The original review and compatibility qualification limits remain in
 [Bun Effect Flue Compatibility](bun-effect-flue-compatibility.md). In particular,

@@ -8,7 +8,7 @@ compatibility probe and pinned workspace configuration are scaffolded.
 
 ## Status
 
-Offline compatibility probe only: 30 tests cover pure decisions, real Flue tools
+Offline compatibility probe only: 36 tests cover pure decisions, real Flue tools
 through Effect, process-kill recovery and distinct read/abort semantics. The
 canonical typecheck passes with strict source checking and the owner-approved
 probe-local vendor declaration policy. This does not qualify production use.
