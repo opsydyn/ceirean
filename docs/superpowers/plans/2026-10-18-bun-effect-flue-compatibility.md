@@ -10,9 +10,10 @@
 
 **Spec:** [Accepted ADR-0001](../../decisions/0001-adopt-effect-and-domain-boundaries.md), specifically Implementation Impact And Probe Plan. [Service architecture](../specs/2026-10-18-internal-upgrade-service-design.md) supplies constraints; its broader worker/deployment design is not authorised by this plan.
 
-Status: pending owner review and execution-method selection. No implementation,
-installation, paid request or probe has run. Exact published package metadata was
-read during planning; the version combination is not yet qualified.
+Status: approved for inline execution in an isolated worktree. Task 1's fixture
+and Moon checks pass; dependency qualification is blocked because the resolved
+JSON-schema adapter requires Valibot ^1.5.0 but this plan pins 1.1.0. No runtime
+probe or paid request has run. See the measured compatibility assessment.
 
 ## Global Constraints
 
@@ -182,7 +183,7 @@ state. No I/O or runtime services are permitted in fixture.ts.
   bun install --frozen-lockfile --ignore-scripts, then explicit Moon setup and
   schema/project-graph validation. Inspect bun why @earendil-works/pi-ai; an incompatible duplicate dependency
   cohort blocks the probe rather than prompting unreviewed overrides.
-- [ ] **Step 2: Write the failing tests.** Test names and exact outcomes:
+- [x] **Step 2: Write the failing tests.** Test names and exact outcomes:
   'refuses verification before freeze' returns InvalidPhase; 'refuses changed
   digest' returns DigestMismatch; 'refuses a late generation' returns
   StaleGeneration; 'cancelled state rejects verification' returns InvalidPhase;
@@ -196,14 +197,14 @@ expect(decideFixture(frozen, {
 })).toEqual({ ok: false, reason: 'DigestMismatch', state: frozen });
 ```
 
-- [ ] **Step 3: Confirm red.** Run bun --no-env-file --no-install test
+- [x] **Step 3: Confirm red.** Run bun --no-env-file --no-install test
   tests/fixture.test.ts. Expect a missing implementation/export failure, not a
   dependency resolution or syntax failure.
-- [ ] **Step 4: Implement the minimal pure decision function.** Check generation
+- [x] **Step 4: Implement the minimal pure decision function.** Check generation
   first; allow cancel from pending/frozen, freeze from pending, verify from frozen
   only with the same digest. Reject other phases. Preserve the three limit fields;
   do not add a production aggregate, budget calculator or retry engine.
-- [ ] **Step 5: Confirm green through Moon.** Run moon run probe:domain --force
+- [x] **Step 5: Confirm green through Moon.** Run moon run probe:domain --force
   --no-actions twice, then moon run probe:typecheck --force --no-actions, all
   from the root. All runs must execute and exit 0, without cache replay, task
   retries, automatic install or Node fallback. Validate declared options against

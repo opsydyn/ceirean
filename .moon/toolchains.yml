@@ -1,0 +1,7 @@
+javascript:
+  packageManager: bun
+  inferTasksFromScripts: false
+  installDependencies: false
+bun:
+  versionFromPrototools: true
+  installDependencies: false

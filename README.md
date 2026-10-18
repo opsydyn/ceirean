@@ -3,13 +3,18 @@
 An internal dependency migration service, built to dogfood across Opsydyn
 repositories before considering a broader product.
 
-Repository direction: a Moon-managed Bun workspace monorepo. The workspace and
-Moon configuration are planned, not scaffolded yet.
+Repository direction: a Moon-managed Bun workspace monorepo. The first private
+compatibility probe and pinned workspace configuration are scaffolded.
 
 ## Status
 
-Planning only. This repository has no application code, installed dependencies,
-GitHub remote, scheduled jobs or deployment.
+Partial offline compatibility probe only. Seven pure-fixture tests and the
+current typecheck pass through Moon. Runtime qualification is blocked by an
+unsatisfied Valibot peer dependency; Flue has not been started. There is no
+production application, GitHub remote, scheduled job or deployment.
+
+[Measured compatibility checkpoint](docs/assessments/bun-effect-flue-compatibility.md)
+records the dependency blocker, exact pins, verified subset and untested phases.
 
 The initial product outcome is a reviewable dependency migration with reproducible
 qualification evidence and less maintainer effort. Producing more version-bump
@@ -91,16 +96,18 @@ host-loss recovery and GitHub dispatch are deferred.
 [ADR-0001 Adopt Effect orchestration and pure domain decisions](docs/decisions/0001-adopt-effect-and-domain-boundaries.md)
 
 Status: accepted on 2026-10-18. It defines service ownership, dependency
-boundaries and the scope of a future Bun/Effect/Flue compatibility probe. The probe
-has not been run; no dependencies or runtime compatibility are qualified.
+boundaries and the scope of the Bun/Effect/Flue compatibility probe. The pure
+fixture is tested; Flue, restart and cancellation remain unqualified.
 
 ## First Implementation Plan
 
 [Bun Effect Flue Compatibility](docs/superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
 
-Pending review and execution-method selection. This plan covers a credential-free
-offline probe using the real Flue runtime with a synthetic provider. It does not
-implement the upgrade service or qualify real models, containers or deployment.
+Approved for inline execution in an isolated worktree. Task 1's fixture and Moon
+checks pass, but dependency qualification is blocked on the approved Valibot pin.
+Tasks 2-4 have not started. The plan covers a credential-free offline probe using
+the real Flue runtime with a synthetic provider; it does not implement the
+upgrade service or qualify real models, containers or deployment.
 
 ## Planned Monorepo Layout
 
