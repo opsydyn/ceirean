@@ -122,11 +122,12 @@ upgrade service or qualify real models, containers or deployment.
 
 [Qualification Gate Tracer](docs/superpowers/specs/2026-10-18-qualification-gate-design.md)
 
-The qualification-gate scope and conversational design are approved, with
-property-based domain tests preferred using Effect's built-in Arbitrary support.
-The written spec requires owner review before an implementation plan. No domain
-or engine package has been created. Real providers, workers and publication stay
-outside this slice.
+The qualification-gate written spec is approved, with property-based domain tests
+preferred using Effect's built-in Arbitrary support and inferred port contracts
+preserving the universal lint policy. The
+[implementation plan](docs/superpowers/plans/2026-10-18-qualification-gate.md)
+requires review and execution-method selection. No domain or engine package has
+been created. Real providers, workers and publication stay outside this slice.
 
 ## Monorepo Layout
 

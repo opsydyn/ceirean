@@ -10,8 +10,9 @@ hosting and execution appetite still require review.
 - [x] Qualify the pinned offline Bun/Effect/Flue combination, including restart
       and synthetic cancellation, without claiming production readiness.
 - [x] Establish full Effect lint policy, formatting and SQLite probe cleanup tests.
-- [ ] Review the [qualification-gate spec](superpowers/specs/2026-10-18-qualification-gate-design.md),
-      then approve its implementation plan and execute the domain/port tracer.
+- [x] Review and approve the [qualification-gate spec](superpowers/specs/2026-10-18-qualification-gate-design.md).
+- [ ] Review its [implementation plan](superpowers/plans/2026-10-18-qualification-gate.md),
+      select an execution method and execute the domain/port tracer.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.
 - [ ] Prove profile reuse with the postcode client rather than adding a second

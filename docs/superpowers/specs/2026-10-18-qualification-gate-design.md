@@ -1,9 +1,12 @@
 # Qualification Gate Tracer
 
-Status: conversational design approved on 2026-10-18, including a preference for
-property-based tests. Written spec pending owner review. No implementation plan,
-package scaffolding, dependency changes or product implementation authorised by
-this document.
+Status: written spec approved by the owner on 2026-10-18, including a preference
+for property-based tests. The owner also explicitly requires universal enforcement
+of `no-manual-effect-channels`; infer service contracts rather than exempting port
+declarations. The implementation plan requires separate review and an execution
+method before package scaffolding, dependency changes or product implementation.
+The inferred native-factory details were refined during planning in response to
+that constraint; review them together with the plan before execution.
 
 ## Intent And Baseline
 
@@ -43,15 +46,16 @@ Organisation discovery and configuration self-PRs are a later
 The following paths are proposed implementation boundaries, not files to scaffold
 while reviewing this spec:
 
-| Area                                     | Responsibility                                                           |
-| ---------------------------------------- | ------------------------------------------------------------------------ |
-| `packages/domain/src/identities.ts`      | Validated identities, digests and numeric constraints                    |
-| `packages/domain/src/verification.ts`    | Contract and receipt data; pure evidence validation                      |
-| `packages/domain/src/upgrade-run.ts`     | Immutable states, commands, facts and qualification decisions            |
-| `packages/domain/tests/`                 | Property-based domain laws and explicit boundary examples                |
-| `packages/engine/src/ports.ts`           | `RunRepository` and narrow `CandidateVerifier` Context.Service contracts |
-| `packages/engine/src/run-coordinator.ts` | Qualification sequencing, explicit clock reads and commit handling       |
-| `packages/engine/tests/`                 | In-memory adapters, controlled races and operational-failure checks      |
+| Area                                       | Responsibility                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| `packages/domain/src/identities.ts`        | Validated identities, digests and numeric constraints                    |
+| `packages/domain/src/verification.ts`      | Contract and receipt data; pure evidence validation                      |
+| `packages/domain/src/upgrade-run.ts`       | Immutable states, commands, facts and qualification decisions            |
+| `packages/domain/tests/`                   | Property-based domain laws and explicit boundary examples                |
+| `packages/engine/src/ports.ts`             | `RunRepository` and narrow `CandidateVerifier` Context.Service contracts |
+| `packages/engine/src/service-factories.ts` | Real native-boundary factories whose return types determine port shapes  |
+| `packages/engine/src/run-coordinator.ts`   | Qualification sequencing, explicit clock reads and commit handling       |
+| `packages/engine/tests/`                   | In-memory adapters, controlled races and operational-failure checks      |
 
 The engine depends on the domain, never the reverse. Domain decisions perform no
 I/O, read no ambient time/environment and execute no Effects. Schema, Data and
@@ -62,6 +66,11 @@ repository and verifier operational failures are tagged Effect errors.
 tracer, not another workflow engine or a live worker implementation. Compose test
 Layers once at the exported test boundary. Helpers consume services directly;
 they must not provision live dependencies or assemble a runtime per operation.
+Infer service shapes from native-boundary factories that actually defer calls,
+normalise typed/native failures and add spans, never from placeholders or test
+implementations. Native factory callbacks carry Result/Promise/data contracts;
+Effect-native test services satisfy the inferred shapes directly. Do not add a
+manual-channel annotation or a rule exception in `ports.ts`.
 
 ## Run And Receipt Contract
 
@@ -225,7 +234,8 @@ tracer is not qualification of a real upgrade or the full service architecture.
 
 ## Review And Next Step
 
-This spec captures the approved two-part conversational design and the owner's
-property-based testing preference. Implementation remains gated on review of this
-written spec, then a separate implementation plan and execution-method selection.
-Do not create packages or implement the tracer while either review is pending.
+This spec captures the approved two-part conversational design, written-spec
+approval, property-based testing preference and explicit universal lint policy.
+The [implementation plan](../plans/2026-10-18-qualification-gate.md) requires owner
+review and execution-method selection. Do not create packages or implement the
+tracer while that gate is pending.
