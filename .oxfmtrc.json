@@ -1,0 +1,18 @@
+{
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "sortImports": true,
+  "ignorePatterns": [
+    "bun.lock",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    ".moon/cache/**",
+    ".superpowers/**",
+    "**/.local/**"
+  ]
+}

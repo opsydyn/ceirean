@@ -40,11 +40,11 @@ worker design or its implementation.
 
 ## Considered Options
 
-| Option | Benefits | Costs and limitations |
-| --- | --- | --- |
-| Plain TypeScript and Promises | Small dependency surface; familiar asynchronous code | Manual dependency wiring, cancellation propagation, resource lifecycle and error conventions |
-| Effect with pure domain decisions | Typed dependencies and failures; scoped execution; replaceable adapters | Learning and dependency cost; explicit bridging to Flue; durable recovery remains application work |
-| Alchemy Domain runtime | Aggregate, event, rejection, policy and read-model vocabulary; upstream durable hosting model | Published API and initial runtime mismatch; broader event/runtime commitments before dogfood proof |
+| Option                            | Benefits                                                                                      | Costs and limitations                                                                              |
+| --------------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Plain TypeScript and Promises     | Small dependency surface; familiar asynchronous code                                          | Manual dependency wiring, cancellation propagation, resource lifecycle and error conventions       |
+| Effect with pure domain decisions | Typed dependencies and failures; scoped execution; replaceable adapters                       | Learning and dependency cost; explicit bridging to Flue; durable recovery remains application work |
+| Alchemy Domain runtime            | Aggregate, event, rejection, policy and read-model vocabulary; upstream durable hosting model | Published API and initial runtime mismatch; broader event/runtime commitments before dogfood proof |
 
 ## Decision
 
@@ -179,19 +179,19 @@ This section identifies future work, not permission to execute it. The named pat
 are proposed; none exist as application code today. The later implementation plan
 must preserve these boundaries or obtain review for a change.
 
-| Proposed path | Responsibility |
-| --- | --- |
-| packages/domain/src/upgrade-run.ts | Immutable state, commands, facts and pure decisions |
-| packages/domain/src/identities.ts | Validated identities and digests |
-| packages/engine/src/ports.ts | Typed Effect service contracts |
-| packages/engine/src/run-coordinator.ts | Application use cases and invariant application |
-| packages/engine/src/adapters/flue/migration-agent.ts | Flue bridge, errors and cancellation |
-| packages/engine/src/adapters/docker/worker-executor.ts | Scoped worker execution and cleanup |
-| packages/engine/src/adapters/sqlite/run-repository.ts | Transactional ledger and reconciliation data |
-| packages/engine/src/adapters/filesystem/artifact-store.ts | Validated artifact storage |
-| apps/cli/src/composition.ts | Live Layers and the single controller runtime |
-| packages/domain/tests/ and packages/engine/tests/ | Pure rules, fake-port orchestration and adapter contracts |
-| probes/bun-effect-flue/ | First Moon project: bounded compatibility fixture |
+| Proposed path                                             | Responsibility                                            |
+| --------------------------------------------------------- | --------------------------------------------------------- |
+| packages/domain/src/upgrade-run.ts                        | Immutable state, commands, facts and pure decisions       |
+| packages/domain/src/identities.ts                         | Validated identities and digests                          |
+| packages/engine/src/ports.ts                              | Typed Effect service contracts                            |
+| packages/engine/src/run-coordinator.ts                    | Application use cases and invariant application           |
+| packages/engine/src/adapters/flue/migration-agent.ts      | Flue bridge, errors and cancellation                      |
+| packages/engine/src/adapters/docker/worker-executor.ts    | Scoped worker execution and cleanup                       |
+| packages/engine/src/adapters/sqlite/run-repository.ts     | Transactional ledger and reconciliation data              |
+| packages/engine/src/adapters/filesystem/artifact-store.ts | Validated artifact storage                                |
+| apps/cli/src/composition.ts                               | Live Layers and the single controller runtime             |
+| packages/domain/tests/ and packages/engine/tests/         | Pure rules, fake-port orchestration and adapter contracts |
+| probes/bun-effect-flue/                                   | First Moon project: bounded compatibility fixture         |
 
 Future dependencies are constrained to Effect >=4.0.0 <4.1.0 and one exact Flue
 release chosen from its published supported API. Record and lock exact versions

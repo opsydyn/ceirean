@@ -1,0 +1,15 @@
+toolchains:
+  default: [javascript, bun, node]
+tasks:
+  lint:
+    command: bun --no-env-file --no-install run lint
+    inputs: ['**/*', '!**/node_modules/**', '!.moon/cache/**', '!**/.local/**']
+    options: { cache: false, retryCount: 0, envFile: false }
+  format-check:
+    command: bun --no-env-file --no-install run format:check
+    inputs: ['**/*', '!**/node_modules/**', '!.moon/cache/**', '!**/.local/**']
+    options: { cache: false, retryCount: 0, envFile: false }
+  check:
+    command: bun --no-env-file --no-install run check
+    inputs: ['**/*', '!**/node_modules/**', '!.moon/cache/**', '!**/.local/**']
+    options: { cache: false, retryCount: 0, envFile: false }

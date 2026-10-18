@@ -1,6 +1,14 @@
-import { Context, Effect } from 'effect';
+import { Context, Ref } from 'effect';
 
-export class ProbeRecorder extends Context.Service<ProbeRecorder, {
-  readonly record: (token: string) => Effect.Effect<number>;
-  readonly count: Effect.Effect<number>;
-}>()('leviathan/probe/Recorder') {}
+export function makeRecorder() {
+  const count = Ref.makeUnsafe(0);
+  return {
+    record: (_token: string) => Ref.updateAndGet(count, (current) => current + 1),
+    count: Ref.get(count),
+  };
+}
+
+export class ProbeRecorder extends Context.Service<
+  ProbeRecorder,
+  ReturnType<typeof makeRecorder>
+>()('leviathan/probe/Recorder') {}

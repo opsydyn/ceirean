@@ -64,19 +64,19 @@ Use a Moon-managed Bun workspace monorepo, as required by the owner on 2026-10-1
 Keep one deployable service with explicit package boundaries, not independently
 deployed microservices:
 
-| Boundary | Responsibility |
-| --- | --- |
-| CLI | Validate operator input and display run outcomes |
-| Profiles and planner | Resolve approved scope, targets and companion dependencies |
-| Run coordinator | Enforce state, cancellation, limits and single ownership |
-| Flue agent and tools | Propose bounded migration actions |
-| Docker worker driver | Create, execute, terminate and remove isolated workers |
-| Verifier | Evaluate a frozen patch against the approved acceptance contract |
-| Ledger and evidence | Persist application state and content-addressed results |
+| Boundary             | Responsibility                                                   |
+| -------------------- | ---------------------------------------------------------------- |
+| CLI                  | Validate operator input and display run outcomes                 |
+| Profiles and planner | Resolve approved scope, targets and companion dependencies       |
+| Run coordinator      | Enforce state, cancellation, limits and single ownership         |
+| Flue agent and tools | Propose bounded migration actions                                |
+| Docker worker driver | Create, execute, terminate and remove isolated workers           |
+| Verifier             | Evaluate a frozen patch against the approved acceptance contract |
+| Ledger and evidence  | Persist application state and content-addressed results          |
 
 ## Monorepo And Task Ownership
 
-The private root package declares apps/*, packages/* and probes/* as Bun
+The private root package declares apps/_, packages/_ and probes/* as Bun
 workspaces, with one root bun.lock. Moon manages project discovery, dependency
 ordering and development tasks. Bun remains the dependency manager and application
 runtime. Moon does not orchestrate durable upgrade runs or supply worker isolation.
@@ -372,9 +372,9 @@ unknown or unreliable cost accounting must be disclosed before paid execution.
 - [ ] A maintainer accepts correctness and records supervision/review effort.
 - [ ] Duplicate submission, restart and cancellation reconcile without orphan work.
 - [ ] Broken baseline, forbidden assertion edits, malicious source instructions and
-  a seeded behaviour regression cannot produce a qualified result.
+      a seeded behaviour regression cannot produce a qualified result.
 - [ ] Source checkout, controller state and credentials are inaccessible to workers
-  beyond the explicitly transferred repository snapshot.
+      beyond the explicitly transferred repository snapshot.
 - [ ] No live PR, branch push, release, deployment or unexpected external write occurs.
 
 Precise blocked outcomes are valid operational results, but only an accepted,

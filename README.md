@@ -8,12 +8,11 @@ compatibility probe and pinned workspace configuration are scaffolded.
 
 ## Status
 
-Offline compatibility probe only: 26 tests cover pure decisions, real Flue tools
+Offline compatibility probe only: 30 tests cover pure decisions, real Flue tools
 through Effect, process-kill recovery and distinct read/abort semantics. The
 canonical typecheck passes with strict source checking and the owner-approved
 probe-local vendor declaration policy. This does not qualify production use.
-There is no
-production application, GitHub remote, scheduled job or deployment.
+There is no production application, GitHub remote, scheduled job or deployment.
 
 [Measured compatibility checkpoint](docs/assessments/bun-effect-flue-compatibility.md)
 records exact pins, measured results, dependency declaration limitations and
@@ -119,16 +118,43 @@ upgrade service or qualify real models, containers or deployment.
 
 ```text
 .moon/                      Project graph, toolchains and development tasks
-.prototools                 Exact Moon and Bun tool pins
+.prototools                 Exact Moon, Bun and development-only Node pins
 package.json                Private Bun workspace root
 bun.lock                    One root dependency lockfile
 apps/cli/                   Future CLI and live dependency composition
 packages/domain/            Future pure upgrade model and decisions
 packages/engine/            Future Effect use cases, ports and adapters
-probes/bun-effect-flue/      First Moon project, private compatibility fixture
+probes/bun-effect-flue/      Private compatibility fixture
 docs/                       Decisions, specifications, plans and evidence
 ```
 
-Only the probe project is created in the first slice. Do not scaffold empty
-production packages. Stateful probe tasks run uncached with no automatic retries;
+The root Moon project owns quality tasks; the probe is the only package workspace.
+Do not scaffold empty production packages. Stateful probe tasks run uncached with no automatic retries;
 Moon is not Leviathan's durable run coordinator or container security boundary.
+
+## Quality Gates
+
+Install the exact tools in `.prototools` with `moon setup`, then install dependencies
+with `bun install --frozen-lockfile --ignore-scripts`. Node 24.15.0 runs developer
+tooling only: standalone Oxlint needs Node for its JavaScript plugin and TypeScript
+config. Application and probe execution remain Bun 1.4.2; Node is not a runtime
+fallback. Moon does not automatically install workspace dependencies.
+
+```sh
+bun run check                     # Oxlint, then oxfmt check
+bun run lint:fix                  # Apply available lint fixes, then review
+bun run format                    # Format owned source, config and docs
+moon run workspace:check --force --no-actions
+moon run probe:typecheck --force --no-actions
+moon run probe:test --force --no-actions
+```
+
+`oxlint.config.ts` enables every Effect 4-applicable rule from
+`@opsydyn/oxlint-effect@2.0.1`: 141 rules, all errors, including the 20 beyond
+`recommendedRules`. There are no blanket source/test exclusions or rule disables.
+Native adapter and test boundaries are explicit paths. Warnings fail the gate.
+`oxfmt@0.73.0` owns formatting; `oxlint@1.88.0` owns linting. Use `bun run lint`,
+not an assumed Bun-native linter. Type-aware Oxlint extensions are not enabled.
+
+[Quality tooling evidence](docs/assessments/code-quality-tooling.md) records the
+baseline, fixes, checks and remaining qualification limits.

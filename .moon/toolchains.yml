@@ -5,3 +5,6 @@ javascript:
 bun:
   versionFromPrototools: true
   installDependencies: false
+node:
+  versionFromPrototools: true
+  installDependencies: false

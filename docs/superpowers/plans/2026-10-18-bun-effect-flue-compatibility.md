@@ -63,24 +63,24 @@ All application-like files below are probe fixtures. Create the root workspace
 manifest and minimal Moon configuration, but do not promote fixtures into
 production or scaffold apps/cli, packages/domain or packages/engine yet.
 
-| Path | Responsibility |
-| --- | --- |
-| package.json and bun.lock | Private root workspace, shared tooling and the only dependency lockfile |
-| .prototools | Exact Moon and Bun pins |
-| .moon/workspace.yml and .moon/toolchains.yml | Explicit probe project and Bun task/dependency tooling |
-| tsconfig.base.json | Shared strict no-emit compiler settings |
-| probes/bun-effect-flue/package.json, tsconfig.json, moon.yml | Private probe, scripts, compiler include set and explicit Moon targets |
-| probes/bun-effect-flue/src/fixture.ts | Pure, deliberately minimal transition fixture |
-| probes/bun-effect-flue/src/recorder.ts | One Effect service recording tool tokens |
-| probes/bun-effect-flue/src/composition.ts | Shared ManagedRuntime and bridge lifetime |
-| probes/bun-effect-flue/src/flue-probe.ts | Faux provider, restricted tool and Flue lifecycle |
-| probes/bun-effect-flue/src/ledger.ts | Fixture state and receipt in application SQLite |
-| probes/bun-effect-flue/src/restart-child.ts | Controlled write/read child-process entry point |
-| probes/bun-effect-flue/src/cancellation-child.ts | Isolated cancellation scenarios with parent watchdog |
-| probes/bun-effect-flue/src/report.ts | Typed phase results and honest verdict |
-| probes/bun-effect-flue/tests/*.test.ts | Focused red/green contract tests |
-| .gitignore | Exclude dependencies, state, environment files and raw artifacts |
-| docs/assessments/bun-effect-flue-compatibility.md | Sanitised measured results and limitations |
+| Path                                                         | Responsibility                                                          |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| package.json and bun.lock                                    | Private root workspace, shared tooling and the only dependency lockfile |
+| .prototools                                                  | Exact Moon and Bun pins                                                 |
+| .moon/workspace.yml and .moon/toolchains.yml                 | Explicit probe project and Bun task/dependency tooling                  |
+| tsconfig.base.json                                           | Shared strict no-emit compiler settings                                 |
+| probes/bun-effect-flue/package.json, tsconfig.json, moon.yml | Private probe, scripts, compiler include set and explicit Moon targets  |
+| probes/bun-effect-flue/src/fixture.ts                        | Pure, deliberately minimal transition fixture                           |
+| probes/bun-effect-flue/src/recorder.ts                       | One Effect service recording tool tokens                                |
+| probes/bun-effect-flue/src/composition.ts                    | Shared ManagedRuntime and bridge lifetime                               |
+| probes/bun-effect-flue/src/flue-probe.ts                     | Faux provider, restricted tool and Flue lifecycle                       |
+| probes/bun-effect-flue/src/ledger.ts                         | Fixture state and receipt in application SQLite                         |
+| probes/bun-effect-flue/src/restart-child.ts                  | Controlled write/read child-process entry point                         |
+| probes/bun-effect-flue/src/cancellation-child.ts             | Isolated cancellation scenarios with parent watchdog                    |
+| probes/bun-effect-flue/src/report.ts                         | Typed phase results and honest verdict                                  |
+| probes/bun-effect-flue/tests/*.test.ts                       | Focused red/green contract tests                                        |
+| .gitignore                                                   | Exclude dependencies, state, environment files and raw artifacts        |
+| docs/assessments/bun-effect-flue-compatibility.md            | Sanitised measured results and limitations                              |
 
 Canonical Moon commands and all dependency installs run from the repository root.
 Direct Bun commands below are focused TDD commands run from probes/bun-effect-flue;
@@ -90,7 +90,7 @@ bunx or another implicit installer.
 ## Moon Workspace Contract
 
 The root package is private, uses packageManager bun@1.4.2 and workspaces
-['apps/*', 'packages/*', 'probes/*']. Put TypeScript and bun-types in root
+['apps/_', 'packages/_', 'probes/*']. Put TypeScript and bun-types in root
 devDependencies; put Effect, Flue, Pi and Valibot in the private probe package
 named @leviathan/compatibility-probe. Its typecheck script is tsc --noEmit.
 Its tsconfig extends ../../tsconfig.base.json and includes src and tests.
@@ -106,15 +106,15 @@ In probe moon.yml, use toolchains.default ['javascript', 'bun']. Every task has
 options cache false, retryCount 0 and envFile false. Do not declare raw databases
 or transcripts as cached task outputs. Register these target commands exactly:
 
-| Target | Command executed in the probe directory |
-| --- | --- |
-| probe:domain | bun --no-env-file --no-install test tests/fixture.test.ts |
-| probe:flue | bun --no-env-file --no-install test tests/flue.test.ts --timeout 15000 |
-| probe:restart | bun --no-env-file --no-install test tests/restart.test.ts --timeout 15000 |
+| Target             | Command executed in the probe directory                                        |
+| ------------------ | ------------------------------------------------------------------------------ |
+| probe:domain       | bun --no-env-file --no-install test tests/fixture.test.ts                      |
+| probe:flue         | bun --no-env-file --no-install test tests/flue.test.ts --timeout 15000         |
+| probe:restart      | bun --no-env-file --no-install test tests/restart.test.ts --timeout 15000      |
 | probe:cancellation | bun --no-env-file --no-install test tests/cancellation.test.ts --timeout 15000 |
-| probe:report | bun --no-env-file --no-install test tests/report.test.ts |
-| probe:typecheck | bun --bun --no-env-file --no-install run typecheck |
-| probe:test | bun --no-env-file --no-install test --timeout 15000 |
+| probe:report       | bun --no-env-file --no-install test tests/report.test.ts                       |
+| probe:typecheck    | bun --bun --no-env-file --no-install run typecheck                             |
+| probe:test         | bun --no-env-file --no-install test --timeout 15000                            |
 
 Explicit setup is allowed only after plan approval: root Bun installs with
 --ignore-scripts, followed by Moon configuration/schema and project-graph
@@ -175,46 +175,50 @@ FixtureCommand): FixtureDecision. Domain rejections return the unchanged origina
 state. No I/O or runtime services are permitted in fixture.ts.
 
 - [x] **Step 1: Establish the Moon workspace and test environment.** Verify
-  moon --version is 2.5.4 and bun --version is 1.4.2. Create the exact workspace,
-  task and version contract above, with all direct dependency pins from Tech
-  Stack. Set both packages private true and type module. Use strict TypeScript with
-  target ESNext, module ESNext, moduleResolution Bundler, noEmit true,
-  allowImportingTsExtensions true and types ['bun-types'] in tsconfig.base.json;
-  the probe tsconfig owns include src and tests. Ignore node_modules, .env and
-  .env.*, .local, SQLite journal files and .moon/cache, but track Moon config.
-  At the root run bun install --ignore-scripts, followed by
-  bun install --frozen-lockfile --ignore-scripts, then explicit Moon setup and
-  schema/project-graph validation. Inspect bun why @earendil-works/pi-ai; an incompatible duplicate dependency
-  cohort blocks the probe rather than prompting unreviewed overrides.
+      moon --version is 2.5.4 and bun --version is 1.4.2. Create the exact workspace,
+      task and version contract above, with all direct dependency pins from Tech
+      Stack. Set both packages private true and type module. Use strict TypeScript with
+      target ESNext, module ESNext, moduleResolution Bundler, noEmit true,
+      allowImportingTsExtensions true and types ['bun-types'] in tsconfig.base.json;
+      the probe tsconfig owns include src and tests. Ignore node_modules, .env and
+      .env.*, .local, SQLite journal files and .moon/cache, but track Moon config.
+      At the root run bun install --ignore-scripts, followed by
+      bun install --frozen-lockfile --ignore-scripts, then explicit Moon setup and
+      schema/project-graph validation. Inspect bun why @earendil-works/pi-ai; an incompatible duplicate dependency
+      cohort blocks the probe rather than prompting unreviewed overrides.
 - [x] **Step 2: Write the failing tests.** Test names and exact outcomes:
-  'refuses verification before freeze' returns InvalidPhase; 'refuses changed
-  digest' returns DigestMismatch; 'refuses a late generation' returns
-  StaleGeneration; 'cancelled state rejects verification' returns InvalidPhase;
-  'does not mutate rejected state' retains reference identity and all fixed limit
-  values. A pending generation-1 state can freeze candidate-a and then verify it.
-  Representative assertion:
+      'refuses verification before freeze' returns InvalidPhase; 'refuses changed
+      digest' returns DigestMismatch; 'refuses a late generation' returns
+      StaleGeneration; 'cancelled state rejects verification' returns InvalidPhase;
+      'does not mutate rejected state' retains reference identity and all fixed limit
+      values. A pending generation-1 state can freeze candidate-a and then verify it.
+      Representative assertion:
 
 ```typescript
-expect(decideFixture(frozen, {
-  type: 'verify', generation: 1, digest: 'candidate-b',
-})).toEqual({ ok: false, reason: 'DigestMismatch', state: frozen });
+expect(
+  decideFixture(frozen, {
+    type: 'verify',
+    generation: 1,
+    digest: 'candidate-b',
+  }),
+).toEqual({ ok: false, reason: 'DigestMismatch', state: frozen });
 ```
 
 - [x] **Step 3: Confirm red.** Run bun --no-env-file --no-install test
-  tests/fixture.test.ts. Expect a missing implementation/export failure, not a
-  dependency resolution or syntax failure.
+      tests/fixture.test.ts. Expect a missing implementation/export failure, not a
+      dependency resolution or syntax failure.
 - [x] **Step 4: Implement the minimal pure decision function.** Check generation
-  first; allow cancel from pending/frozen, freeze from pending, verify from frozen
-  only with the same digest. Reject other phases. Preserve the three limit fields;
-  do not add a production aggregate, budget calculator or retry engine.
+      first; allow cancel from pending/frozen, freeze from pending, verify from frozen
+      only with the same digest. Reject other phases. Preserve the three limit fields;
+      do not add a production aggregate, budget calculator or retry engine.
 - [x] **Step 5: Confirm green through Moon.** Run moon run probe:domain --force
-  --no-actions twice, then moon run probe:typecheck --force --no-actions, all
-  from the root. All runs must execute and exit 0, without cache replay, task
-  retries, automatic install or Node fallback. Validate declared options against
-  the pinned CLI's generated schema. Record resolved pins, task commands and platform.
+      --no-actions twice, then moon run probe:typecheck --force --no-actions, all
+      from the root. All runs must execute and exit 0, without cache replay, task
+      retries, automatic install or Node fallback. Validate declared options against
+      the pinned CLI's generated schema. Record resolved pins, task commands and platform.
 - [x] **Step 6: Commit the independently passing fixture and tooling.** Stage only
-  root workspace/Moon config and the explicit probe files, never dependencies or state; commit
-  with message test: establish pinned Bun Effect compatibility fixture.
+      root workspace/Moon config and the explicit probe files, never dependencies or state; commit
+      with message test: establish pinned Bun Effect compatibility fixture.
 
 ### Task 2: Real Flue Tool Calls Through One Effect Runtime
 
@@ -241,35 +245,35 @@ waitForBlockedResponse(): Promise<void> and releaseBlockedResponse(): void as
 synthetic-provider test controls; release is idempotent.
 
 - [x] **Step 1: Write failing tests.** 'two tool calls share one recorder' expects
-  counts 1 then 2, total 2 and one Layer acquisition. 'faux-only startup ignores
-  ambient credentials' supplies env {} and records zero outbound fetches.
-  'unknown provider fails closed' must not resolve a built-in fallback. 'stop then
-  restart releases singleton ownership' successfully starts a fresh session.
-  'tool failure is observed' injects a rejecting record callback and checks the
-  error is represented in the runtime/tool outcome, not reported as successful
-  recording. Use test-scoped fetch tripwires, restoring them in finally.
+      counts 1 then 2, total 2 and one Layer acquisition. 'faux-only startup ignores
+      ambient credentials' supplies env {} and records zero outbound fetches.
+      'unknown provider fails closed' must not resolve a built-in fallback. 'stop then
+      restart releases singleton ownership' successfully starts a fresh session.
+      'tool failure is observed' injects a rejecting record callback and checks the
+      error is represented in the runtime/tool outcome, not reported as successful
+      recording. Use test-scoped fetch tripwires, restoring them in finally.
 - [x] **Step 2: Confirm red.** Run bun --no-env-file --no-install test
-  tests/flue.test.ts --timeout 15000. Missing bridge implementation must fail.
+      tests/flue.test.ts --timeout 15000. Missing bridge implementation must fail.
 - [x] **Step 3: Implement the bridge.** Use ManagedRuntime.make once in
-  composition.ts; callbacks run service effects through that instance. Flue uses
-  start and sqlite from @flue/runtime/node, plus init, useModel, useTool and
-  defineTool from public exports. Use fauxProvider, fauxAssistantMessage and
-  fauxToolCall from @earendil-works/pi-ai/providers/faux. Set providers explicitly
-  to the faux handle's provider, env {}, agent identity LeviathanProbe and model
-  leviathan-probe/fixture. Configure those matching provider/model IDs in the
-  faux factory. For each submission, script one recorder tool call followed by
-  text probe-complete; the shared-counter test sends two submissions.
-  Use Valibot to validate the tool's token string. No sandbox is attached.
+      composition.ts; callbacks run service effects through that instance. Flue uses
+      start and sqlite from @flue/runtime/node, plus init, useModel, useTool and
+      defineTool from public exports. Use fauxProvider, fauxAssistantMessage and
+      fauxToolCall from @earendil-works/pi-ai/providers/faux. Set providers explicitly
+      to the faux handle's provider, env {}, agent identity LeviathanProbe and model
+      leviathan-probe/fixture. Configure those matching provider/model IDs in the
+      faux factory. For each submission, script one recorder tool call followed by
+      text probe-complete; the shared-counter test sends two submissions.
+      Use Valibot to validate the tool's token string. No sandbox is attached.
 - [x] **Step 4: Enforce lifecycle.** Flue exposes no host shell or consumer files.
-  Run singleton lifecycle tests serially; always stop Flue before disposing the
-  Effect bridge. Fail on a tool callback invoked after bridge disposal. No
-  callback dispatches and reads its own currently executing conversation.
+      Run singleton lifecycle tests serially; always stop Flue before disposing the
+      Effect bridge. Fail on a tool callback invoked after bridge disposal. No
+      callback dispatches and reads its own currently executing conversation.
 - [x] **Step 5: Confirm green.** From the root run explicit Moon targets probe:flue,
-  probe:domain and probe:typecheck with --force --no-actions, one at a time.
-  Record that this used the real Flue tool loop with a synthetic provider, not a
-  real model. Do not replace a failing Flue startup with a mocked runtime.
+      probe:domain and probe:typecheck with --force --no-actions, one at a time.
+      Record that this used the real Flue tool loop with a synthetic provider, not a
+      real model. Do not replace a failing Flue startup with a mocked runtime.
 - [x] **Step 6: Commit the passing runtime bridge.** Stage the four named files;
-  commit with message test: probe Flue tools through a shared Effect runtime.
+      commit with message test: probe Flue tools through a shared Effect runtime.
 
 ### Task 3: File Backed Recovery Across A Process Kill
 
@@ -284,31 +288,31 @@ result line with state, receipt, reply and providerCalls; a separate COMMITTED
 line signals that both durable writes completed.
 
 - [x] **Step 1: Write the failing parent-process test.** 'completed receipt and
-  limits survive process death' starts a writer, awaits COMMITTED, sends SIGKILL
-  and awaits exit, then starts a reader on the same two database files. Assert
-  fixed state fields are unchanged, submissionId is identical, reply text is
-  probe-complete, and reader providerCalls is 0. Check app.db and flue.db are
-  distinct files. An absent application row is an explicit failure, not a reset.
+      limits survive process death' starts a writer, awaits COMMITTED, sends SIGKILL
+      and awaits exit, then starts a reader on the same two database files. Assert
+      fixed state fields are unchanged, submissionId is identical, reply text is
+      probe-complete, and reader providerCalls is 0. Check app.db and flue.db are
+      distinct files. An absent application row is an explicit failure, not a reset.
 - [x] **Step 2: Confirm red.** Run bun --no-env-file --no-install test
-  tests/restart.test.ts --timeout 15000; expect the missing child/ledger to fail.
+      tests/restart.test.ts --timeout 15000; expect the missing child/ledger to fail.
 - [x] **Step 3: Implement the child and ledger.** The writer completes one faux
-  submission, saves its completed receipt and frozen fixture in app.db, emits
-  COMMITTED, then waits for the deliberate kill without graceful teardown. The
-  reader bootstraps the same agent identity with file-backed flue.db and reads the
-  stored receipt using its original instance ID. Do not dispatch a new message.
-  Never inspect Flue's tables or copy only the main file from a live WAL database.
+      submission, saves its completed receipt and frozen fixture in app.db, emits
+      COMMITTED, then waits for the deliberate kill without graceful teardown. The
+      reader bootstraps the same agent identity with file-backed flue.db and reads the
+      stored receipt using its original instance ID. Do not dispatch a new message.
+      Never inspect Flue's tables or copy only the main file from a live WAL database.
 - [x] **Step 4: Bound processes and state.** Use the absolute current Bun binary
-  and --no-env-file --no-install for children, an explicit minimal environment,
-  fresh owner-only temporary directories and a 5-second COMMITTED/read watchdog.
-  Parent finally blocks kill and await any remaining child, then remove only
-  their newly created fixture directory. No consumer path can be an output target.
+      and --no-env-file --no-install for children, an explicit minimal environment,
+      fresh owner-only temporary directories and a 5-second COMMITTED/read watchdog.
+      Parent finally blocks kill and await any remaining child, then remove only
+      their newly created fixture directory. No consumer path can be an output target.
 - [x] **Step 5: Confirm green.** Run explicit Moon targets probe:restart, probe:flue,
-  probe:domain and probe:typecheck with --force --no-actions, one at a time.
-  A retained state test within one process does not satisfy this
-  task. Record same-host recovery only; no active-job or host-loss claim.
+      probe:domain and probe:typecheck with --force --no-actions, one at a time.
+      A retained state test within one process does not satisfy this
+      task. Record same-host recovery only; no active-job or host-loss claim.
 - [x] **Step 6: Commit the restart probe.** Stage the three new files and any
-  explicitly reviewed adapter change; commit with message test: verify probe
-  persistence across Bun process restart.
+      explicitly reviewed adapter change; commit with message test: verify probe
+      persistence across Bun process restart.
 
 ### Task 4: Cancellation Semantics And Evidence Report
 
@@ -333,41 +337,41 @@ submissionOutcome ('completed' or 'aborted') and cleanup 'confirmed'. Parent
 tests use the same minimal environment and child cleanup discipline as Task 3.
 
 - [x] **Step 1: Write failing cancellation tests.** 'read cancellation does not
-  abort the submission' cancels only read's signal, observes read_cancelled, then
-  releases the barrier and reads a completed result using the same receipt.
-  'explicit abort settles synthetic work' calls abort, then reads until the
-  distinct aborted outcome; an abort-intent acknowledgement alone is not success.
-  'late completion cannot advance cancelled fixture' exercises Task 1's decision
-  after the barrier releases. Tests need deterministic barriers, not arbitrary
-  sleeps. Abort and cleanup have a 5-second external watchdog.
+      abort the submission' cancels only read's signal, observes read_cancelled, then
+      releases the barrier and reads a completed result using the same receipt.
+      'explicit abort settles synthetic work' calls abort, then reads until the
+      distinct aborted outcome; an abort-intent acknowledgement alone is not success.
+      'late completion cannot advance cancelled fixture' exercises Task 1's decision
+      after the barrier releases. Tests need deterministic barriers, not arbitrary
+      sleeps. Abort and cleanup have a 5-second external watchdog.
 - [x] **Step 2: Write failing reporting tests.** A missing, failed, duplicate or
-  evidence-free phase cannot yield offline-compatible. A complete four-phase pass
-  retains all three not_run fields and productionQualification false. A thrown
-  startup failure remains visible; no test.skip is counted as a phase pass.
+      evidence-free phase cannot yield offline-compatible. A complete four-phase pass
+      retains all three not_run fields and productionQualification false. A thrown
+      startup failure remains visible; no test.skip is counted as a phase pass.
 - [x] **Step 3: Confirm red.** Run bun --no-env-file --no-install test
-  tests/cancellation.test.ts tests/report.test.ts --timeout 15000. Expect missing
-  blocked mode/report behaviour to fail before implementing it.
+      tests/cancellation.test.ts tests/report.test.ts --timeout 15000. Expect missing
+      blocked mode/report behaviour to fail before implementing it.
 - [x] **Step 4: Implement the minimal cancellation and report logic.** Use Flue's
-  explicit abort path and await settlement; stopping a read does not substitute.
-  Keep the synthetic provider signal-aware. Report real-provider cancellation
-  and actual worker cleanup as untested, even when the fake-provider tests pass.
-  The watchdog kills an unresponsive probe child and records a failure rather
-  than leaving execution running or claiming cleanup succeeded.
+      explicit abort path and await settlement; stopping a read does not substitute.
+      Keep the synthetic provider signal-aware. Report real-provider cancellation
+      and actual worker cleanup as untested, even when the fake-provider tests pass.
+      The watchdog kills an unresponsive probe child and records a failure rather
+      than leaving execution running or claiming cleanup succeeded.
 - [x] **Step 5: Run final verification.** From the root run
-  bun install --frozen-lockfile --ignore-scripts, then
-  moon run probe:typecheck --force --no-actions and
-  moon run probe:test --force --no-actions sequentially. Run probe:test twice to
-  confirm evidence is rerun rather than restored. Also run git diff --check and
-  confirm no nested lockfile or unplanned package exists. All claimed passing phases require recorded
-  commands and exit codes; cap exhaustion or a missing phase means blocked.
+      bun install --frozen-lockfile --ignore-scripts, then
+      moon run probe:typecheck --force --no-actions and
+      moon run probe:test --force --no-actions sequentially. Run probe:test twice to
+      confirm evidence is rerun rather than restored. Also run git diff --check and
+      confirm no nested lockfile or unplanned package exists. All claimed passing phases require recorded
+      commands and exit codes; cap exhaustion or a missing phase means blocked.
 - [x] **Step 6: Write and review measured evidence.** Record OS/architecture,
-  exact Moon/Bun/plugin identities, resolved dependency cohort and root lockfile
-  digest, task commands and effective cache/retry/env-file options, test outcomes,
-  elapsed effort, temporary-state cleanup and exclusions. Keep raw databases,
-  credentials and transcripts out of Git. Add the report link to the README.
+      exact Moon/Bun/plugin identities, resolved dependency cohort and root lockfile
+      digest, task commands and effective cache/retry/env-file options, test outcomes,
+      elapsed effort, temporary-state cleanup and exclusions. Keep raw databases,
+      credentials and transcripts out of Git. Add the report link to the README.
 - [x] **Step 7: Commit the final probe and evidence.** Stage only named source,
-  tests and sanitised documentation; commit with message docs: record offline
-  Bun Effect Flue compatibility evidence. Stop for owner review of the findings.
+      tests and sanitised documentation; commit with message docs: record offline
+      Bun Effect Flue compatibility evidence. Stop for owner review of the findings.
 
 ## Self Review And Coverage Boundary
 

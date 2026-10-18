@@ -1,11 +1,25 @@
 {
   "name": "leviathan",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "probes/*"
+  ],
   "type": "module",
-  "packageManager": "bun@1.4.2",
-  "workspaces": ["apps/*", "packages/*", "probes/*"],
+  "scripts": {
+    "lint": "NODE_OPTIONS=--experimental-strip-types oxlint --config oxlint.config.ts --deny-warnings .",
+    "lint:fix": "NODE_OPTIONS=--experimental-strip-types oxlint --config oxlint.config.ts --deny-warnings --fix .",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "check": "bun run lint && bun run format:check"
+  },
   "devDependencies": {
+    "@opsydyn/oxlint-effect": "2.0.1",
     "bun-types": "1.4.2",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.88.0",
     "typescript": "7.0.2"
-  }
+  },
+  "packageManager": "bun@1.4.2"
 }
