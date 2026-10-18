@@ -7,6 +7,6 @@
     "effect": "4.0.5",
     "@flue/runtime": "2.3.0",
     "@earendil-works/pi-ai": "1.3.0",
-    "valibot": "1.1.0"
+    "valibot": "1.5.0"
   }
 }

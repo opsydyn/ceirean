@@ -6,14 +6,13 @@
 
 **Architecture:** Establish a Moon-managed Bun workspace monorepo, with one private compatibility project under probes/bun-effect-flue and one root lockfile. Exercise the published Flue runtime and its SQLite adapter with Pi's faux provider, alongside a small pure fixture and application SQLite file. Do not create the production packages yet; report offline compatibility separately from real-provider, Docker and service qualification.
 
-**Tech Stack:** Moon 2.5.4; Bun 1.4.2; effect 4.0.5; @flue/runtime 2.3.0; @earendil-works/pi-ai 1.3.0; valibot 1.1.0; typescript 7.0.2; bun-types 1.4.2.
+**Tech Stack:** Moon 2.5.4; Bun 1.4.2; effect 4.0.5; @flue/runtime 2.3.0; @earendil-works/pi-ai 1.3.0; valibot 1.5.0; typescript 7.0.2; bun-types 1.4.2.
 
 **Spec:** [Accepted ADR-0001](../../decisions/0001-adopt-effect-and-domain-boundaries.md), specifically Implementation Impact And Probe Plan. [Service architecture](../specs/2026-10-18-internal-upgrade-service-design.md) supplies constraints; its broader worker/deployment design is not authorised by this plan.
 
-Status: approved for inline execution in an isolated worktree. Task 1's fixture
-and Moon checks pass; dependency qualification is blocked because the resolved
-JSON-schema adapter requires Valibot ^1.5.0 but this plan pins 1.1.0. No runtime
-probe or paid request has run. See the measured compatibility assessment.
+Status: approved for inline execution in an isolated worktree. Owner approved
+revising Valibot from 1.1.0 to 1.5.0 to satisfy the resolved JSON-schema adapter.
+Task 1 resumes with fresh dependency qualification before runtime probes.
 
 ## Global Constraints
 
