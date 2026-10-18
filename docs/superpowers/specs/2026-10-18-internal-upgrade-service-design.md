@@ -11,9 +11,11 @@ Agreed: a dedicated service repository, Bun and TypeScript first, Flue at the
 core, FoldKit experiments first and the postcode client second. Keep service
 machinery outside the public Astro and Viz packages. Rust is parked.
 
-Effect's proposed role and the pure domain boundary are recorded in
-[ADR-0001](../../decisions/0001-adopt-effect-and-domain-boundaries.md). The written
-ADR is proposed for review; no compatibility probe has been executed.
+Effect's accepted role and the pure domain boundary are recorded in
+[ADR-0001](../../decisions/0001-adopt-effect-and-domain-boundaries.md), accepted by
+the owner on 2026-10-18. No compatibility probe has been executed. The
+[first implementation plan](../plans/2026-10-18-bun-effect-flue-compatibility.md)
+covers the compatibility gate only, not this entire service design.
 
 This document proposes the remaining architecture. It does not approve credentials,
 model data access, infrastructure, pilot spending, GitHub installation or PR
@@ -395,5 +397,6 @@ stop and reshape rather than claiming success from a manifest-only bump.
 Review this written design before an implementation plan is created. In
 particular, approve or revise the initial single-owner CLI deployment, worker
 boundary, local-only persistence guarantee, immutable verification contract and
-first-slice scope, together with the proposed Effect and domain ownership in
-ADR-0001. Host selection and paid-run approval remain execution gates.
+first-slice scope. Effect and domain ownership in ADR-0001 is accepted; the wider
+deployment and worker design remains a draft. Host selection and paid-run approval
+remain execution gates.

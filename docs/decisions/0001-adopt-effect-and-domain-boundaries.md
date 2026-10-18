@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-18
 decision-makers: Project owner
 ---
@@ -23,10 +23,11 @@ Domain-driven design (DDD) means modelling those rules in the service's own
 language and keeping infrastructure behind interfaces. It does not require event
 sourcing, distributed services or a framework-specific aggregate runtime.
 
-This ADR records the agreed direction as a proposed written decision for review.
-It does not authorise dependency installation, probe execution, infrastructure,
-model data access, spending or publication. A detailed implementation plan still
-requires review after this ADR and the architecture specification are approved.
+The project owner accepted this written ADR on 2026-10-18. Acceptance does not
+authorise dependency installation, probe execution, infrastructure, model data
+access, spending or publication. The compatibility implementation plan requires
+separate review; accepting this ADR does not approve the broader deployment and
+worker design or its implementation.
 
 ## Decision Drivers
 
@@ -47,7 +48,7 @@ requires review after this ADR and the architecture specification are approved.
 
 ## Decision
 
-Propose Effect 4 for application orchestration, with pure domain decisions and
+Adopt Effect 4 for application orchestration, with pure domain decisions and
 explicit infrastructure adapters. Retain Bun as the controller runtime and Flue
 as the agent runtime. Defer Alchemy Domain and additional workflow engines.
 
@@ -240,5 +241,7 @@ variables are configured by this ADR. There is no existing code or data migratio
 - [Alchemy Domain platform](https://github.com/alchemy-run/alchemy/blob/main/packages/alchemy/src/Domain/Platform.ts)
 - [Alchemy published metadata](https://registry.npmjs.org/alchemy/latest)
 
-Owner review of this written ADR is pending. The compatibility probe has not been
-run, and no dependency compatibility or runtime acceptance is claimed.
+Accepted by the project owner on 2026-10-18. The compatibility probe has not been
+run, and no dependency compatibility or runtime acceptance is claimed. The
+[compatibility implementation plan](../superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
+requires review and execution-method selection before work begins.

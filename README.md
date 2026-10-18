@@ -16,7 +16,7 @@ pull requests is not the success measure.
 
 - Bun and TypeScript first, with Flue at the core of bounded agent reasoning.
 - Effect for application orchestration, with pure domain decisions and explicit
-  infrastructure adapters; the written ADR remains proposed for review.
+  infrastructure adapters, recorded in accepted ADR-0001.
 - A dedicated central service, independent of its consumer repositories.
 - FoldKit experiments first; the postcode client second; wider internal adoption
   only after successful dogfooding.
@@ -53,7 +53,7 @@ execution budgets.
 - [x] Lock Bun first and retain Flue at the core.
 - [x] Create the local Leviathan repository.
 - [x] Agree the Effect, pure-domain and Flue ownership direction.
-- [ ] Review the written Effect and domain-boundary ADR.
+- [x] Review and accept the written Effect and domain-boundary ADR.
 - [ ] Approve the manual workflow and repository profile contract.
 - [ ] Approve worker isolation, credentials, persistence and recovery design.
 - [ ] Select a historical migration and define acceptance evidence and budgets.
@@ -75,14 +75,23 @@ run paid jobs or change external systems.
 [Internal Upgrade Service Design](docs/superpowers/specs/2026-10-18-internal-upgrade-service-design.md)
 
 The draft proposes a single-owner CLI, isolated workers, separate run and Flue
-storage, immutable qualification and dry-run evidence. It needs owner review
-before an implementation plan. Process-restart recovery is in scope; host-loss
-recovery and GitHub dispatch are deferred.
+storage, immutable qualification and dry-run evidence. Its broader service design
+needs owner review before a service implementation plan. The narrow compatibility
+plan below follows accepted ADR-0001 only. Process-restart recovery is in scope;
+host-loss recovery and GitHub dispatch are deferred.
 
 ## Architecture Decisions
 
 [ADR-0001 Adopt Effect orchestration and pure domain decisions](docs/decisions/0001-adopt-effect-and-domain-boundaries.md)
 
-Status: proposed for written review. It defines service ownership, dependency
+Status: accepted on 2026-10-18. It defines service ownership, dependency
 boundaries and the scope of a future Bun/Effect/Flue compatibility probe. The probe
 has not been run; no dependencies or runtime compatibility are qualified.
+
+## First Implementation Plan
+
+[Bun Effect Flue Compatibility](docs/superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
+
+Pending review and execution-method selection. This plan covers a credential-free
+offline probe using the real Flue runtime with a synthetic provider. It does not
+implement the upgrade service or qualify real models, containers or deployment.
