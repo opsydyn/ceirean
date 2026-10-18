@@ -114,6 +114,16 @@ typecheck. The plan covers a credential-free offline probe using
 the real Flue runtime with a synthetic provider; it does not implement the
 upgrade service or qualify real models, containers or deployment.
 
+## Next Application Design
+
+[Qualification Gate Tracer](docs/superpowers/specs/2026-10-18-qualification-gate-design.md)
+
+The qualification-gate scope and conversational design are approved, with
+property-based domain tests preferred using Effect's built-in Arbitrary support.
+The written spec requires owner review before an implementation plan. No domain
+or engine package has been created. Real providers, workers and publication stay
+outside this slice.
+
 ## Monorepo Layout
 
 ```text
