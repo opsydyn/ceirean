@@ -6,6 +6,23 @@ import type { WorkerJournalEdit, WorkerJournalSnapshot } from '../src/worker-con
 
 export { makeWorkerCase };
 
+export function makeStartedWorkerSnapshot(): WorkerJournalSnapshot {
+  const c = makeWorkerCase();
+  const observation = { ...c.observation, atMs: 950 };
+  const intents = (['Create', 'Start'] as const).map((kind): WorkerIntent => ({
+    ...makeWorkerIntent(kind),
+    outcome: { _tag: 'Completed', observation },
+  }));
+  return {
+    ...makeWorkerSnapshot(),
+    revision: 11,
+    intents,
+    containerId: Option.some(c.containerId),
+    editTimeFloorMs: 950,
+    outcomeEvidenceFloorMs: 950,
+  };
+}
+
 export function makeWorkerSnapshot(): WorkerJournalSnapshot {
   const { operation } = makeWorkerCase();
   return {
