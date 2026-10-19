@@ -19,7 +19,8 @@ hosting and execution appetite still require review.
       clean at `e7d9d25` over `6809192..e7d9d25`; independent controller gates
       passed all nine commands (210 tests, 712 assertions, 93,000 primary cases).
       Local branch only, not merged/pushed; no durable/live qualification.
-      The controller separately reviews this documentation-only closure.
+      The subsequent documentation closure was separately approved through
+      `742a5df`; later docs-only corrections do not extend that reviewed range.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.
 - [ ] Prove profile reuse with the postcode client rather than adding a second

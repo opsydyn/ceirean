@@ -142,7 +142,8 @@ Private domain and engine packages implement the synthetic tracer. The review of
 `6809192..e7d9d25` found no actionable issues; the exact range and independent
 controller results are recorded in the measured assessment. Real providers,
 workers, durable application storage and publication stay outside this slice.
-The controller's scoped review of this documentation closure is still separate.
+The subsequent documentation closure was separately approved through `742a5df`;
+later docs-only corrections do not extend that reviewed range.
 
 ## Monorepo Layout
 

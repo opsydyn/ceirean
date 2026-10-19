@@ -3,6 +3,8 @@
 Measured 2026-10-19. Task 4 implementation and local gates pass; Task 4 Step 7 is
 complete with a clean whole-branch review through `e7d9d25` and all nine
 independent controller acceptance commands passing at that exact head.
+The subsequent documentation closure is approved through `742a5df`; later
+docs-only corrections do not extend that reviewed range.
 This is not production qualification or approval to integrate, publish or deploy.
 
 ## Exact Artifact
@@ -150,12 +152,12 @@ retain cache false, retryCount 0, envFile false, and Bun no-env-file/no-install.
 | `git diff --check`                               |    0 | No output                                                                                                     |
 
 Aggregate: **210 tests, 712 assertions, 0 failures across 15 files**.
-The documentation follow-up adds this one matched Markdown file (65 format
-matches), without changing the tested code/lock. Its full sequential gate is
-recorded separately in the local scratch report
-`.superpowers/sdd/2026-10-18-qualification-gate/task-4-report.md`, which preserves full
-outputs of both runs, RED/GREEN details and controlled-entry assertions. It is
-ignored coordination evidence, not a substitute for the durable identities here.
+The documentation follow-up added this one matched Markdown file (65 format
+matches), without changing the tested code/lock; its full sequential gate passed
+with the same suite counts. The original transient scratch reports were cleaned
+after clean reviews. This assessment retains the durable artifact identities,
+historical RED/GREEN and mutation measurements, controlled-entry evidence and
+execution summaries; it does not depend on removed temporary records.
 The controller subsequently reran all nine commands independently at
 `e7d9d25ade69f5351d9ad64336afbea81c0cd293`: the same 210 tests, 712 assertions
 and 93,000 primary cases passed, with 65 format matches, all 141 Effect rules at
@@ -210,7 +212,7 @@ primary laws, nor are repeated gates summed to inflate the totals.
 
 The current suite passes actual Falsified/shrinking/replay-coordinate diagnostic,
 Exhausted, ReplayMismatch, exact-run-count, false-law, defect and interruption
-controls. Earlier measured task reports record a permissive validator mutation
+controls. Historical task measurements included a permissive validator mutation
 falsifying 11 evidence laws, plus separate generation-binding/cancellation-guard
 mutations each falsifying after 1 run and 10 shrinks with identical diagnostic
 replay. Their readable shrunk generation-zero/cancellation-zero regressions still
@@ -249,10 +251,18 @@ nine prescribed commands with the measured totals recorded above.
 Review exclusions are accepted as the approved synthetic-only limits, not new
 proved capabilities or deferred defects; the Proof Boundaries above remain in force.
 
-The local review and controller execution records are `final-review.md` and
-`controller-gate.md` under `.superpowers/sdd/2026-10-18-qualification-gate/`.
-This closure changes documentation only on local `codex/qualification-gate`;
+Beauvoir's clean scoped review of the subsequent documentation closure approved
+`742a5df5540de6c00936149bb689c6567d5d289b`: all three requested items were
+addressed with no breakage. The controller freshly reran root tests and check at
+that head: 210 tests, 712 assertions, zero lint warnings/errors. This is distinct
+from the full nine-command independent controller gate at `e7d9d25` above.
+Transient review/execution scratch records were intentionally cleaned after
+clean reviews; the factual review and execution summaries are retained here.
+
+The current correction reconciles handoff documentation only; recorded approval
+ends at `742a5df`, not at this correction. It makes no implementation change or
+claim that the controller has reviewed this correction. Work remains local-only
+on `codex/qualification-gate`;
 main remains `68091929c8fd6414351194ddd8f196a584c5303b`. No merge, push,
 publication or deployment was performed or authorized by review acceptance.
-The controller owns one further scoped review of this documentation-only closure;
-that review is not claimed complete here. Integration remains owner-controlled.
+Integration remains owner-controlled.
