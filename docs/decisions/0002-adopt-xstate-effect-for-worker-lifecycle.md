@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-19
 decision-makers: Project owner
 ---
@@ -14,9 +14,9 @@ has pure decisions and a synthetic Effect coordinator, but no worker or durable
 application adapter. A machine alone does not qualify either boundary or prove
 improved throughput.
 
-This record captures the chosen direction for written review. `proposed` means
-the written ADR is not yet accepted, not that framework selection remains open.
-Installation/implementation await written-spec, detailed-plan and execution gates.
+The owner accepted this written record and its companion spec on 2026-10-19.
+Installation/implementation still await detailed-plan review and execution gates;
+architecture acceptance is not evidence of package compatibility.
 
 ## Decision
 
@@ -82,7 +82,8 @@ contract. The later implementation plan must address:
 6. README/roadmap and a measured report: exact artifacts, observed gates/counts,
    failure controls and external proof gaps.
 
-These are follow-up areas, not an approved implementation plan. Existing
+These areas are expanded in the [implementation plan](../superpowers/plans/2026-10-19-worker-lifecycle.md),
+which awaits execution approval. Existing
 `qualifyRun`, domain run decisions and probe source stay unchanged initially.
 
 ## Later Verification

@@ -47,7 +47,7 @@ pull requests is not the success measure.
 - Rust is parked pending a measured bottleneck and a separate decision.
 - Alchemy Domain and additional workflow engines are deferred for the pilot.
 - The owner selected `@xstate/effect` for local worker lifecycle orchestration,
-  not another durable coordinator. The new written spec and ADR-0002 await review;
+  not another durable coordinator. The written spec and ADR-0002 are approved;
   no XState dependency or worker implementation is installed yet.
 - No automatic merge, package release or deployment.
 
@@ -123,10 +123,10 @@ architecture remain unqualified.
 
 [ADR-0002 Adopt XState Effect for worker lifecycle](docs/decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md)
 
-Status: proposed written record of the owner-selected direction, 2026-10-19.
+Status: accepted by the owner on 2026-10-19.
 It narrows the additional-engine deferral to allow an Effect-hosted local worker
-statechart, retaining the ledger as durable authority. Written review and an
-implementation plan precede installation; compatibility remains unqualified.
+statechart, retaining the ledger as durable authority. Implementation-plan review
+precedes installation; compatibility remains unqualified.
 
 ## First Implementation Plan
 
@@ -159,11 +159,11 @@ later docs-only corrections do not extend that reviewed range.
 
 The next design is
 [Worker Ownership And XState Effect Lifecycle](docs/superpowers/specs/2026-10-19-worker-lifecycle-design.md).
-Ownership and lifecycle boundaries were approved conversationally; this written
-spec awaits review. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
+The written spec and ADR are approved. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
 and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The first planned
 implementation is an offline actor/journal tracer, not Docker or durable recovery.
-No detailed implementation plan, execution approval or package install exists yet.
+The [implementation plan](docs/superpowers/plans/2026-10-19-worker-lifecycle.md)
+awaits review before execution. No package install or new runtime proof exists yet.
 
 ## Monorepo Layout
 

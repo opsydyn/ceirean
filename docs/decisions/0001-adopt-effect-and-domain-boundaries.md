@@ -267,7 +267,8 @@ the production aggregate, real worker/model, active-job or host-loss verificatio
 items above, or authorise the next service slice.
 
 On 2026-10-19 the owner selected XState's Effect adapter for the local worker
-lifecycle. [Proposed ADR-0002](0002-adopt-xstate-effect-for-worker-lifecycle.md)
-records that narrow amendment for written review. It does not replace this
+lifecycle and approved its written record and spec the same day.
+[Accepted ADR-0002](0002-adopt-xstate-effect-for-worker-lifecycle.md)
+records that narrow amendment. It does not replace this
 record's application/domain ownership or approve another durable workflow engine,
 dependency installation, Docker execution or the broader service draft.

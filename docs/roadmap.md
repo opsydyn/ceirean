@@ -24,9 +24,10 @@ hosting and execution appetite still require review.
 - [x] Select `@xstate/effect` for controller-owned worker lifecycle actors, keeping
       ledger authority, pure qualification, Bun and universal lint unchanged.
       Direction only; no new packages or workers are installed.
-- [ ] Review the [worker lifecycle spec](superpowers/specs/2026-10-19-worker-lifecycle-design.md)
-      and [ADR-0002](decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md),
-      then approve a detailed implementation plan and execution method. First
+- [x] Approve the written [worker lifecycle spec](superpowers/specs/2026-10-19-worker-lifecycle-design.md)
+      and accept [ADR-0002](decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md).
+- [ ] Review the [worker lifecycle implementation plan](superpowers/plans/2026-10-19-worker-lifecycle.md)
+      and confirm execution before installing packages. First
       qualify the exact alpha cohort and deliver an offline lifecycle tracer;
       live Docker, durable storage and scaling guarantees remain separate.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual

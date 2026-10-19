@@ -1,10 +1,10 @@
 # Worker Ownership And XState Effect Lifecycle
 
-Status: conversational ownership/lifecycle design approved on 2026-10-19. The
+Status: written spec and ADR-0002 approved by the owner on 2026-10-19. The
 owner selected `@xstate/effect` as the framework, not an alternative to investigate.
-This written spec and proposed ADR-0002 require review before an implementation
-plan. This document adds no dependency/code and authorises no installation or
-live execution.
+The [implementation plan](../plans/2026-10-19-worker-lifecycle.md) requires review
+before execution. This document adds no dependency/code and authorises no
+installation or live execution.
 
 ## Intent And Baseline
 
@@ -38,7 +38,7 @@ commitments and is not selected.
 This narrowly amends ADR-0001's deferral of another workflow engine: a local
 interpreter is selected, not a second durable coordinator. Flue owns reasoning,
 Effect owns execution/services, and the ledger owns durable intent. See
-[proposed ADR-0002](../../decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md).
+[accepted ADR-0002](../../decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md).
 
 ## Cohort And Universal Policy
 
