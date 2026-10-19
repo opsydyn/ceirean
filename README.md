@@ -48,7 +48,8 @@ pull requests is not the success measure.
 - Alchemy Domain and additional workflow engines are deferred for the pilot.
 - The owner selected `@xstate/effect` for local worker lifecycle orchestration,
   not another durable coordinator. The written spec and ADR-0002 are approved;
-  no XState dependency or worker implementation is installed yet.
+  execution is approved, and Task 1's exact-cohort gate is committed and reviewed
+  clean at `91c0f01`. Task 2's pure domain implementation awaits controller review.
 - No automatic merge, package release or deployment.
 
 ## Proposed First Slice
@@ -125,8 +126,9 @@ architecture remain unqualified.
 
 Status: accepted by the owner on 2026-10-19.
 It narrows the additional-engine deferral to allow an Effect-hosted local worker
-statechart, retaining the ledger as durable authority. Implementation-plan review
-precedes installation; compatibility remains unqualified.
+statechart, retaining the ledger as durable authority. The owner approved plan
+execution; Task 1's clean review admits the pinned cohort locally, not live workers
+or durable recovery.
 
 ## First Implementation Plan
 
@@ -159,11 +161,15 @@ later docs-only corrections do not extend that reviewed range.
 
 The next design is
 [Worker Ownership And XState Effect Lifecycle](docs/superpowers/specs/2026-10-19-worker-lifecycle-design.md).
-The written spec and ADR are approved. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
+The written spec, ADR and plan execution are approved. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
 and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The first planned
 implementation is an offline actor/journal tracer, not Docker or durable recovery.
 The [implementation plan](docs/superpowers/plans/2026-10-19-worker-lifecycle.md)
-awaits review before execution. No package install or new runtime proof exists yet.
+records Task 1's clean independent review and commit `91c0f01`; its
+[measured cohort evidence](docs/assessments/worker-lifecycle.md) is local-only.
+Task 2's pure schemas/readiness/custody checks are implemented; controller review
+is pending before Task 3. No lifecycle engine protocol, Docker or durable recovery
+is established by this domain-only work. The whole plan remains incomplete.
 
 ## Monorepo Layout
 

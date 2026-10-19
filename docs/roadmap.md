@@ -23,12 +23,17 @@ hosting and execution appetite still require review.
       `742a5df`; later docs-only corrections do not extend that reviewed range.
 - [x] Select `@xstate/effect` for controller-owned worker lifecycle actors, keeping
       ledger authority, pure qualification, Bun and universal lint unchanged.
-      Direction only; no new packages or workers are installed.
+      The pinned packages are now admitted by Task 1; no live workers are qualified.
 - [x] Approve the written [worker lifecycle spec](superpowers/specs/2026-10-19-worker-lifecycle-design.md)
       and accept [ADR-0002](decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md).
-- [ ] Review the [worker lifecycle implementation plan](superpowers/plans/2026-10-19-worker-lifecycle.md)
-      and confirm execution before installing packages. First
-      qualify the exact alpha cohort and deliver an offline lifecycle tracer;
+- [x] Review the [worker lifecycle implementation plan](superpowers/plans/2026-10-19-worker-lifecycle.md)
+      and approve execution (owner approval, 2026-10-19).
+- [x] Complete Task 1's exact-cohort compatibility gate, commit `91c0f01`, with
+      clean independent review and controller gates; see the
+      [local cohort evidence](assessments/worker-lifecycle.md).
+- [x] Implement Task 2's pure worker data, binding/readiness and custody checks.
+- [ ] Obtain controller approval of Task 2's independent review before Task 3.
+- [ ] Complete the remaining offline lifecycle tracer tasks and whole-plan review;
       live Docker, durable storage and scaling guarantees remain separate.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.

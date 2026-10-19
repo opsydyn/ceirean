@@ -2,9 +2,13 @@
 
 Status: written spec and ADR-0002 approved by the owner on 2026-10-19. The
 owner selected `@xstate/effect` as the framework, not an alternative to investigate.
-The [implementation plan](../plans/2026-10-19-worker-lifecycle.md) requires review
-before execution. This document adds no dependency/code and authorises no
-installation or live execution.
+The owner separately approved [implementation-plan](../plans/2026-10-19-worker-lifecycle.md)
+execution on 2026-10-19. Task 1's exact-cohort compatibility gate is committed and
+independently reviewed clean at `91c0f01`; see the
+[local evidence](../../assessments/worker-lifecycle.md). Task 2's pure domain
+implementation is present, with controller review pending before Task 3. The
+remaining lifecycle tasks and whole-plan review are incomplete. This status
+does not authorise live execution or establish durable recovery.
 
 ## Intent And Baseline
 
@@ -257,9 +261,9 @@ cancellation/errors and universal lint, stop with concrete evidence. Do not
 downgrade Effect, switch to Node, relax rules, fork the adapter or replace the
 framework silently. Changed package selection requires owner review.
 
-The approved two-hour appetite covers design only, not implementation or live
-execution. Written-spec and ADR review precede a detailed implementation plan
-and execution-method selection. No merge, push, installation or Docker approval
+The original two-hour appetite covered design only. Written-spec and ADR review
+were followed by separate owner approval of the implementation plan and execution;
+current task progress is recorded above. No merge, push or live Docker approval
 is inferred. No throughput baseline or comparative performance has been measured.
 
 ## References
