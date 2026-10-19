@@ -8,11 +8,20 @@ compatibility probe and pinned workspace configuration are scaffolded.
 
 ## Status
 
-Offline compatibility probe only: 36 tests cover pure decisions, real Flue tools
+The offline compatibility probe's 36 tests cover pure decisions, real Flue tools
 through Effect, process-kill recovery and distinct read/abort semantics. The
 canonical typecheck passes with strict source checking and the owner-approved
 probe-local vendor declaration policy. This does not qualify production use.
 There is no production application, GitHub remote, scheduled job or deployment.
+
+The synthetic qualification-gate tracer is implemented and locally verified:
+119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
+Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect
+races use a test-only in-memory repository, not a durable application adapter.
+Task 4 and whole-branch controller reviews remain pending.
+
+[Measured qualification-gate evidence](docs/assessments/qualification-gate.md)
+records the exact tested-code commit, lock identities, gates and exclusions.
 
 [Measured compatibility checkpoint](docs/assessments/bun-effect-flue-compatibility.md)
 records exact pins, measured results, dependency declaration limitations and
@@ -126,8 +135,10 @@ The qualification-gate written spec is approved, with property-based domain test
 preferred using Effect's built-in Arbitrary support and inferred port contracts
 preserving the universal lint policy. The
 [implementation plan](docs/superpowers/plans/2026-10-18-qualification-gate.md)
-requires review and execution-method selection. No domain or engine package has
-been created. Real providers, workers and publication stay outside this slice.
+was executed through Task 4 Steps 1-6 in the existing qualification-gate worktree.
+Private domain and engine packages now implement the synthetic tracer. Task 4's
+controller review and the whole-branch review (Step 7) remain pending. Real
+providers, workers, durable application storage and publication stay outside this slice.
 
 ## Monorepo Layout
 
@@ -137,14 +148,14 @@ been created. Real providers, workers and publication stay outside this slice.
 package.json                Private Bun workspace root
 bun.lock                    One root dependency lockfile
 apps/cli/                   Future CLI and live dependency composition
-packages/domain/            Future pure upgrade model and decisions
-packages/engine/            Future Effect use cases, ports and adapters
+packages/domain/            Pure qualification evidence and run decisions
+packages/engine/            Qualification coordinator and inferred ports
 probes/bun-effect-flue/      Private compatibility fixture
 docs/                       Decisions, specifications, plans and evidence
 ```
 
-The root Moon project owns quality tasks; the probe is the only package workspace.
-Do not scaffold empty production packages. Stateful probe tasks run uncached with no automatic retries;
+The root Moon project owns quality tasks; domain, engine and probe are private workspaces.
+Do not scaffold empty production packages. Evidence tasks run uncached with no automatic retries;
 Moon is not Leviathan's durable run coordinator or container security boundary.
 
 ## Quality Gates
@@ -160,7 +171,11 @@ bun run check                     # Oxlint, then oxfmt check
 bun run lint:fix                  # Apply available lint fixes, then review
 bun run format                    # Format owned source, config and docs
 moon run workspace:check --force --no-actions
+moon run domain:typecheck --force --no-actions
+moon run engine:typecheck --force --no-actions
 moon run probe:typecheck --force --no-actions
+moon run domain:test --force --no-actions
+moon run engine:test --force --no-actions
 moon run probe:test --force --no-actions
 ```
 

@@ -1,6 +1,6 @@
 # Leviathan Roadmap
 
-Local delivery map, updated 2026-10-18. Checkboxes describe delivered outcomes,
+Local delivery map, updated 2026-10-19. Checkboxes describe delivered outcomes,
 not permission to implement unchecked items. The organisation-discovery direction
 is requested by the owner; its architecture, implementation plan, permissions,
 hosting and execution appetite still require review.
@@ -11,8 +11,12 @@ hosting and execution appetite still require review.
       and synthetic cancellation, without claiming production readiness.
 - [x] Establish full Effect lint policy, formatting and SQLite probe cleanup tests.
 - [x] Review and approve the [qualification-gate spec](superpowers/specs/2026-10-18-qualification-gate-design.md).
-- [ ] Review its [implementation plan](superpowers/plans/2026-10-18-qualification-gate.md),
-      select an execution method and execute the domain/port tracer.
+- [x] Execute the approved [qualification-gate plan](superpowers/plans/2026-10-18-qualification-gate.md)
+      through Task 4 Steps 1-6: synthetic domain/port/coordinator tracer, 210 local
+      tests and 93,000 primary property cases per full run. See the exact tested
+      artifact and limits in the [measured assessment](assessments/qualification-gate.md).
+- [ ] Complete Task 4 controller review and whole-branch review (Task 4 Step 7).
+      Local gates do not imply review acceptance or durable/live qualification.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
