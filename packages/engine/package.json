@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "@leviathan/domain": "workspace:*",
-    "effect": "4.0.5"
+    "@xstate/effect": "0.1.0-alpha.6",
+    "effect": "4.0.5",
+    "xstate": "6.0.0-alpha.64"
   }
 }
