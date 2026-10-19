@@ -1,0 +1,13 @@
+{
+  "name": "@leviathan/engine",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@leviathan/domain": "workspace:*",
+    "effect": "4.0.5"
+  }
+}

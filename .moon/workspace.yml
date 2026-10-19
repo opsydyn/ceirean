@@ -2,3 +2,4 @@ projects:
   workspace: .
   probe: probes/bun-effect-flue
   domain: packages/domain
+  engine: packages/engine
