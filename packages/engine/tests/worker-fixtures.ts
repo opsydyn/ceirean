@@ -12,6 +12,8 @@ export function makeWorkerSnapshot(): WorkerJournalSnapshot {
     revision: 7,
     operation,
     createdAtMs: 900,
+    editTimeFloorMs: 900,
+    outcomeEvidenceFloorMs: 900,
     authority: { identity: operation.identity, cancelledAtMs: Option.none() },
     intents: [],
     containerId: Option.none(),

@@ -9,6 +9,7 @@ import {
   WorkerOperationId,
   type WorkerIntent,
   type WorkerMutationReply,
+  type WorkerReadyReceipt,
 } from '@leviathan/domain';
 import { Deferred, Effect, Fiber, Match, Option, Result, Schema } from 'effect';
 
@@ -68,6 +69,454 @@ function replyFor(kind: WorkerIntent['kind'] = 'Create'): WorkerMutationReply {
   const c = makeWorkerCase();
   return { ...c.reply, intentId: makeWorkerIntent(kind).intentId };
 }
+
+function readinessAt(observedAtMs: number): WorkerReadyReceipt {
+  const { operation, containerId } = makeWorkerCase();
+  return {
+    operationId: operation.operationId,
+    identity: operation.identity,
+    hostId: operation.hostId,
+    daemonId: operation.daemonId,
+    containerId,
+    imageDigest: operation.imageDigest,
+    sourceDigest: operation.sourceDigest,
+    policyDigest: operation.policyDigest,
+    configDigest: operation.configDigest,
+    configuration: operation.configuration,
+    observedAtMs,
+  };
+}
+
+async function startClaimInvalidatesReadiness() {
+  function* scenario() {
+    const c = makeWorkerCase();
+    const seed = {
+      ...makeWorkerSnapshot(),
+      containerId: Option.some(c.containerId),
+      readiness: Option.some(readinessAt(940)),
+    };
+    const journal = yield* makeMemoryWorkerJournal([seed]);
+    const startIntent = makeWorkerIntent('Start');
+    const started = committed(yield* journal.service.commit(claimEdit(seed, startIntent)));
+    expect(started.readiness).toEqual(Option.none());
+    const failedReply = {
+      ...replyFor('Start'),
+      atMs: 951,
+      outcome: { _tag: 'Failed' as const, reason: { _tag: 'NotFound' as const } },
+    };
+    const failed = committed(yield* journal.service.commit(outcomeEdit(started, failedReply)));
+    const recovered = yield* makeMemoryWorkerJournal([failed]);
+    const authorization: WorkerJournalEdit = {
+      _tag: 'AuthorizeExecution',
+      operationId: seed.operation.operationId,
+      expectedRevision: failed.revision,
+      atMs: 952,
+    };
+    expect((yield* recovered.service.commit(authorization))._tag).toBe('Refused');
+    const stale = { ...failed, readiness: Option.some(readinessAt(940)) };
+    const restoredStale = yield* makeMemoryWorkerJournal([stale]);
+    expect((yield* restoredStale.service.commit(authorization))._tag).toBe('Refused');
+    const fresh = committed(
+      yield* recovered.service.commit({
+        _tag: 'RecordReadiness',
+        operationId: seed.operation.operationId,
+        expectedRevision: failed.revision,
+        atMs: 952,
+        receipt: readinessAt(952),
+      }),
+    );
+    const authorized = committed(
+      yield* recovered.service.commit({
+        ...authorization,
+        expectedRevision: fresh.revision,
+        atMs: 953,
+      }),
+    );
+    expect(authorized.executionAuthorizedAtMs).toEqual(Option.some(953));
+  }
+  const program = Effect.gen(scenario);
+  await Effect.runPromise(program);
+}
+test(
+  'I1 Start claim clears pre-action readiness and failed Start needs fresh readback after reconstruction',
+  startClaimInvalidatesReadiness,
+);
+
+for (const outcomeTag of ['Failed', 'Unknown'] as const) {
+  async function nonCompletedOutcomeOrdering() {
+    function* scenario() {
+      const c = makeWorkerCase();
+      const seed = { ...makeWorkerSnapshot(), containerId: Option.some(c.containerId) };
+      const journal = yield* makeMemoryWorkerJournal([seed]);
+      const startIntent = makeWorkerIntent('Start');
+      const claimed = committed(yield* journal.service.commit(claimEdit(seed, startIntent)));
+      const outcome = Match.value(outcomeTag).pipe(
+        Match.when('Failed', () => ({
+          _tag: 'Failed' as const,
+          reason: { _tag: 'NotFound' as const },
+        })),
+        Match.when('Unknown', () => ({
+          _tag: 'Unknown' as const,
+          reason: { _tag: 'UnresolvedIntent' as const },
+        })),
+        Match.exhaustive,
+      );
+      const reply = { ...replyFor('Start'), atMs: 990, outcome };
+      const recorded = committed(yield* journal.service.commit(outcomeEdit(claimed, reply)));
+      const recovered = yield* makeMemoryWorkerJournal([recorded]);
+      const stale: WorkerJournalResult = {
+        _tag: 'Refused',
+        refusal: { _tag: 'StaleObservation', operationId: seed.operation.operationId },
+      };
+      const readiness: WorkerJournalEdit = {
+        _tag: 'RecordReadiness',
+        operationId: seed.operation.operationId,
+        expectedRevision: recorded.revision,
+        atMs: 991,
+        receipt: readinessAt(980),
+      };
+      expect(yield* recovered.service.commit(readiness)).toEqual(stale);
+      expect(yield* recovered.service.commit(cleanupEdit(recorded, 960))).toEqual(stale);
+      expect(
+        yield* recovered.service.commit(outcomeEdit(recorded, { ...reply, atMs: 989 }, 991)),
+      ).toEqual(stale);
+      const forged = { ...recorded, readiness: Option.some(readinessAt(980)) };
+      const staleRestored = yield* makeMemoryWorkerJournal([forged]);
+      expect(
+        yield* staleRestored.service.commit({
+          _tag: 'AuthorizeExecution',
+          operationId: seed.operation.operationId,
+          expectedRevision: recorded.revision,
+          atMs: 992,
+        }),
+      ).toEqual(stale);
+      expect(yield* recovered.inspect(seed.operation.operationId)).toEqual(Option.some(recorded));
+      expect(recorded.editTimeFloorMs).toBe(990);
+      expect(recorded.outcomeEvidenceFloorMs).toBe(990);
+      const equal = committed(yield* recovered.service.commit(outcomeEdit(recorded, reply)));
+      expect(equal.editTimeFloorMs).toBe(990);
+      expect(equal.outcomeEvidenceFloorMs).toBe(990);
+      const newer = committed(
+        yield* recovered.service.commit(outcomeEdit(equal, { ...reply, atMs: 991 })),
+      );
+      expect(newer.editTimeFloorMs).toBe(991);
+      expect(newer.outcomeEvidenceFloorMs).toBe(991);
+      const reconstructed = yield* makeMemoryWorkerJournal([newer]);
+      expect(
+        (yield* reconstructed.service.commit({
+          ...readiness,
+          expectedRevision: newer.revision,
+          atMs: 991,
+          receipt: readinessAt(991),
+        }))._tag,
+      ).toBe(
+        Match.value(outcomeTag).pipe(
+          Match.when('Failed', () => 'Committed' as const),
+          Match.when('Unknown', () => 'Refused' as const),
+          Match.exhaustive,
+        ),
+      );
+    }
+    const program = Effect.gen(scenario);
+    await Effect.runPromise(program);
+  }
+  test(
+    `I2 ${outcomeTag} reply time fences older readiness, authorization and edits after reconstruction`,
+    nonCompletedOutcomeOrdering,
+  );
+}
+
+async function separateAdministrativeAndOutcomeFloors() {
+  function* scenario() {
+    const seed = {
+      ...makeWorkerSnapshot(),
+      containerId: Option.some(makeWorkerCase().containerId),
+    };
+    const journal = yield* makeMemoryWorkerJournal([seed]);
+    const ready = committed(
+      yield* journal.service.commit({
+        _tag: 'RecordReadiness',
+        operationId: seed.operation.operationId,
+        expectedRevision: seed.revision,
+        atMs: 995,
+        receipt: readinessAt(990),
+      }),
+    );
+    const recovered = yield* makeMemoryWorkerJournal([ready]);
+    expect((yield* recovered.service.commit(cleanupEdit(ready, 994)))._tag).toBe('Refused');
+    expect(ready.editTimeFloorMs).toBe(995);
+    expect(ready.outcomeEvidenceFloorMs).toBe(990);
+    const newer = committed(
+      yield* recovered.service.commit({
+        _tag: 'RecordReadiness',
+        operationId: seed.operation.operationId,
+        expectedRevision: ready.revision,
+        atMs: 996,
+        receipt: readinessAt(991),
+      }),
+    );
+    expect(newer.editTimeFloorMs).toBe(996);
+    expect(newer.outcomeEvidenceFloorMs).toBe(991);
+    const authorized = committed(
+      yield* recovered.service.commit({
+        _tag: 'AuthorizeExecution',
+        operationId: seed.operation.operationId,
+        expectedRevision: newer.revision,
+        atMs: 996,
+      }),
+    );
+    expect(authorized.executionAuthorizedAtMs).toEqual(Option.some(996));
+    expect(authorized.outcomeEvidenceFloorMs).toBe(991);
+    const afterAuthorization = yield* makeMemoryWorkerJournal([authorized]);
+    expect(
+      (yield* afterAuthorization.service.commit({
+        _tag: 'AuthorizeExecution',
+        operationId: seed.operation.operationId,
+        expectedRevision: authorized.revision,
+        atMs: 997,
+      }))._tag,
+    ).toBe('Refused');
+  }
+  const program = Effect.gen(scenario);
+  await Effect.runPromise(program);
+}
+test(
+  'I2 administrative edits and post-action readiness retain distinct durable time floors',
+  separateAdministrativeAndOutcomeFloors,
+);
+
+async function freshReadinessAfterUnknownResolution() {
+  function* scenario() {
+    const seed = {
+      ...makeWorkerSnapshot(),
+      containerId: Option.some(makeWorkerCase().containerId),
+    };
+    const journal = yield* makeMemoryWorkerJournal([seed]);
+    const intent = makeWorkerIntent('Start');
+    const claimed = committed(yield* journal.service.commit(claimEdit(seed, intent)));
+    const uncertainReply = {
+      ...replyFor('Start'),
+      atMs: 990,
+      outcome: { _tag: 'Unknown' as const, reason: { _tag: 'UnresolvedIntent' as const } },
+    };
+    const uncertain = committed(
+      yield* journal.service.commit(outcomeEdit(claimed, uncertainReply)),
+    );
+    const recovered = yield* makeMemoryWorkerJournal([uncertain]);
+    expect(
+      (yield* recovered.service.commit({
+        _tag: 'RecordReadiness',
+        operationId: seed.operation.operationId,
+        expectedRevision: uncertain.revision,
+        atMs: 991,
+        receipt: readinessAt(991),
+      }))._tag,
+    ).toBe('Refused');
+    const c = makeWorkerCase();
+    const reply = {
+      ...replyFor('Start'),
+      atMs: 992,
+      outcome: { _tag: 'Completed' as const, observation: { ...c.observation, atMs: 992 } },
+    };
+    const resolved = committed(yield* recovered.service.commit(outcomeEdit(uncertain, reply)));
+    expect(resolved.outcomeEvidenceFloorMs).toBe(992);
+    const ready = committed(
+      yield* recovered.service.commit({
+        _tag: 'RecordReadiness',
+        operationId: seed.operation.operationId,
+        expectedRevision: resolved.revision,
+        atMs: 992,
+        receipt: readinessAt(992),
+      }),
+    );
+    const authorized = committed(
+      yield* recovered.service.commit({
+        _tag: 'AuthorizeExecution',
+        operationId: seed.operation.operationId,
+        expectedRevision: ready.revision,
+        atMs: 992,
+      }),
+    );
+    expect(authorized.executionAuthorizedAtMs).toEqual(Option.some(992));
+    expect(authorized.editTimeFloorMs).toBe(992);
+    expect(authorized.outcomeEvidenceFloorMs).toBe(992);
+  }
+  const program = Effect.gen(scenario);
+  await Effect.runPromise(program);
+}
+test(
+  'I2 Unknown requires matching newer completion before equal-time readiness and execution can succeed',
+  freshReadinessAfterUnknownResolution,
+);
+
+for (const outcomeTag of ['Completed', 'Failed', 'Unknown'] as const) {
+  async function lateOutcomeFloors() {
+    function* scenario() {
+      const seed = makeWorkerSnapshot();
+      const journal = yield* makeMemoryWorkerJournal([seed]);
+      const claimed = committed(yield* journal.service.commit(claimEdit(seed)));
+      const cancelled = committed(
+        yield* journal.service.commit({ ...cleanupEdit(claimed), _tag: 'RequestCancellation' }),
+      );
+      const c = makeWorkerCase();
+      const outcome = Match.value(outcomeTag).pipe(
+        Match.when('Completed', () => ({
+          _tag: 'Completed' as const,
+          observation: { ...c.observation, atMs: 998 },
+        })),
+        Match.when('Failed', () => ({
+          _tag: 'Failed' as const,
+          reason: { _tag: 'NotFound' as const },
+        })),
+        Match.when('Unknown', () => ({
+          _tag: 'Unknown' as const,
+          reason: { _tag: 'UnresolvedIntent' as const },
+        })),
+        Match.exhaustive,
+      );
+      const reply = { ...replyFor(), atMs: 999, outcome };
+      const recorded = committed(
+        yield* journal.service.commit(outcomeEdit(cancelled, reply, 1002)),
+      );
+      expect(recorded.editTimeFloorMs).toBe(1002);
+      expect(recorded.outcomeEvidenceFloorMs).toBe(999);
+      expect(recorded.operation.limits).toEqual({ deadlineMs: 1000, spentMicros: 17, repairs: 1 });
+      expect(recorded.authority.cancelledAtMs).toEqual(Option.some(1000));
+      const recovered = yield* makeMemoryWorkerJournal([recorded]);
+      expect((yield* recovered.service.commit(cleanupEdit(recorded, 1001)))._tag).toBe('Refused');
+      const repeated = committed(yield* recovered.service.commit(cleanupEdit(recorded, 1002)));
+      expect(repeated.editTimeFloorMs).toBe(1002);
+      expect(repeated.outcomeEvidenceFloorMs).toBe(999);
+      expect(Option.getOrThrow(repeated.cleanup).deadlineMs).toBe(1100);
+    }
+    const program = Effect.gen(scenario);
+    await Effect.runPromise(program);
+  }
+  test(
+    `I2 late truthful ${outcomeTag} evidence can predate cancellation without moving the edit clock backward`,
+    lateOutcomeFloors,
+  );
+}
+
+async function requiredPersistedFloors() {
+  function* scenario() {
+    const seed = makeWorkerSnapshot();
+    expect(seed.editTimeFloorMs).toBe(900);
+    expect(seed.outcomeEvidenceFloorMs).toBe(900);
+    const journal = yield* makeMemoryWorkerJournal([]);
+    const registered = committed(
+      yield* journal.service.commit({
+        _tag: 'Register',
+        operationId: seed.operation.operationId,
+        operation: seed.operation,
+        createdAtMs: 900,
+        atMs: 920,
+      }),
+    );
+    expect(registered.editTimeFloorMs).toBe(920);
+    expect(registered.outcomeEvidenceFloorMs).toBe(900);
+    const error = new WorkerJournalError({ operation: 'load', code: 'InvalidData' });
+    for (const field of ['editTimeFloorMs', 'outcomeEvidenceFloorMs'] as const) {
+      const missing = { ...seed };
+      Reflect.deleteProperty(missing, field);
+      expect(yield* Effect.result(makeMemoryWorkerJournal([missing]))).toEqual(Result.fail(error));
+      for (const invalid of [undefined, -1, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+        const malformed = { ...seed };
+        Reflect.set(malformed, field, invalid);
+        expect(yield* Effect.result(makeMemoryWorkerJournal([malformed]))).toEqual(
+          Result.fail(error),
+        );
+      }
+    }
+    Reflect.set(registered, 'editTimeFloorMs', 0);
+    const loaded = Option.getOrThrow(yield* journal.inspect(seed.operation.operationId));
+    expect(loaded.editTimeFloorMs).toBe(920);
+    const recovered = yield* makeMemoryWorkerJournal([loaded]);
+    Reflect.set(loaded, 'outcomeEvidenceFloorMs', 0);
+    const inspected = Option.getOrThrow(yield* recovered.service.load(seed.operation.operationId));
+    expect(inspected.editTimeFloorMs).toBe(920);
+    expect(inspected.outcomeEvidenceFloorMs).toBe(900);
+  }
+  const program = Effect.gen(scenario);
+  await Effect.runPromise(program);
+}
+test(
+  'I2 persisted time floors are required safe integers and detach without reconstruction defaults',
+  requiredPersistedFloors,
+);
+
+async function authorityPreservesOrderingFloors() {
+  function* scenario() {
+    const seed = makeWorkerSnapshot();
+    const sibling = { ...siblingSnapshot(seed), editTimeFloorMs: 995, outcomeEvidenceFloorMs: 990 };
+    const control = yield* makeMemoryWorkerJournal([seed, sibling]);
+    yield* control.replaceAuthority(
+      seed.operation.operationId,
+      { ...seed.operation.identity, generation: 4 },
+      Option.none(),
+    );
+    const controlTarget = Option.getOrThrow(yield* control.inspect(seed.operation.operationId));
+    const controlPeer = Option.getOrThrow(yield* control.inspect(sibling.operation.operationId));
+    expect(controlTarget.editTimeFloorMs).toBe(900);
+    expect(controlPeer.editTimeFloorMs).toBe(995);
+    expect(controlPeer.outcomeEvidenceFloorMs).toBe(990);
+    const journal = yield* makeMemoryWorkerJournal([seed, sibling]);
+    expect(
+      (yield* journal.service.commit({ ...cleanupEdit(seed, 994), _tag: 'RequestCancellation' }))
+        ._tag,
+    ).toBe('Refused');
+    expect(yield* journal.inspect(seed.operation.operationId)).toEqual(Option.some(seed));
+    const cancelled = committed(
+      yield* journal.service.commit({ ...cleanupEdit(seed, 995), _tag: 'RequestCancellation' }),
+    );
+    const peer = Option.getOrThrow(yield* journal.inspect(sibling.operation.operationId));
+    expect(cancelled.editTimeFloorMs).toBe(995);
+    expect(peer.editTimeFloorMs).toBe(995);
+    expect(peer.outcomeEvidenceFloorMs).toBe(990);
+    const replacement = { ...seed.operation.identity, generation: 4 };
+    yield* journal.replaceAuthority(seed.operation.operationId, replacement, Option.none());
+    const replaced = Option.getOrThrow(yield* journal.inspect(sibling.operation.operationId));
+    expect(replaced.editTimeFloorMs).toBe(995);
+    expect(replaced.outcomeEvidenceFloorMs).toBe(990);
+    yield* journal.replaceAuthority(seed.operation.operationId, replacement, Option.some(997));
+    const suppliedTime = Option.getOrThrow(yield* journal.inspect(sibling.operation.operationId));
+    expect(suppliedTime.editTimeFloorMs).toBe(997);
+    expect(suppliedTime.outcomeEvidenceFloorMs).toBe(990);
+    const operation = {
+      ...seed.operation,
+      operationId: WorkerOperationId.make('worker-3'),
+      identity: replacement,
+    };
+    expect(
+      (yield* journal.service.commit({
+        _tag: 'Register',
+        operationId: operation.operationId,
+        operation,
+        createdAtMs: 900,
+        atMs: 996,
+      }))._tag,
+    ).toBe('Refused');
+    const registered = committed(
+      yield* journal.service.commit({
+        _tag: 'Register',
+        operationId: operation.operationId,
+        operation,
+        createdAtMs: 900,
+        atMs: 998,
+      }),
+    );
+    expect(registered.editTimeFloorMs).toBe(998);
+    expect(registered.outcomeEvidenceFloorMs).toBe(990);
+    const recovered = yield* makeMemoryWorkerJournal([registered]);
+    expect((yield* recovered.service.commit(cleanupEdit(registered, 996)))._tag).toBe('Refused');
+  }
+  const program = Effect.gen(scenario);
+  await Effect.runPromise(program);
+}
+test(
+  'I2 run authority fan-out, replacement and registration preserve affected record ordering',
+  authorityPreservesOrderingFloors,
+);
 
 function siblingSnapshot(seed: WorkerJournalSnapshot): WorkerJournalSnapshot {
   return {

@@ -43,6 +43,8 @@ function detach(snapshot: WorkerJournalSnapshot): WorkerJournalSnapshot {
     revision: snapshot.revision,
     operation: structuredClone(snapshot.operation),
     createdAtMs: snapshot.createdAtMs,
+    editTimeFloorMs: snapshot.editTimeFloorMs,
+    outcomeEvidenceFloorMs: snapshot.outcomeEvidenceFloorMs,
     authority: {
       identity: structuredClone(snapshot.authority.identity),
       cancelledAtMs,
@@ -90,7 +92,13 @@ function observationTime(snapshot: WorkerJournalSnapshot): number {
     Option.map((receipt) => receipt.observedAtMs),
     Option.getOrElse(() => 0),
   );
-  return Math.max(snapshot.createdAtMs, ...completedTimes, ...cleanupTimes, readyTime);
+  return Math.max(
+    snapshot.createdAtMs,
+    snapshot.outcomeEvidenceFloorMs,
+    ...completedTimes,
+    ...cleanupTimes,
+    readyTime,
+  );
 }
 
 function evidenceTime(snapshot: WorkerJournalSnapshot): number {
@@ -103,6 +111,7 @@ function evidenceTime(snapshot: WorkerJournalSnapshot): number {
   );
   return Math.max(
     observationTime(snapshot),
+    snapshot.editTimeFloorMs,
     authorizedTime,
     cancellationTime,
     cleanupTime,
@@ -215,7 +224,7 @@ function claim(
       Match.orElse(() => Option.contains(snapshot.containerId, intent.resource)),
     );
     yield* requireRecord(owned, snapshot, 'NoCustody');
-    return { ...snapshot, intents: [...snapshot.intents, intent] };
+    return { ...snapshot, readiness: Option.none(), intents: [...snapshot.intents, intent] };
   }
   return Result.gen(validate);
 }
@@ -364,11 +373,17 @@ function recordOutcome(
       snapshot,
       'InvalidTime',
     );
-    return yield* Match.value(intent.outcome).pipe(
+    yield* requireRecord(
+      reply.atMs >= snapshot.outcomeEvidenceFloorMs,
+      snapshot,
+      'StaleObservation',
+    );
+    const next = yield* Match.value(intent.outcome).pipe(
       Match.tag('Completed', 'Failed', () => terminalOutcome(snapshot, intent, reply)),
       Match.tag('Claimed', 'Unknown', () => resolveOutcome(snapshot, intent, reply)),
       Match.exhaustive,
     );
+    return { ...next, outcomeEvidenceFloorMs: Math.max(next.outcomeEvidenceFloorMs, reply.atMs) };
   }
   return Result.gen(validate);
 }
@@ -385,6 +400,9 @@ function receiptObservation(receipt: WorkerReadyReceipt): WorkerObservation {
 function checkReady(snapshot: WorkerJournalSnapshot, receipt: WorkerReadyReceipt, atMs: number) {
   function* validate() {
     yield* currentAuthority(snapshot, atMs);
+    const claimedTimes = snapshot.intents.map((intent) => intent.claimedAtMs);
+    const floor = Math.max(observationTime(snapshot), ...claimedTimes);
+    yield* requireRecord(receipt.observedAtMs >= floor, snapshot, 'StaleObservation');
     yield* requireRecord(
       Option.isNone(snapshot.cleanup) && !snapshot.intents.some(unresolved),
       snapshot,
@@ -411,13 +429,12 @@ function recordReadiness(
   edit: Extract<ConditionalEdit, { readonly _tag: 'RecordReadiness' }>,
 ): Result.Result<WorkerJournalSnapshot, WorkerRefusal> {
   function* validate() {
-    yield* requireRecord(
-      edit.receipt.observedAtMs >= evidenceTime(snapshot),
-      snapshot,
-      'StaleObservation',
-    );
     const receipt = yield* checkReady(snapshot, edit.receipt, edit.atMs);
-    return { ...snapshot, readiness: Option.some(receipt) };
+    return {
+      ...snapshot,
+      readiness: Option.some(receipt),
+      outcomeEvidenceFloorMs: Math.max(snapshot.outcomeEvidenceFloorMs, receipt.observedAtMs),
+    };
   }
   return Result.gen(validate);
 }
@@ -552,7 +569,11 @@ function recordCleanup(
       })),
       Match.exhaustive,
     );
-    return { ...snapshot, cleanup: Option.some(next) };
+    return {
+      ...snapshot,
+      cleanup: Option.some(next),
+      outcomeEvidenceFloorMs: Math.max(snapshot.outcomeEvidenceFloorMs, observation.atMs),
+    };
   }
   return Result.gen(validate);
 }
@@ -560,10 +581,15 @@ function recordCleanup(
 function applyEdit(
   snapshot: WorkerJournalSnapshot,
   edit: ConditionalEdit,
+  sharedEditFloorMs: number,
 ): Result.Result<WorkerJournalSnapshot, WorkerRefusal> {
   function* validate() {
     yield* requireRecord(edit.atMs >= snapshot.createdAtMs, snapshot, 'InvalidTime');
-    yield* requireRecord(edit.atMs >= evidenceTime(snapshot), snapshot, 'StaleObservation');
+    yield* requireRecord(
+      edit.atMs >= Math.max(evidenceTime(snapshot), sharedEditFloorMs),
+      snapshot,
+      'StaleObservation',
+    );
     return yield* Match.value(edit).pipe(
       Match.tag('Claim', (request) => claim(snapshot, request)),
       Match.tag('RecordOutcome', (request) => recordOutcome(snapshot, request)),
@@ -578,14 +604,18 @@ function applyEdit(
   return Result.gen(validate);
 }
 
+function runSnapshots(current: Store, operation: WorkerOperation) {
+  return Array.fromIterable(HashMap.values(current)).filter(
+    (snapshot) => snapshot.operation.identity.runId === operation.identity.runId,
+  );
+}
+
 function register(
   current: Store,
   edit: Extract<WorkerJournalEdit, { readonly _tag: 'Register' }>,
 ): Result.Result<WorkerJournalResult, WorkerJournalError> {
-  const sameRun = Array.findFirst(
-    HashMap.values(current),
-    (value) => value.operation.identity.runId === edit.operation.identity.runId,
-  );
+  const peers = runSnapshots(current, edit.operation);
+  const sameRun = Array.head(peers);
   const authority = Option.match(sameRun, {
     onNone: () => ({ identity: edit.operation.identity, cancelledAtMs: Option.none<number>() }),
     onSome: (value) => value.authority,
@@ -594,6 +624,15 @@ function register(
     revision: 0,
     operation: edit.operation,
     createdAtMs: edit.createdAtMs,
+    editTimeFloorMs: Math.max(
+      edit.createdAtMs,
+      edit.atMs,
+      ...peers.map((peer) => peer.editTimeFloorMs),
+    ),
+    outcomeEvidenceFloorMs: Math.max(
+      edit.createdAtMs,
+      ...peers.map((peer) => peer.outcomeEvidenceFloorMs),
+    ),
     authority,
     intents: [],
     containerId: Option.none(),
@@ -613,6 +652,8 @@ function register(
       'InvalidTime',
     );
     yield* validateWorkerCustody(edit.operation, custodyObservation(snapshot, edit.atMs));
+    const runFloorMs = Math.max(edit.createdAtMs, ...peers.map(evidenceTime));
+    yield* requireRecord(edit.atMs >= runFloorMs, snapshot, 'StaleObservation');
     return snapshot;
   }
   const validation = Result.gen(validate);
@@ -644,16 +685,30 @@ function register(
 }
 
 function updateExisting(
+  current: Store,
   snapshot: WorkerJournalSnapshot,
   edit: ConditionalEdit,
 ): Result.Result<WorkerJournalResult, WorkerJournalError> {
+  const sharedEditFloorMs = Match.value(edit).pipe(
+    Match.tag('RequestCancellation', () =>
+      Math.max(
+        snapshot.createdAtMs,
+        ...runSnapshots(current, snapshot.operation).map(evidenceTime),
+      ),
+    ),
+    Match.orElse(() => 0),
+  );
   function changed() {
-    return applyEdit(snapshot, edit).pipe(
+    return applyEdit(snapshot, edit, sharedEditFloorMs).pipe(
       Result.match({
         onFailure: (refusal): WorkerJournalResult => ({ _tag: 'Refused', refusal }),
         onSuccess: (next): WorkerJournalResult => ({
           _tag: 'Committed',
-          snapshot: { ...next, revision: snapshot.revision + 1 },
+          snapshot: {
+            ...next,
+            revision: snapshot.revision + 1,
+            editTimeFloorMs: Math.max(next.editTimeFloorMs, edit.atMs),
+          },
         }),
       }),
       Result.succeed,
@@ -677,7 +732,7 @@ function conditionalCommit(current: Store, edit: ConditionalEdit) {
   return Option.match(HashMap.get(current, edit.operationId), {
     onNone: (): Result.Result<WorkerJournalResult, WorkerJournalError> =>
       Result.succeed({ _tag: 'Conflict', operationId: edit.operationId }),
-    onSome: (snapshot) => updateExisting(snapshot, edit),
+    onSome: (snapshot) => updateExisting(current, snapshot, edit),
   });
 }
 
@@ -700,6 +755,7 @@ function evaluate(
 function spreadAuthority(
   current: Store,
   snapshot: WorkerJournalSnapshot,
+  atMs: Option.Option<number>,
 ): Result.Result<Store, WorkerJournalError> {
   const peers = Array.fromIterable(HashMap.values(current)).filter(
     (peer) =>
@@ -713,7 +769,15 @@ function spreadAuthority(
         HashMap.set(
           store,
           peer.operation.operationId,
-          detach({ ...peer, revision: peer.revision + 1, authority: snapshot.authority }),
+          detach({
+            ...peer,
+            revision: peer.revision + 1,
+            authority: snapshot.authority,
+            editTimeFloorMs: Math.max(
+              peer.editTimeFloorMs,
+              Option.getOrElse(atMs, () => peer.editTimeFloorMs),
+            ),
+          }),
         ),
       current,
     );
@@ -742,7 +806,9 @@ function transition(
     const snapshot = detach(value);
     const returned = detach(snapshot);
     const updated = Match.value(edit).pipe(
-      Match.tag('RequestCancellation', () => spreadAuthority(current, snapshot)),
+      Match.tag('RequestCancellation', ({ atMs }) =>
+        spreadAuthority(current, snapshot, Option.some(atMs)),
+      ),
       Match.orElse(() =>
         Result.succeed(HashMap.set(current, snapshot.operation.operationId, snapshot)),
       ),
@@ -785,6 +851,10 @@ function changedAuthority(
   const next = {
     ...snapshot,
     revision: snapshot.revision + 1,
+    editTimeFloorMs: Math.max(
+      snapshot.editTimeFloorMs,
+      Option.getOrElse(cancelledAtMs, () => snapshot.editTimeFloorMs),
+    ),
     authority: { identity, cancelledAtMs: cancelled },
   };
   const valid =
@@ -820,7 +890,7 @@ function authorityTransition(
     ): readonly [Result.Result<Option.Option<WorkerJournalSnapshot>, WorkerJournalError>, Store] {
       const detached = detach(next);
       const returned = Option.some(detach(detached));
-      return spreadAuthority(current, detached).pipe(
+      return spreadAuthority(current, detached, cancelledAtMs).pipe(
         Result.match({
           onFailure: (error) => [Result.fail(error), current],
           onSuccess: (store) => [Result.succeed(returned), store],

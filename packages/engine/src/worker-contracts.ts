@@ -17,6 +17,8 @@ export const WorkerJournalSnapshot = Schema.Struct({
   revision: NonNegativeSafeInteger,
   operation: WorkerOperation,
   createdAtMs: NonNegativeSafeInteger,
+  editTimeFloorMs: NonNegativeSafeInteger,
+  outcomeEvidenceFloorMs: NonNegativeSafeInteger,
   authority: Schema.Struct({
     identity: CandidateIdentity,
     cancelledAtMs: Schema.Option(NonNegativeSafeInteger),
