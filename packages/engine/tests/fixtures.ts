@@ -1,10 +1,29 @@
 import { decideCancellation, decideQualification } from '@leviathan/domain';
-import { Match } from 'effect';
+import { Deferred, Effect, Layer, Match, Ref } from 'effect';
+import { TestClock } from 'effect/testing';
 
 import { makeEvidenceCase, makeFrozenRun } from '../../domain/tests/fixtures.ts';
 import type { RunSnapshot } from '../src/contracts.ts';
+import {
+  CandidateVerifier,
+  CandidateVerifierError,
+  RunRepository,
+  type VerificationRequest,
+} from '../src/index.ts';
 
 export { makeEvidenceCase, makeFrozenRun };
+
+export function coordinatorTestLayers(
+  repository: typeof RunRepository.Service,
+  verifier: typeof CandidateVerifier.Service,
+) {
+  const layers = Layer.mergeAll(
+    Layer.succeed(RunRepository, repository),
+    Layer.succeed(CandidateVerifier, verifier),
+    TestClock.layer(),
+  );
+  return layers;
+}
 
 export function makeSnapshot(): RunSnapshot {
   return {
@@ -52,4 +71,37 @@ export function makeCancelledChange() {
     }),
     Match.exhaustive,
   );
+}
+
+export function makeControlledVerifier() {
+  function* acquire() {
+    const first = yield* Deferred.make<VerificationRequest>();
+    const second = yield* Deferred.make<VerificationRequest>();
+    const releaseFirst = yield* Deferred.make<unknown, CandidateVerifierError>();
+    const releaseSecond = yield* Deferred.make<unknown, CandidateVerifierError>();
+    const calls = yield* Ref.make(0);
+    function verify(request: VerificationRequest) {
+      function* verification() {
+        const index = yield* Ref.getAndUpdate(calls, (count) => count + 1);
+        const barrier = Match.value(index).pipe(
+          Match.when(0, () => ({ entered: first, release: releaseFirst })),
+          Match.orElse(() => ({ entered: second, release: releaseSecond })),
+        );
+        yield* Deferred.succeed(barrier.entered, request);
+        return yield* Deferred.await(barrier.release);
+      }
+      const operation = Effect.gen(verification);
+      return operation;
+    }
+    return {
+      service: CandidateVerifier.of({ verify }),
+      first,
+      second,
+      releaseFirst,
+      releaseSecond,
+      calls,
+    };
+  }
+  const acquisition = Effect.gen(acquire);
+  return acquisition;
 }
