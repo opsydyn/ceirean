@@ -21,6 +21,14 @@ hosting and execution appetite still require review.
       Local branch only, not merged/pushed; no durable/live qualification.
       The subsequent documentation closure was separately approved through
       `742a5df`; later docs-only corrections do not extend that reviewed range.
+- [x] Select `@xstate/effect` for controller-owned worker lifecycle actors, keeping
+      ledger authority, pure qualification, Bun and universal lint unchanged.
+      Direction only; no new packages or workers are installed.
+- [ ] Review the [worker lifecycle spec](superpowers/specs/2026-10-19-worker-lifecycle-design.md)
+      and [ADR-0002](decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md),
+      then approve a detailed implementation plan and execution method. First
+      qualify the exact alpha cohort and deliver an offline lifecycle tracer;
+      live Docker, durable storage and scaling guarantees remain separate.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.
 - [ ] Prove profile reuse with the postcode client rather than adding a second

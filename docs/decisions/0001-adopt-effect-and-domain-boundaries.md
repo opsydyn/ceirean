@@ -265,3 +265,9 @@ records the pinned cohort, strict source/vendor declaration policy, same-host
 completed-receipt restart and synthetic cancellation results. This does not close
 the production aggregate, real worker/model, active-job or host-loss verification
 items above, or authorise the next service slice.
+
+On 2026-10-19 the owner selected XState's Effect adapter for the local worker
+lifecycle. [Proposed ADR-0002](0002-adopt-xstate-effect-for-worker-lifecycle.md)
+records that narrow amendment for written review. It does not replace this
+record's application/domain ownership or approve another durable workflow engine,
+dependency installation, Docker execution or the broader service draft.

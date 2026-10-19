@@ -46,6 +46,9 @@ pull requests is not the success measure.
 - Keep the public Astro and Viz packages independent of service machinery.
 - Rust is parked pending a measured bottleneck and a separate decision.
 - Alchemy Domain and additional workflow engines are deferred for the pilot.
+- The owner selected `@xstate/effect` for local worker lifecycle orchestration,
+  not another durable coordinator. The new written spec and ADR-0002 await review;
+  no XState dependency or worker implementation is installed yet.
 - No automatic merge, package release or deployment.
 
 ## Proposed First Slice
@@ -118,6 +121,13 @@ fixture, Flue/Effect tool loop, same-host completed-receipt restart and syntheti
 cancellation semantics are tested. Real providers, containers and production
 architecture remain unqualified.
 
+[ADR-0002 Adopt XState Effect for worker lifecycle](docs/decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md)
+
+Status: proposed written record of the owner-selected direction, 2026-10-19.
+It narrows the additional-engine deferral to allow an Effect-hosted local worker
+statechart, retaining the ledger as durable authority. Written review and an
+implementation plan precede installation; compatibility remains unqualified.
+
 ## First Implementation Plan
 
 [Bun Effect Flue Compatibility](docs/superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
@@ -144,6 +154,16 @@ controller results are recorded in the measured assessment. Real providers,
 workers, durable application storage and publication stay outside this slice.
 The subsequent documentation closure was separately approved through `742a5df`;
 later docs-only corrections do not extend that reviewed range.
+
+## Worker Lifecycle Design
+
+The next design is
+[Worker Ownership And XState Effect Lifecycle](docs/superpowers/specs/2026-10-19-worker-lifecycle-design.md).
+Ownership and lifecycle boundaries were approved conversationally; this written
+spec awaits review. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
+and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The first planned
+implementation is an offline actor/journal tracer, not Docker or durable recovery.
+No detailed implementation plan, execution approval or package install exists yet.
 
 ## Monorepo Layout
 
