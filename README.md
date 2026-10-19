@@ -18,7 +18,9 @@ The synthetic qualification-gate tracer is implemented and locally verified:
 119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
 Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect
 races use a test-only in-memory repository, not a durable application adapter.
-Task 4 and whole-branch controller reviews remain pending.
+Task 4 Step 7 is complete: the whole-branch review is clean through `e7d9d25`,
+and the controller independently passed all nine acceptance commands at that head.
+This remains local-only on `codex/qualification-gate`, not merged to main or pushed.
 
 [Measured qualification-gate evidence](docs/assessments/qualification-gate.md)
 records the exact tested-code commit, lock identities, gates and exclusions.
@@ -135,10 +137,12 @@ The qualification-gate written spec is approved, with property-based domain test
 preferred using Effect's built-in Arbitrary support and inferred port contracts
 preserving the universal lint policy. The
 [implementation plan](docs/superpowers/plans/2026-10-18-qualification-gate.md)
-was executed through Task 4 Steps 1-6 in the existing qualification-gate worktree.
-Private domain and engine packages now implement the synthetic tracer. Task 4's
-controller review and the whole-branch review (Step 7) remain pending. Real
-providers, workers, durable application storage and publication stay outside this slice.
+was executed through Task 4 Step 7 in the existing qualification-gate worktree.
+Private domain and engine packages implement the synthetic tracer. The review of
+`6809192..e7d9d25` found no actionable issues; the exact range and independent
+controller results are recorded in the measured assessment. Real providers,
+workers, durable application storage and publication stay outside this slice.
+The controller's scoped review of this documentation closure is still separate.
 
 ## Monorepo Layout
 

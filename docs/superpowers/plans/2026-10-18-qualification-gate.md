@@ -10,7 +10,7 @@
 
 **Spec:** [Qualification Gate Tracer](../specs/2026-10-18-qualification-gate-design.md), owner-approved on 2026-10-18. Read both documents before implementation.
 
-**Status:** Written plan pending owner review and execution-method selection. This commit changes documentation only. The owner explicitly rejected a lint exception: `no-manual-effect-channels` remains universal.
+**Status, 2026-10-19:** Synthetic tracer implemented; Task 4 Step 7 review complete and clean through `e7d9d25ade69f5351d9ad64336afbea81c0cd293`, with all nine independent controller acceptance commands passing. Local-only on `codex/qualification-gate`; main remains `68091929c8fd6414351194ddd8f196a584c5303b`, not merged/pushed. This documentation closure receives a separate scoped controller review. The owner explicitly rejected a lint exception: `no-manual-effect-channels` remains universal.
 
 ## Global Constraints
 
@@ -157,11 +157,16 @@ Also assert the exact accepted state identity/limits, one complete RunQualified 
 
 ## Task 4: Coordinator, Controlled Races And Evidence
 
-Measured status, 2026-10-19: Steps 1-6 implemented and locally verified against
+Measured status, 2026-10-19: Steps 1-7 complete for the approved synthetic scope.
+Implementation was locally verified against
 code commit `3cda115a2d0ade81a2faecceed42dfa64deb82ee`. See the
 [assessment](../../assessments/qualification-gate.md) for lock identity and measured
-gates. Task 4 controller review and whole-branch review remain pending; Step 7 is
-not complete. Synthetic tests do not qualify durable/live infrastructure.
+gates. The clean whole-branch review covers
+`68091929c8fd6414351194ddd8f196a584c5303b..e7d9d25ade69f5351d9ad64336afbea81c0cd293`;
+the controller independently passed all nine gates at that head: 210 tests,
+712 assertions, 93,000 primary cases, all 141 Effect rules at error and unchanged
+external dependency cohort. No findings are parked. This remains a local branch,
+not merged/pushed; synthetic tests do not qualify durable/live infrastructure.
 
 **Files:** Create `packages/engine/src/run-coordinator.ts`, `tests/{run-coordinator.test.ts,qualification-races.test.ts}`, and `docs/assessments/qualification-gate.md`. Extend `src/index.ts` and test fixtures. Update README, roadmap and this plan's checkboxes only to reflect measured implementation/review progress.
 
@@ -190,7 +195,7 @@ git diff --check
 All commands must exit 0; no skipped suite/cache replay counts as evidence. Record actual discovered test counts and each property's seeded evaluation totals, diagnostics/replay checks and mutation controls. Assert no manual-channel declaration or rule exception was introduced, no source-to-tests dependency exists, and no live adapter/publication capability was added. Compare lockfile cohort and source diff against the approved task scope.
 
 - [x] **Step 6: Write the measured report and commit.** Report versions, commands, observed counts, gate outcomes and exact candidate commit/lock identities in `docs/assessments/qualification-gate.md`. Distinguish property laws, synthetic Effect interleavings and native-boundary unit tests from real workers, provider cancellation, SQLite durability and production qualification. Keep those external guarantees unqualified. Commit `feat: coordinate race-safe qualification with synthetic evidence` after all checks pass.
-- [ ] **Step 7: Obtain the whole-branch review.** A fresh reviewer checks the approved spec, all four task interfaces and the complete diff, with emphasis on receipt authority, optimistic concurrency, typed failures, invariant coverage and non-vacuous properties. Resolve findings, rerun affected/full gates and commit fixes before presenting integration choices. Do not auto-merge or push.
+- [x] **Step 7: Obtain the whole-branch review.** A fresh reviewer checks the approved spec, all four task interfaces and the complete diff, with emphasis on receipt authority, optimistic concurrency, typed failures, invariant coverage and non-vacuous properties. Resolve findings, rerun affected/full gates and commit fixes before presenting integration choices. Do not auto-merge or push.
 
 ## Self-Review And Handoff
 
@@ -198,4 +203,4 @@ Spec coverage: evidence identity/completeness and generator integrity belong to 
 
 The owner-approved universal lint rule is preserved through real factory inference; no policy decision is deferred to the executor. If that design cannot satisfy strict types and lint without a semantic compromise, stop and show the concrete failure rather than introducing an exception or dummy service. The same stop rule applies to new vendor declaration errors, unexpected dependency-cohort changes or needing live infrastructure.
 
-Before execution, the owner must review this written plan and choose an execution method. Recommend **subagent-driven** for the four independently reviewable contracts: mistakes here can falsely qualify a candidate, and a fresh gate at each boundary is useful. **Native** remains available for lower context overhead, with a final independent review. Approval of the spec does not authorise execution of this still-unreviewed plan.
+Historical pre-execution gate: owner review of this written plan and execution-method selection were required separately from spec approval. The original guidance recommended **subagent-driven** execution for four independently reviewable contracts, with **native** execution available and a final independent review. This is historical planning guidance, not a remaining approval gate; the measured completion and review status are recorded above.

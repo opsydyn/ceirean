@@ -1,7 +1,8 @@
 # Qualification Gate: Measured Synthetic Tracer
 
-Measured 2026-10-19. Task 4 implementation and local gates pass; controller Task 4
-and whole-branch reviews remain **pending**. Task 4 Step 7 is not complete.
+Measured 2026-10-19. Task 4 implementation and local gates pass; Task 4 Step 7 is
+complete with a clean whole-branch review through `e7d9d25` and all nine
+independent controller acceptance commands passing at that exact head.
 This is not production qualification or approval to integrate, publish or deploy.
 
 ## Exact Artifact
@@ -155,7 +156,11 @@ recorded separately in the local scratch report
 `.superpowers/sdd/2026-10-18-qualification-gate/task-4-report.md`, which preserves full
 outputs of both runs, RED/GREEN details and controlled-entry assertions. It is
 ignored coordination evidence, not a substitute for the durable identities here.
-Controller independent reruns/reviews remain pending.
+The controller subsequently reran all nine commands independently at
+`e7d9d25ade69f5351d9ad64336afbea81c0cd293`: the same 210 tests, 712 assertions
+and 93,000 primary cases passed, with 65 format matches, all 141 Effect rules at
+error and unchanged external dependency cohort. These are controller results,
+separate from the historical implementer gates preserved above.
 
 ## Property Budgets
 
@@ -231,12 +236,23 @@ storage, production upgrades, external cancellation or publication.
 
 Self-review covered all new files, changed exports/fixtures, authority detachment,
 inferred channels, original CAS, explicit entry barriers, no-retry counts and
-restored mutations. No outstanding self-review issues. Tasks 1-3 were handed
-back reviewed at the predecessor; this document does not assert the pending
-Task 4 or whole-branch controller review is complete. No merge or push performed.
+restored mutations. No outstanding self-review issues. Task 4 Step 7 is now
+complete: the fresh whole-branch review of
+`68091929c8fd6414351194ddd8f196a584c5303b..e7d9d25ade69f5351d9ad64336afbea81c0cd293`
+covered all eight commits, the approved spec/plan and all four task contracts.
+It found no actionable issues at any severity, with no parked/deferred findings.
+The exact reviewed head includes tested code
+`3cda115a2d0ade81a2faecceed42dfa64deb82ee`; the code and lock identities above
+are unchanged. The independent controller gate at the reviewed head passed all
+nine prescribed commands with the measured totals recorded above.
 
-Next bounded gate: controller independently reviews the Task 4 and complete
-branch diff against the [approved spec](../superpowers/specs/2026-10-18-qualification-gate-design.md)
-and [plan](../superpowers/plans/2026-10-18-qualification-gate.md), and reruns the
-full acceptance commands. Stop before integration choices until that review
-accepts the artifact or its findings are resolved and reverified.
+Review exclusions are accepted as the approved synthetic-only limits, not new
+proved capabilities or deferred defects; the Proof Boundaries above remain in force.
+
+The local review and controller execution records are `final-review.md` and
+`controller-gate.md` under `.superpowers/sdd/2026-10-18-qualification-gate/`.
+This closure changes documentation only on local `codex/qualification-gate`;
+main remains `68091929c8fd6414351194ddd8f196a584c5303b`. No merge, push,
+publication or deployment was performed or authorized by review acceptance.
+The controller owns one further scoped review of this documentation-only closure;
+that review is not claimed complete here. Integration remains owner-controlled.
