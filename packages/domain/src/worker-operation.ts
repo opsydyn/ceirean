@@ -205,7 +205,7 @@ function checkCompletion(
   }
   function* validateCompletion() {
     yield* requireCompletion(observation.resources.length <= 1, 'AmbiguousObservation');
-    yield* requireCompletion(observation.resources.length === 1, 'NotFound');
+    // Empty Remove readback is representable; the journal authorizes against the stored intent.
     yield* requireCompletion(sameSubject(reply, observation), 'IdentityMismatch');
     yield* requireCompletion(
       observation.resources.every(

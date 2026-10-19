@@ -174,6 +174,18 @@ function observations() {
 }
 test('refuses missing, multiple, foreign and running-only evidence', observations);
 
+function absenceIsNotReadiness() {
+  const c = makeWorkerCase();
+  const absence = { ...c.observation, resources: [], staging: 'Absent' as const };
+  expect(ready(c, absence)).toEqual(
+    Result.fail({ _tag: 'NotFound', operationId: c.operation.operationId }),
+  );
+}
+test(
+  'absence representable in a completion envelope never establishes readiness',
+  absenceIsNotReadiness,
+);
+
 function invalidTime(time: number) {
   const c = makeWorkerCase();
   expect(ready(c, c.observation, time)).toEqual(

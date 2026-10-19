@@ -5,6 +5,8 @@ import { Result, Schema } from 'effect';
 import {
   WorkerCleanup,
   WorkerIntent,
+  WorkerIntentId,
+  WorkerMutationReply,
   WorkerRefusal,
   decodeWorkerMutationReply,
   decodeWorkerObservation,
@@ -91,7 +93,6 @@ test('rejects malformed digests and duplicate mount targets or capabilities', in
 function completionEvidence() {
   const c = makeWorkerCase();
   for (const observation of [
-    { ...c.observation, resources: [] },
     { ...c.observation, resources: [c.resource, c.resource] },
     { ...c.observation, hostId: 'foreign' },
     { ...c.observation, resources: [{ ...c.resource, operationId: 'foreign' }] },
@@ -109,7 +110,60 @@ function completionEvidence() {
     'Failure',
   );
 }
-test('completion requires nonempty unambiguous matching controller evidence', completionEvidence);
+test('completion requires unambiguous matching controller evidence', completionEvidence);
+
+function removeCompletionRepresentation() {
+  const c = makeWorkerCase();
+  const intent = WorkerIntent.make({
+    intentId: WorkerIntentId.make('intent-remove-1'),
+    operationId: c.operation.operationId,
+    issuerId: c.reply.issuerId,
+    kind: 'Remove',
+    resource: c.containerId,
+    claimedAtMs: 1000,
+    outcome: { _tag: 'Claimed' },
+  });
+  const reply = WorkerMutationReply.make({
+    ...c.reply,
+    intentId: intent.intentId,
+    issuerId: intent.issuerId,
+    atMs: 1001,
+    outcome: {
+      _tag: 'Completed',
+      observation: { ...c.observation, atMs: 1001, resources: [], staging: 'Absent' },
+    },
+  });
+  // Representation only: the journal must authorize against its stored Remove intent and exact ID.
+  expect(decodeWorkerMutationReply(reply)).toEqual(Result.succeed(reply));
+}
+test(
+  'generic decoder accepts bound Remove absence envelope; stored journal intent must authorize action',
+  removeCompletionRepresentation,
+);
+
+function invalidAbsenceCompletion() {
+  const c = makeWorkerCase();
+  const absence = { ...c.observation, resources: [] };
+  for (const observation of [
+    { ...absence, resources: null },
+    { ...absence, resources: [{ running: false }] },
+    { ...absence, hostId: 'foreign' },
+    { ...absence, daemonId: 'foreign' },
+    { ...absence, operationId: 'foreign' },
+    { ...absence, identity: { ...absence.identity, generation: 4 } },
+    { ...absence, atMs: 1000 },
+    { ...absence, atMs: NaN },
+  ]) {
+    expect(
+      decodeWorkerMutationReply({ ...c.reply, outcome: { _tag: 'Completed', observation } })._tag,
+    ).toBe('Failure');
+  }
+  expect(decodeWorkerMutationReply(absence)._tag).toBe('Failure');
+}
+test(
+  'empty completion preserves malformed, foreign and time refusals; observation alone is not a reply',
+  invalidAbsenceCompletion,
+);
 
 function sanitizedReasons() {
   const c = makeWorkerCase();
@@ -193,10 +247,14 @@ function immutableDecoding() {
   decodeWorkerOperation(c.operation);
   decodeWorkerObservation(c.observation);
   decodeWorkerMutationReply(c.reply);
-  decodeWorkerMutationReply({
+  const refused = decodeWorkerMutationReply({
     ...c.reply,
-    outcome: { _tag: 'Completed', observation: { ...c.observation, resources: [] } },
+    outcome: {
+      _tag: 'Completed',
+      observation: { ...c.observation, resources: [c.resource, c.resource] },
+    },
   });
+  expect(refused._tag).toBe('Failure');
   expect(c).toEqual(before);
 }
 test('decoding and refused completion leave caller inputs unchanged', immutableDecoding);
