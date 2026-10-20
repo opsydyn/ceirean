@@ -1,4 +1,5 @@
 import { AdmissionDraft, AuthorityAvailable, Digest, VerifiedCommand } from '@leviathan/domain';
+import { Schema } from 'effect';
 
 export function authorityFixture() {
   return {
@@ -16,6 +17,43 @@ export function authorityFixture() {
       policyRevision: 'policy-1',
       observedAtMs: 900,
       validUntilMs: 2000,
+    }),
+  };
+}
+
+export async function signedCommandFixture(deliveryId: string) {
+  const fixture = { secret: 'synthetic-restart-secret' };
+  const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
+  const body = encode({
+    action: 'created',
+    installation: { id: 11 },
+    repository: { id: 22, name: 'repository', owner: { id: 33, login: 'owner' } },
+    issue: { id: 44, number: 1 },
+    comment: { id: 55, body: '/leviathan assess', user: { id: 66, type: 'User' } },
+    sender: { id: 66, type: 'User' },
+  });
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(fixture.secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const digest = new Uint8Array(
+    await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body)),
+  );
+  const signature = Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return {
+    secret: fixture.secret,
+    request: new Request('http://leviathan.invalid/webhook', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-github-event': 'issue_comment',
+        'x-github-delivery': deliveryId,
+        'x-hub-signature-256': `sha256=${signature}`,
+      },
+      body,
     }),
   };
 }

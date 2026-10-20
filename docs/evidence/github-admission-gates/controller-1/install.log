@@ -1,0 +1,8 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" bun install --frozen-lockfile --ignore-scripts
+bun install v1.4.2 (744846f84)
+Resolving dependencies
+Resolved, downloaded and extracted [2]
+
+Checked 207 installs across 260 packages (no changes) [30.00ms]
+
+Exit: 0

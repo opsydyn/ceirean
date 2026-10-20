@@ -1,0 +1,81 @@
+bun test v1.4.2 (744846f84)
+
+tests/restart.test.ts:
+49 | }
+50 | test('committed lost response survives process kill', () => withProcesses(committed));
+51 | async function uncommitted(file: string, own: Own) {
+52 |   const writer = own('uncommitted');
+53 |   expect((await phase(writer)).phase).toBe('AfterDecision');
+54 |   expect(counts(file)).toEqual([0, 0]);
+     ^
+error: expect(received).toEqual(expected)
+
+  [
+-   0,
++   1,
+    0,
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at toEqual (unknown:1:1)
+      at uncommitted (/private/tmp/leviathan-compatibility/probes/github-admission/tests/restart.test.ts:54:24)
+(fail) uncommitted kill leaves no partial admission [181.78ms]
+
+tests/sqlite-inbox.test.ts:
+(pass) rollback at BeforeRecord leaves no partial rows or floor updates [10.18ms]
+2561 | /** @internal */
+2562 | export const runSyncWith = context => {
+2563 |   const runSyncExit = runSyncExitWith(context);
+2564 |   return effect => {
+2565 |     const exit = runSyncExit(effect);
+2566 |     if (exit._tag === "Failure") throw causeSquash(exit.cause);
+                                                                    ^
+error: expect(received).toEqual(expected)
+
+  {
+    "clock_floor": 0,
+-   "decisions": 0,
++   "decisions": 1,
+    "receipts": 0,
+    "revision": "authority-1",
+  }
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:2566:62)
+      at rollback (/private/tmp/leviathan-compatibility/probes/github-admission/tests/sqlite-inbox.test.ts:202:10)
+(fail) rollback at AfterDecision leaves no partial rows or floor updates [6.87ms]
+2561 | /** @internal */
+2562 | export const runSyncWith = context => {
+2563 |   const runSyncExit = runSyncExitWith(context);
+2564 |   return effect => {
+2565 |     const exit = runSyncExit(effect);
+2566 |     if (exit._tag === "Failure") throw causeSquash(exit.cause);
+                                                                    ^
+error: expect(received).toEqual(expected)
+
+  {
+-   "clock_floor": 0,
+-   "decisions": 0,
+-   "receipts": 0,
++   "clock_floor": 1000,
++   "decisions": 1,
++   "receipts": 1,
+    "revision": "authority-1",
+  }
+
+- Expected  - 3
++ Received  + 3
+
+      at <anonymous> (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:2566:62)
+      at rollback (/private/tmp/leviathan-compatibility/probes/github-admission/tests/sqlite-inbox.test.ts:202:10)
+(fail) rollback at BeforeCommit leaves no partial rows or floor updates [5.19ms]
+
+ 1 pass
+ 32 filtered out
+ 3 fail
+ 9 expect() calls
+Ran 4 tests across 2 files. [268.00ms]

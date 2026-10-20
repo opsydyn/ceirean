@@ -1,0 +1,10 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" moon run engine:typecheck --force --no-actions
+▮▮▮▮ engine:typecheck (0f45bfaa)
+$ tsc --noEmit
+▮▮▮▮ engine:typecheck (1s 606ms, 0f45bfaa)
+
+Tasks: 1 completed
+ Time: 1s 623ms
+
+
+Exit: 0

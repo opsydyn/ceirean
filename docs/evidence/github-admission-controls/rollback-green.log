@@ -1,0 +1,15 @@
+bun test v1.4.2 (744846f84)
+
+tests/restart.test.ts:
+(pass) uncommitted kill leaves no partial admission [490.78ms]
+
+tests/sqlite-inbox.test.ts:
+(pass) rollback at BeforeRecord leaves no partial rows or floor updates [7.87ms]
+(pass) rollback at AfterDecision leaves no partial rows or floor updates [6.53ms]
+(pass) rollback at BeforeCommit leaves no partial rows or floor updates [5.09ms]
+
+ 4 pass
+ 32 filtered out
+ 0 fail
+ 20 expect() calls
+Ran 4 tests across 2 files. [573.00ms]

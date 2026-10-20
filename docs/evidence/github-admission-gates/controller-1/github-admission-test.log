@@ -1,0 +1,171 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" moon run github-admission:test --force --no-actions
+▮▮▮▮ github-admission:test (08c8c2b6)
+bun test v1.4.2 (744846f84)
+
+tests/restart-process.test.ts:
+
+tests/composition.test.ts:
+(pass) one runtime and native handle are acquired once and disposed once; late calls fail [10.71ms]
+(pass) acquisition and initialization cleanup failures retain sanitized primary and teardown evidence [3.25ms]
+(pass) dispose failure stays observable and idempotent without raw exception text [4.71ms]
+
+tests/github-ingress.test.ts:
+(pass) signed authorised command persists one preview [15.77ms]
+(pass) tampered bytes never call admission [7.12ms]
+(pass) renamed replay is historical [13.87ms]
+(pass) revoked new comment cannot admit [13.69ms]
+(pass) unsafe id cannot reach admission [7.57ms]
+(pass) zero id cannot reach admission [4.78ms]
+(pass) author mismatch cannot reach admission [4.94ms]
+(pass) bot sender cannot reach admission [4.11ms]
+(pass) bot author cannot reach admission [4.14ms]
+(pass) edited action cannot reach admission [6.77ms]
+(pass) oversize comment cannot reach admission [5.42ms]
+(pass) oversize display cannot reach admission [4.38ms]
+(pass) control display cannot reach admission [5.94ms]
+(pass) exact command variant  /leviathan assess is ignored [5.29ms]
+(pass) exact command variant /leviathan assess
+ is ignored [4.77ms]
+(pass) exact command variant /leviathan assess extra is ignored [4.76ms]
+(pass) exact command variant /Leviathan assess is ignored [4.73ms]
+(pass) exact command variant `/leviathan assess` is ignored [4.50ms]
+(pass) exact command variant > /leviathan assess is ignored [4.18ms]
+(pass) exact command variant private ordinary conversation is ignored [5.35ms]
+(pass) header x-hub-signature-256= returns 401 [4.16ms]
+(pass) header x-hub-signature-256=sha256=00 returns 401 [4.09ms]
+(pass) header x-github-delivery= returns 400 [3.77ms]
+(pass) header x-github-event= returns 400 [3.93ms]
+(pass) header x-github-delivery=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx returns 413 [3.52ms]
+(pass) header x-github-event=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx returns 413 [3.31ms]
+(pass) header content-type=text/plain returns 415 [3.29ms]
+(pass) header content-length=not-numeric returns 400 [3.12ms]
+(pass) header content-length=65537 returns 413 [3.54ms]
+(pass) unsupported event ping is explicitly ignored [3.54ms]
+(pass) unsupported event issues is explicitly ignored [3.67ms]
+(pass) unsupported event push is explicitly ignored [3.29ms]
+(pass) malformed native payload { [4.62ms]
+(pass) malformed native payload null [4.05ms]
+(pass) malformed native payload [] [3.52ms]
+(pass) malformed native payload 42 [3.89ms]
+(pass) malformed native payload {} [3.88ms]
+(pass) invalid UTF8 cannot be repaired by SDK replacement decoding [5.51ms]
+(pass) ordinary issue gate excludes pull request comments [4.21ms]
+(pass) same delivery with changed bytes conflicts without overwrite [11.40ms]
+(pass) capacity refuses new work while identical delivery remains historical [7.09ms]
+(pass) native transaction failure never acknowledges partial recording [4.72ms]
+(pass) exclusive authority expiry records refusal rather than admission [4.75ms]
+(pass) interleaved captured bodies keep delivery digest and command identity request-local [10.85ms]
+(pass) abort after synchronous commit cannot undo or deny the committed request [7.19ms]
+(pass) abort during ingress capture cancels without admission [4.52ms]
+(pass) streamed overflow through application never enters admission [4.56ms]
+(pass) thrown admission callback yields sanitized 503 without SDK error logging [4.20ms]
+(pass) rows responses and logs omit secrets signatures raw conversation and exception text [5.29ms]
+(pass) denied operator records business refusal [4.06ms]
+(pass) wrong repository records business refusal [3.74ms]
+(pass) wrong owner records business refusal [4.25ms]
+(pass) wrong installation records business refusal [3.96ms]
+(pass) future authority records business refusal [4.15ms]
+(pass) unavailable trusted authority cannot admit [4.31ms]
+(pass) profile Disabled cannot admit [4.43ms]
+(pass) profile Unknown cannot admit [7.65ms]
+(pass) authority revision changed between observation and commit refuses stale preview [6.70ms]
+(pass) signed exact 65536-byte original body remains admissible [4.70ms]
+(pass) stream read rejection through application does not admit or leak raw exception [3.95ms]
+(pass) application disposal interrupts pending capture and releases owned reader [3.60ms]
+(pass) disposal owns reader until held asynchronous cancellation settles: resolve [3.66ms]
+(pass) disposal owns reader until held asynchronous cancellation settles: reject [3.87ms]
+(pass) SDK operational exception is sanitized without default error logging [3.81ms]
+(pass) application snapshots trusted config and callable identities at construction [3.97ms]
+
+tests/compatibility.test.ts:
+(pass) signed request reaches the real channel callback once [0.30ms]
+(pass) invalid and missing signatures never reach the callback [0.19ms]
+(pass) byte tampering fails verification [0.11ms]
+(pass) ping is handled internally [0.12ms]
+(pass) callback throw does not become accepted application success [0.72ms]
+(pass) callback reject does not become accepted application success [0.12ms]
+(pass) whitespace-bearing signed bytes preserve parsed payload and metadata [0.10ms]
+(pass) body limit refuses oversized signed bytes before the callback [0.12ms]
+
+tests/restart.test.ts:
+(pass) committed lost response survives process kill [455.31ms]
+(pass) uncommitted kill leaves no partial admission [454.96ms]
+(pass) reader refuses missing database without creating recovered success [170.17ms]
+(pass) reader refuses corrupt database without creating recovered success [156.92ms]
+(pass) reader retains revoked authority rather than seeding granted fixture [175.37ms]
+
+tests/github-payload.test.ts:
+(pass) normalization is a detached runtime-validated pure Result [0.30ms]
+(pass) invalid native id %s cannot construct identity [0.10ms]
+(pass) invalid native id %s cannot construct identity [0.04ms]
+(pass) invalid native id %s cannot construct identity [0.03ms]
+(pass) invalid native id %s cannot construct identity [0.03ms]
+(pass) invalid native id %s cannot construct identity [0.03ms]
+(pass) invalid native id %s cannot construct identity [0.03ms]
+(pass) missing native structure 0 is rejected without operational failure [0.04ms]
+(pass) missing native structure 1 is rejected without operational failure [0.04ms]
+(pass) missing native structure 2 is rejected without operational failure [0.02ms]
+(pass) missing native structure 3 is rejected without operational failure [0.04ms]
+(pass) runtime receipt event cannot disagree with verified command event [0.05ms]
+
+tests/sqlite-inbox.test.ts:
+(pass) record once; duplicate original survives reopen and returns detached schema-valid record [5.95ms]
+(pass) conflicting delivery cannot overwrite and names alone preserve historical original [5.11ms]
+(pass) stale authority cannot commit; used revisions cannot restore authority [4.18ms]
+(pass) rollback at BeforeRecord leaves no partial rows or floor updates [3.60ms]
+(pass) rollback at AfterDecision leaves no partial rows or floor updates [4.08ms]
+(pass) rollback at BeforeCommit leaves no partial rows or floor updates [3.08ms]
+(pass) two native connections contend inside a transaction; deliberate retry converges to the original [4.03ms]
+(pass) post-commit reply loss retains original across native reopen [4.51ms]
+(pass) native 256 decision / 1024 receipt capacities preserve originals without eviction [220.61ms]
+(pass) revision history capacity never evicts and idempotency survives saturation [37.37ms]
+(pass) persisted floor, rollback, nonfinite clock and exclusive expiry refuse fresh previews [14.27ms]
+(pass) no initial fixture has unavailable authority and another scope cannot inherit it [4.72ms]
+(pass) missing create:false and corrupt files are visible failures [0.89ms]
+(pass) invalid stored record schema refuses historical evidence without leaking stored text [4.83ms]
+(pass) native WAL is persistent and receipt foreign key constraints reject orphan rows [4.01ms]
+(pass) different digest under identical delivery cannot replace original receipt [4.26ms]
+(pass) initialization plus close failure preserves both sanitized causes [1.47ms]
+(pass) adapter handle has actual WAL/FULL/FK/zero-timeout values and caller scope closes it [3.66ms]
+(pass) failed initialization closes its native handle before returning to an open caller scope [1.04ms]
+(pass) synthetic Close fault remains visible but actual native handle is closed [3.46ms]
+(pass) prior rejection stays historical after authority change while a new comment may admit [4.72ms]
+(pass) stale expected install, changed same revision and cross-scope snapshot cannot replace authority [4.46ms]
+(pass) native reopen preserves floor even when draft evaluation is also rolled back [5.47ms]
+(pass) native current policy rejects forged preview and changed candidate without relabeling a fresh record [4.14ms]
+(pass) reopening an existing database cannot reseed deleted authority from a new fixture [5.60ms]
+(pass) schema-valid receipt with inconsistent immutable facts cannot become historical evidence [4.42ms]
+(pass) external native write lock is explicit Busy with no partial rows and no automatic retry [4.85ms]
+(pass) persisted fields are normalized and detached from caller extras and later mutation [4.62ms]
+(pass) caller config mutation cannot raise the acquired decision capacity [4.19ms]
+(pass) caller config mutation cannot retarget the acquired authority scope [4.09ms]
+(pass) construction snapshots initial authority and callable identities before acquisition runs [4.11ms]
+
+tests/native-files.test.ts:
+
+tests/report.test.ts:
+(pass) report refuses any missing or nonzero gate [1.85ms]
+(pass) report separates local persistence from production durability [0.21ms]
+(pass) report refuses unvalidated laws, identity gaps, split cohort and unrestored controls [0.61ms]
+(pass) report refuses contradictory source, test and gate attribution [0.39ms]
+(pass) restart result rejects malformed decision identities and non-recording dispositions [0.07ms]
+
+tests/request-body.test.ts:
+(pass) exact byte limit hashes original bytes and releases lock [0.64ms]
+(pass) streamed overflow cancels and releases reader [0.17ms]
+(pass) stream rejection is sanitized and reader lock released [0.15ms]
+(pass) abort during pending read cancels and releases reader [0.09ms]
+(pass) digest failure is sanitized after releasing body reader [0.18ms]
+(pass) rejecting cancellation releases lock and preserves sanitized primary and cleanup failures [0.41ms]
+
+ 135 pass
+ 0 fail
+ 1828 expect() calls
+Ran 135 tests across 10 files. [2.34s]
+▮▮▮▮ github-admission:test (2s 381ms, 08c8c2b6)
+
+Tasks: 1 completed
+ Time: 2s 402ms
+
+
+Exit: 0

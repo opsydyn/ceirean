@@ -1,0 +1,52 @@
+bun test v1.4.2 (744846f84)
+
+tests/github-ingress.test.ts:
+113 |   const close = spyOn(Database.prototype, 'close');
+114 |   const { app, file } = await opened();
+115 |   const response = await app.fetch(await signed());
+116 |   expect(response.status).toBe(200);
+117 |   const reply = Schema.decodeUnknownSync(AdmissionReply)(await response.json());
+118 |   expect(reply).toMatchObject({
+                      ^
+error: expect(received).toMatchObject(expected)
+
+  {
+    "_tag": "Recorded",
+    "record": {
++     "authorityRevision": "authority-1",
++     "candidate": {
++       "command": "Assess",
++       "commentId": 55,
++       "ingressScopeId": "fixture-app",
++       "installationId": 11,
++       "issueId": 44,
++       "issueNumber": 1,
++       "operatorId": 66,
++       "ownerId": 33,
++       "ownerLogin": "owner",
++       "repositoryId": 22,
++       "repositoryName": "repository",
++     },
++     "commandKey": "[11,22,55]",
++     "committedAtMs": 1000,
+      "decision": {
+-       "_tag": "AdmittedPreview",
++       "_tag": "Rejected",
++       "reason": "AccessRevoked",
+      },
++     "decisionId": "1",
++     "evaluatedAtMs": 1000,
+    },
+  }
+
+- Expected  - 1
++ Received  + 20
+
+      at authorised (/private/tmp/leviathan-compatibility/probes/github-admission/tests/github-ingress.test.ts:118:17)
+(fail) signed authorised command persists one preview [44.33ms]
+
+ 0 pass
+ 64 filtered out
+ 1 fail
+ 3 expect() calls
+Ran 1 test across 1 file. [283.00ms]

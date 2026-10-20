@@ -1,0 +1,10 @@
+bun test v1.4.2 (744846f84)
+
+tests/sqlite-inbox.test.ts:
+(pass) stale authority cannot commit; used revisions cannot restore authority [12.13ms]
+
+ 1 pass
+ 30 filtered out
+ 0 fail
+ 5 expect() calls
+Ran 1 test across 1 file. [75.00ms]

@@ -1,0 +1,10 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" moon run domain:typecheck --force --no-actions
+▮▮▮▮ domain:typecheck (7e5b190f)
+$ tsc --noEmit
+▮▮▮▮ domain:typecheck (520ms, 7e5b190f)
+
+Tasks: 1 completed
+ Time: 539ms
+
+
+Exit: 0

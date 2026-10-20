@@ -1,0 +1,83 @@
+{
+  "scope": "pinned-public-npm-artifacts-and-local-cohort",
+  "registryAccess": "tooling-audit-only-not-harness-runtime",
+  "lockSha256": "a03b2f20874301814ba165f945b3fa55df5f20023f29ba5b873f3d16537cadc3",
+  "artifacts": [
+    {
+      "name": "@flue/github",
+      "version": "2.3.0",
+      "registryIntegrity": "sha512-YMhbDT8P3xt3ilO3OI9xOebiitTqy1z5kdLEL+1MB6mdGeYiGO1aEkjQPK1pmSK1hN6HAQNNpcOGZWJ/hhXpDg==",
+      "fetchedIntegrity": "sha512-YMhbDT8P3xt3ilO3OI9xOebiitTqy1z5kdLEL+1MB6mdGeYiGO1aEkjQPK1pmSK1hN6HAQNNpcOGZWJ/hhXpDg==",
+      "exportsSha256": "daf4eddbbcd7b60c8189c75a30e13496477dba31d6164fd64ca5f81852180171",
+      "entrySha256": "526cb85d72f4e9a7e947444d62c4206f56b88e30b20d1efaec2935d78440b597",
+      "tarballBytes": 8861,
+      "exportsHashBasis": "JSON.stringify tarball package.json exports in published key order"
+    },
+    {
+      "name": "@flue/runtime",
+      "version": "2.3.0",
+      "registryIntegrity": "sha512-Sb3Dix9PArIzwr7lmAZCr2csU7OUMHsEhIqYKCiqgldyt33u23k59CNoD947MLXpBaWXAz6CEd/Xv1LLI0cHYg==",
+      "fetchedIntegrity": "sha512-Sb3Dix9PArIzwr7lmAZCr2csU7OUMHsEhIqYKCiqgldyt33u23k59CNoD947MLXpBaWXAz6CEd/Xv1LLI0cHYg==",
+      "exportsSha256": "df50a89d1bec012d5a55aad9eeea843f21db966ba6b0601dad30eadbd6557bf4",
+      "entrySha256": "67ced81aec33762ed6f7111cdab6dcace78548c062f2401a03114f5e91527907",
+      "tarballBytes": 758003,
+      "exportsHashBasis": "JSON.stringify tarball package.json exports in published key order"
+    }
+  ],
+  "patches": [
+    {
+      "path": "patches/@flue%2Fruntime@2.3.0.patch",
+      "sha256": "07d115c8c98bea3c28011afe76e838a89a5126b2f401bad1091af678c008931a"
+    },
+    {
+      "path": "patches/gaxios@7.3.1.patch",
+      "sha256": "7ea7b1f29d158ab1595b71f798b71c9c44249ae29567b12dcf6d5d7e35239e3e"
+    }
+  ],
+  "toolchain": {
+    "bun": "1.4.2",
+    "moon": "2.5.4",
+    "node": "24.15.0",
+    "nodeRole": "tooling-only",
+    "typescript": "7.0.2",
+    "bunTypes": "1.4.2",
+    "oxlint": "1.88.0",
+    "oxfmt": "0.73.0",
+    "effectPlugin": "2.0.1",
+    "xstate": "6.0.0-alpha.64",
+    "xstateEffect": "0.1.0-alpha.6",
+    "basis": "tool-version-commands-and-installed-package-list"
+  },
+  "cohort": {
+    "effectVersion": "4.0.5",
+    "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+    "physicalEffectPaths": [
+      "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+    ],
+    "consumers": [
+      {
+        "name": "packages/domain",
+        "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+      },
+      {
+        "name": "packages/engine",
+        "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+      },
+      {
+        "name": "probes/bun-effect-flue",
+        "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+      },
+      {
+        "name": "probes/github-admission",
+        "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+      }
+    ],
+    "effectRules": 141
+  },
+  "limits": [
+    "not-npm-signature-attestation",
+    "not-cold-cache-install",
+    "patched-declarations-remain-required",
+    "not-live-github-or-production-qualification"
+  ]
+}

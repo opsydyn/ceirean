@@ -1,0 +1,10 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" moon run probe:typecheck --force --no-actions
+▮▮▮▮ probe:typecheck (cb0ca193)
+$ tsc --noEmit
+▮▮▮▮ probe:typecheck (145ms, cb0ca193)
+
+Tasks: 1 completed
+ Time: 162ms
+
+
+Exit: 0

@@ -1,0 +1,9 @@
+bun test v1.4.2 (744846f84)
+
+tests/command-properties.test.ts:
+(pass) law: rename invariance preserves admission and keys [283.82ms]
+
+ 1 pass
+ 5 filtered out
+ 0 fail
+Ran 1 test across 1 file. [328.00ms]

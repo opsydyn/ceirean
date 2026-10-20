@@ -1,0 +1,65 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" moon run probe:test --force --no-actions
+▮▮▮▮ probe:test (0401e1b0)
+bun test v1.4.2 (744846f84)
+
+tests/protocol.test.ts:
+(pass) checkpoint codec preserves receipt and fixed limits [0.92ms]
+(pass) restart codec preserves the completed reply without new provider work [0.10ms]
+(pass) cancellation codec preserves late rejection and cleanup evidence [0.21ms]
+(pass) protocol decoders reject malformed evidence instead of trusting JSON shape [0.30ms]
+
+tests/fixture.test.ts:
+(pass) refuses verification before freeze [0.04ms]
+(pass) refuses changed digest
+(pass) refuses a late generation
+(pass) cancelled state rejects verification
+(pass) does not mutate rejected state [0.01ms]
+(pass) pending can freeze and verify the same digest while preserving limits [0.01ms]
+(pass) cancellation is allowed only before verification [0.03ms]
+
+tests/ledger.test.ts:
+(pass) initialization failure at statement 1 closes the database [3.81ms]
+(pass) initialization failure at statement 2 closes the database [0.23ms]
+(pass) initialization failure at statement 3 closes the database [0.09ms]
+(pass) successful ledger stays usable until explicit idempotent close [1.07ms]
+(pass) explicit close reports a cleanup failure [0.23ms]
+(pass) initialization and cleanup failures are both reported [0.53ms]
+
+tests/restart.test.ts:
+(pass) completed receipt and limits survive process death [378.59ms]
+(pass) absent application row fails instead of resetting limits [163.60ms]
+
+tests/flue.test.ts:
+(pass) two tool calls share one recorder [37.11ms]
+(pass) faux-only startup ignores ambient credentials [12.98ms]
+(pass) unknown provider fails closed [3.01ms]
+(pass) stop then restart releases singleton ownership [26.26ms]
+(pass) tool failure is observed [12.15ms]
+(pass) callback after bridge disposal fails [0.21ms]
+(pass) startup failure remains visible with a sanitized cause [13.01ms]
+
+tests/cancellation.test.ts:
+(pass) read cancellation does not abort the submission [181.93ms]
+(pass) explicit abort settles synthetic work [183.19ms]
+(pass) late completion cannot advance cancelled fixture [186.22ms]
+
+tests/report.test.ts:
+(pass) missing phases cannot qualify compatibility [0.14ms]
+(pass) failed or unrun phases cannot qualify compatibility [0.03ms]
+(pass) duplicate and unknown phases are rejected [0.08ms]
+(pass) evidence-free and blank evidence cannot qualify compatibility [0.04ms]
+(pass) four evidenced passes remain offline only [0.02ms]
+(pass) startup failure remains visible rather than being promoted [0.03ms]
+(pass) report snapshots evidence instead of retaining mutable caller arrays [0.02ms]
+
+ 36 pass
+ 0 fail
+ 104 expect() calls
+Ran 36 tests across 7 files. [1380.00ms]
+▮▮▮▮ probe:test (1s 462ms, 0401e1b0)
+
+Tasks: 1 completed
+ Time: 1s 483ms
+
+
+Exit: 0

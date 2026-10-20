@@ -1,0 +1,30 @@
+bun test v1.4.2 (744846f84)
+
+tests/command-properties.test.ts:
+15 |   const diagnostic = Arbitrary.formatCheckFailure(result);
+16 |   return Match.value(result).pipe(
+17 |     Match.when({ _tag: 'Passed', runs: expectedRuns }, () => Result.succeed(undefined)),
+18 |     Match.orElse(() =>
+19 |       Result.fail(
+20 |         new LawFailure({
+             ^
+command rename invariance:
+       seed: 0,
+ diagnostic: "command rename invariance; seed 0; Effect 4.0.5\nProperty falsified after 1 run(s) and 3 shrink(s)\nShrunk input: {\n  \"candidate\": {\n    \"ingressScopeId\": \"scope-1\",\n    \"installationId\": 1,\n    \"repositoryId\": 2,\n    \"ownerId\": 3,\n    \"issueId\": 4,\n    \"issueNumber\": 5,\n    \"commentId\": 6,\n    \"operatorId\": 7,\n    \"command\": \"Assess\",\n    \"ownerLogin\": \"owner-1\",\n    \"repositoryName\": \"repo-1\"\n  },\n  \"authority\": {\n    \"_tag\": \"Available\",\n    \"revision\": \"authority-1\",\n    \"ingressScopeId\": \"scope-1\",\n    \"installationId\": 1,\n    \"repositoryId\": 2,\n    \"ownerId\": 3,\n    \"access\": \"Granted\",\n    \"profile\": {\n      \"_tag\": \"Enabled\",\n      \"profileId\": \"profile-1\",\n      \"profileRevision\": \"profile-revision-1\"\n    },\n    \"allowedOperatorIds\": [7],\n    \"policyRevision\": \"policy-1\",\n    \"observedAtMs\": 0,\n    \"validUntilMs\": 2\n  },\n  \"nowMs\": 1,\n  \"mutation\": 0\n}\nFailure: returned false\nReplay: [0,\"0\",0,0,[0,0,0],\"ReturnedFalse\"]",
+       _tag: "LawFailure",
+
+      at <anonymous> (/private/tmp/leviathan-compatibility/packages/domain/tests/properties.ts:20:9)
+      at checkSeeds (/private/tmp/leviathan-compatibility/packages/domain/tests/properties.ts:44:32)
+      at ~effect/Effect/successCont (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:979:28)
+      at runLoop (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:453:88)
+      at evaluate (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:402:23)
+      at <anonymous> (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:2474:9)
+      at <anonymous> (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:2526:19)
+      at <anonymous> (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:2537:31)
+      at <anonymous> (/private/tmp/leviathan-compatibility/packages/domain/tests/command-properties.test.ts:162:16)
+(fail) law: rename invariance preserves admission and keys [17.02ms]
+
+ 0 pass
+ 5 filtered out
+ 1 fail
+Ran 1 test across 1 file. [136.00ms]

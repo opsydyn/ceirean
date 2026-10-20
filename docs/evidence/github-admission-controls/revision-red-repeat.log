@@ -1,0 +1,59 @@
+bun test v1.4.2 (744846f84)
+
+tests/sqlite-inbox.test.ts:
+2561 | /** @internal */
+2562 | export const runSyncWith = context => {
+2563 |   const runSyncExit = runSyncExitWith(context);
+2564 |   return effect => {
+2565 |     const exit = runSyncExit(effect);
+2566 |     if (exit._tag === "Failure") throw causeSquash(exit.cause);
+                                                                    ^
+error: expect(received).toMatchObject(expected)
+
+  {
+-   "_tag": "Unrecorded",
+-   "decision": {
+-     "reason": "AuthorityChanged",
++   "_tag": "Recorded",
++   "record": {
++     "authorityRevision": "authority-2",
++     "candidate": {
++       "command": "Assess",
++       "commentId": 55,
++       "ingressScopeId": "fixture-app",
++       "installationId": 11,
++       "issueId": 44,
++       "issueNumber": 1,
++       "operatorId": 66,
++       "ownerId": 33,
++       "ownerLogin": "owner",
++       "repositoryId": 22,
++       "repositoryName": "repository",
++     },
++     "commandKey": "[11,22,55]",
++     "committedAtMs": 1000,
++     "decision": {
++       "_tag": "AdmittedPreview",
++       "commandKey": "[11,22,55]",
++       "evidenceRevision": "authority-1",
++       "policyRevision": "policy-1",
++       "profileId": "foldkit",
++       "profileRevision": "profile-1",
++     },
++     "decisionId": "1",
++     "evaluatedAtMs": 1000,
+    },
+  }
+
+- Expected  - 3
++ Received  + 28
+
+      at <anonymous> (/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/internal/effect.js:2566:62)
+      at revisionBarrier (/private/tmp/leviathan-compatibility/probes/github-admission/tests/sqlite-inbox.test.ts:178:10)
+(fail) stale authority cannot commit; used revisions cannot restore authority [12.76ms]
+
+ 0 pass
+ 30 filtered out
+ 1 fail
+ 4 expect() calls
+Ran 1 test across 1 file. [74.00ms]

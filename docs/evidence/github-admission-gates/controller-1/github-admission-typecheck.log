@@ -1,0 +1,10 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" moon run github-admission:typecheck --force --no-actions
+▮▮▮▮ github-admission:typecheck (9f480117)
+$ tsc --noEmit
+▮▮▮▮ github-admission:typecheck (1s 993ms, 9f480117)
+
+Tasks: 1 completed
+ Time: 2s 10ms
+
+
+Exit: 0

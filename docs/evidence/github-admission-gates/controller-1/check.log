@@ -1,0 +1,12 @@
+$ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$TMPDIR" bun run check
+$ bun run lint && bun run format:check
+$ NODE_OPTIONS=--experimental-strip-types oxlint --config oxlint.config.ts --deny-warnings .
+Found 0 warnings and 0 errors.
+Finished in 4.6s on 97 files with 210 rules using 12 threads.
+$ oxfmt --check .
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 12ms on 139 files using 12 threads.
+
+Exit: 0

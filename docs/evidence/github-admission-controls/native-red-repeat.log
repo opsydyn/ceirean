@@ -1,0 +1,24 @@
+bun test v1.4.2 (744846f84)
+
+tests/restart.test.ts:
+25 |   return decodePhase(await phaseText(owned));
+26 | }
+27 | async function read(owned: Owned) {
+28 |   const output = boundedOutput(owned.child.stdout);
+29 |   void output.catch(() => undefined);
+30 |   expect(await joined(owned)).toBe(0);
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: 0
+Received: 1
+
+      at read (/private/tmp/leviathan-compatibility/probes/github-admission/tests/restart.test.ts:30:31)
+      at async committed (/private/tmp/leviathan-compatibility/probes/github-admission/tests/restart.test.ts:43:27)
+(fail) committed lost response survives process kill [340.55ms]
+
+ 0 pass
+ 4 filtered out
+ 1 fail
+ 7 expect() calls
+Ran 1 test across 1 file. [400.00ms]
