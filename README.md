@@ -25,7 +25,7 @@ defines exact command parsing, identity/authority schemas and explicit-time
 preview decisions. It is not an inbox, verified HTTP endpoint or permission to
 execute work.
 
-The next bounded slice is the [in-memory command admission contract](docs/assessments/github-inbox-contract.md):
+The reviewed [in-memory command admission contract](docs/assessments/github-inbox-contract.md) adds
 an inferred Effect service and test-only replay/authority fixture. Native SQLite
 transactions, verified ingress and restart qualification remain later work.
 

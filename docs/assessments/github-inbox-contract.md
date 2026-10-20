@@ -2,8 +2,9 @@
 
 Task 3 of the [offline admission plan](../superpowers/plans/2026-10-20-github-admission.md)
 is separately approved after the [pure command policy](github-command-policy.md).
-Source is implemented; controller full runtime gates and independent task review
-are in progress. The already completed pure policy remains unchanged.
+Source is implemented at `18695a6`; controller full gates pass and independent
+task review approves spec compliance and quality with no findings. The already
+completed pure policy remains unchanged.
 
 ## Boundary
 
@@ -85,13 +86,20 @@ Controller-observed sequential gates pass:
 | Total                                                       | **518 pass / 2422 assertions**, no failures |
 | Frozen install and whitespace                               | Pass                                        |
 
-Independent task review is pending. These are local controller-run gates, not
-CI or live acceptance. Moon targets used `--force --no-actions` with the planned
+Independent review covered `880b5f9..18695a6` with no findings. These are local
+controller-run gates, not reviewer-rerun, CI or live acceptance. Moon targets used `--force --no-actions` with the planned
 minimal environment, unchanged timeouts and no overlapping suites. Frozen
 installation used scoped temporary-directory access and ran no scripts.
 Dependency/configuration inputs, domain source and the lock hash are unchanged
 from `880b5f9`:
 `9659b60ff39f9d38bfc54e5aea5bccc7ba47a0ba37e2ca01598cf3b75e76d5c4`.
+
+The reviewer inspected inference/ownership, relational reply checks, history,
+revision/time barriers, mutation, capacity and exact law budgets. Full gate
+execution and historical RED are attributed to controller/implementer evidence,
+not independently rerun history. Controller also confirmed all 141 Effect rules,
+one physical Effect instance across four workspaces, unchanged configuration and
+unchanged main. This is Task 3 acceptance only; no whole-plan or merge approval.
 
 Later tasks still own native transactions, bounded ingress and local
 process-restart qualification; none is implied by passing an in-memory contract.

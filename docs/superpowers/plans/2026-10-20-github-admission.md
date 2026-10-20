@@ -23,8 +23,10 @@ checks and 466 tests / 1924 assertions, including eight real-handler tests.
 The owner then approved **Task 2 only**, completed at `0a435bc` with clean
 independent spec/quality review, 481 passing tests / 2058 assertions, and 18000
 new pure law cases. See [Task 2 evidence](../../assessments/github-command-policy.md).
-Task 3's inferred service and test-only memory inbox contract is now separately
-approved and in progress. Tasks 4-6 remain pending separate approval. No live
+Task 3's inferred service and test-only memory inbox contract is complete at
+`18695a6`, with clean independent review, 518 total tests / 2422 assertions and
+12000 new sequence-law cases. See [Task 3 evidence](../../assessments/github-inbox-contract.md).
+Tasks 4-6 remain pending separate approval. No live
 GitHub access, merge or push is authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
@@ -173,12 +175,12 @@ from the real factories. `admit(input: unknown)` returns an inferred Effect with
 `AdmissionReply`, tagged operational failure and no retained inbox dependency
 after its owning service acquisition. It decodes/detaches input before use.
 
-- [ ] **1. Write/observe failing use-case tests.** `one exact candidate records one preview`, `operational failure is not a decision`, and `service retains declared dependencies` pin successful records, separate failure channels and consumer-only strict compilation. Add test driver load/commit call counts and mutation barriers; run the engine's named test files and capture RED.
-- [ ] **2. Implement service/use case.** Load trusted authority observation, evaluate with pure policy, submit a detached draft and return the atomic driver's recording disposition. No check-then-insert policy in the service, implicit retry, new decision on duplicate, helper provisioning or Effect runners. Validate driver replies at the boundary; malformed/mismatched records become tagged failures rather than trusted success.
-- [ ] **3. Implement the memory contract fixture.** Atomically enforce transport/command identity, authority revision, current time/clock floor, uniqueness and capacity. Clone both stored records and returned data. It is a synthetic contract implementation, not durable evidence or a second run ledger.
-- [ ] **4. Exercise literal failures/races.** Assert same key/different digest, header event binding, actor or issue conflict preserve the first record; rename/different delivery ID references the original; rejected commands remain rejected after profile changes; new comments may succeed. Pausing between authority load and commit, then replacing/revoking authority, must produce an unrecorded rejection/conflict, never a stale preview. Caller mutation before/after completion cannot rewrite the draft/history. Store throw/invalid reply returns an observed operational error.
-- [ ] **5. Add four engine sequence laws.** Generated delivery/replay ordering preserves at most one admission per command key; original decisions are immutable; authority changes cannot activate an old rejection or admit through a stale draft; a constructive valid new-comment sequence can admit after its blocker is resolved. Use `Arbitrary.checkEffect` and existing `validateCheckResult`, fixed budgets, fresh scoped state and sequences no longer than 25. Do not introduce a parallel admission-policy oracle.
-- [ ] **6. Verify/commit/review.** Run the literal suites, exact property counts and full gates. Commit `feat: add transactional command admission boundary`; review under the selected execution method before SQLite/composition consumes the contracts.
+- [x] **1. Write/observe failing use-case tests.** `one exact candidate records one preview`, `operational failure is not a decision`, and `service retains declared dependencies` pin successful records, separate failure channels and consumer-only strict compilation. Add test driver load/commit call counts and mutation barriers; run the engine's named test files and capture RED.
+- [x] **2. Implement service/use case.** Load trusted authority observation, evaluate with pure policy, submit a detached draft and return the atomic driver's recording disposition. No check-then-insert policy in the service, implicit retry, new decision on duplicate, helper provisioning or Effect runners. Validate driver replies at the boundary; malformed/mismatched records become tagged failures rather than trusted success.
+- [x] **3. Implement the memory contract fixture.** Atomically enforce transport/command identity, authority revision, current time/clock floor, uniqueness and capacity. Clone both stored records and returned data. It is a synthetic contract implementation, not durable evidence or a second run ledger.
+- [x] **4. Exercise literal failures/races.** Assert same key/different digest, header event binding, actor or issue conflict preserve the first record; rename/different delivery ID references the original; rejected commands remain rejected after profile changes; new comments may succeed. Pausing between authority load and commit, then replacing/revoking authority, must produce an unrecorded rejection/conflict, never a stale preview. Caller mutation before/after completion cannot rewrite the draft/history. Store throw/invalid reply returns an observed operational error.
+- [x] **5. Add four engine sequence laws.** Generated delivery/replay ordering preserves at most one admission per command key; original decisions are immutable; authority changes cannot activate an old rejection or admit through a stale draft; a constructive valid new-comment sequence can admit after its blocker is resolved. Use `Arbitrary.checkEffect` and existing `validateCheckResult`, fixed budgets, fresh scoped state and sequences no longer than 25. Do not introduce a parallel admission-policy oracle.
+- [x] **6. Verify/commit/review.** Run the literal suites, exact property counts and full gates. Commit `feat: add transactional command admission boundary`; review under the selected execution method before SQLite/composition consumes the contracts.
 
 The engine fixture exports `verifiedCommandFixture()` using the shared literal
 candidate and a schema-valid synthetic digest. In `same command is not admitted
@@ -349,5 +351,5 @@ the remaining tasks just because their plans are written.
 
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
-are linked above. Task 2 is complete; Task 3 is separately approved and in
-progress. That approval does not start Tasks 4-6. Live GitHub use remains unauthorised.
+are linked above. Tasks 2 and 3 are complete with independent task review.
+Those approvals do not start Tasks 4-6. Live GitHub use remains unauthorised.

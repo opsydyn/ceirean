@@ -73,14 +73,16 @@ issue comments before discovery events, with previews only and no execution.
       six Effect Arbitrary laws: [Task 2 evidence](assessments/github-command-policy.md),
       18000 new primary cases, 481 total tests / 2058 assertions, clean independent
       task review of `0a435bc`. No inbox or verified ingress implementation implied.
-- [ ] Add the inferred Effect admission service and test-only atomic memory inbox
-      contract (Task 3, separately approved and in progress).
+- [x] Add the inferred Effect admission service and test-only atomic memory inbox
+      contract: [Task 3 evidence](assessments/github-inbox-contract.md), 12000 new
+      sequence cases, 518 total tests / 2422 assertions, clean independent review
+      of `18695a6`. No native transaction or durability guarantee implied.
 - [ ] Prove signed fixtures, runtime validation, current local authorisation,
       transactional deduplication and SQLite process-restart behavior, with no
       model calls, listener, workers, coordinator invocation or GitHub writes.
 
 The strict compatibility probe and pure Task 2 policy are locally qualified.
-Task 3's service/memory contract is in progress; no native inbox or ingress
+Task 3's service/memory contract is locally qualified; no native inbox or ingress
 application is implemented. The package
 gate does not satisfy the remaining transactional or persistence requirements.
 Production hosting, live permission retrieval, execution and publication remain
