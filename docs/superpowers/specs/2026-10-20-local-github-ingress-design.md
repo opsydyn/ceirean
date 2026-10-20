@@ -198,7 +198,7 @@ same database must refuse startup. CLI status is read-only, runs without GitHub
 credentials, and reports counts and structured outcomes, not secrets or full
 payloads. Broken storage never becomes an empty successful ledger.
 
-Implementation-plan proposal for review: an owner-only `<database>.owner.sqlite`
+Selected implementation-plan detail: an owner-only `<database>.owner.sqlite`
 sidecar supplies a lifetime SQLite exclusive lock on a separate connection, not
 an open admission transaction. It is operational ownership state, not another
 inbox. Missing or mismatched sidecar state blocks start; child-process tests must
@@ -313,9 +313,10 @@ host-loss durability or exactly-once execution.
 
 ## Handoff
 
-The owner approved this written spec. The subsequent
-[implementation plan](../plans/2026-10-20-local-github-ingress.md) requires review
-and execution-method selection before implementation. It resolves concrete
-module placement, dependency/API-version pins and test tasks within these
-boundaries; broader architecture changes require renewed approval. Live activity
-remains separately gated.
+The owner approved this written spec and selected subagent-driven execution of
+the [implementation plan](../plans/2026-10-20-local-github-ingress.md). Its first
+three tasks are independently reviewed; native adapters, listener and final
+qualification remain pending. The plan resolves concrete module placement,
+dependency/API-version pins and test tasks within these boundaries; broader
+architecture changes require renewed approval. Live activity remains separately
+gated.

@@ -111,15 +111,21 @@ separately gated even if a future offline probe passes.
       operator IDs plus fresh write-or-higher permission checks, local Bun/SQLite
       and an operator-managed temporary HTTPS tunnel; admission previews only.
 - [x] Review the written [local ingress spec](superpowers/specs/2026-10-20-local-github-ingress-design.md).
-- [ ] Review the [local ingress implementation plan](superpowers/plans/2026-10-20-local-github-ingress.md)
+- [x] Review the [local ingress implementation plan](superpowers/plans/2026-10-20-local-github-ingress.md)
       and select its execution method.
 - [ ] Qualify local adapters, listener, immutable live evidence and replay-first
       admission with synthetic credentials and independent review.
 - [ ] Separately approve the exact live target, App grants, credentials, tunnel
       and finite rehearsal session before any live access or listener starts.
 
-This is design work only. No deployment, GitHub writes, worker execution or
-cloud storage is authorised. Local test persistence is not production durability.
+This is local implementation/qualification work only. No deployment, GitHub
+writes, worker execution or cloud storage is authorised. Local test persistence
+is not production durability.
+
+Implementation is now approved and in progress on an isolated local branch:
+Tasks 1-3 are independently reviewed through `f707065` (699 local tests; all
+available gates). Native adapters, listener and final qualification are pending.
+This does not authorise a live rehearsal or broaden execution/publication scope.
 
 ## Organisation Discovery And Configuration Self-PRs
 

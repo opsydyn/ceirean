@@ -10,11 +10,15 @@
 
 **Spec:** [Approved local GitHub ingress design](../specs/2026-10-20-local-github-ingress-design.md).
 
-Status: written spec approved by the owner on 2026-10-20. This plan awaits review
-and execution-method selection. No implementation, dependency installation,
-credentials, public tunnel, App modification or live GitHub access is authorised
-by writing this plan. Baseline is local main `6bc1567`; planning-only commits may
-follow without changing that source/dependency identity.
+Status: the owner approved the written spec and selected subagent-driven plan
+execution on 2026-10-20. Tasks 1-3 are committed and independently reviewed;
+Task 3's blocking findings were fixed and cleared on 2026-10-21 at `f707065`.
+That source passes 699 tests, five typechecks, all available gates and 24000 new
+primary law cases per full execution. Tasks 4-7 remain pending. Two Task 3 Minor
+findings remain for final triage; installer traffic was not independently traced.
+Live credentials, public tunnel, App modification, live GitHub access, merge and
+push remain separately gated. Original design baseline was main `6bc1567`;
+implementation began from the approved planning commit `4fdf876` in isolation.
 
 ## Global Constraints
 
@@ -106,11 +110,11 @@ direct `jose: "6.2.12"` and `@effect/platform-bun: "4.0.5"` imports, or a precis
 blocked report. No real GitHub request or production app scaffold beyond the
 compatibility deliverable. App's initial workspace may be added in Task 6 instead.
 
-- [ ] **1. Baseline.** Resolve the actual Leviathan checkout/worktree and clean status, inspect existing attachments and reuse a suitable isolated checkout via using-git-worktrees. Do not implement on main or attach a FoldKit worktree. Run the full existing gate block; capture source/lock identities before edits.
-- [ ] **2. RED.** Add compatibility tests importing candidate packages directly. Test synthetic PKCS8 RS256 JWT roundtrip, malformed key failure, real Bun-backed FileSystem exclusive creation/chmod and scope cleanup in a test-owned directory. A missing export/package is a compatibility RED, not a behavioural RED. No credential discovery or API calls.
-- [ ] **3. Verify/install exact artifacts.** Verify npm metadata/tarball SHA512 and declared exports/peers before one script-free install. Add jose to adapter dependencies; platform-bun to adapter devDependencies and, later, app dependencies. Pin root `overrides["@effect/platform-node-shared"] = "4.0.5"` because platform-bun declares `^4.0.5`; do not let that transitive range upgrade the Effect platform independently. Inspect ws/@types/ws transitive additions and prohibit unrelated lock changes. Current metadata is a candidate, not installed qualification.
-- [ ] **4. GREEN gate.** Run strict new-workspace typecheck, real synthetic signing/filesystem tests and the full gates. Confirm one physical Effect, unchanged existing pins/patch hashes and all 141 rules. Bun platform's internal node-shared dependency is not a Node controller fallback, but it must actually pass under Bun. Do not weaken lint or declaration checks if its API fails.
-- [ ] **5. Commit/review.** On success commit `test: qualify local ingress authentication cohort`; record exact installed artifacts, commands and limits. On failure stop dependent tasks, preserve diagnostics, restore only this task's unqualified dependency/setup edits without overwriting concurrent user changes, rerun baseline and commit a documentation-only blocked report. Do not leave a broken workspace committed.
+- [x] **1. Baseline.** Resolve the actual Leviathan checkout/worktree and clean status, inspect existing attachments and reuse a suitable isolated checkout via using-git-worktrees. Do not implement on main or attach a FoldKit worktree. Run the full existing gate block; capture source/lock identities before edits.
+- [x] **2. RED.** Add compatibility tests importing candidate packages directly. Test synthetic PKCS8 RS256 JWT roundtrip, malformed key failure, real Bun-backed FileSystem exclusive creation/chmod and scope cleanup in a test-owned directory. A missing export/package is a compatibility RED, not a behavioural RED. No credential discovery or API calls.
+- [x] **3. Verify/install exact artifacts.** Verify npm metadata/tarball SHA512 and declared exports/peers before one script-free install. Add jose to adapter dependencies; platform-bun to adapter devDependencies and, later, app dependencies. Pin root `overrides["@effect/platform-node-shared"] = "4.0.5"` because platform-bun declares `^4.0.5`; do not let that transitive range upgrade the Effect platform independently. Inspect ws/@types/ws transitive additions and prohibit unrelated lock changes. Current metadata is a candidate, not installed qualification.
+- [x] **4. GREEN gate.** Run strict new-workspace typecheck, real synthetic signing/filesystem tests and the full gates. Confirm one physical Effect, unchanged existing pins/patch hashes and all 141 rules. Bun platform's internal node-shared dependency is not a Node controller fallback, but it must actually pass under Bun. Do not weaken lint or declaration checks if its API fails.
+- [x] **5. Commit/review.** On success commit `test: qualify local ingress authentication cohort`; record exact installed artifacts, commands and limits. On failure stop dependent tasks, preserve diagnostics, restore only this task's unqualified dependency/setup edits without overwriting concurrent user changes, rerun baseline and commit a documentation-only blocked report. Do not leave a broken workspace committed.
 
 ## Task 2: Extract The Verified Protocol Without Changing Legacy Outcomes
 
@@ -123,10 +127,10 @@ Flue 2.3.0. **Produces:** `makeVerifiedGitHubIngress` and exported capture/norma
 functions, with the legacy `makeGitHubIngress` retaining old AdmissionReply/status
 semantics. Neither module imports fixtures or owns an application runtime.
 
-- [ ] **1. RED.** Add `verified callback sees exact normalised command once`, `invalid signature never reaches callback`, and `conflicting digest is not rewritten by transport` tests using synthetic signatures. Assert `expect(calls).toHaveLength(1)` for valid input and `expect(calls).toHaveLength(0)` for invalid/tampered/missing signatures. Keep existing probe tests untouched initially and observe new missing-export failures.
-- [ ] **2. Extract.** Move only shared protocol into the private package, with static old-path forwarding where appropriate. The legacy wrapper retains legacy reply decoding and status mapping; the live app will supply its own response projection. Preserve request-owned Flue channels and exact-byte verification. No dynamic imports or direct Hono dependency.
-- [ ] **3. Pin cleanup/security.** Cover aborted/slow/overflowing body reads, rejecting or pending cancellation, unsupported media/event/action, malformed IDs and ping. Assert zero onVerified callbacks for ignored/invalid input, exact original digest and no leaked reader lock. Preserve pending-cancellation ownership rather than forcing a false disposal success.
-- [ ] **4. Verify/commit.** Run focused protocol tests, old probe suites and full gates; commit `refactor: share verified GitHub protocol boundary`. Independent review must confirm old behaviour rather than accepting updated tests as parity proof.
+- [x] **1. RED.** Add `verified callback sees exact normalised command once`, `invalid signature never reaches callback`, and `conflicting digest is not rewritten by transport` tests using synthetic signatures. Assert `expect(calls).toHaveLength(1)` for valid input and `expect(calls).toHaveLength(0)` for invalid/tampered/missing signatures. Keep existing probe tests untouched initially and observe new missing-export failures.
+- [x] **2. Extract.** Move only shared protocol into the private package, with static old-path forwarding where appropriate. The legacy wrapper retains legacy reply decoding and status mapping; the live app will supply its own response projection. Preserve request-owned Flue channels and exact-byte verification. No dynamic imports or direct Hono dependency.
+- [x] **3. Pin cleanup/security.** Cover aborted/slow/overflowing body reads, rejecting or pending cancellation, unsupported media/event/action, malformed IDs and ping. Assert zero onVerified callbacks for ignored/invalid input, exact original digest and no leaked reader lock. Preserve pending-cancellation ownership rather than forcing a false disposal success.
+- [x] **4. Verify/commit.** Run focused protocol tests, old probe suites and full gates; commit `refactor: share verified GitHub protocol boundary`. Independent review must confirm old behaviour rather than accepting updated tests as parity proof.
 
 ## Task 3: Model Request-Bound Evidence And Replay-First Admission
 
@@ -138,12 +142,12 @@ schema-derived live records/provenance, pure `decideLiveAdmission(input)`, real
 `makeLiveInbox`, `makeLiveAuthority`, and `makeLiveAdmission` service factories.
 Native implementation comes later; memory storage is tests only.
 
-- [ ] **1. RED domain cases.** Use trusted fixture wall time 1000, first observation 900, expiry 6900 and monotonic start 100. Test coherent write/admin acceptance, read/none refusal, absent/wrong-key/wrong-operator evidence, invalid IDs, custom role names, future/rollback times and expiry equality. Assert `expect(decision._tag).toBe('AdmittedPreview')` for the coherent control and `expect(decideAt(6900)._tag).toBe('Rejected')` at exclusive expiry; define these named fixture functions in this task's test file.
-- [ ] **2. Implement pure schemas/policy.** Add LocalPolicy/LiveChecked discriminated provenance and the live draft union; derive types rather than casts/booleans. Reuse existing pure policy where its semantics match, but never give live evidence the legacy shared snapshot lifecycle. No changes to old AdmissionRecord/AuthorityState or old evidence artifacts.
-- [ ] **3. RED service cases.** Define the test memory driver implementing the exact synchronous Result contracts. Add `known replay performs zero authority calls`, `unknown eligible comment performs a fresh call`, `unknown denied operator performs zero calls`, `two operators cannot share evidence`, `operational failure stores no decision`, `competing policy revision refuses commit`, and `same delivery changed digest conflicts before network`. Count actual calls and records; a different delivery of a recorded command may add only a receipt.
-- [ ] **4. Implement inferred services.** Follow existing service-factories.ts: deferred native calls, structured input/output decoding, tagged sanitised failures, cancellation-aware tryPromise at the authority boundary and named spans. Replay resolution precedes live checks, while final commit rechecks uniqueness and policy/time. No promise-returning Effect service method or fake type-inference factory.
-- [ ] **5. Add eight laws.** Four domain laws: coherent binding plus single-ID mutations; rename invariance; exclusive expiry/invalid-clock refusal; provenance/permission integrity. Four engine sequence laws: delivery permutation deduplication; command/receipt conflict history; operator/policy isolation; failed/interrupted checks cannot admit. Use Effect Arbitrary/checkLaw conventions, 1000 primary runs at seeds 0, 1, 163, size 50, maxShrinks 1000, maxDiscards 10000, sequences at most 25. Exactly 24000 new primary cases per full execution; exclude shrinks/control runs from this count and retain old law budgets.
-- [ ] **6. Verify/commit.** Run focused domain/engine tests with constructive accepted controls, full gates and chosen independent review; commit `feat: model fresh GitHub admission evidence`. Generated inputs must preserve enough coherence to exercise success, not only schema rejection.
+- [x] **1. RED domain cases.** Use trusted fixture wall time 1000, first observation 900, expiry 6900 and monotonic start 100. Test coherent write/admin acceptance, read/none refusal, absent/wrong-key/wrong-operator evidence, invalid IDs, custom role names, future/rollback times and expiry equality. Assert `expect(decision._tag).toBe('AdmittedPreview')` for the coherent control and `expect(decideAt(6900)._tag).toBe('Rejected')` at exclusive expiry; define these named fixture functions in this task's test file.
+- [x] **2. Implement pure schemas/policy.** Add LocalPolicy/LiveChecked discriminated provenance and the live draft union; derive types rather than casts/booleans. Reuse existing pure policy where its semantics match, but never give live evidence the legacy shared snapshot lifecycle. No changes to old AdmissionRecord/AuthorityState or old evidence artifacts.
+- [x] **3. RED service cases.** Define the test memory driver implementing the exact synchronous Result contracts. Add `known replay performs zero authority calls`, `unknown eligible comment performs a fresh call`, `unknown denied operator performs zero calls`, `two operators cannot share evidence`, `operational failure stores no decision`, `competing policy revision refuses commit`, and `same delivery changed digest conflicts before network`. Count actual calls and records; a different delivery of a recorded command may add only a receipt.
+- [x] **4. Implement inferred services.** Follow existing service-factories.ts: deferred native calls, structured input/output decoding, tagged sanitised failures, cancellation-aware tryPromise at the authority boundary and named spans. Replay resolution precedes live checks, while final commit rechecks uniqueness and policy/time. No promise-returning Effect service method or fake type-inference factory.
+- [x] **5. Add eight laws.** Four domain laws: coherent binding plus single-ID mutations; rename invariance; exclusive expiry/invalid-clock refusal; provenance/permission integrity. Four engine sequence laws: delivery permutation deduplication; command/receipt conflict history; operator/policy isolation; failed/interrupted checks cannot admit. Use Effect Arbitrary/checkLaw conventions, 1000 primary runs at seeds 0, 1, 163, size 50, maxShrinks 1000, maxDiscards 10000, sequences at most 25. Exactly 24000 new primary cases per full execution; exclude shrinks/control runs from this count and retain old law budgets.
+- [x] **6. Verify/commit.** Run focused domain/engine tests with constructive accepted controls, full gates and chosen independent review; commit `feat: model fresh GitHub admission evidence`. Generated inputs must preserve enough coherence to exercise success, not only schema rejection.
 
 ## Task 4: Implement Bounded GitHub Authentication And Access Reads
 
@@ -261,8 +265,7 @@ queue, permission cache, Node fallback or broader GitHub grant automatically.
 
 ## Execution Handoff
 
-The owner reviews this plan and selects execution before Task 1. Subagent-driven
-execution is recommended because evidence/transaction/cancellation boundaries need
-independent task review before dependent code adopts their contracts. Native
-execution is also possible, with a fresh independent whole-branch review after
-the implementer's sequential tasks. Neither option authorises a live rehearsal.
+The owner selected subagent-driven execution. Continue remaining tasks with
+independent task review before dependent code adopts their contracts, then a fresh
+whole-branch review. The execution choice does not authorise a live rehearsal,
+merge or push. Checkboxes above identify accepted tasks, not live readiness.
