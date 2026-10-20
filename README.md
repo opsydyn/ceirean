@@ -29,6 +29,10 @@ The reviewed [in-memory command admission contract](docs/assessments/github-inbo
 an inferred Effect service and test-only replay/authority fixture. Native SQLite
 transactions, verified ingress and restart qualification remain later work.
 
+The [local SQLite inbox](docs/assessments/github-sqlite-inbox.md) is being
+qualified separately, with scoped handles, native transactions and revision
+history. Same-process close/reopen is not process-kill or host-loss evidence.
+
 The synthetic qualification-gate tracer is implemented and locally verified:
 119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
 Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect

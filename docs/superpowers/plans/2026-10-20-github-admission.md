@@ -26,7 +26,8 @@ new pure law cases. See [Task 2 evidence](../../assessments/github-command-polic
 Task 3's inferred service and test-only memory inbox contract is complete at
 `18695a6`, with clean independent review, 518 total tests / 2422 assertions and
 12000 new sequence-law cases. See [Task 3 evidence](../../assessments/github-inbox-contract.md).
-Tasks 4-6 remain pending separate approval. No live
+Task 4's scoped native SQLite adapter is now separately approved and in progress;
+Tasks 5-6 remain pending separate approval. No live
 GitHub access, merge or push is authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
@@ -87,7 +88,7 @@ types. Do not handwrite Effect success/error/environment annotations.
 - `AdmissionReply`: `Recorded { record }`, `Duplicate { record }` or `Unrecorded { decision }`; the latter contains only `Rejected`/`Ignored`. These envelopes describe recording disposition, not another business decision. A duplicate always labels the original decision/revisions and time.
 - `AuthorityObservation`: `{ state: AuthorityState, atMs }`. `AdmissionDraft`: `{ verified: VerifiedCommand, expectedAuthorityRevision, evaluatedAtMs, decision }`, with decision limited to admitted/rejected exact commands. `CommitReply`: the `AdmissionReply` union.
 - `CommandInboxDriver`: synchronous `loadAuthority(scopeId): Result<AuthorityObservation, CommandInboxError>` and `commit(draft): Result<CommitReply, CommandInboxError>`. `makeCommandInbox(driver)` wraps real calls into inferred Effects; `CommandInbox` derives from that actual factory. `makeCommandAdmission()` acquires the inbox once and returns inferred `admit(input: unknown)`; `CommandAdmission` derives from its actual acquisition success using installed Effect utilities.
-- `makeSqliteInbox({ file, create, initialAuthority?, limits, nowMs, fault? })` is a scoped acquisition Effect returning `{ driver, installAuthority(input: unknown) }`. The latter is trusted harness administration, never reachable from request/agent APIs. `nowMs: () => number` is injected trusted fixture time read inside each native transaction; there is no wall-clock default. `initialAuthority` may seed only a new database, never overwrite existing state on reopen. `create: false` refuses a missing file. Fault phases are injected only at adapter construction in tests, never through ingress.
+- `makeSqliteInbox({ file, create, ingressScopeId, initialAuthority?, limits, nowMs, fault? })` is a scoped acquisition Effect returning `{ driver, installAuthority(input: unknown) }`. The latter is trusted harness administration, never reachable from request/agent APIs. `nowMs: () => number` is injected trusted fixture time read inside each native transaction; there is no wall-clock default. `initialAuthority` may seed only a new database, never overwrite existing state on reopen. `create: false` refuses a missing file. Fault phases are injected only at adapter construction in tests, never through ingress. Task 4 explicitly supplies configured scope because `Unavailable` has no scope field; future `ProbeConfig` already carries it.
 - `ProbeConfig` is trusted boundary configuration `{ file, create, initialAuthority?, ingressScopeId, secret, limits, nowMs, fault? }`, using the same native fields as `makeSqliteInbox`. It is not an ingress payload. `makeAdmissionProbeLayer(config)` composes inbox/admission Layers without running them. Exported `openAdmissionProbe(config)` owns one ManagedRuntime and returns `{ fetch(request: Request): Promise<Response>, dispose(): Promise<void> }`. Its bridge runs capture/admission on that one runtime; no internal helper provides dependencies or allocates another runtime. Do not add direct `Effect.run*` calls or change lint boundaries.
 
 ### Fixed Synthetic Limits And Protocol Decisions
@@ -203,6 +204,12 @@ expect(storedDecisionCount).toBe(1);
 ```
 
 ## Task 4: Scoped SQLite Inbox And Authority Revision Barrier
+
+Supporting setup for this bounded slice: declare the existing domain/engine
+workspace dependencies in the probe, include `src` in strict typechecking,
+add finite `Busy` to the shared operational error code schema, and re-export
+the existing `sameCommandFacts` comparison. No other shared behavior, rule,
+external version or declaration waiver is changed.
 
 **Files:** probe `src/sqlite-inbox.ts`, `src/fixture.ts`, `tests/sqlite-inbox.test.ts`.
 
@@ -352,4 +359,5 @@ the remaining tasks just because their plans are written.
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
 are linked above. Tasks 2 and 3 are complete with independent task review.
-Those approvals do not start Tasks 4-6. Live GitHub use remains unauthorised.
+Task 4 is separately approved and in progress; Tasks 5-6 have not started.
+Live GitHub use remains unauthorised.

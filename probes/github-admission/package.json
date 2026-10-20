@@ -8,6 +8,8 @@
   "dependencies": {
     "@flue/github": "2.3.0",
     "@flue/runtime": "2.3.0",
+    "@leviathan/domain": "workspace:*",
+    "@leviathan/engine": "workspace:*",
     "effect": "4.0.5"
   },
   "devDependencies": {

@@ -4,7 +4,7 @@ export * from './service-factories.ts';
 export * from './ports.ts';
 export * from './command-inbox-contracts.ts';
 export * from './command-inbox-errors.ts';
-export { makeCommandInbox } from './command-inbox-factory.ts';
+export { makeCommandInbox, sameCommandFacts } from './command-inbox-factory.ts';
 export * from './command-inbox-port.ts';
 export * from './command-admission.ts';
 export * from './run-coordinator.ts';

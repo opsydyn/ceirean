@@ -7,6 +7,7 @@ export const CommandInboxErrorCode = Schema.Literals([
   'OpenFailed',
   'CloseFailed',
   'InvalidData',
+  'Busy',
 ]);
 
 export class CommandInboxError extends Data.TaggedError('CommandInboxError')<{
