@@ -451,4 +451,5 @@ Docker cleanup/isolation, real providers/subprocess driver, production adapter,
 durable storage/controller fencing, process/host-loss recovery, deployment,
 real migration, throughput/scaling proof: none. No merge or push. All six task
 reviews and the final whole-implementation review are complete and clean for
-this offline slice. A local merge or push still needs owner approval.
+this offline slice. The owner-approved local fast-forward into `main` completed
+at `9723c33`, with merged-checkout gates passing. Nothing has been pushed.

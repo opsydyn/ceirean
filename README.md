@@ -176,7 +176,8 @@ The [measured qualification](docs/assessments/worker-lifecycle.md) separates pin
 package admission from real statechart/service tests with controlled fakes,
 stateful Effect Arbitrary laws and simulated service reconstruction. The offline
 plan is complete: task reviews, whole-implementation review, scoped final-fix
-rereview and controller verification are clean. The branch remains unmerged.
+rereview and controller verification are clean. The reviewed work was
+fast-forwarded into local `main` at `9723c33`; nothing has been pushed.
 No browser/manual, native Docker isolation/cleanup, durable journal/host-loss,
 deployment, real migration or throughput/scaling proof is claimed.
 
