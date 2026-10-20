@@ -16,8 +16,9 @@ See [memory contract evidence](../../assessments/github-inbox-contract.md).
 Task 4's scoped native SQLite adapter is complete at `db21cc4`, with clean
 independent review and 549 total tests / 3810 assertions. See
 [native inbox evidence](../../assessments/github-sqlite-inbox.md).
-Task 5's bounded verified-ingress bridge is separately approved and in progress;
-see [Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 remains
+Task 5's bounded verified-ingress bridge is complete at `f5b96ba`, with full gates
+and clean independent review after the async-reader cleanup correction; see
+[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 remains
 pending separate approval. No live GitHub access, execution or publication is
 authorised by this offline approval.
 
@@ -314,5 +315,6 @@ The owner subsequently approved the linked plan and selected subagent-driven
 execution. The original published-artifact gate failed; only the explicitly
 repaired local cohort is admitted. Pure Task 2 work is complete and reviewed;
 Task 3's inferred service/memory contract and Task 4's local native transaction
-adapter are complete and reviewed. Verified ingress, process-kill qualification,
-live use and execution boundaries remain unimplemented.
+adapter are complete and reviewed. Task 5 verified ingress is locally qualified
+and independently reviewed; process-kill qualification, live use and execution
+boundaries remain unimplemented.

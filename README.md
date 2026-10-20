@@ -33,6 +33,11 @@ The reviewed [local SQLite inbox](docs/assessments/github-sqlite-inbox.md) is
 locally qualified, with scoped handles, native transactions and revision
 history. Same-process close/reopen is not process-kill or host-loss evidence.
 
+The reviewed [verified ingress bridge](docs/assessments/github-verified-ingress.md)
+connects bounded signed fixtures to that inbox through one application runtime.
+It remains an in-process offline harness, not a listening service or live GitHub
+permission integration.
+
 The synthetic qualification-gate tracer is implemented and locally verified:
 119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
 Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect
@@ -140,10 +145,12 @@ is admitted. Tasks 2-4 now provide reviewed pure policy, an inferred admission
 service and a scoped native SQLite inbox, with 549 local tests / 3810 assertions
 at the Task 4 baseline.
 
-[Task 5 verified ingress](docs/assessments/github-verified-ingress.md) is separately
-approved and in progress. Process-restart qualification in Task 6 still requires
-approval. Models, a public endpoint, worker execution and GitHub writes remain
-out of scope; the CLI-first direction is unchanged.
+[Task 5 verified ingress](docs/assessments/github-verified-ingress.md) is complete
+at `f5b96ba`, with clean independent review after the async-reader cleanup fix:
+635 local tests / 4124 assertions, all four types and lint/format pass.
+Process-restart qualification in Task 6 still requires approval. Models, a public
+endpoint, worker execution and GitHub writes remain out of scope; the CLI-first
+direction is unchanged.
 
 ## Architecture Draft
 

@@ -2,8 +2,10 @@
 
 Task 5 of the [offline admission plan](../superpowers/plans/2026-10-20-github-admission.md)
 is separately approved after the [native SQLite inbox](github-sqlite-inbox.md).
-Source implementation passes full controller gates. The verified candidate is
-awaiting commit and independent task review; this is not whole-plan acceptance.
+Initial candidate `2c06dc1` passed full controller gates, but independent review
+found an owned-reader-lifetime gap under asynchronous cancellation. Correction
+`f5b96ba` passes repeated full gates and clean scoped re-review. Task 5 is
+complete; this is not whole-plan acceptance.
 
 ## Intended Boundary
 
@@ -27,7 +29,7 @@ undo that record.
 
 ## Acceptance Record
 
-The implementer reports 83 focused tests / 293 assertions, strict probe types and
+The implementer reports 86 focused tests / 314 assertions, strict probe types and
 root lint/format passing. The report distinguishes initial missing-module RED
 from later behavioral failures and their fixes: disposed-state classification,
 field-size status mapping, lifecycle evidence and SDK exception logging. These
@@ -57,17 +59,35 @@ Controller-observed sequential gates pass in the specified minimal environment:
 | Domain tests                       | 201 pass / 768 assertions                   |
 | Engine tests                       | 273 pass / 1526 assertions                  |
 | Existing Flue probe                | 36 pass / 104 assertions                    |
-| GitHub/native probe                | 122 pass / 1705 assertions                  |
-| Total                              | **632 pass / 4103 assertions**, no failures |
+| GitHub/native probe                | 125 pass / 1726 assertions                  |
+| Total                              | **635 pass / 4124 assertions**, no failures |
 | Frozen installation and whitespace | Pass                                        |
 
-The GitHub probe contains 83 new deterministic cases and 39 existing channel/native
+The GitHub probe contains 86 new deterministic cases and 39 existing channel/native
 cases. The prior 30000 generated admission cases remain unchanged; repeated
 executions do not add to that primary-case budget. All 141 Effect rules remain
 enabled and all four workspaces resolve one physical Effect 4.0.5 instance.
 Lock SHA-256 remains
 `a03b2f20874301814ba165f945b3fa55df5f20023f29ba5b873f3d16537cadc3`.
-No existing qualification or worker source changed. Independent review is pending.
+No existing qualification or worker source changed. Independent review found that
+`Effect.tryPromise` interruption could complete before JavaScript cleanup awaited
+an asynchronous `reader.cancel()`. The original synchronous tests did not answer
+that schedule, despite the first candidate's 632 passing tests / 4103 assertions.
+
+The correction uses `Effect.acquireUseRelease` to own acquisition, use and release.
+Its interruption-safe release awaits memoized cancellation and attempts lock
+release on both settlement paths. New held-cancel barriers prove disposal and
+response stay pending while cancellation is held, then complete with the reader
+unlocked. Resolving and rejecting cancellation are tested; combined primary and
+cleanup failures retain finite sanitized evidence. The report preserves the
+behavioral RED and subsequent GREEN. The table above describes repeated controller
+gates for corrected `f5b96ba`. Scoped re-review closed the original finding with
+no new Critical, Important or Minor findings. Controller execution evidence and
+reviewer inspection remain separately attributed; no CI or live claim follows.
+
+A cancellation that never settles deliberately keeps disposal pending. No new
+teardown deadline, production availability or abuse-resistance guarantee is
+claimed by this ordering fix.
 
 The fixed local protocol distinguishes transport acknowledgment from admission:
 

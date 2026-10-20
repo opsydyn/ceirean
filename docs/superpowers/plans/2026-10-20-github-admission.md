@@ -29,10 +29,10 @@ Task 3's inferred service and test-only memory inbox contract is complete at
 Task 4's scoped native SQLite adapter is complete at `db21cc4`, with clean
 independent review and 549 total tests / 3810 assertions. See
 [Task 4 evidence](../../assessments/github-sqlite-inbox.md).
-Task 5's bounded verified-ingress bridge is separately approved and in progress;
-see [Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6
-remains pending separate approval. No live GitHub access, merge or push is
-authorised.
+Task 5's bounded verified-ingress bridge is complete at `f5b96ba`, with full gates
+and clean independent review after the async-reader cleanup correction; see
+[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 remains
+pending separate approval. No live GitHub access, merge or push is authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
 patches and explicit Google optional MCP peer already committed at `629ada7`.
@@ -262,12 +262,12 @@ the exported composition boundary, running their Effects on its single runtime.
 `openAdmissionProbe`/Layer follow the shared
 signatures. Keep SDK calls in ingress, not domain/engine.
 
-- [ ] **1. Write/observe failing end-to-end tests.** `signed authorised command persists one preview`, `tampered bytes never call admission`, `renamed replay is historical`, and `revoked new comment cannot admit` exercise the actual channel plus real SQLite through `openAdmissionProbe`. Assert response schema, transaction rows and bridge acquisition/disposal counts. Capture RED against missing integration before implementing it.
-- [ ] **2. Implement bounded capture/normalisation.** Read once to the exact limit, hash original bytes, and construct a new local Request with unchanged bytes/headers for the SDK; do not reserialise or clone an unbounded stream. Pass digest/context through request-local closure/state, never a mutable global latest-delivery variable. Runtime-decode native fields and scope equality; only ordinary new issue comments with matching human author/sender and exact command proceed. Streaming read rejection or abort cancels/releases the reader and never calls admission.
-- [ ] **3. Implement channel and application composition.** Create the real channel, route locally at `/webhook`, and await the injected admission callback before returning an explicit mapped response. Compose one scoped SQLite/inbox/admission Layer and one exported ManagedRuntime bridge, alive until `dispose`. No listener or per-request runtime; dispose is idempotent and late calls fail explicitly. Propagate cancellation before admission; interruption after synchronous commit must not undo it or claim the request never happened.
-- [ ] **4. Exercise protocol/error table.** Assert every fixed HTTP status and finite outcome: bad/missing/tampered signature; invalid UTF-8/JSON/metadata/IDs; media/body/field limits including streamed overflow; unsupported events/actions/PR/bot; exact-command variants; authority denial/expiry/change; transport conflict/capacity; SQLite error and thrown callback. Avoid SDK default-empty-200 behavior on errors. Interleave two requests with different bytes/digests using barriers to prove request-local capture cannot cross-contaminate receipts.
-- [ ] **5. Verify no-work boundaries and sanitisation.** Fail-closed outbound-fetch/listener spies in tests must remain at zero; restore them in cleanup. Inspect source import/call graph and unchanged qualification/worker source hashes: no agent/model API, run coordinator call, worker constructor or GitHub client. Query persisted rows/responses/logs for fixture secrets, signatures, raw non-command bodies and injected exception text; all absent. These are bounded proof claims, not universal network-containment guarantees.
-- [ ] **6. Verify/commit/review.** Run focused RED/GREEN and full gates without modifying lint configuration. Commit `feat: bridge verified GitHub fixtures to admission previews`; review under the selected execution method before final persistence qualification.
+- [x] **1. Write/observe failing end-to-end tests.** `signed authorised command persists one preview`, `tampered bytes never call admission`, `renamed replay is historical`, and `revoked new comment cannot admit` exercise the actual channel plus real SQLite through `openAdmissionProbe`. Assert response schema, transaction rows and bridge acquisition/disposal counts. Capture RED against missing integration before implementing it.
+- [x] **2. Implement bounded capture/normalisation.** Read once to the exact limit, hash original bytes, and construct a new local Request with unchanged bytes/headers for the SDK; do not reserialise or clone an unbounded stream. Pass digest/context through request-local closure/state, never a mutable global latest-delivery variable. Runtime-decode native fields and scope equality; only ordinary new issue comments with matching human author/sender and exact command proceed. Streaming read rejection or abort cancels/releases the reader and never calls admission.
+- [x] **3. Implement channel and application composition.** Create the real channel, route locally at `/webhook`, and await the injected admission callback before returning an explicit mapped response. Compose one scoped SQLite/inbox/admission Layer and one exported ManagedRuntime bridge, alive until `dispose`. No listener or per-request runtime; dispose is idempotent and late calls fail explicitly. Propagate cancellation before admission; interruption after synchronous commit must not undo it or claim the request never happened.
+- [x] **4. Exercise protocol/error table.** Assert every fixed HTTP status and finite outcome: bad/missing/tampered signature; invalid UTF-8/JSON/metadata/IDs; media/body/field limits including streamed overflow; unsupported events/actions/PR/bot; exact-command variants; authority denial/expiry/change; transport conflict/capacity; SQLite error and thrown callback. Avoid SDK default-empty-200 behavior on errors. Interleave two requests with different bytes/digests using barriers to prove request-local capture cannot cross-contaminate receipts.
+- [x] **5. Verify no-work boundaries and sanitisation.** Fail-closed outbound-fetch/listener spies in tests must remain at zero; restore them in cleanup. Inspect source import/call graph and unchanged qualification/worker source hashes: no agent/model API, run coordinator call, worker constructor or GitHub client. Query persisted rows/responses/logs for fixture secrets, signatures, raw non-command bodies and injected exception text; all absent. These are bounded proof claims, not universal network-containment guarantees.
+- [x] **6. Verify/commit/review.** Run focused RED/GREEN and full gates without modifying lint configuration. Commit `feat: bridge verified GitHub fixtures to admission previews`; review under the selected execution method before final persistence qualification.
 
 In `tampered bytes never call admission`, sign first and change a body byte
 without resigning. Through the composed application's `fetch`, assert:
@@ -363,6 +363,5 @@ the remaining tasks just because their plans are written.
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
 are linked above. Tasks 2 and 3 are complete with independent task review.
-Task 4 is complete and reviewed; Task 5 is approved and in progress, while Task 6
-has not started.
+Tasks 4 and 5 are complete and independently reviewed. Task 6 has not started.
 Live GitHub use remains unauthorised.

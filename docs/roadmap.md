@@ -81,14 +81,21 @@ issue comments before discovery events, with previews only and no execution.
       two-connection checks: [Task 4 evidence](assessments/github-sqlite-inbox.md),
       31 native cases, 549 total tests / 3810 assertions, clean independent review
       of `db21cc4`. Same-process reopen is not process-kill or host-loss evidence.
-- [ ] Prove signed fixtures, runtime validation, current local authorisation,
-      transactional deduplication and SQLite process-restart behavior, with no
-      model calls, listener, workers, coordinator invocation or GitHub writes.
+- [x] Prove bounded signed fixtures, runtime validation, current local fixture
+      authorisation and transactional deduplication through one application
+      bridge: [Task 5 evidence](assessments/github-verified-ingress.md), 635 total
+      tests / 4124 assertions and clean independent review of `f5b96ba` after the
+      async-reader cleanup correction. No model, listener, worker, coordinator
+      invocation or GitHub writes.
+- [ ] Qualify SQLite process-kill recovery, behavioral negative controls and a
+      measured offline evidence report under separately approved Task 6.
 
 The strict compatibility probe and pure Task 2 policy are locally qualified.
-Task 3's service/memory contract and Task 4's native inbox are locally qualified;
-no verified ingress application is implemented. The package
-gate does not satisfy the remaining transactional or persistence requirements.
+Task 3's service/memory contract and Task 4's native inbox are locally qualified.
+[Task 5's verified-ingress bridge](assessments/github-verified-ingress.md) is
+locally qualified and independently reviewed. The original async-reader lifetime
+finding was corrected and re-reviewed. Process-kill recovery and measured final
+qualification remain pending; no whole-plan acceptance is claimed.
 Production hosting, live permission retrieval, execution and publication remain
 separately gated even if a future offline probe passes.
 
