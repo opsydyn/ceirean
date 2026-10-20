@@ -63,19 +63,21 @@ issue comments before discovery events, with previews only and no execution.
 - [x] Review its [implementation plan](superpowers/plans/2026-10-20-github-admission.md)
       and select subagent-driven execution (owner approval, 2026-10-20), with
       controller-owned independent review.
-- [ ] Qualify the exact GitHub channel artifact against the pinned Bun/Flue cohort
-      and universal lint rules before implementing the adapter. Task 1 is blocked:
-      seven runtime tests pass, strict declarations fail (TS2846, TS2307, TS2416),
-      and the discarded prototype failed three lint rules. Setup/lock edits were
-      restored; all restored baseline gates pass (458 tests / 1900 assertions).
-      See the [blocked assessment](assessments/github-admission.md); the package
-      is not admitted and Tasks 2-6 remain pending, not started.
+- [x] Qualify the owner-approved patched local GitHub channel cohort against
+      strict new-probe types, the pinned Bun/Flue cohort and universal lint rules.
+      [Repair `629ada7`](assessments/github-admission-repair.md) passes 466 tests /
+      1924 assertions and fresh-directory frozen installation. The
+      [unmodified artifact failure](assessments/github-admission.md) is preserved;
+      this is not admission of the original unpatched artifact.
+- [ ] Implement and verify pure exact-command, identity and authority policy with
+      six Effect Arbitrary laws (Task 2, approved and in progress).
 - [ ] Prove signed fixtures, runtime validation, current local authorisation,
       transactional deduplication and SQLite process-restart behavior, with no
       model calls, listener, workers, coordinator invocation or GitHub writes.
 
-No admission implementation is retained. The runtime evidence above does not
-satisfy the strict package gate or these remaining evidence requirements.
+Only the strict compatibility probe is currently qualified; Task 2 is in progress.
+No admission service, inbox or ingress application is implemented. The package
+gate does not satisfy the remaining transactional or persistence requirements.
 Production hosting, live permission retrieval, execution and publication remain
 separately gated even if a future offline probe passes.
 

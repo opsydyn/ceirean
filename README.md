@@ -20,6 +20,11 @@ Its owner-approved compatibility repair is tracked in
 including the two declaration-only Bun patches and Google's explicit optional
 MCP type peer. This does not implement the GitHub admission service.
 
+The separately approved [pure GitHub command policy](docs/assessments/github-command-policy.md)
+defines exact command parsing, identity/authority schemas and explicit-time
+preview decisions. It is not an inbox, verified HTTP endpoint or permission to
+execute work.
+
 The synthetic qualification-gate tracer is implemented and locally verified:
 119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
 Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect

@@ -12,15 +12,23 @@
 
 Status: the owner approved the written spec and this plan on 2026-10-20 and
 selected subagent-driven execution, with independent review owned by the
-controller. Task 1 was attempted and is blocked: seven real-handler runtime tests
-pass, but strict vendor declarations fail with TS2846, TS2307 and TS2416. The
-discarded prototype also failed three lint rules. Task-owned setup/lock edits
-were restored; the restored baseline passes all gates (458 tests / 1900
-assertions). See the [blocked assessment](../../assessments/github-admission.md).
-The package is not admitted. Independent task review at `13cd821` approved the
-blocked disposition, with a minor evidence-wording clarification subsequently
-incorporated in the assessment. Tasks 2-6 remain pending, not started; any decision
-to revisit compatibility remains with the controller.
+controller. The original Task 1 attempt failed and was restored; its
+[blocked assessment](../../assessments/github-admission.md) remains historical
+evidence, not an accepted unmodified artifact.
+
+The owner subsequently approved the bounded
+[compatibility repair](../../assessments/github-admission-repair.md), committed
+at `629ada7`. The patched local cohort passes strict new-probe types, all existing
+checks and 466 tests / 1924 assertions, including eight real-handler tests.
+The owner then approved **Task 2 only**, now in progress. Tasks 3-6 remain pending
+separate approval. No live GitHub access, merge or push is authorised.
+
+**Approved compatibility amendment:** retain the two version-scoped declaration
+patches and explicit Google optional MCP peer already committed at `629ada7`.
+This narrowly supersedes the no-patch/no-extra-SDK clauses of the original
+Task 1 instructions below; it does not allow further waivers, dependencies,
+cohort changes or relaxed checks. Original failure/restoration instructions are
+preserved to explain the historical gate.
 
 ## Global Constraints
 
@@ -335,8 +343,7 @@ The known vendor-declaration risk makes the first gate meaningful and potentiall
 blocking. Passing package metadata reads is not passing that gate. Do not start
 the remaining tasks just because their plans are written.
 
-The owner approved the plan and selected subagent-driven execution. Execution
-stopped at Task 1's strict compatibility failure; its independently reviewed
-blocked assessment is linked above. Reopening the gate requires a separately
-reviewed compatibility remedy, not another execution-method choice or an implicit
-declaration-check waiver. Live GitHub use remains unauthorised.
+The owner approved the plan and selected subagent-driven execution. The original
+strict failure and its later explicitly approved, independently reviewed repair
+are linked above. Task 2 is the next bounded approved slice; that approval does
+not automatically start Tasks 3-6. Live GitHub use remains unauthorised.

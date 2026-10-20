@@ -3,12 +3,13 @@
 Status: the owner approved the conversational design, this written spec and the
 [implementation plan](../plans/2026-10-20-github-admission.md) on 2026-10-20,
 selecting subagent-driven execution with controller-owned independent review.
-Task 1 is blocked: seven runtime tests pass, strict vendor declarations fail
-(TS2846, TS2307, TS2416), and the discarded prototype failed three lint rules.
-Setup/lock edits were restored and the full restored baseline passes (458 tests /
-1900 assertions). The [assessment](../../assessments/github-admission.md) records
-the rejected gate; Tasks 2-6 remain pending, not started. No live GitHub access,
-execution or publication is authorised by this offline approval.
+The original Task 1 failure was restored and is preserved in the
+[historical assessment](../../assessments/github-admission.md). The owner then
+approved a bounded [compatibility repair](../../assessments/github-admission-repair.md)
+at `629ada7`: the patched local cohort passes strict new-probe types, all existing
+checks and 466 tests / 1924 assertions. Task 2's pure policy slice is separately
+approved and in progress; Tasks 3-6 remain pending separate approval. No live
+GitHub access, execution or publication is authorised by this offline approval.
 
 ## Outcome And Scope
 
@@ -70,6 +71,11 @@ All 141 Effect rules remain errors universally. No disables, ignored new paths,
 manual Effect/Layer channels, fake inference factories, vendor patches, per-call
 runtimes or inline helper provisioning. Incompatibility blocks adoption and is
 reported for review; it is not permission to write a replacement verifier.
+
+Later owner-approved exception: retain only the Flue 2.3.0 and Gaxios 7.3.1
+declaration patches and explicit Google optional MCP peer in `629ada7`. Their
+removal criteria and local-only qualification are recorded in the repair
+assessment. This is not a general vendor-patch or type-check waiver.
 
 ## Package Ownership
 
@@ -295,6 +301,6 @@ models, worker isolation, publication and org discovery remain separately gated.
 - [GitHub failed-delivery handling](https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)
 
 The owner subsequently approved the linked plan and selected subagent-driven
-execution. Task 1's measured strict compatibility blocker prevents dependent
-implementation; the published package is not admitted. Independent review and
-any approved next direction remain with the controller.
+execution. The original published-artifact gate failed; only the explicitly
+repaired local cohort is admitted. Pure Task 2 work is separately approved;
+service, persistence, live use and execution boundaries remain unimplemented.
