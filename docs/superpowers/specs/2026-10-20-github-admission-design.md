@@ -16,8 +16,10 @@ See [memory contract evidence](../../assessments/github-inbox-contract.md).
 Task 4's scoped native SQLite adapter is complete at `db21cc4`, with clean
 independent review and 549 total tests / 3810 assertions. See
 [native inbox evidence](../../assessments/github-sqlite-inbox.md).
-Tasks 5-6 remain pending separate approval. No live
-GitHub access, execution or publication is authorised by this offline approval.
+Task 5's bounded verified-ingress bridge is separately approved and in progress;
+see [Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 remains
+pending separate approval. No live GitHub access, execution or publication is
+authorised by this offline approval.
 
 ## Outcome And Scope
 

@@ -29,8 +29,10 @@ Task 3's inferred service and test-only memory inbox contract is complete at
 Task 4's scoped native SQLite adapter is complete at `db21cc4`, with clean
 independent review and 549 total tests / 3810 assertions. See
 [Task 4 evidence](../../assessments/github-sqlite-inbox.md).
-Tasks 5-6 remain pending separate approval. No live
-GitHub access, merge or push is authorised.
+Task 5's bounded verified-ingress bridge is separately approved and in progress;
+see [Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6
+remains pending separate approval. No live GitHub access, merge or push is
+authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
 patches and explicit Google optional MCP peer already committed at `629ada7`.
@@ -361,5 +363,6 @@ the remaining tasks just because their plans are written.
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
 are linked above. Tasks 2 and 3 are complete with independent task review.
-Task 4 is complete and reviewed; Tasks 5-6 have not started.
+Task 4 is complete and reviewed; Task 5 is approved and in progress, while Task 6
+has not started.
 Live GitHub use remains unauthorised.

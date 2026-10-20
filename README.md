@@ -126,21 +126,24 @@ run paid jobs or change external systems.
 organisation discovery and config-only self-PRs against Leviathan for new repos.
 Discovery does not automatically enable migrations or grant execution access.
 
-## Offline GitHub Admission: Blocked
+## Offline GitHub Admission
 
 The owner approved the conversational design for an offline `/leviathan assess`
 issue-comment admission probe. The
 [written spec](docs/superpowers/specs/2026-10-20-github-admission-design.md)
 and [implementation plan](docs/superpowers/plans/2026-10-20-github-admission.md)
 were approved on 2026-10-20 with subagent-driven execution and controller-owned
-independent review. Task 1 is blocked: seven real-handler runtime tests pass,
-but strict vendor declarations fail (TS2846, TS2307, TS2416). The discarded
-prototype also failed three lint rules. Setup/lock edits were restored and all
-restored baseline gates pass (458 tests / 1900 assertions). The
-[blocked assessment](docs/assessments/github-admission.md) records the evidence;
-the package is not admitted and Tasks 2-6 remain pending, not started. No
-admission implementation is retained. Models, a public endpoint, worker execution
-and GitHub writes remain out of scope; the CLI-first direction is unchanged.
+independent review. The original published-artifact failure remains in the
+[historical blocked assessment](docs/assessments/github-admission.md); only the
+subsequently approved [patched local cohort](docs/assessments/github-admission-repair.md)
+is admitted. Tasks 2-4 now provide reviewed pure policy, an inferred admission
+service and a scoped native SQLite inbox, with 549 local tests / 3810 assertions
+at the Task 4 baseline.
+
+[Task 5 verified ingress](docs/assessments/github-verified-ingress.md) is separately
+approved and in progress. Process-restart qualification in Task 6 still requires
+approval. Models, a public endpoint, worker execution and GitHub writes remain
+out of scope; the CLI-first direction is unchanged.
 
 ## Architecture Draft
 
