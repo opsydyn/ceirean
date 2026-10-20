@@ -1,0 +1,1297 @@
+{
+  "qualification": "offline-local-process-restart-only",
+  "productionQualified": false,
+  "exclusions": [
+    "live-permissions",
+    "models",
+    "workers",
+    "publishing",
+    "hosting",
+    "power-loss",
+    "host-loss",
+    "distributed-storage",
+    "exactly-once-execution"
+  ],
+  "primaryLawCases": 30000,
+  "lawCountBasis": "validated-law-source-and-passing-gate-attribution",
+  "evidence": {
+    "identity": {
+      "testedCommit": "ad5c840c07128ce761272f7d3d3fdc2f6069af0a",
+      "testedTree": "e049c317e09bc301549db4752c25e432e7a37336",
+      "lockSha256": "a03b2f20874301814ba165f945b3fa55df5f20023f29ba5b873f3d16537cadc3",
+      "sources": [
+        {
+          "path": ".moon/toolchains.yml",
+          "sha256": "24333a46707cb84a7e5db09a623c4c0ad1138b374f7ce63d21ca678487fd3522"
+        },
+        {
+          "path": ".moon/workspace.yml",
+          "sha256": "3da78e3de1474004b2d5ede1594de3ed2d7f74068de29e625d4daa4d74552456"
+        },
+        {
+          "path": ".prototools",
+          "sha256": "584f72ca5e35a6d7a7a9d3bdf690d3fc372214ef726516d6fcc91130818c298a"
+        },
+        {
+          "path": "oxlint.config.ts",
+          "sha256": "a4ee5835f4246a48d82ecc569aa533db3a22dd27b24d66c3acdec396bc25ca9d"
+        },
+        {
+          "path": "package.json",
+          "sha256": "d813101a143a99ae70bc2c62831ca60a054daa8c77600d56d5e9ae32b46ac4da"
+        },
+        {
+          "path": "packages/domain/moon.yml",
+          "sha256": "8125b57f6c301d3e6059c13b4bd19eb867966692571ed5a8b1d53e3086d07312"
+        },
+        {
+          "path": "packages/domain/package.json",
+          "sha256": "2922c6fda06a77150cbad37895ed075e1c18e30c9a50d2dad10be23d1d9cb78f"
+        },
+        {
+          "path": "packages/domain/src/command-admission-policy.ts",
+          "sha256": "1abf0df32439a412482b48e4919441b2edd0e1a53b129a5eab3e886cf91e7b39"
+        },
+        {
+          "path": "packages/domain/src/command-admission.ts",
+          "sha256": "f8375d4d87bf8ea6fa627d90fe16975e53b172c45da6fa090b7a635327093f5e"
+        },
+        {
+          "path": "packages/domain/src/identities.ts",
+          "sha256": "b26d7fc6feb131a20aadaa120a13d39fc25b2f8e394db80ca77cc916471fe133"
+        },
+        {
+          "path": "packages/domain/src/index.ts",
+          "sha256": "d74bcb7e9c689d8db56309bb63864ae8cec4c9ededf1070b7693ce9f57508636"
+        },
+        {
+          "path": "packages/domain/src/upgrade-run.ts",
+          "sha256": "7a8818bc82bf070149c481b127f286e61fc567839c63680102a8a9b15a9d9d97"
+        },
+        {
+          "path": "packages/domain/src/verification.ts",
+          "sha256": "e0da23a0c240087d0c8ecf93a2f259653909a3db25fe605edacc93b13f1e7866"
+        },
+        {
+          "path": "packages/domain/src/worker-evidence.ts",
+          "sha256": "92752fc7a452c7dcc9a24c830df0d4432bd085c6fd9b096ee6aea44d3e91f1ce"
+        },
+        {
+          "path": "packages/domain/src/worker-operation.ts",
+          "sha256": "0e370f53696abf2c42b0786c3e5f8bbfaed63829370909326cfe72103e0afe0c"
+        },
+        {
+          "path": "packages/domain/tests/command-admission.test.ts",
+          "sha256": "e85411383a722b3ab766fc23a9c4c203fc17bd039aa428f8b66ac55f397c0784"
+        },
+        {
+          "path": "packages/domain/tests/command-fixtures.ts",
+          "sha256": "68594a8e7b30038c246dd569e477847fe8871d99746a13e280696c14dad3bf94"
+        },
+        {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        {
+          "path": "packages/domain/tests/fixtures.ts",
+          "sha256": "17ee9c090a420acb74cc8a8c0bd637779069524695db5243ecc04374d7d71964"
+        },
+        {
+          "path": "packages/domain/tests/properties.test.ts",
+          "sha256": "d90645fbc59272fcc230290b59107645e40e1b251286dc4b105c44ace82c5c35"
+        },
+        {
+          "path": "packages/domain/tests/properties.ts",
+          "sha256": "457e10efadc4fce51dbf3eb5f44df8a2837e03c854ace29693fb90a68cd71483"
+        },
+        {
+          "path": "packages/domain/tests/run-properties.test.ts",
+          "sha256": "9c255b5ce547fd99efb53cbb4740bfb8213203f85e712eb575eb5d0ca6b925cc"
+        },
+        {
+          "path": "packages/domain/tests/upgrade-run.test.ts",
+          "sha256": "781941ecd846f5be71b21cfaa48f358ef13b84aaaba56fc157dcd0e25935981e"
+        },
+        {
+          "path": "packages/domain/tests/verification.test.ts",
+          "sha256": "dbe6b23c57838766168e7ee3a09228c3cff8cad0518791bea70462c3d427ba17"
+        },
+        {
+          "path": "packages/domain/tests/worker-evidence.test.ts",
+          "sha256": "3112083bb799d9a574d69dc308286e8fd72c7e066e14fd7fffe13dbcbd9a04c0"
+        },
+        {
+          "path": "packages/domain/tests/worker-fixtures.ts",
+          "sha256": "4dc02e1e54888e2204d37105297ccfe6f820f6ad18bac8ca26cfc56b4577f608"
+        },
+        {
+          "path": "packages/domain/tests/worker-operation.test.ts",
+          "sha256": "e4ea7d15a99b8e7a76c5c10d22b82bca6036becf7df64ff23e94db8dce25b0f8"
+        },
+        {
+          "path": "packages/domain/tsconfig.json",
+          "sha256": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60"
+        },
+        {
+          "path": "packages/engine/moon.yml",
+          "sha256": "8125b57f6c301d3e6059c13b4bd19eb867966692571ed5a8b1d53e3086d07312"
+        },
+        {
+          "path": "packages/engine/package.json",
+          "sha256": "12eb7586b98dc27e721e3c91bf5711bfb46c39a8464b79ec8e471dc63043d70f"
+        },
+        {
+          "path": "packages/engine/src/command-admission.ts",
+          "sha256": "50f105b6db272e89ec61e45c3c661ba95591b315a3273c788c1682807e1214d0"
+        },
+        {
+          "path": "packages/engine/src/command-inbox-contracts.ts",
+          "sha256": "07339f95ae0d550a475322a9745d03d2e3c14ca457ebd38bf1a35872ad915a42"
+        },
+        {
+          "path": "packages/engine/src/command-inbox-errors.ts",
+          "sha256": "1213fa6c38081574f3a42b7d8493b7ddca63b987b1a225556c9a3310098decfc"
+        },
+        {
+          "path": "packages/engine/src/command-inbox-factory.ts",
+          "sha256": "0361e60061189368faf514d0047f0562b9517e6e930f17b0d4c63d2bacd2d6f5"
+        },
+        {
+          "path": "packages/engine/src/command-inbox-port.ts",
+          "sha256": "5967ff4d3182271d5fb6657c9a32b48c841238d5044ff941305e4c7d5f2f65b3"
+        },
+        {
+          "path": "packages/engine/src/contracts.ts",
+          "sha256": "571c37b9ba2951211b95865dbe4d9c4ae0fbf7d694b7fdc047b09484b4c10cc1"
+        },
+        {
+          "path": "packages/engine/src/errors.ts",
+          "sha256": "16771331887559e73120d603e0b4e2f19892f16187f9507f14c081e85c779736"
+        },
+        {
+          "path": "packages/engine/src/index.ts",
+          "sha256": "ea5e844fa1dd5a93d913970859927c6fade3fb38b3e2815b0d5a8942fd534e0c"
+        },
+        {
+          "path": "packages/engine/src/ports.ts",
+          "sha256": "82b7e690953d7a146a8e119b6bd50dbf5108b248eda064c12e7f381a8183b22a"
+        },
+        {
+          "path": "packages/engine/src/run-coordinator.ts",
+          "sha256": "41eff383b50cbdc5f89143b1120c0e3b8baac82b362c33b7b44200be34c0cf2f"
+        },
+        {
+          "path": "packages/engine/src/service-factories.ts",
+          "sha256": "446c0d26e0f3f5c3b067eb9fdf7ac1cea527945c434189fc1741ef2d02e22505"
+        },
+        {
+          "path": "packages/engine/src/worker-contracts.ts",
+          "sha256": "6cf24452e90a15851bfd53ea57b7d06839a48aae790745c8cce2ce60c7070ef6"
+        },
+        {
+          "path": "packages/engine/src/worker-errors.ts",
+          "sha256": "a760969fe32acd8c0a4fa8e01963b755f8da7ee93f42868770d7f779f3bd77db"
+        },
+        {
+          "path": "packages/engine/src/worker-lifecycle-service.ts",
+          "sha256": "8ba7d7c7a7e745889e2a16b015eea1dd2b0d1a4ffec32c0d2ffb6cfc2691ac0a"
+        },
+        {
+          "path": "packages/engine/src/worker-lifecycle-tasks.ts",
+          "sha256": "454a104f7e2bb88d789c6bfd95792682c08747f2924df6f93b8d6cafd26a1129"
+        },
+        {
+          "path": "packages/engine/src/worker-lifecycle.ts",
+          "sha256": "5b555f6474e2ab29eed7ec15b63bdb6ee2cc2c8cb1d9dc69f09f90673bf912b3"
+        },
+        {
+          "path": "packages/engine/src/worker-ports.ts",
+          "sha256": "00d535c897d947397ac18ec6c57f6c3884fb63a281ffdac6e865105a4b5820c4"
+        },
+        {
+          "path": "packages/engine/src/worker-service-factories.ts",
+          "sha256": "d79c6f7e1729dd2e41617e1cb3f4e09c2df9ef1c6961b30356b032aef91b2dff"
+        },
+        {
+          "path": "packages/engine/tests/command-admission.test.ts",
+          "sha256": "40f55349e48022909176f31c1ca83bdeb4e8b2e1eeaf70cb5c69c147cd3a56c1"
+        },
+        {
+          "path": "packages/engine/tests/command-fixtures.ts",
+          "sha256": "bb709e5364c0e289bfb575ea317af618121e63267cca5f92bd8a89ea169aafc8"
+        },
+        {
+          "path": "packages/engine/tests/command-inbox.test.ts",
+          "sha256": "26a7f467ec4fdf65f31fec3cdc8a4ee5662900ca380cb4176ba42201f7094d86"
+        },
+        {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        {
+          "path": "packages/engine/tests/fixtures.ts",
+          "sha256": "e6d84539d25d114c007cf5b61f9c6aa765110b9a73d1c3678cfd49b9fb703774"
+        },
+        {
+          "path": "packages/engine/tests/memory-command-inbox.ts",
+          "sha256": "7a551a38ec639405eb4048c77d1075af1498db3105dfb960c0af43d27c9f7fe2"
+        },
+        {
+          "path": "packages/engine/tests/memory-repository.ts",
+          "sha256": "a10ea6835729ba8f35dd3c845901494d7c5a40169586ce192b4ec31af8418f2a"
+        },
+        {
+          "path": "packages/engine/tests/qualification-races.test.ts",
+          "sha256": "bc7f65e7fa31219acbc997a4983531563e1667272454c7480abf3e0fc664dc1f"
+        },
+        {
+          "path": "packages/engine/tests/repository.test.ts",
+          "sha256": "4323bb536b915e0ffed7b78ba0cd490f0cad66148074257c746df47a4bf4298f"
+        },
+        {
+          "path": "packages/engine/tests/run-coordinator.test.ts",
+          "sha256": "cb2599ebf5528d9d5598579c866bce58379cab2af5d9dde24b4a6525e21443ed"
+        },
+        {
+          "path": "packages/engine/tests/service-factories.test.ts",
+          "sha256": "3ec35f7a6b0680a4af4f9a3e86fe6fc7718d354fa8d18343a1e5d532ebb64e6a"
+        },
+        {
+          "path": "packages/engine/tests/worker-completion.test.ts",
+          "sha256": "47cd304152673008d8964b136a312dbb9b6d3a102a78a035bfb5fbc6b6738f30"
+        },
+        {
+          "path": "packages/engine/tests/worker-controller.test.ts",
+          "sha256": "28cdfe47d5a5a152ba5799cd5418fbdf1b10a42d40d75738eb7c4a17a8dd89fa"
+        },
+        {
+          "path": "packages/engine/tests/worker-fakes.ts",
+          "sha256": "0e7d445597fd23d6ab52be7ff8e75824232c734fbc972a0ce135dff78a2fe5d1"
+        },
+        {
+          "path": "packages/engine/tests/worker-fixtures.ts",
+          "sha256": "d2581cef8a44a0fc156950afae6b3b6dd7116a3f9ebfb9989d5d884e2d62a791"
+        },
+        {
+          "path": "packages/engine/tests/worker-journal.test.ts",
+          "sha256": "070f43c797157cefa1da2de6dd412d7e96007627fa2ef6b2cfd99f10ad3a4051"
+        },
+        {
+          "path": "packages/engine/tests/worker-lifecycle.test.ts",
+          "sha256": "090d68c1dee360d9b106a422a45c82bde429239ce83c58c9e6350b2e169047be"
+        },
+        {
+          "path": "packages/engine/tests/worker-memory-journal.ts",
+          "sha256": "b629b981146782fa5a2dfb836594fbeeefcf30bf76f087c1ad2c104d48234ab7"
+        },
+        {
+          "path": "packages/engine/tests/worker-properties.test.ts",
+          "sha256": "00aeea8e2bed47617a0341bb6cc645355b6ab1479d5c60b88ce98f1f74fb2391"
+        },
+        {
+          "path": "packages/engine/tests/worker-property-fixture.ts",
+          "sha256": "290d49d7e293560f97be95a4cfbfcc7784cfa326a88348dafbdc3107e0f552fd"
+        },
+        {
+          "path": "packages/engine/tests/worker-service-factories.test.ts",
+          "sha256": "e163f804d50058e5434d07f42d07d56802866a24368c1921710939b69129bd71"
+        },
+        {
+          "path": "packages/engine/tests/xstate-compatibility.test.ts",
+          "sha256": "4ea6a20c35dbb392adc72bc785491f36d35fdc8bb9675726237ee493b1fdf578"
+        },
+        {
+          "path": "packages/engine/tsconfig.json",
+          "sha256": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60"
+        },
+        {
+          "path": "patches/@flue%2Fruntime@2.3.0.patch",
+          "sha256": "07d115c8c98bea3c28011afe76e838a89a5126b2f401bad1091af678c008931a"
+        },
+        {
+          "path": "patches/gaxios@7.3.1.patch",
+          "sha256": "7ea7b1f29d158ab1595b71f798b71c9c44249ae29567b12dcf6d5d7e35239e3e"
+        },
+        {
+          "path": "probes/bun-effect-flue/moon.yml",
+          "sha256": "8438f009494116f63dcb645a842bece20c07bd95be1196f936f52108f7e846e7"
+        },
+        {
+          "path": "probes/bun-effect-flue/package.json",
+          "sha256": "3698bb31cec0c989d31ed0f3520967290f83341c2af882e93a06ab405e881b19"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/cancellation-child.ts",
+          "sha256": "48299c2f81348c386ccd72a15e4b1219597e6b8fd543e992f3d802dd5c27b603"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/composition.ts",
+          "sha256": "4cc5bf300b1aa4cfd88843b81e21d5b09739df7ff735ce35b8ff30ef9f27ed52"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/fixture.ts",
+          "sha256": "2c9f7976037e0e56956dfc4fa388e706908574081a590ab9fb5e253e1aa1def3"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/flue-probe.ts",
+          "sha256": "2617564dec52dff46c8431b37ef95462582f119e7ca4fc0ced0495387ed6d5ba"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/ledger.ts",
+          "sha256": "15d3dbd288576ef4e985d963a8e16d3a7bc05532279888a964d35c047594ea09"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/protocol.ts",
+          "sha256": "262ccacd5aeff674a47933a0f5ccb81baa2f0bc4eb848e7e6089b6cff9d75476"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/recorder.ts",
+          "sha256": "2f3896f43c1074141cafd28aa082d1589452df1a39ca50f72b250c9062b49e4a"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/report.ts",
+          "sha256": "ce3c10947c7b49c2f5938964b1ed6deac9aa041af5d99a36956735e27e9128e0"
+        },
+        {
+          "path": "probes/bun-effect-flue/src/restart-child.ts",
+          "sha256": "fbbbab44710b2af50ca52f52f7d64e3cde660b7e81739d919a91754d9017a9ec"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/cancellation.test.ts",
+          "sha256": "c69a15d5b11fc19f5bfcd4111cd4d36cc12da3e634adfc7497c235dd72d46a87"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/fixture.test.ts",
+          "sha256": "247e5634a0982c931f31e4342c562e36eb2297bae81a19cdfc905916f22b9f85"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/flue.test.ts",
+          "sha256": "e717330d98c6ba68baf1d81904e12bacd8bb9cf0df18fed23cdb87ca68330a7f"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/ledger.test.ts",
+          "sha256": "e16952f93b60e86b2f22920f8c3b61eaa2356e3a0e0bf3ca94ebf4bf9e747590"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/process.ts",
+          "sha256": "8fab980543812adac27f21102c20c3f9756c7168328f52c929846ef6f981b279"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/protocol.test.ts",
+          "sha256": "5855c46dd5d2852a76fb15cee7829b2d6d17f430c02ee2f2c3875e9b3e742391"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/report.test.ts",
+          "sha256": "57c8a69bb8cd5f2b78e5aff368790555f8f0c6ad8130b76e8df82d0109912a06"
+        },
+        {
+          "path": "probes/bun-effect-flue/tests/restart.test.ts",
+          "sha256": "6a38299949208f66ee2ad769fce4edad7dbdb7b62422ee12e7a41ec67125afcb"
+        },
+        {
+          "path": "probes/bun-effect-flue/tsconfig.json",
+          "sha256": "2fd112124a95843621a820ba00f3076903df2ac3a52c7d21fb7f0f6d60a0ca02"
+        },
+        {
+          "path": "probes/github-admission/moon.yml",
+          "sha256": "b70e0a5e533cbb1b6736d61837c7e9c05424b35597beec092089a7372751e068"
+        },
+        {
+          "path": "probes/github-admission/package.json",
+          "sha256": "61399c41eb17dfd21e4693c0a3142c5f8a707a28939a2fd20681637e27f88acf"
+        },
+        {
+          "path": "probes/github-admission/src/composition.ts",
+          "sha256": "b89af5e3714246678db7ab0e86d261504137184f953b5bae682b54a970b97f7d"
+        },
+        {
+          "path": "probes/github-admission/src/fixture.ts",
+          "sha256": "633eaab210f2e0c5084dbf5eb4a9ab61eddc3600f9dc49506b3352cd54607f3c"
+        },
+        {
+          "path": "probes/github-admission/src/github-ingress.ts",
+          "sha256": "4c6b45278098b1779f8d808e92ccc61c2561615bf94c63bab85dc9411efe651e"
+        },
+        {
+          "path": "probes/github-admission/src/github-payload.ts",
+          "sha256": "5392debc4ae1d14f632d90e5d4812ecd1c40dc4cd11e68d247cacd213555369d"
+        },
+        {
+          "path": "probes/github-admission/src/report.ts",
+          "sha256": "9d2597bfe0690edb57e494cef02b4b3152feccb922e6b1dadb57532bdb24a0e2"
+        },
+        {
+          "path": "probes/github-admission/src/request-body.ts",
+          "sha256": "6023cdbffc82590882578d2a677ec3831c859a7449d9fae071869d118bfa49a3"
+        },
+        {
+          "path": "probes/github-admission/src/restart-child.ts",
+          "sha256": "302ce7e074e6b6395d664c04b5375ce2c723be1346a7751dea4266c6d0dc26c8"
+        },
+        {
+          "path": "probes/github-admission/src/sqlite-inbox.ts",
+          "sha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50"
+        },
+        {
+          "path": "probes/github-admission/src/sqlite-storage.ts",
+          "sha256": "85c04c9d570d200a86fa25adc58e558a33462087897f709d42a2e9c0ca786fc7"
+        },
+        {
+          "path": "probes/github-admission/tests/compatibility.test.ts",
+          "sha256": "e13542fdabfe2673308a73372ea673eaec526c5dc6a7a5bd8152e227fad72bdc"
+        },
+        {
+          "path": "probes/github-admission/tests/composition.test.ts",
+          "sha256": "22cd860f7096947a0d8addb66c2346fc3b3c4a45272dda7ab6ec7cd00ae6af8c"
+        },
+        {
+          "path": "probes/github-admission/tests/github-ingress.test.ts",
+          "sha256": "b5869b7a168f3a3adef11bbb68fb78127419e00beb59ea3fb4cdb6ff7276b451"
+        },
+        {
+          "path": "probes/github-admission/tests/github-payload.test.ts",
+          "sha256": "6bb44e845ca32da51d1acabbd2cc25a43010172e014016a2612cf520d6227a0c"
+        },
+        {
+          "path": "probes/github-admission/tests/native-files.test.ts",
+          "sha256": "055542bcbbd9638b107e166d1c509668a672f49fa0b507a00178748a68e9ef6e"
+        },
+        {
+          "path": "probes/github-admission/tests/report.test.ts",
+          "sha256": "d8fe85d9d75a7b0e5a3ca2bf205abd75029eac72413af2e87d38ba7e4ff8c3a6"
+        },
+        {
+          "path": "probes/github-admission/tests/request-body.test.ts",
+          "sha256": "65945686c81f031a8db36b150ed56e527e0e7ec9c98df38c10ddb41ded1e61da"
+        },
+        {
+          "path": "probes/github-admission/tests/restart-process.test.ts",
+          "sha256": "253c95940a594c601c9ab85ef023142cb14a5e2d18142c7fe13b985ea91fe3b6"
+        },
+        {
+          "path": "probes/github-admission/tests/restart.test.ts",
+          "sha256": "9ccff023a211a009f2d64de97b811595258cf5a0011980cbe85b5438a098a88c"
+        },
+        {
+          "path": "probes/github-admission/tests/sqlite-inbox.test.ts",
+          "sha256": "9559d84c7d8cf5c01f5a95b844c6dd7f47c5b47538cd4ccee838dbf1c62a710c"
+        },
+        {
+          "path": "probes/github-admission/tsconfig.json",
+          "sha256": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60"
+        },
+        {
+          "path": "tsconfig.base.json",
+          "sha256": "e3b4043691ce77a31810768208b6719041723a3ecf794acb722994aaf2d3f895"
+        }
+      ],
+      "artifacts": [
+        {
+          "name": "@flue/github",
+          "version": "2.3.0",
+          "registryIntegrity": "sha512-YMhbDT8P3xt3ilO3OI9xOebiitTqy1z5kdLEL+1MB6mdGeYiGO1aEkjQPK1pmSK1hN6HAQNNpcOGZWJ/hhXpDg==",
+          "fetchedIntegrity": "sha512-YMhbDT8P3xt3ilO3OI9xOebiitTqy1z5kdLEL+1MB6mdGeYiGO1aEkjQPK1pmSK1hN6HAQNNpcOGZWJ/hhXpDg==",
+          "exportsSha256": "daf4eddbbcd7b60c8189c75a30e13496477dba31d6164fd64ca5f81852180171"
+        },
+        {
+          "name": "@flue/runtime",
+          "version": "2.3.0",
+          "registryIntegrity": "sha512-Sb3Dix9PArIzwr7lmAZCr2csU7OUMHsEhIqYKCiqgldyt33u23k59CNoD947MLXpBaWXAz6CEd/Xv1LLI0cHYg==",
+          "fetchedIntegrity": "sha512-Sb3Dix9PArIzwr7lmAZCr2csU7OUMHsEhIqYKCiqgldyt33u23k59CNoD947MLXpBaWXAz6CEd/Xv1LLI0cHYg==",
+          "exportsSha256": "df50a89d1bec012d5a55aad9eeea843f21db966ba6b0601dad30eadbd6557bf4"
+        }
+      ],
+      "cohort": {
+        "effectVersion": "4.0.5",
+        "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+        "physicalEffectPaths": [
+          "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+        ],
+        "consumers": [
+          {
+            "name": "packages/domain",
+            "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+          },
+          {
+            "name": "packages/engine",
+            "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+          },
+          {
+            "name": "probes/bun-effect-flue",
+            "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+          },
+          {
+            "name": "probes/github-admission",
+            "effectRealpath": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+          }
+        ],
+        "audit": {
+          "path": "docs/evidence/github-admission-artifacts.json",
+          "sha256": "017a5f128f7a01c9417a1b22acbff70a718662a6c14dae14463e5230af8c6837"
+        }
+      }
+    },
+    "gates": [
+      {
+        "gate": "install",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/install.log",
+          "sha256": "76180d9cff3793df34effbd5c9f7d8c0560b0681e49c4eef3dbd570deb17e0ec"
+        }
+      },
+      {
+        "gate": "check",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/check.log",
+          "sha256": "f42aaa805ef99ef1523de7d0ed24b503d12eed2ef90385955b9d4305b125e5d6"
+        }
+      },
+      {
+        "gate": "domain:typecheck",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-typecheck.log",
+          "sha256": "75f9f569fa4d15cb280a30a314dcaa84466dd4bc4f1c9cae65a283ea3e2277d2"
+        }
+      },
+      {
+        "gate": "engine:typecheck",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-typecheck.log",
+          "sha256": "ff5ae0f8fdd164f30714e58bbda2d43126dacc931ab40d55ea3f16e53b13c4d0"
+        }
+      },
+      {
+        "gate": "probe:typecheck",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/probe-typecheck.log",
+          "sha256": "672ecbf269975e9c069e7b5b7ea238e269708294c700c8463fc4ba76652ec615"
+        }
+      },
+      {
+        "gate": "github-admission:typecheck",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/github-admission-typecheck.log",
+          "sha256": "2a550f7cc56e662b1596c485fb5baed2fcedbf1c89eb787554e157c40fda79e8"
+        }
+      },
+      {
+        "gate": "domain:test",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "gate": "engine:test",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "gate": "probe:test",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/probe-test.log",
+          "sha256": "e189c1e91c82f31499c58249c79df5de70679b4d81fc4c1fedbcde7819c64cb6"
+        }
+      },
+      {
+        "gate": "github-admission:test",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/github-admission-test.log",
+          "sha256": "f771b7f540cfe5931fd96f2d3d2ec7ff2eec374310965560b6b9351cee2d0505"
+        }
+      },
+      {
+        "gate": "diff:check",
+        "exitCode": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/diff-check.log",
+          "sha256": "a03d1203b73c7a5f99bde27ed7859cd472affdc5c49002d73198ec1921396aaa"
+        }
+      }
+    ],
+    "tests": [
+      {
+        "gate": "domain:test",
+        "passed": 201,
+        "failed": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "gate": "engine:test",
+        "passed": 273,
+        "failed": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "gate": "probe:test",
+        "passed": 36,
+        "failed": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/probe-test.log",
+          "sha256": "e189c1e91c82f31499c58249c79df5de70679b4d81fc4c1fedbcde7819c64cb6"
+        }
+      },
+      {
+        "gate": "github-admission:test",
+        "passed": 135,
+        "failed": 0,
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/github-admission-test.log",
+          "sha256": "f771b7f540cfe5931fd96f2d3d2ec7ff2eec374310965560b6b9351cee2d0505"
+        }
+      }
+    ],
+    "laws": [
+      {
+        "law": "domain:command coherent admission",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command coherent admission",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command coherent admission",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command single authority mutation",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command single authority mutation",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command single authority mutation",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command invalid interval and time",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command invalid interval and time",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command invalid interval and time",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command rename invariance",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command rename invariance",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command rename invariance",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command tuple key injectivity",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command tuple key injectivity",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command tuple key injectivity",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command generated extra text",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command generated extra text",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "domain:command generated extra text",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/domain/tests/command-properties.test.ts",
+          "sha256": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a"
+        },
+        "gate": "domain:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/domain-test.log",
+          "sha256": "2bd4a90a23b43635bf2e48ea7a25adfc52ec7e4cd0cfb6997ecb9c30b2009ba0"
+        }
+      },
+      {
+        "law": "engine:at most one admission per command key",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:at most one admission per command key",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:at most one admission per command key",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:original decisions immutable",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:original decisions immutable",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:original decisions immutable",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:authority and time races never activate stale drafts",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:authority and time races never activate stale drafts",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:authority and time races never activate stale drafts",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:resolved blocker admits only a new comment",
+        "seed": 0,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:resolved blocker admits only a new comment",
+        "seed": 1,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      },
+      {
+        "law": "engine:resolved blocker admits only a new comment",
+        "seed": 163,
+        "runs": 1000,
+        "size": 50,
+        "maxShrinks": 1000,
+        "maxDiscards": 10000,
+        "validation": "Passed.runs===1000",
+        "source": {
+          "path": "packages/engine/tests/command-properties.test.ts",
+          "sha256": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c"
+        },
+        "gate": "engine:test",
+        "log": {
+          "path": "docs/evidence/github-admission-gates/controller-1/engine-test.log",
+          "sha256": "f191622d93015bfd980ba8414c6abab5d4bc057d0f8e6a807da41649b7b0846d"
+        }
+      }
+    ],
+    "controls": [
+      {
+        "control": "command-key",
+        "source": "packages/domain/src/command-admission.ts",
+        "originalSha256": "f8375d4d87bf8ea6fa627d90fe16975e53b172c45da6fa090b7a635327093f5e",
+        "mutantSha256": "01f1ce21bfef10bc0ae0d5c0a9439b74db348bd22322d2faf3026b1a1963d320",
+        "restoredSha256": "f8375d4d87bf8ea6fa627d90fe16975e53b172c45da6fa090b7a635327093f5e",
+        "redExit": 1,
+        "greenExit": 0,
+        "behavioralFailure": "Pure rename/key property falsified at seed 0 after one run and three shrinks; repeated RED; restored three-seed law passed.",
+        "redLog": {
+          "path": "docs/evidence/github-admission-controls/key-red.log",
+          "sha256": "d42dcbfd859d645de28cdb07c51fd82a272b0b98aea16e9e83fb168adc6c84d9"
+        },
+        "greenLog": {
+          "path": "docs/evidence/github-admission-controls/key-green.log",
+          "sha256": "0589cc698617542e49220a32fd611365c9b9746ee96012d5fc93b300567fd54e"
+        }
+      },
+      {
+        "control": "native-dedup",
+        "source": "probes/github-admission/src/sqlite-inbox.ts",
+        "originalSha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+        "mutantSha256": "36c0fa9fc28ff2ebc49524213e147a2f46eecd4b444952008a1adba78cc779c4",
+        "restoredSha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+        "redExit": 1,
+        "greenExit": 0,
+        "behavioralFailure": "Fresh native recovery reader exited 1 instead of returning historical Duplicate after command lookup was bypassed; repeated RED; restored replay passed.",
+        "redLog": {
+          "path": "docs/evidence/github-admission-controls/native-red.log",
+          "sha256": "a6341cc87398ef3f12dcf1e30451502c9d97b3c9e9f706458957ea292b95856a"
+        },
+        "greenLog": {
+          "path": "docs/evidence/github-admission-controls/native-green.log",
+          "sha256": "49cf8293dc95c0470f1ba56250f3fcb412c951ad691c9474501cb828e98fd8d2"
+        }
+      },
+      {
+        "control": "authority-revision",
+        "source": "probes/github-admission/src/sqlite-inbox.ts",
+        "originalSha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+        "mutantSha256": "eb69def2d2b65f4a92889c3536675deccb67e0115beeec0506fc4d12f828958a",
+        "restoredSha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+        "redExit": 1,
+        "greenExit": 0,
+        "behavioralFailure": "Literal stale-revision test received Recorded AdmittedPreview instead of Unrecorded AuthorityChanged; repeated RED; restored refusal passed.",
+        "redLog": {
+          "path": "docs/evidence/github-admission-controls/revision-red.log",
+          "sha256": "0e044e5edaa49a1d61023e11997751d75f3dcec9edcecd0a3792a5b8998ccf88"
+        },
+        "greenLog": {
+          "path": "docs/evidence/github-admission-controls/revision-green.log",
+          "sha256": "3d841ae66fc7e15d850987797f2afcbdecc307f23d210c0596ad2db95e524a92"
+        }
+      },
+      {
+        "control": "rollback",
+        "source": "probes/github-admission/src/sqlite-inbox.ts",
+        "originalSha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+        "mutantSha256": "4a0e17e4d976058fb3179e37845b1ec23611b84b6c9890f6e435ab9a3910c2bf",
+        "restoredSha256": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+        "redExit": 1,
+        "greenExit": 0,
+        "behavioralFailure": "Bypassed transaction left one decision and zero receipts after killed uncommitted writer; two native rollback cases also failed; repeated RED; restored four tests passed.",
+        "redLog": {
+          "path": "docs/evidence/github-admission-controls/rollback-red.log",
+          "sha256": "244379e662aa0c44fa9d32a41c13a5122bb20874978e193eb97a44ba49b7de52"
+        },
+        "greenLog": {
+          "path": "docs/evidence/github-admission-controls/rollback-green.log",
+          "sha256": "45423387ef3ecffee03182ac2ae5b079889e93ae8356aa72d62ea21f7244c303"
+        }
+      },
+      {
+        "control": "reject-everything",
+        "source": "packages/domain/src/command-admission-policy.ts",
+        "originalSha256": "1abf0df32439a412482b48e4919441b2edd0e1a53b129a5eab3e886cf91e7b39",
+        "mutantSha256": "92a0c42a51522c7fe97ad8b3ba2ce2992d894b556773030101f30a627b4ee2e8",
+        "restoredSha256": "1abf0df32439a412482b48e4919441b2edd0e1a53b129a5eab3e886cf91e7b39",
+        "redExit": 1,
+        "greenExit": 0,
+        "behavioralFailure": "Constructive signed-authorised ingress received Rejected AccessRevoked instead of AdmittedPreview; repeated RED; restored accepted case passed.",
+        "redLog": {
+          "path": "docs/evidence/github-admission-controls/reject-red.log",
+          "sha256": "f7e2717b5fe8d74456f6a33384e790485c29307e32984d595433d91a2e870b96"
+        },
+        "greenLog": {
+          "path": "docs/evidence/github-admission-controls/reject-green.log",
+          "sha256": "83be2717036ec2292a5b99c9cae47b340a7c22a08cae6d89a8aea145a7584804"
+        }
+      }
+    ]
+  }
+}

@@ -148,9 +148,11 @@ at the Task 4 baseline.
 [Task 5 verified ingress](docs/assessments/github-verified-ingress.md) is complete
 at `f5b96ba`, with clean independent review after the async-reader cleanup fix:
 635 local tests / 4124 assertions, all four types and lint/format pass.
-Process-restart qualification in Task 6 still requires approval. Models, a public
-endpoint, worker execution and GitHub writes remain out of scope; the CLI-first
-direction is unchanged.
+Task 6 is separately approved. Its [recovery candidate](docs/assessments/github-admission-recovery.md)
+passes 645 local tests / 4226 assertions, with process-kill evidence and a
+source-bound measured report; independent whole-branch review remains pending.
+Models, a public endpoint, worker execution and GitHub writes remain out of
+scope; the CLI-first direction is unchanged.
 
 ## Architecture Draft
 

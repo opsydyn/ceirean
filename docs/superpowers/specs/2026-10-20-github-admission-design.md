@@ -18,9 +18,10 @@ independent review and 549 total tests / 3810 assertions. See
 [native inbox evidence](../../assessments/github-sqlite-inbox.md).
 Task 5's bounded verified-ingress bridge is complete at `f5b96ba`, with full gates
 and clean independent review after the async-reader cleanup correction; see
-[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 remains
-pending separate approval. No live GitHub access, execution or publication is
-authorised by this offline approval.
+[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 is now
+separately approved and in progress; see [recovery evidence](../../assessments/github-admission-recovery.md).
+No live GitHub access, execution or publication is authorised by this offline
+approval.
 
 ## Outcome And Scope
 

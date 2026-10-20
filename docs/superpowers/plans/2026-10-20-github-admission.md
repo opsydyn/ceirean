@@ -31,8 +31,9 @@ independent review and 549 total tests / 3810 assertions. See
 [Task 4 evidence](../../assessments/github-sqlite-inbox.md).
 Task 5's bounded verified-ingress bridge is complete at `f5b96ba`, with full gates
 and clean independent review after the async-reader cleanup correction; see
-[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 remains
-pending separate approval. No live GitHub access, merge or push is authorised.
+[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 is now
+separately approved and in progress; see [recovery evidence](../../assessments/github-admission-recovery.md).
+No live GitHub access, merge or push is authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
 patches and explicit Google optional MCP peer already committed at `629ada7`.
@@ -363,5 +364,6 @@ the remaining tasks just because their plans are written.
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
 are linked above. Tasks 2 and 3 are complete with independent task review.
-Tasks 4 and 5 are complete and independently reviewed. Task 6 has not started.
+Tasks 4 and 5 are complete and independently reviewed. Task 6 is approved and in
+progress; final qualification and independent whole-branch review remain pending.
 Live GitHub use remains unauthorised.

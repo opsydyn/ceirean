@@ -96,6 +96,10 @@ Task 3's service/memory contract and Task 4's native inbox are locally qualified
 locally qualified and independently reviewed. The original async-reader lifetime
 finding was corrected and re-reviewed. Process-kill recovery and measured final
 qualification remain pending; no whole-plan acceptance is claimed.
+Task 6 is separately approved; its [recovery candidate](assessments/github-admission-recovery.md)
+passes controller gates and real process-kill tests, with a validated measured
+report. Independent whole-branch review and its fresh gate run remain pending;
+no whole-plan acceptance is claimed yet.
 Production hosting, live permission retrieval, execution and publication remain
 separately gated even if a future offline probe passes.
 
