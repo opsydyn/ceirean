@@ -105,6 +105,21 @@ qualified by it.
 Production hosting, live permission retrieval, execution and publication remain
 separately gated even if a future offline probe passes.
 
+## Local GitHub Ingress Rehearsal Design
+
+- [x] Agree the conversational scope: one repository/installation, explicit
+      operator IDs plus fresh write-or-higher permission checks, local Bun/SQLite
+      and an operator-managed temporary HTTPS tunnel; admission previews only.
+- [ ] Review the written [local ingress spec](superpowers/specs/2026-10-20-local-github-ingress-design.md).
+- [ ] Review a subsequent implementation plan and select its execution method.
+- [ ] Qualify local adapters, listener, immutable live evidence and replay-first
+      admission with synthetic credentials and independent review.
+- [ ] Separately approve the exact live target, App grants, credentials, tunnel
+      and finite rehearsal session before any live access or listener starts.
+
+This is design work only. No deployment, GitHub writes, worker execution or
+cloud storage is authorised. Local test persistence is not production durability.
+
 ## Organisation Discovery And Configuration Self-PRs
 
 **Outcome:** a maintainer no longer has to notice every new organisation repo and
