@@ -575,6 +575,87 @@ test(
   cancelledStartMaterializes,
 );
 
+for (const entry of ['notification', 'reconstruction'] as const) {
+  async function failedStartAllowsOwnedCleanup() {
+    function* scenario() {
+      const h = yield* LifecycleHarness;
+      const c = makeWorkerCase();
+      yield* TestClock.setTime(950);
+      const original = yield* createEffectActor(workerLifecycleMachine, { input });
+      const create = yield* Queue.take(h.fake.barriers.mutations);
+      yield* completeMutation(create, false);
+      const start = yield* Queue.take(h.fake.barriers.mutations);
+      const reason = { _tag: 'ReadinessMismatch' as const, operationId: input.operationId };
+      yield* Deferred.succeed(start.reply, {
+        ...c.reply,
+        atMs: 950,
+        intentId: start.request.intent.intentId,
+        issuerId: input.issuerId,
+        outcome: { _tag: 'Failed', reason },
+      });
+      yield* answerNextObservation();
+      const failed = yield* waitFor(original, (state) => state.matches('blocked'));
+      expect(failed.context.issue).toEqual(reason);
+      const cancelled = yield* cancelPersisted();
+      const acquire = Match.value(entry).pipe(
+        Match.when('notification', () => Effect.sync(() => original)),
+        Match.when('reconstruction', () => createEffectActor(workerLifecycleMachine, { input })),
+        Match.exhaustive,
+      );
+      const actor = yield* acquire;
+      const notify = send(actor, {
+        type: 'RecordedCancellation',
+        operationId: input.operationId,
+        revision: cancelled.revision,
+      });
+      const needsNotification = Effect.succeed(
+        Match.value(entry).pipe(
+          Match.when('notification', () => true),
+          Match.orElse(() => false),
+        ),
+      );
+      yield* notify.pipe(Effect.when(needsNotification));
+      const inspect = yield* Queue.take(h.fake.barriers.observations);
+      expect(inspect.request.containerId).toEqual(Option.some(c.containerId));
+      yield* h.fake.readback(inspect);
+      const decision = yield* waitFor(
+        actor,
+        (state) => state.matches('blocked') || state.matches('removing'),
+      );
+      expect(decision.matches('removing')).toBe(true);
+      expect(decision.context.issue).toEqual(reason);
+      const remove = yield* Queue.take(h.fake.barriers.mutations);
+      expect(remove.request.intent.kind).toBe('Remove');
+      expect(remove.request.intent.resource).toBe(c.containerId);
+      yield* completeMutation(remove, false, true);
+      yield* h.fake.materialize({ ...c.observation, atMs: 950, resources: [], staging: 'Absent' });
+      yield* answerNextObservation();
+      const released = yield* waitFor(actor, (state) => state.matches('released'));
+      expect(released.context.issue).toEqual(reason);
+      const stored = Option.getOrThrow(yield* h.journal.inspect(input.operationId));
+      expect(stored.authority.cancelledAtMs).toEqual(Option.some(950));
+      expect(stored.intents.map((intent) => [intent.kind, intent.outcome._tag])).toEqual([
+        ['Create', 'Completed'],
+        ['Start', 'Failed'],
+        ['Remove', 'Completed'],
+      ]);
+      expect(Option.getOrThrow(stored.cleanup)._tag).toBe('CleanupConfirmed');
+      expect(
+        (yield* Ref.get(h.fake.calls)).filter(isMutation).map((call) => call.request.intent.kind),
+      ).toEqual(['Create', 'Start', 'Remove']);
+    }
+    const program = Effect.gen(scenario);
+    const scoped = Effect.scoped(program);
+    const services = lifecycleTestLayer(makeWorkerSnapshot());
+    const provided = Effect.provide(scoped, services);
+    await Effect.runPromise(provided);
+  }
+  test(
+    `failed Start then cancellation via ${entry} removes once and retains its tagged failure`,
+    failedStartAllowsOwnedCleanup,
+  );
+}
+
 for (const staging of ['Present', 'Unknown', 'Absent'] as const) {
   async function cleanupRequiresAllAbsence() {
     function* scenario() {
@@ -696,22 +777,35 @@ test(
   selfCompletedWorkRequestsCleanup,
 );
 
-for (const failure of ['Failed', 'Defect'] as const) {
+for (const failure of ['FailedStop', 'FailedRemove', 'Defect'] as const) {
   async function cleanupFailureIsVisible() {
     function* scenario() {
       const h = yield* LifecycleHarness;
       yield* TestClock.setTime(950);
-      yield* h.fake.materialize({ ...makeWorkerCase().observation, atMs: 950 });
+      const running = Match.value(failure).pipe(
+        Match.when('FailedRemove', () => false),
+        Match.orElse(() => true),
+      );
+      yield* h.fake.materialize({
+        ...makeWorkerCase().observation,
+        atMs: 950,
+        resources: [{ ...makeWorkerCase().resource, running }],
+      });
       const actor = yield* createEffectActor(workerLifecycleMachine, { input });
       yield* answerNextObservation();
-      const stop = yield* Queue.take(h.fake.barriers.mutations);
+      const mutation = yield* Queue.take(h.fake.barriers.mutations);
+      const expectedKind = Match.value(failure).pipe(
+        Match.when('FailedRemove', () => 'Remove' as const),
+        Match.orElse(() => 'Stop' as const),
+      );
+      expect(mutation.request.intent.kind).toBe(expectedKind);
       const c = makeWorkerCase();
       const answer = Match.value(failure).pipe(
-        Match.when('Failed', () =>
-          Deferred.succeed(stop.reply, {
+        Match.whenOr('FailedStop', 'FailedRemove', () =>
+          Deferred.succeed(mutation.reply, {
             ...c.reply,
             atMs: 950,
-            intentId: stop.request.intent.intentId,
+            intentId: mutation.request.intent.intentId,
             issuerId: input.issuerId,
             outcome: {
               _tag: 'Failed',
@@ -719,13 +813,15 @@ for (const failure of ['Failed', 'Defect'] as const) {
             },
           }),
         ),
-        Match.when('Defect', () => Deferred.die(stop.reply, new Error('private mechanism detail'))),
+        Match.when('Defect', () =>
+          Deferred.die(mutation.reply, new Error('private mechanism detail')),
+        ),
         Match.exhaustive,
       );
       yield* answer;
       const isKnownFailure = Effect.succeed(
         Match.value(failure).pipe(
-          Match.when('Failed', () => true),
+          Match.whenOr('FailedStop', 'FailedRemove', () => true),
           Match.orElse(() => false),
         ),
       );
@@ -736,10 +832,23 @@ for (const failure of ['Failed', 'Defect'] as const) {
       expect(blocked.context.issue).not.toHaveProperty('cause');
       expect(String(blocked.context.issue)).not.toContain('private mechanism detail');
       const expected = Match.value(failure).pipe(
-        Match.when('Failed', () => 'NoCustody' as const),
+        Match.whenOr('FailedStop', 'FailedRemove', () => 'NoCustody' as const),
         Match.orElse(() => 'WorkerLifecycleRuntimeError' as const),
       );
       expect(blocked.context.issue?._tag).toBe(expected);
+      const stored = Option.getOrThrow(yield* h.journal.inspect(input.operationId));
+      yield* send(actor, {
+        type: 'RequestedReconciliation',
+        operationId: input.operationId,
+        revision: stored.revision,
+      });
+      yield* answerNextObservation();
+      const reconciled = yield* waitFor(actor, (state) => state.matches('blocked'));
+      const afterReconciliation = Match.value(failure).pipe(
+        Match.when('Defect', () => 'UnresolvedIntent' as const),
+        Match.orElse(() => 'NoCustody' as const),
+      );
+      expect(reconciled.context.issue?._tag).toBe(afterReconciliation);
       expect((yield* Ref.get(h.fake.calls)).filter(isMutation)).toHaveLength(1);
     }
     const seed = {
@@ -1085,6 +1194,56 @@ for (const fault of [
     `${fault} mutation reply cannot bind or authorize Start`,
     mutationReplyCannotAuthorizeNextAction,
   );
+}
+
+for (const kind of ['Create', 'Start'] as const) {
+  for (const outcome of ['Claimed', 'Unknown'] as const) {
+    async function unresolvedStartupBlocksCleanup() {
+      const c = makeWorkerCase();
+      const unresolvedOutcome = Match.value(outcome).pipe(
+        Match.when('Claimed', () => ({ _tag: 'Claimed' as const })),
+        Match.when('Unknown', () => ({
+          _tag: 'Unknown' as const,
+          reason: { _tag: 'UnresolvedIntent' as const, operationId: input.operationId },
+        })),
+        Match.exhaustive,
+      );
+      const intent = { ...makeWorkerIntent(kind), outcome: unresolvedOutcome };
+      const seed = Match.value(kind).pipe(
+        Match.when('Create', () => ({ ...makeWorkerSnapshot(), intents: [intent] })),
+        Match.when('Start', () => ({
+          ...makeStartedWorkerSnapshot(),
+          intents: [...makeStartedWorkerSnapshot().intents.slice(0, 1), intent],
+        })),
+        Match.exhaustive,
+      );
+      function* scenario() {
+        const h = yield* LifecycleHarness;
+        yield* TestClock.setTime(950);
+        const resources = Match.value(kind).pipe(
+          Match.when('Create', () => []),
+          Match.when('Start', () => [{ ...c.resource, running: false }]),
+          Match.exhaustive,
+        );
+        yield* h.fake.materialize({ ...c.observation, atMs: 950, resources, staging: 'Absent' });
+        yield* cancelPersisted();
+        const actor = yield* createEffectActor(workerLifecycleMachine, { input });
+        yield* answerNextObservation();
+        const blocked = yield* waitFor(actor, (state) => state.matches('blocked'));
+        expect(blocked.context.issue?._tag).toBe('UnresolvedIntent');
+        expect((yield* Ref.get(h.fake.calls)).filter(isNativeWrite)).toEqual([]);
+        const stored = Option.getOrThrow(yield* h.journal.inspect(input.operationId));
+        expect(stored.intents.at(-1)?.outcome._tag).toBe(outcome);
+        expect(Option.getOrThrow(stored.cleanup)._tag).not.toBe('CleanupConfirmed');
+      }
+      const program = Effect.gen(scenario);
+      const scoped = Effect.scoped(program);
+      const services = lifecycleTestLayer(seed);
+      const provided = Effect.provide(scoped, services);
+      await Effect.runPromise(provided);
+    }
+    test(`${outcome} ${kind} still blocks cancelled cleanup`, unresolvedStartupBlocksCleanup);
+  }
 }
 
 for (const recovery of [

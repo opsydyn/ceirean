@@ -239,7 +239,6 @@ function reconciledSnapshot(
   context: LifecycleContext,
   { snapshot, observation }: Result.Result.Success<OutputFrom<typeof reconcileWorker>>,
 ) {
-  const next = { ...context, snapshot };
   const confirmed = Option.exists(snapshot.cleanup, (cleanup) =>
     Match.value(cleanup).pipe(
       Match.tag('CleanupConfirmed', () => true),
@@ -249,6 +248,10 @@ function reconciledSnapshot(
   const reason = Array.findFirst(snapshot.intents.map(failedReason), Option.isSome).pipe(
     Option.flatten,
   );
+  const next = Option.match(reason, {
+    onNone: () => ({ ...context, snapshot }),
+    onSome: (error) => failure({ ...context, snapshot }, error),
+  });
   const resource = Array.head(observation.resources);
   const pending = Option.match(resource, {
     onNone: () => 'Remove' as const,
@@ -282,11 +285,11 @@ function reconciledSnapshot(
     Match.when({ unresolved: true }, () =>
       blocked(next, { _tag: 'UnresolvedIntent', operationId: context.operationId }),
     ),
-    Match.when({ failed: true }, () => blocked(next, Option.getOrThrow(reason))),
     Match.when({ cleanup: true, canClean: true }, () => ({
       target: 'recordingIntent' as const,
       context: { ...next, pending },
     })),
+    Match.when({ failed: true }, () => blocked(next, Option.getOrThrow(reason))),
     Match.when({ cleanup: true }, () => blocked(next, cleanupIssue)),
     Match.when({ hasContainer: true, resourcePresent: false }, () =>
       blocked(next, { _tag: 'NotFound', operationId: context.operationId }),
