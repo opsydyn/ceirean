@@ -1,9 +1,14 @@
 # Offline GitHub Command Admission
 
-Status: the owner approved the conversational design sections and then this
-written spec on 2026-10-20. The [implementation plan](../plans/2026-10-20-github-admission.md)
-awaits review and selection of execution method. Dependency installation, live
-GitHub access and implementation are not authorised by written-spec approval.
+Status: the owner approved the conversational design, this written spec and the
+[implementation plan](../plans/2026-10-20-github-admission.md) on 2026-10-20,
+selecting subagent-driven execution with controller-owned independent review.
+Task 1 is blocked: seven runtime tests pass, strict vendor declarations fail
+(TS2846, TS2307, TS2416), and the discarded prototype failed three lint rules.
+Setup/lock edits were restored and the full restored baseline passes (458 tests /
+1900 assertions). The [assessment](../../assessments/github-admission.md) records
+the rejected gate; Tasks 2-6 remain pending, not started. No live GitHub access,
+execution or publication is authorised by this offline approval.
 
 ## Outcome And Scope
 
@@ -289,6 +294,7 @@ models, worker isolation, publication and org discovery remain separately gated.
 - [Assessed source package manifest](https://github.com/withastro/flue/blob/deee93b40d275ecc9a50c50af2158f20089d54bc/packages/github/package.json)
 - [GitHub failed-delivery handling](https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)
 
-The owner has approved this written spec. Written-spec approval permits a plan,
-not code or installation. Review the linked implementation plan and select its
-execution method before implementation begins.
+The owner subsequently approved the linked plan and selected subagent-driven
+execution. Task 1's measured strict compatibility blocker prevents dependent
+implementation; the published package is not admitted. Independent review and
+any approved next direction remain with the controller.

@@ -107,17 +107,21 @@ run paid jobs or change external systems.
 organisation discovery and config-only self-PRs against Leviathan for new repos.
 Discovery does not automatically enable migrations or grant execution access.
 
-## Offline GitHub Admission Proposal
+## Offline GitHub Admission: Blocked
 
 The owner approved the conversational design for an offline `/leviathan assess`
 issue-comment admission probe. The
 [written spec](docs/superpowers/specs/2026-10-20-github-admission-design.md)
-is approved; its [implementation plan](docs/superpowers/plans/2026-10-20-github-admission.md)
-awaits review and selection of an execution method. It proposes verified ingress,
-application-owned authorisation and a transactional local inbox producing
-historical admission previews only. Nothing is implemented or installed for this
-slice; models, a public endpoint, worker execution and GitHub writes remain out
-of scope. It does not change the CLI-first deployment direction.
+and [implementation plan](docs/superpowers/plans/2026-10-20-github-admission.md)
+were approved on 2026-10-20 with subagent-driven execution and controller-owned
+independent review. Task 1 is blocked: seven real-handler runtime tests pass,
+but strict vendor declarations fail (TS2846, TS2307, TS2416). The discarded
+prototype also failed three lint rules. Setup/lock edits were restored and all
+restored baseline gates pass (458 tests / 1900 assertions). The
+[blocked assessment](docs/assessments/github-admission.md) records the evidence;
+the package is not admitted and Tasks 2-6 remain pending, not started. No
+admission implementation is retained. Models, a public endpoint, worker execution
+and GitHub writes remain out of scope; the CLI-first direction is unchanged.
 
 ## Architecture Draft
 

@@ -10,9 +10,15 @@
 
 **Spec:** [Approved offline GitHub admission design](../specs/2026-10-20-github-admission-design.md).
 
-Status: written spec approved by the owner on 2026-10-20. This plan awaits review
-and selection of an execution method. No installation or implementation has begun.
-Task 1 is a hard stop/go gate; Tasks 2-6 are conditional on its clean evidence.
+Status: the owner approved the written spec and this plan on 2026-10-20 and
+selected subagent-driven execution, with independent review owned by the
+controller. Task 1 was attempted and is blocked: seven real-handler runtime tests
+pass, but strict vendor declarations fail with TS2846, TS2307 and TS2416. The
+discarded prototype also failed three lint rules. Task-owned setup/lock edits
+were restored; the restored baseline passes all gates (458 tests / 1900
+assertions). See the [blocked assessment](../../assessments/github-admission.md).
+The package is not admitted. Tasks 2-6 remain pending, not started; independent
+review and any decision to revisit compatibility remain with the controller.
 
 ## Global Constraints
 

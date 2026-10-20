@@ -60,17 +60,24 @@ issue comments before discovery events, with previews only and no execution.
 - [x] Review the conversational command/authority, inbox/replay and acceptance
       design sections for `/leviathan assess` on ordinary issues.
 - [x] Review the written [offline admission spec](superpowers/specs/2026-10-20-github-admission-design.md).
-- [ ] Review its [implementation plan](superpowers/plans/2026-10-20-github-admission.md)
-      and select an execution method.
+- [x] Review its [implementation plan](superpowers/plans/2026-10-20-github-admission.md)
+      and select subagent-driven execution (owner approval, 2026-10-20), with
+      controller-owned independent review.
 - [ ] Qualify the exact GitHub channel artifact against the pinned Bun/Flue cohort
-      and universal lint rules before implementing the adapter.
+      and universal lint rules before implementing the adapter. Task 1 is blocked:
+      seven runtime tests pass, strict declarations fail (TS2846, TS2307, TS2416),
+      and the discarded prototype failed three lint rules. Setup/lock edits were
+      restored; all restored baseline gates pass (458 tests / 1900 assertions).
+      See the [blocked assessment](assessments/github-admission.md); the package
+      is not admitted and Tasks 2-6 remain pending, not started.
 - [ ] Prove signed fixtures, runtime validation, current local authorisation,
       transactional deduplication and SQLite process-restart behavior, with no
       model calls, listener, workers, coordinator invocation or GitHub writes.
 
-These are future evidence requirements, not implemented capability. Production
-hosting, live permission retrieval, execution and publication remain separately
-gated even if the offline probe passes.
+No admission implementation is retained. The runtime evidence above does not
+satisfy the strict package gate or these remaining evidence requirements.
+Production hosting, live permission retrieval, execution and publication remain
+separately gated even if a future offline probe passes.
 
 ## Organisation Discovery And Configuration Self-PRs
 
