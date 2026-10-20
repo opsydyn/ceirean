@@ -10,7 +10,8 @@ at `629ada7`: the patched local cohort passes strict new-probe types, all existi
 checks and 466 tests / 1924 assertions. Task 2's pure policy slice is complete at
 `0a435bc`, independently reviewed with no findings, and passes 481 total tests /
 2058 assertions. See [pure policy evidence](../../assessments/github-command-policy.md).
-Tasks 3-6 remain pending separate approval. No live
+Task 3's inferred service/test-only memory contract is separately approved and
+in progress; Tasks 4-6 remain pending separate approval. No live
 GitHub access, execution or publication is authorised by this offline approval.
 
 ## Outcome And Scope
@@ -305,4 +306,5 @@ models, worker isolation, publication and org discovery remain separately gated.
 The owner subsequently approved the linked plan and selected subagent-driven
 execution. The original published-artifact gate failed; only the explicitly
 repaired local cohort is admitted. Pure Task 2 work is complete and reviewed;
-service, persistence, live use and execution boundaries remain unimplemented.
+Task 3's inferred service/memory contract is in progress. Native persistence,
+verified ingress, live use and execution boundaries remain unimplemented.

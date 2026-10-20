@@ -25,6 +25,10 @@ defines exact command parsing, identity/authority schemas and explicit-time
 preview decisions. It is not an inbox, verified HTTP endpoint or permission to
 execute work.
 
+The next bounded slice is the [in-memory command admission contract](docs/assessments/github-inbox-contract.md):
+an inferred Effect service and test-only replay/authority fixture. Native SQLite
+transactions, verified ingress and restart qualification remain later work.
+
 The synthetic qualification-gate tracer is implemented and locally verified:
 119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
 Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect

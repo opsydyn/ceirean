@@ -23,8 +23,9 @@ checks and 466 tests / 1924 assertions, including eight real-handler tests.
 The owner then approved **Task 2 only**, completed at `0a435bc` with clean
 independent spec/quality review, 481 passing tests / 2058 assertions, and 18000
 new pure law cases. See [Task 2 evidence](../../assessments/github-command-policy.md).
-Tasks 3-6 remain pending
-separate approval. No live GitHub access, merge or push is authorised.
+Task 3's inferred service and test-only memory inbox contract is now separately
+approved and in progress. Tasks 4-6 remain pending separate approval. No live
+GitHub access, merge or push is authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
 patches and explicit Google optional MCP peer already committed at `629ada7`.
@@ -348,5 +349,5 @@ the remaining tasks just because their plans are written.
 
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
-are linked above. Task 2 is the completed bounded slice; that approval does
-not automatically start Tasks 3-6. Live GitHub use remains unauthorised.
+are linked above. Task 2 is complete; Task 3 is separately approved and in
+progress. That approval does not start Tasks 4-6. Live GitHub use remains unauthorised.
