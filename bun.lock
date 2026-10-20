@@ -27,6 +27,16 @@
         "xstate": "6.0.0-alpha.64",
       },
     },
+    "packages/github-adapter": {
+      "name": "@leviathan/github-adapter",
+      "dependencies": {
+        "effect": "4.0.5",
+        "jose": "6.2.12",
+      },
+      "devDependencies": {
+        "@effect/platform-bun": "4.0.5",
+      },
+    },
     "probes/bun-effect-flue": {
       "name": "@leviathan/compatibility-probe",
       "dependencies": {
@@ -53,6 +63,9 @@
   "patchedDependencies": {
     "@flue/runtime@2.3.0": "patches/@flue%2Fruntime@2.3.0.patch",
     "gaxios@7.3.1": "patches/gaxios@7.3.1.patch",
+  },
+  "overrides": {
+    "@effect/platform-node-shared": "4.0.5",
   },
   "packages": {
     "@anthropic-ai/sdk": ["@anthropic-ai/sdk@0.129.0", "", { "dependencies": { "json-schema-to-ts": "^3.1.1", "standardwebhooks": "^1.0.0" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" }, "optionalPeers": ["zod"], "bin": { "anthropic-ai-sdk": "bin/cli" } }, "sha512-MH7LB20kNpGLUpPTe2OG5XvL/KhX8HUO9XyBaFjgFk6TLS4Xjt0VPIuMKywe7POKKPslX+QxSlVok9e+8kG5Nw=="],
@@ -103,6 +116,10 @@
 
     "@earendil-works/pi-telemetry": ["@earendil-works/pi-telemetry@1.3.0", "", {}, "sha512-ERGZr+aXjNJzoUbB7ZzHVH3g5otzMHjHLs2Fyizm12By5X+gBEhod9cJXFOk13S7M8a29Am+Mq21zm73mRJFLg=="],
 
+    "@effect/platform-bun": ["@effect/platform-bun@4.0.5", "", { "dependencies": { "@effect/platform-node-shared": "^4.0.5" }, "peerDependencies": { "effect": "^4.0.5" } }, "sha512-tB/GapZ/bVoCbwRgnojGP4TwopvkMoFoSCipXT1sf0guvG/2oRVhWzJW/1vkrYFEdLM7XyRnVVLrSJyqdok7DA=="],
+
+    "@effect/platform-node-shared": ["@effect/platform-node-shared@4.0.5", "", { "dependencies": { "@types/ws": "^8.18.2", "ws": "^8.22.0" }, "peerDependencies": { "effect": "^4.0.5" } }, "sha512-a8rCdEkfZBGe9C6bsIjxVZuRp73svIyK5IHwHdDAVsvZXjrbkxusfI+rZ8WlX31RP1mKizwI/E72GQTNfdMWHw=="],
+
     "@flue/github": ["@flue/github@2.3.0", "", { "dependencies": { "@octokit/webhooks-types": "7.6.1", "hono": "^4.12.32" }, "peerDependencies": { "@flue/runtime": "^2.3.0" } }, "sha512-YMhbDT8P3xt3ilO3OI9xOebiitTqy1z5kdLEL+1MB6mdGeYiGO1aEkjQPK1pmSK1hN6HAQNNpcOGZWJ/hhXpDg=="],
 
     "@flue/runtime": ["@flue/runtime@2.3.0", "", { "dependencies": { "@earendil-works/pi-agent-core": "^1.1.0", "@earendil-works/pi-ai": "^1.1.0", "@hono/node-server": "^2.0.3", "@modelcontextprotocol/client": "2.0.0", "@valibot/to-json-schema": "^1.3.0", "hono": "^4.12.32", "js-yaml": "^5.2.1", "ulidx": "^2.4.1", "valibot": "^1.1.0" } }, "sha512-Sb3Dix9PArIzwr7lmAZCr2csU7OUMHsEhIqYKCiqgldyt33u23k59CNoD947MLXpBaWXAz6CEd/Xv1LLI0cHYg=="],
@@ -116,6 +133,8 @@
     "@leviathan/domain": ["@leviathan/domain@workspace:packages/domain"],
 
     "@leviathan/engine": ["@leviathan/engine@workspace:packages/engine"],
+
+    "@leviathan/github-adapter": ["@leviathan/github-adapter@workspace:packages/github-adapter"],
 
     "@leviathan/github-admission-probe": ["@leviathan/github-admission-probe@workspace:probes/github-admission"],
 
@@ -242,6 +261,8 @@
     "@types/node": ["@types/node@26.6.5", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg=="],
 
     "@types/retry": ["@types/retry@0.12.0", "", {}, "sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA=="],
+
+    "@types/ws": ["@types/ws@8.18.2", "", { "dependencies": { "@types/node": "*" } }, "sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w=="],
 
     "@typescript/typescript-aix-ppc64": ["@typescript/typescript-aix-ppc64@7.0.2", "", { "os": "aix", "cpu": "ppc64" }, "sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ=="],
 

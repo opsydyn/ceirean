@@ -4,3 +4,4 @@ projects:
   domain: packages/domain
   engine: packages/engine
   github-admission: probes/github-admission
+  github-adapter: packages/github-adapter

@@ -1,0 +1,15 @@
+{
+  "name": "@leviathan/github-adapter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "effect": "4.0.5",
+    "jose": "6.2.12"
+  },
+  "devDependencies": {
+    "@effect/platform-bun": "4.0.5"
+  }
+}

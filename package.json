@@ -21,6 +21,9 @@
     "oxlint": "1.88.0",
     "typescript": "7.0.2"
   },
+  "overrides": {
+    "@effect/platform-node-shared": "4.0.5"
+  },
   "packageManager": "bun@1.4.2",
   "patchedDependencies": {
     "@flue/runtime@2.3.0": "patches/@flue%2Fruntime@2.3.0.patch",
