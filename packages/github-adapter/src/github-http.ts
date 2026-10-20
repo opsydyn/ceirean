@@ -32,6 +32,29 @@ export function safeGitHubError(error: unknown, phase: Phase) {
     Match.orElse(() => new LiveAuthorityError({ phase, code: 'Unavailable' })),
   );
 }
+
+// This bounds the result only. Its caller must separately retain native settlement.
+export function boundedNativeOutcome<A>(
+  native: Promise<A>,
+  signal: AbortSignal,
+  phase: () => Phase,
+) {
+  let onAbort = () => {};
+  const aborted = new Promise<never>((_resolve, reject) => {
+    onAbort = () => {
+      const result = Result.try(() => interrupted(signal, phase()));
+      Result.match(result, {
+        onFailure: reject,
+        onSuccess: () => undefined,
+      });
+    };
+    signal.addEventListener('abort', onAbort, { once: true });
+    onAbort();
+  });
+  return Promise.race([native, aborted]).finally(() =>
+    signal.removeEventListener('abort', onAbort),
+  );
+}
 function statusCode(status: number) {
   return Match.value(status).pipe(
     Match.when(401, () => 'Denied' as const),
@@ -51,6 +74,7 @@ async function readResponse(
   signal: AbortSignal,
   phase: Phase,
   expectedStatus: number,
+  failed: (error: unknown) => void,
 ) {
   const reader = response.body?.getReader();
   let cancellation: Promise<Result.Result<void, LiveAuthorityError>> | undefined;
@@ -123,6 +147,7 @@ async function readResponse(
     .then(read)
     .catch(invalid)
     .then(Result.succeed, Result.fail);
+  Result.match(result, { onFailure: failed, onSuccess: () => undefined });
   const cleanup = await release();
   const value = Result.getOrThrow(result);
   Result.getOrThrow(cleanup);
@@ -138,6 +163,7 @@ export async function githubRequest(
     readonly token: string;
     readonly body?: string;
   },
+  own: (settlement: Promise<void>) => void,
 ) {
   const attempt = new AbortController();
   const signal = AbortSignal.any([lifetime, attempt.signal]);
@@ -145,6 +171,10 @@ export async function githubRequest(
     () => attempt.abort(new LiveAuthorityError({ phase: request.phase, code: 'Timeout' })),
     2000,
   );
+  let failed = (_error: unknown) => {};
+  const primaryFailure = new Promise<never>((_resolve, reject) => {
+    failed = (error) => reject(safeGitHubError(error, request.phase));
+  });
   async function execute() {
     interrupted(signal, request.phase);
     const method = Match.value(request.body).pipe(
@@ -168,7 +198,7 @@ export async function githubRequest(
       },
       body: request.body,
     });
-    const value = await readResponse(response, signal, request.phase, expectedStatus);
+    const value = await readResponse(response, signal, request.phase, expectedStatus, failed);
     interrupted(signal, request.phase);
     return value;
   }
@@ -176,8 +206,16 @@ export async function githubRequest(
     interrupted(signal, request.phase);
     throw safeGitHubError(error, request.phase);
   }
-  return Promise.resolve()
-    .then(execute)
-    .catch(sanitize)
-    .finally(() => clearTimeout(timer));
+  const native = Promise.resolve().then(execute).catch(sanitize);
+  // Neither a deadline outcome nor a primary failure releases this ownership.
+  own(
+    native.then(
+      () => undefined,
+      () => undefined,
+    ),
+  );
+  const outcome = Promise.race([native, primaryFailure]);
+  return boundedNativeOutcome(outcome, signal, () => request.phase).finally(() =>
+    clearTimeout(timer),
+  );
 }

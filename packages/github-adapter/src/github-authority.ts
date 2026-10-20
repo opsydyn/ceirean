@@ -11,6 +11,7 @@ import { Match, Option, Result, Schema } from 'effect';
 
 import { importAppSigner } from './github-auth.ts';
 import {
+  boundedNativeOutcome,
   githubRequest,
   interrupted,
   requireGitHub,
@@ -78,9 +79,16 @@ export async function makeGitHubAuthorityDriver(options: {
   const { appId, privateKey, fetch, clock } = options;
   const acquired = await importAppSigner(appId, privateKey);
   function buildDriver(sign: (wallMs: number) => Promise<string>) {
-    function driver(input: AuthorityQuery, callerSignal: AbortSignal) {
+    const closed = new AbortController();
+    const outstanding = new Set<Promise<void>>();
+    let disposal: Promise<void> | undefined;
+    function run(input: AuthorityQuery, callerSignal: AbortSignal) {
       const timeout = new AbortController();
-      const signal = AbortSignal.any([callerSignal, timeout.signal]);
+      const signal = AbortSignal.any([callerSignal, timeout.signal, closed.signal]);
+      const nativeRequests: Promise<void>[] = [];
+      function own(settlement: Promise<void>) {
+        nativeRequests.push(settlement);
+      }
       const timer = setTimeout(
         () => timeout.abort(new LiveAuthorityError({ phase: 'permission', code: 'Timeout' })),
         6000,
@@ -137,12 +145,17 @@ export async function makeGitHubAuthorityDriver(options: {
         ) {
           current.phase = nextPhase;
           reading();
-          const raw = await githubRequest(fetch, signal, {
-            phase: current.phase,
-            path,
-            token,
-            body,
-          });
+          const raw = await githubRequest(
+            fetch,
+            signal,
+            {
+              phase: current.phase,
+              path,
+              token,
+              body,
+            },
+            own,
+          );
           reading();
           return decode(schema, raw, current.phase);
         }
@@ -257,13 +270,47 @@ export async function makeGitHubAuthorityDriver(options: {
         });
         return Result.fail(safeGitHubError(cause, current.phase));
       }
-      return Promise.resolve(snapshot)
+      const native = Promise.resolve(snapshot)
         .then(Result.getOrThrow)
         .then(check)
-        .then(Result.succeed, failure)
+        .then(Result.succeed, failure);
+      async function settle() {
+        await native;
+        await Promise.all(nativeRequests);
+      }
+      const settlement = settle().finally(() => {
+        outstanding.delete(settlement);
+      });
+      outstanding.add(settlement);
+      return boundedNativeOutcome(native, signal, () => current.phase)
+        .catch(failure)
         .finally(() => clearTimeout(timer));
     }
-    return driver satisfies LiveAuthorityDriver;
+    function driver(input: AuthorityQuery, callerSignal: AbortSignal) {
+      return Match.value(true).pipe(
+        Match.when(
+          () => closed.signal.aborted,
+          () =>
+            Promise.resolve(
+              Result.fail(new LiveAuthorityError({ phase: 'signing', code: 'Aborted' })),
+            ),
+        ),
+        Match.when(
+          () => outstanding.size >= 4,
+          () =>
+            Promise.resolve(
+              Result.fail(new LiveAuthorityError({ phase: 'signing', code: 'Unavailable' })),
+            ),
+        ),
+        Match.orElse(() => run(input, callerSignal)),
+      );
+    }
+    function dispose() {
+      closed.abort();
+      disposal ??= Promise.all(outstanding).then(() => undefined);
+      return disposal;
+    }
+    return { driver: driver satisfies LiveAuthorityDriver, dispose };
   }
   return Result.map(acquired, buildDriver);
 }

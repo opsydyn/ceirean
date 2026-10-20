@@ -236,6 +236,21 @@ per HTTP attempt; and a ten-second graceful-shutdown budget. Keep body capture a
 HTTP retries or redirect following. The evidence interval expires no later than
 six seconds after the first live observation and must also fit the request budget.
 
+The native GitHub authority factory imports its key once and returns an explicit
+owned resource `{ driver: LiveAuthorityDriver, dispose(): Promise<void> }`, with
+types inferred from the actual factory. The existing native driver signature is
+unchanged. Finite two-second attempt and six-second total outcomes are separate
+from tracked native cleanup; abort delivery alone is not cleanup settlement.
+Retain at most four native command owners even after their outcome times out.
+Saturation refuses new work immediately, without signing, clock or HTTP work.
+An abort-ignoring fetch and any late response-reader cancellation remain owned
+until actual settlement. Never allow a timed-out continuation to produce a lease
+or follow-up HTTP. Idempotent disposal synchronously closes further admission,
+aborts all owners and awaits every native promise and reader cleanup. A stuck
+native promise keeps disposal pending; the future main process must force a
+nonzero exit after ten seconds rather than report successful finalisation. No
+additional runtime, dependency or detached cleanup is permitted.
+
 Enforce limits before expensive work, including body-reading time, and decode
 every used API field. Rate limits apply process-wide, not to a spoofable forwarded
 IP. Return 429 on local saturation, with no queued admission. Do not call GitHub

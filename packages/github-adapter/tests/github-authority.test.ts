@@ -1,4 +1,4 @@
-import { beforeAll, expect, test } from 'bun:test';
+import { afterEach, beforeAll, expect, test } from 'bun:test';
 
 import { AuthorityQuery, Digest, LiveEvidenceLease } from '@leviathan/domain';
 import { makeLiveAuthority } from '@leviathan/engine';
@@ -6,6 +6,7 @@ import { Effect, Match, Option, Result, Schema } from 'effect';
 import { exportPKCS8, generateKeyPair, jwtVerify } from 'jose';
 
 import { makeGitHubAuthorityDriver } from '../src/github-authority.ts';
+import { githubRequest } from '../src/github-http.ts';
 
 const wall = Date.parse('2026-10-21T12:00:00Z');
 const jsonBoundary = Schema.fromJsonString(Schema.Unknown);
@@ -19,6 +20,12 @@ async function generateSyntheticKey() {
   publicKey = pair.publicKey;
 }
 beforeAll(generateSyntheticKey);
+const disposals = new Set<() => Promise<void>>();
+async function disposeTestResources() {
+  await Promise.all(Array.from(disposals, (dispose) => dispose()));
+  disposals.clear();
+}
+afterEach(disposeTestResources);
 
 function query() {
   return AuthorityQuery.make({
@@ -93,13 +100,25 @@ function harness(values = replies()) {
     return Promise.resolve(respond(index));
   };
   const options = { appId: 77, privateKey, fetch, clock: () => ({ ...reading }) };
+  const owned: (() => Promise<void>)[] = [];
+  async function acquireResource() {
+    const resource = Result.getOrThrow(await makeGitHubAuthorityDriver(options));
+    owned.push(resource.dispose);
+    disposals.add(resource.dispose);
+    return resource;
+  }
   async function acquire() {
-    return Result.getOrThrow(await makeGitHubAuthorityDriver(options));
+    return (await acquireResource()).driver;
+  }
+  async function dispose() {
+    await Promise.all(owned.map((close) => close()));
   }
   return {
     calls,
     options,
     acquire,
+    acquireResource,
+    dispose,
     setClock: (value: typeof reading) => {
       reading = value;
     },
@@ -504,7 +523,9 @@ async function snapshotCase() {
   h.options.privateKey = 'secret-native';
   h.options.fetch = () => Promise.reject(new Error('secret-native'));
   h.options.clock = () => ({ wallMs: 0, monotonicMs: 0 });
-  const driver = Result.getOrThrow(await acquisition);
+  const resource = Result.getOrThrow(await acquisition);
+  disposals.add(resource.dispose);
+  const driver = resource.driver;
   const input = structuredClone(query());
   const running = driver(input, new AbortController().signal);
   Reflect.set(input.policy, 'appId', 99);
@@ -577,26 +598,29 @@ for (let index = 0; index < 5; index += 1) {
         Match.orElse(() => Response.json(replies()[at], { status: [200, 201, 200, 200, 200][at] })),
       ),
     );
-    let settled = false;
-    const running = (await h.acquire())(query(), abort.signal).finally(() => {
-      settled = true;
-    });
+    const running = (await h.acquire())(query(), abort.signal);
     await entered.promise;
     // pull may prefill before ownership, so wait until the actual request arrives.
     while (h.calls.length <= index) await Bun.sleep(1);
     abort.abort(new Error('secret-native'));
     await cancelled.promise;
+    expectFailure(await within(running, 100), 'Aborted');
+    let disposed = false;
+    const disposing = h.dispose().finally(() => {
+      disposed = true;
+    });
     await Bun.sleep(5);
-    expect(settled).toBe(false);
+    expect(disposed).toBe(false);
     expect(body.body?.locked).toBe(true);
     finishCancel.resolve();
+    await disposing;
     expectFailure(await running, 'Aborted');
     expect(cancels).toBe(1);
     expect(body.body?.locked).toBe(false);
     expect(h.calls).toHaveLength(index + 1);
   }
   test(
-    `abort during body phase ${index} awaits exactly one pending cancellation and releases`,
+    `abort during body phase ${index} returns promptly while disposal awaits one cancellation and releases`,
     abortBodyCase,
   );
 }
@@ -623,6 +647,7 @@ async function rejectedCancelCase() {
   while (h.calls.length === 0) await Bun.sleep(1);
   abort.abort();
   expectFailure(await running, 'Aborted');
+  await h.dispose();
   expect(cancels).toBe(1);
   expect(body.body?.locked).toBe(false);
   expect(h.calls).toHaveLength(1);
@@ -980,3 +1005,343 @@ async function engineContractCase() {
   expect(h.calls).toHaveLength(5);
 }
 test('native adapter lease is accepted by the real engine authority boundary', engineContractCase);
+
+function within<A>(promise: Promise<A>, milliseconds: number) {
+  return Promise.race([
+    promise,
+    Bun.sleep(milliseconds).then(() => ({ _tag: 'StillPending' as const })),
+  ]);
+}
+function installationRequest() {
+  return {
+    phase: 'installation' as const,
+    path: '/app/installations/11',
+    token: 'synthetic-token',
+  };
+}
+async function pendingCancelDeadlineCase() {
+  const cancellation = deferred<void>();
+  const startedCancel = deferred<void>();
+  const owned: Promise<void>[] = [];
+  let cancels = 0;
+  const response = new Response(
+    new ReadableStream({
+      cancel() {
+        cancels += 1;
+        startedCancel.resolve();
+        return cancellation.promise;
+      },
+    }),
+  );
+  const running = githubRequest(
+    () => Promise.resolve(response),
+    new AbortController().signal,
+    installationRequest(),
+    (settlement) => {
+      owned.push(settlement);
+    },
+  ).then(Result.succeed, Result.fail);
+  await startedCancel.promise;
+  const atDeadline = await within(running, 200);
+  const lockedAtDeadline = response.body?.locked;
+  const trackedAtDeadline = owned.length;
+  cancellation.resolve();
+  await running;
+  await Promise.all(owned);
+  expectFailure(atDeadline, 'Timeout', 'installation');
+  expect(lockedAtDeadline).toBe(true);
+  expect(trackedAtDeadline).toBe(1);
+  expect(cancels).toBe(1);
+  expect(response.body?.locked).toBe(false);
+}
+test(
+  'round1 deadline returns while native reader cancellation is still pending and owned',
+  pendingCancelDeadlineCase,
+  5000,
+);
+
+async function ignoringFetchDeadlineCase() {
+  const fetchResult = deferred<Response>();
+  const cancellation = deferred<void>();
+  const startedCancel = deferred<void>();
+  const owned: Promise<void>[] = [];
+  let nativeSettled = false;
+  let cancels = 0;
+  const response = new Response(
+    new ReadableStream({
+      cancel() {
+        cancels += 1;
+        startedCancel.resolve();
+        return cancellation.promise;
+      },
+    }),
+  );
+  function own(settlement: Promise<void>) {
+    owned.push(
+      settlement.finally(() => {
+        nativeSettled = true;
+      }),
+    );
+  }
+  const running = githubRequest(
+    () => fetchResult.promise,
+    new AbortController().signal,
+    installationRequest(),
+    own,
+  ).then(Result.succeed, Result.fail);
+  const atDeadline = await within(running, 2300);
+  const trackedBeforeFetchSettles = owned.length;
+  fetchResult.resolve(response);
+  await startedCancel.promise;
+  const pendingLateCleanup = !nativeSettled && response.body?.locked;
+  cancellation.resolve();
+  await running;
+  await Promise.all(owned);
+  expectFailure(atDeadline, 'Timeout', 'installation');
+  expect(trackedBeforeFetchSettles).toBe(1);
+  expect(pendingLateCleanup).toBe(true);
+  expect(nativeSettled).toBe(true);
+  expect(cancels).toBe(1);
+  expect(response.body?.locked).toBe(false);
+}
+test(
+  'round1 ignoring-abort fetch has finite outcome and its late response cleanup stays owned',
+  ignoringFetchDeadlineCase,
+  5000,
+);
+
+async function pendingCleanupPrimaryCase() {
+  const cancellation = deferred<void>();
+  const startedCancel = deferred<void>();
+  const owned: Promise<void>[] = [];
+  const response = new Response(
+    new ReadableStream({
+      cancel() {
+        startedCancel.resolve();
+        return cancellation.promise;
+      },
+    }),
+    { status: 403 },
+  );
+  const running = githubRequest(
+    () => Promise.resolve(response),
+    new AbortController().signal,
+    installationRequest(),
+    (settlement) => {
+      owned.push(settlement);
+    },
+  ).then(Result.succeed, Result.fail);
+  await startedCancel.promise;
+  const beforeCleanup = await within(running, 100);
+  cancellation.resolve();
+  const final = await running;
+  await Promise.all(owned);
+  expectFailure(beforeCleanup, 'Denied', 'installation');
+  expectFailure(final, 'Denied', 'installation');
+  expect(response.body?.locked).toBe(false);
+}
+test(
+  'round1 known primary failure returns without waiting for cancellation settlement',
+  pendingCleanupPrimaryCase,
+);
+
+async function ownedResourceCase() {
+  const h = harness();
+  let clockReads = 0;
+  const clock = h.options.clock;
+  function trackedClock() {
+    clockReads += 1;
+    return clock();
+  }
+  h.options.clock = trackedClock;
+  const resource = Result.getOrThrow(await makeGitHubAuthorityDriver(h.options));
+  expect(typeof resource.driver).toBe('function');
+  expect(typeof resource.dispose).toBe('function');
+  const fetches: ReturnType<typeof deferred<Response>>[] = [];
+  const cancellations: ReturnType<typeof deferred<void>>[] = [];
+  const responses: Response[] = [];
+  let cancels = 0;
+  function respond() {
+    const fetched = deferred<Response>();
+    fetches.push(fetched);
+    return fetched.promise;
+  }
+  h.setResponse(respond);
+  const results = Array.from({ length: 4 }, () =>
+    resource.driver(query(), new AbortController().signal),
+  );
+  const outcomes = await within(Promise.all(results), 2400);
+  const callsAtDeadline = h.calls.length;
+  const readsAtDeadline = clockReads;
+  const signal = new AbortController().signal;
+  const saturated = resource.driver(query(), signal);
+  const refused = await within(saturated, 100);
+  const callsAfterRefusal = h.calls.length;
+  let disposed = false;
+  const disposing = resource.dispose().finally(() => {
+    disposed = true;
+  });
+  const sameDisposal = resource.dispose();
+  const closedCall = resource.driver(query(), signal);
+  const afterClose = await within(closedCall, 100);
+  for (const fetched of fetches) {
+    const cancellation = deferred<void>();
+    cancellations.push(cancellation);
+    const response = new Response(
+      new ReadableStream({
+        cancel() {
+          cancels += 1;
+          return cancellation.promise;
+        },
+      }),
+    );
+    responses.push(response);
+    fetched.resolve(response);
+  }
+  while (cancels < 4) await Bun.sleep(1);
+  const disposalDuringLateCleanup = disposed;
+  const lateLocks = responses.map((response) => response.body?.locked);
+  for (const cancellation of cancellations) cancellation.resolve();
+  await disposing;
+  await sameDisposal;
+  expect(Array.isArray(outcomes)).toBe(true);
+  for (const outcome of await Promise.all(results)) expectFailure(outcome, 'Timeout');
+  expectFailure(refused, 'Unavailable');
+  expectFailure(afterClose, 'Aborted');
+  expect(callsAtDeadline).toBe(4);
+  expect(callsAfterRefusal).toBe(4);
+  expect(clockReads).toBe(readsAtDeadline);
+  expect(h.calls).toHaveLength(4);
+  expect(disposalDuringLateCleanup).toBe(false);
+  expect(lateLocks).toEqual([true, true, true, true]);
+  expect(cancels).toBe(4);
+  for (const response of responses) expect(response.body?.locked).toBe(false);
+  expect(disposed).toBe(true);
+  expect(resource.dispose()).toBe(sameDisposal);
+}
+test(
+  'round1 owned resource retains four timed-out native slots, refuses new work, and drains late cleanup on disposal',
+  ownedResourceCase,
+  5000,
+);
+
+async function disposalBeforeDeadlineCase() {
+  const h = harness();
+  const fetched = deferred<Response>();
+  const entered = deferred<void>();
+  function respond() {
+    entered.resolve();
+    return fetched.promise;
+  }
+  h.setResponse(respond);
+  const resource = await h.acquireResource();
+  const running = resource.driver(query(), new AbortController().signal);
+  await entered.promise;
+  let disposed = false;
+  const disposing = resource.dispose().finally(() => {
+    disposed = true;
+  });
+  const outcome = await within(running, 100);
+  const stillOwned = !disposed;
+  const stopped = h.calls[0]?.init.signal?.aborted;
+  fetched.resolve(Response.json(replies()[0]));
+  await disposing;
+  expectFailure(outcome, 'Aborted');
+  expect(stillOwned).toBe(true);
+  expect(stopped).toBe(true);
+  expect(h.calls).toHaveLength(1);
+}
+test(
+  'round1 disposal aborts active work promptly but awaits an ignoring fetch until actual settlement',
+  disposalBeforeDeadlineCase,
+);
+
+async function slotRecoveryCase() {
+  const h = harness();
+  const pending = Array.from({ length: 4 }, () => deferred<Response>());
+  h.setResponse((at) => pending[at]!.promise);
+  const resource = await h.acquireResource();
+  const attempts = Array.from({ length: 4 }, () =>
+    resource.driver(query(), new AbortController().signal),
+  );
+  const outcomes = await within(Promise.all(attempts), 2400);
+  const saturated = resource.driver(query(), new AbortController().signal);
+  const rejected = await within(saturated, 100);
+  function respondLate(fetched: (typeof pending)[number]) {
+    const response = Response.json(replies()[0]);
+    fetched.resolve(response);
+    return response;
+  }
+  const lateResponses = pending.map(respondLate);
+  while (lateResponses.some((response) => response.body?.locked)) await Bun.sleep(1);
+  // The late native chains release their ownership in subsequent microtasks.
+  await Bun.sleep(1);
+  h.setResponse((at) =>
+    Response.json(replies()[(at - 4) % 5], { status: [200, 201, 200, 200, 200][(at - 4) % 5] }),
+  );
+  const recovered = await resource.driver(query(), new AbortController().signal);
+  await resource.dispose();
+  expect(Array.isArray(outcomes)).toBe(true);
+  expectFailure(rejected, 'Unavailable');
+  expect(Result.isSuccess(recovered)).toBe(true);
+  expect(h.calls).toHaveLength(9);
+}
+test(
+  'round1 settled native cleanup restores capacity without a cache or permanently closed resource',
+  slotRecoveryCase,
+  5000,
+);
+
+async function totalOutcomeDeadlineCase() {
+  const h = harness();
+  const finalFetch = deferred<Response>();
+  const finalCancel = deferred<void>();
+  const lateCancelled = deferred<void>();
+  let cancels = 0;
+  async function respond(at: number) {
+    async function earlierResponse() {
+      await Bun.sleep(1100);
+      return Response.json(replies()[at], { status: [200, 201, 200, 200, 200][at] });
+    }
+    return Match.value(at).pipe(
+      Match.when(4, () => finalFetch.promise),
+      Match.orElse(earlierResponse),
+    );
+  }
+  h.setResponse(respond);
+  const resource = await h.acquireResource();
+  const started = performance.now();
+  const running = resource.driver(query(), new AbortController().signal);
+  const outcome = await within(running, 6250);
+  const elapsed = performance.now() - started;
+  let disposed = false;
+  const disposing = resource.dispose().finally(() => {
+    disposed = true;
+  });
+  const response = new Response(
+    new ReadableStream({
+      cancel() {
+        cancels += 1;
+        lateCancelled.resolve();
+        return finalCancel.promise;
+      },
+    }),
+  );
+  finalFetch.resolve(response);
+  await lateCancelled.promise;
+  const awaitingLateCleanup = !disposed;
+  finalCancel.resolve();
+  await disposing;
+  expectFailure(outcome, 'Timeout');
+  expect(elapsed).toBeGreaterThanOrEqual(5900);
+  expect(elapsed).toBeLessThan(6250);
+  expect(awaitingLateCleanup).toBe(true);
+  expect(cancels).toBe(1);
+  expect(response.body?.locked).toBe(false);
+  expect(h.calls).toHaveLength(5);
+}
+test(
+  'round1 total six-second outcome precedes a still-pending final fetch and late cleanup',
+  totalOutcomeDeadlineCase,
+  9000,
+);
