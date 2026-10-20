@@ -3,8 +3,9 @@
 Task 6 of the [approved plan](../superpowers/plans/2026-10-20-github-admission.md)
 is separately approved after the [verified ingress bridge](github-verified-ingress.md).
 Source candidate `ad5c840` passes controller qualification and has a validated
-measured report. Independent Task 6/whole-branch review is pending; this is not
-yet whole-plan acceptance.
+measured report. Independent Task 6/whole-branch review approved `71afb64` with
+fresh gates and no findings. This completes the amended offline admission plan,
+not a production service or the original unpatched-artifact gate.
 
 ## Required Evidence
 
@@ -150,13 +151,30 @@ memory sequence laws are not credited with detecting native SQLite mutations.
 Two trailing diagnostic spaces and transcript footer blank lines were normalized
 for Git whitespace checks; behavioral output/counterexamples are retained.
 
-## Review Status
+## Independent Review
 
-A fresh reviewer is assessing both Task 6 and the entire admission branch from
-main, followed by the plan's independent full sequential gate rerun. This single
-combined scope replaces a duplicate narrow-only review seat; it does not narrow
-the reviewed code or replace controller execution evidence. No final review
-verdict is recorded yet.
+The [final independent review](github-admission-review.md) approved Task 6 spec
+compliance, code quality and the entire admission branch from main through
+`71afb64`, with no Critical, Important or Minor findings. This single combined
+scope replaced a duplicate narrow-only seat without narrowing code or gate
+coverage. The reviewer independently reran all 11 gates sequentially, observing
+the same 645 tests / 4226 assertions and 30000 attributed admission cases, and
+verified all 138 evidence references plus the 116 source/configuration identities.
+These repeat executions do not double the case count.
+
+The [review log archive](../evidence/github-admission-review.json) retains 14 raw
+UTF-8 log contents and their original SHA-256 values, including provenance and
+postflight checks. The initial sandboxed install's tempdir permission failure is
+retained separately from the permitted scoped frozen-install success. No test
+retry or lowered budget was used.
+
+The reviewer did not reapply historical mutations or repeat the registry fetch;
+those observations remain attributed to implementer/controller evidence. Current
+source restoration and installed artifact consistency were checked independently.
+Declined live-operation, production-availability, kernel/unkillable-process,
+power/host-loss and execution guarantees match the exclusions below; none is an
+unresolved in-scope finding. Later closeout changes are documentation/evidence
+only, with no new source/configuration/dependency tree claimed as tested.
 
 ## Exclusions
 

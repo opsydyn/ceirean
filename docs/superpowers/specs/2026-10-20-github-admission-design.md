@@ -18,10 +18,11 @@ independent review and 549 total tests / 3810 assertions. See
 [native inbox evidence](../../assessments/github-sqlite-inbox.md).
 Task 5's bounded verified-ingress bridge is complete at `f5b96ba`, with full gates
 and clean independent review after the async-reader cleanup correction; see
-[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 is now
-separately approved and in progress; see [recovery evidence](../../assessments/github-admission-recovery.md).
-No live GitHub access, execution or publication is authorised by this offline
-approval.
+[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 is complete
+at source `ad5c840`, with source-bound evidence and clean independent whole-branch
+review/fresh gates at `71afb64`; see [recovery evidence](../../assessments/github-admission-recovery.md).
+The amended offline plan is complete. No live GitHub access, execution or
+publication is authorised by this approval.
 
 ## Outcome And Scope
 
@@ -317,5 +318,6 @@ execution. The original published-artifact gate failed; only the explicitly
 repaired local cohort is admitted. Pure Task 2 work is complete and reviewed;
 Task 3's inferred service/memory contract and Task 4's local native transaction
 adapter are complete and reviewed. Task 5 verified ingress is locally qualified
-and independently reviewed; process-kill qualification, live use and execution
-boundaries remain unimplemented.
+and independently reviewed. Task 6 qualifies local process-kill recovery and
+measured evidence with fresh independent gates; live use, production durability
+and execution boundaries remain unimplemented.

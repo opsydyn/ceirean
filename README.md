@@ -148,11 +148,12 @@ at the Task 4 baseline.
 [Task 5 verified ingress](docs/assessments/github-verified-ingress.md) is complete
 at `f5b96ba`, with clean independent review after the async-reader cleanup fix:
 635 local tests / 4124 assertions, all four types and lint/format pass.
-Task 6 is separately approved. Its [recovery candidate](docs/assessments/github-admission-recovery.md)
-passes 645 local tests / 4226 assertions, with process-kill evidence and a
-source-bound measured report; independent whole-branch review remains pending.
-Models, a public endpoint, worker execution and GitHub writes remain out of
-scope; the CLI-first direction is unchanged.
+Task 6's [recovery assessment](docs/assessments/github-admission-recovery.md)
+completes the amended offline admission plan: 645 tests / 4226 assertions,
+process-kill evidence, source-bound measured report and clean independent
+whole-branch review with fresh gates. This is local fixture qualification only.
+Models, a public endpoint, worker execution and GitHub writes remain out of scope;
+the CLI-first direction is unchanged.
 
 ## Architecture Draft
 
@@ -239,7 +240,7 @@ apps/cli/                   Future CLI and live dependency composition
 packages/domain/            Pure qualification evidence and run decisions
 packages/engine/            Qualification coordinator and inferred ports
 probes/bun-effect-flue/      Private compatibility fixture
-probes/github-admission/     Strict offline GitHub channel compatibility fixture
+probes/github-admission/     Offline signed-command admission and native recovery probe
 patches/                    Version-scoped declaration-only dependency repairs
 docs/                       Decisions, specifications, plans and evidence
 ```

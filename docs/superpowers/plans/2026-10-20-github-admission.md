@@ -31,9 +31,11 @@ independent review and 549 total tests / 3810 assertions. See
 [Task 4 evidence](../../assessments/github-sqlite-inbox.md).
 Task 5's bounded verified-ingress bridge is complete at `f5b96ba`, with full gates
 and clean independent review after the async-reader cleanup correction; see
-[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 is now
-separately approved and in progress; see [recovery evidence](../../assessments/github-admission-recovery.md).
-No live GitHub access, merge or push is authorised.
+[Task 5 evidence](../../assessments/github-verified-ingress.md). Task 6 is complete
+at source `ad5c840`, with source-bound evidence and clean independent whole-branch
+review/fresh gates at `71afb64`; see [recovery evidence](../../assessments/github-admission-recovery.md).
+The amended offline plan is complete. No live GitHub access, merge or push is
+authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
 patches and explicit Google optional MCP peer already committed at `629ada7`.
@@ -107,6 +109,10 @@ types. Do not handwrite Effect success/error/environment annotations.
 - New laws: six pure domain laws and four engine sequence laws, each `1000` runs at seeds `0`, `1`, `163`, size `50`, maxShrinks `1000`, maxDiscards `10000`, sequences at most `25` actions. Expected primary cases `30000`, separately counted from shrinks/assertions. No generated SQLite subprocess per case.
 
 ## Task 1: Strict Published-Channel Compatibility Gate
+
+Historical checklist: the original unmodified-artifact gate was rejected and its
+unchecked steps are preserved below. The accepted replacement is the explicitly
+approved repair at `629ada7`, not retroactive acceptance of an unpatched artifact.
 
 **Files:** probe setup/fixture/compatibility test, root lock/Moon project and
 `docs/assessments/github-admission.md`. No domain or engine source changes.
@@ -295,12 +301,12 @@ actual decision/receipt counts from a fresh native connection. Report schema
 binds tested source/lock/artifact identities, exact gate exits, actual test/law
 counts and explicit offline exclusions. It must refuse missing/failed gates.
 
-- [ ] **1. Write/observe failing recovery tests.** `committed lost response survives process kill` starts writer, waits for a sentinel emitted only after native commit, SIGKILLs it, and reads/replays from a fresh process. `uncommitted kill leaves no partial admission` pauses after insert but before transaction commit, kills, and asserts a fresh connection sees no partial keys/decision and current-authority retry records once. Parent always joins/kills surviving children and removes only its owned temporary directory; all waits use the 5000ms watchdog.
-- [ ] **2. Implement child/recovery protocol.** Use the exported application boundary and real database, not seeded JSON as recovery proof. The trusted synchronous fault hook writes a bounded phase sentinel, then blocks on a child-local `Atomics.wait` barrier with a 5000ms fail-closed timeout; it never awaits inside the native transaction. The parent kills only after reading that phase, not after a guessed sleep. No timers keep the child alive. SIGKILL provides no close guarantee; clean close/interruption is covered separately. Reader mode uses `create: false` and no initial authority: missing/corrupt file cannot silently become a recovered success or reset revoked access. A post-commit repeated delivery under a new ID remains a duplicate after restart.
-- [ ] **3. Run behavioral negative controls.** Temporarily break command-key deduplication, the authority-revision barrier and transaction rollback, one at a time. The corresponding replay law, literal revision race and SQLite fault/recovery test must fail reproducibly. Include a reject-everything control caught by a constructive admitted case. Restore correct source before verification; record RED/GREEN/control identities without committing broken code.
-- [ ] **4. Build the measured report.** `report refuses any missing or nonzero gate` and `report separates local persistence from production durability` must fail before report implementation. Record exact fresh head/tree/lock and artifact integrity, physical Effect/cohort audit, all command exit codes, law seeds/budgets/actual runs, controls and unqualified live/durable/host-loss capabilities. Expected 30000 new cases is a requirement to verify, not a copied measured total.
-- [ ] **5. Run final gates and update docs.** Execute the complete sequential block below in a minimal environment, with no cached/affected-only evidence or automatic retries. Mark roadmap items only where actual tests qualify them. Retain live permission, model/worker/publishing/hosting exclusions and any compatibility failure. Self-review spec-to-test coverage and no-work composition boundaries.
-- [ ] **6. Commit and obtain final independent review.** Commit `test: qualify offline GitHub admission recovery`. A fresh reviewer checks the whole branch and reruns gates; fix/review findings before claiming completion. Recommend the next separately approved work, but do not merge, push, install credentials, expose an endpoint or start execution.
+- [x] **1. Write/observe failing recovery tests.** `committed lost response survives process kill` starts writer, waits for a sentinel emitted only after native commit, SIGKILLs it, and reads/replays from a fresh process. `uncommitted kill leaves no partial admission` pauses after insert but before transaction commit, kills, and asserts a fresh connection sees no partial keys/decision and current-authority retry records once. Parent always joins/kills surviving children and removes only its owned temporary directory; all waits use the 5000ms watchdog.
+- [x] **2. Implement child/recovery protocol.** Use the exported application boundary and real database, not seeded JSON as recovery proof. The trusted synchronous fault hook writes a bounded phase sentinel, then blocks on a child-local `Atomics.wait` barrier with a 5000ms fail-closed timeout; it never awaits inside the native transaction. The parent kills only after reading that phase, not after a guessed sleep. No timers keep the child alive. SIGKILL provides no close guarantee; clean close/interruption is covered separately. Reader mode uses `create: false` and no initial authority: missing/corrupt file cannot silently become a recovered success or reset revoked access. A post-commit repeated delivery under a new ID remains a duplicate after restart.
+- [x] **3. Run behavioral negative controls.** Temporarily break command-key deduplication, the authority-revision barrier and transaction rollback, one at a time. The corresponding replay law, literal revision race and SQLite fault/recovery test must fail reproducibly. Include a reject-everything control caught by a constructive admitted case. Restore correct source before verification; record RED/GREEN/control identities without committing broken code.
+- [x] **4. Build the measured report.** `report refuses any missing or nonzero gate` and `report separates local persistence from production durability` must fail before report implementation. Record exact fresh head/tree/lock and artifact integrity, physical Effect/cohort audit, all command exit codes, law seeds/budgets/actual runs, controls and unqualified live/durable/host-loss capabilities. Expected 30000 new cases is a requirement to verify, not a copied measured total.
+- [x] **5. Run final gates and update docs.** Execute the complete sequential block below in a minimal environment, with no cached/affected-only evidence or automatic retries. Mark roadmap items only where actual tests qualify them. Retain live permission, model/worker/publishing/hosting exclusions and any compatibility failure. Self-review spec-to-test coverage and no-work composition boundaries.
+- [x] **6. Commit and obtain final independent review.** Commit `test: qualify offline GitHub admission recovery`. A fresh reviewer checks the whole branch and reruns gates; fix/review findings before claiming completion. Recommend the next separately approved work, but do not merge, push, install credentials, expose an endpoint or start execution.
 
 In `committed lost response survives process kill`, decode the fresh reader's
 result and compare against the writer's committed decision identity:
@@ -364,6 +370,7 @@ the remaining tasks just because their plans are written.
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
 are linked above. Tasks 2 and 3 are complete with independent task review.
-Tasks 4 and 5 are complete and independently reviewed. Task 6 is approved and in
-progress; final qualification and independent whole-branch review remain pending.
+Tasks 4 and 5 are complete and independently reviewed. Task 6 and final independent
+whole-branch review are complete, including fresh sequential gates. This accepts
+only the amended, patched local offline cohort and its tested process behavior.
 Live GitHub use remains unauthorised.

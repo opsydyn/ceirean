@@ -87,19 +87,21 @@ issue comments before discovery events, with previews only and no execution.
       tests / 4124 assertions and clean independent review of `f5b96ba` after the
       async-reader cleanup correction. No model, listener, worker, coordinator
       invocation or GitHub writes.
-- [ ] Qualify SQLite process-kill recovery, behavioral negative controls and a
-      measured offline evidence report under separately approved Task 6.
+- [x] Qualify SQLite process-kill recovery, behavioral negative controls and a
+      measured offline evidence report: [Task 6 evidence](assessments/github-admission-recovery.md),
+      645 tests / 4226 assertions, clean independent whole-branch review and fresh
+      gates at `71afb64`. This is local process-restart evidence only.
 
 The strict compatibility probe and pure Task 2 policy are locally qualified.
 Task 3's service/memory contract and Task 4's native inbox are locally qualified.
 [Task 5's verified-ingress bridge](assessments/github-verified-ingress.md) is
 locally qualified and independently reviewed. The original async-reader lifetime
 finding was corrected and re-reviewed. Process-kill recovery and measured final
-qualification remain pending; no whole-plan acceptance is claimed.
-Task 6 is separately approved; its [recovery candidate](assessments/github-admission-recovery.md)
-passes controller gates and real process-kill tests, with a validated measured
-report. Independent whole-branch review and its fresh gate run remain pending;
-no whole-plan acceptance is claimed yet.
+qualification are complete under Task 6's
+[recovery assessment](assessments/github-admission-recovery.md), with a validated
+measured report and clean independent whole-branch review/fresh gates. The amended
+offline admission plan is complete; no production durability or execution is
+qualified by it.
 Production hosting, live permission retrieval, execution and publication remain
 separately gated even if a future offline probe passes.
 
