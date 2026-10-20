@@ -17,8 +17,10 @@ pass, but strict vendor declarations fail with TS2846, TS2307 and TS2416. The
 discarded prototype also failed three lint rules. Task-owned setup/lock edits
 were restored; the restored baseline passes all gates (458 tests / 1900
 assertions). See the [blocked assessment](../../assessments/github-admission.md).
-The package is not admitted. Tasks 2-6 remain pending, not started; independent
-review and any decision to revisit compatibility remain with the controller.
+The package is not admitted. Independent task review at `13cd821` approved the
+blocked disposition, with a minor evidence-wording clarification subsequently
+incorporated in the assessment. Tasks 2-6 remain pending, not started; any decision
+to revisit compatibility remains with the controller.
 
 ## Global Constraints
 
@@ -333,8 +335,8 @@ The known vendor-declaration risk makes the first gate meaningful and potentiall
 blocking. Passing package metadata reads is not passing that gate. Do not start
 the remaining tasks just because their plans are written.
 
-Owner review of this plan and selection of execution method are required next.
-Recommended: subagent-driven, with sequential tasks and independent review at
-each interface boundary; the real SDK, transactional adapter and restart proof
-can each fail independently. Native/inline execution is also available with a
-fresh whole-branch review at the end. Neither choice authorises live GitHub use.
+The owner approved the plan and selected subagent-driven execution. Execution
+stopped at Task 1's strict compatibility failure; its independently reviewed
+blocked assessment is linked above. Reopening the gate requires a separately
+reviewed compatibility remedy, not another execution-method choice or an implicit
+declaration-check waiver. Live GitHub use remains unauthorised.

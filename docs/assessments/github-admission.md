@@ -3,7 +3,8 @@
 Task 1 was attempted on 2026-10-20 with the owner's explicit execution and
 installation approval. **The published-channel dependency gate is rejected.**
 No admission implementation or new dependency workspace is retained. Tasks 2-6
-remain unstarted. The controller owns independent review and any next decision.
+remain unstarted. Independent task review approved the blocked disposition at
+`13cd821`, not dependency admission. Any next decision remains with the controller.
 
 ## Tested Identity
 
@@ -77,7 +78,8 @@ in-process `channel.route().fetch(request)` and synthetic secrets/payloads:
 - Post-signing byte tampering: 401, no callback.
 - Ping: 200, no callback.
 - Callback error: 500 with `internal_error`, not accepted application success.
-- Custom body bytes/event/delivery ID preserved.
+- Whitespace-bearing signed body accepted; parsed payload and event/delivery ID
+  preserved. This does not prove raw-byte capture or digest retention.
 - Body limit `65536`: signed `65537`-byte request gets 413, no callback.
 
 These runtime successes do **not** admit the artifact. The attempted root
@@ -106,8 +108,8 @@ root lint/format (0 warnings/errors), all three existing uncached typechecks,
 domain 186 tests, engine 236 tests, old probe 36 tests, and `git diff --check`.
 Total: **458 pass, 0 fail, 1900 assertions**. This restored baseline result is
 distinct from the rejected attempted dependency gate and prototype lint failures.
-The owner approved the plan and selected subagent-driven execution; independent
-review remains with the controller. Tasks 2-6 remain pending, not started.
+The owner approved the plan and selected subagent-driven execution. Tasks 2-6
+remain pending, not started.
 
 Full command/exits, complete diagnostics, RED/GREEN logs, exact manifest/tarball,
 `attempted-source.tgz`, `attempted.bun.lock`, `vendor-declarations.tgz` and the
@@ -115,4 +117,15 @@ detailed self-review report are retained under the ignored directory:
 `.superpowers/sdd/2026-10-20-github-admission/` (`scratch/` and
 `task-1-report.md`). No global network fetch, live GitHub access, listener, model,
 agent dispatch, coordinator, worker or publisher was used by the new probe.
-This is author self-review only; independent review remains with the controller.
+The author report is self-review, separate from the independent task review in
+`task-1-review.md`. That review found no critical or important issues in the
+blocked disposition. Its minor evidence-wording clarification is incorporated
+above: the custom-body test observes parsed payload/metadata, not raw bytes at
+the callback. The controller checked the archived assertion before correcting it.
+
+Controller closeout also confirms an empty source/configuration/dependency diff
+against the starting commit, the exact original lock hash, current clean lint
+and formatting, 33 resolving local documentation links and the recorded restored
+gate results. This documentation-only closeout does not extend runtime evidence
+or admit the rejected package. Main remains unchanged at `1fb038c`; no merge or
+push was performed.
