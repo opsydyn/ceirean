@@ -112,7 +112,8 @@ Discovery does not automatically enable migrations or grant execution access.
 The owner approved the conversational design for an offline `/leviathan assess`
 issue-comment admission probe. The
 [written spec](docs/superpowers/specs/2026-10-20-github-admission-design.md)
-awaits review before implementation planning. It proposes verified ingress,
+is approved; its [implementation plan](docs/superpowers/plans/2026-10-20-github-admission.md)
+awaits review and selection of an execution method. It proposes verified ingress,
 application-owned authorisation and a transactional local inbox producing
 historical admission previews only. Nothing is implemented or installed for this
 slice; models, a public endpoint, worker execution and GitHub writes remain out

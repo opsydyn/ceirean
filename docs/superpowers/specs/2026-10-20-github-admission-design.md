@@ -1,8 +1,9 @@
 # Offline GitHub Command Admission
 
-Status: the owner approved the conversational design sections on 2026-10-20.
-This written spec awaits owner review. No implementation plan, dependency
-installation, live GitHub access or execution is authorised by this document.
+Status: the owner approved the conversational design sections and then this
+written spec on 2026-10-20. The [implementation plan](../plans/2026-10-20-github-admission.md)
+awaits review and selection of execution method. Dependency installation, live
+GitHub access and implementation are not authorised by written-spec approval.
 
 ## Outcome And Scope
 
@@ -288,6 +289,6 @@ models, worker isolation, publication and org discovery remain separately gated.
 - [Assessed source package manifest](https://github.com/withastro/flue/blob/deee93b40d275ecc9a50c50af2158f20089d54bc/packages/github/package.json)
 - [GitHub failed-delivery handling](https://docs.github.com/en/webhooks/using-webhooks/handling-failed-webhook-deliveries)
 
-Review this written spec before implementation planning. Written-spec approval
-permits a plan, not code or installation. The reviewed implementation plan and
-chosen execution method must be approved before implementation begins.
+The owner has approved this written spec. Written-spec approval permits a plan,
+not code or installation. Review the linked implementation plan and select its
+execution method before implementation begins.

@@ -59,8 +59,9 @@ issue comments before discovery events, with previews only and no execution.
 
 - [x] Review the conversational command/authority, inbox/replay and acceptance
       design sections for `/leviathan assess` on ordinary issues.
-- [ ] Review the written [offline admission spec](superpowers/specs/2026-10-20-github-admission-design.md).
-- [ ] Review its implementation plan and select an execution method.
+- [x] Review the written [offline admission spec](superpowers/specs/2026-10-20-github-admission-design.md).
+- [ ] Review its [implementation plan](superpowers/plans/2026-10-20-github-admission.md)
+      and select an execution method.
 - [ ] Qualify the exact GitHub channel artifact against the pinned Bun/Flue cohort
       and universal lint rules before implementing the adapter.
 - [ ] Prove signed fixtures, runtime validation, current local authorisation,
