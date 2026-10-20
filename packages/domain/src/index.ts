@@ -5,3 +5,5 @@ export * from './worker-operation.ts';
 export * from './worker-evidence.ts';
 export * from './command-admission.ts';
 export * from './command-admission-policy.ts';
+export * from './live-admission.ts';
+export * from './live-admission-policy.ts';
