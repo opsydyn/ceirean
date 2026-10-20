@@ -13,7 +13,9 @@ checks and 466 tests / 1924 assertions. Task 2's pure policy slice is complete a
 Task 3's inferred service/test-only memory contract is complete at `18695a6`,
 independently reviewed with no findings, with 518 total tests / 2422 assertions.
 See [memory contract evidence](../../assessments/github-inbox-contract.md).
-Task 4's scoped native SQLite adapter is separately approved and in progress;
+Task 4's scoped native SQLite adapter is complete at `db21cc4`, with clean
+independent review and 549 total tests / 3810 assertions. See
+[native inbox evidence](../../assessments/github-sqlite-inbox.md).
 Tasks 5-6 remain pending separate approval. No live
 GitHub access, execution or publication is authorised by this offline approval.
 
@@ -309,6 +311,6 @@ models, worker isolation, publication and org discovery remain separately gated.
 The owner subsequently approved the linked plan and selected subagent-driven
 execution. The original published-artifact gate failed; only the explicitly
 repaired local cohort is admitted. Pure Task 2 work is complete and reviewed;
-Task 3's inferred service/memory contract is complete and reviewed. Native persistence
-is in progress under Task 4; verified ingress, live use and execution boundaries
-remain unimplemented.
+Task 3's inferred service/memory contract and Task 4's local native transaction
+adapter are complete and reviewed. Verified ingress, process-kill qualification,
+live use and execution boundaries remain unimplemented.

@@ -26,11 +26,11 @@ preview decisions. It is not an inbox, verified HTTP endpoint or permission to
 execute work.
 
 The reviewed [in-memory command admission contract](docs/assessments/github-inbox-contract.md) adds
-an inferred Effect service and test-only replay/authority fixture. Native SQLite
-transactions, verified ingress and restart qualification remain later work.
+an inferred Effect service and test-only replay/authority fixture. That memory
+result alone does not qualify native SQLite, verified ingress or restart recovery.
 
-The [local SQLite inbox](docs/assessments/github-sqlite-inbox.md) is being
-qualified separately, with scoped handles, native transactions and revision
+The reviewed [local SQLite inbox](docs/assessments/github-sqlite-inbox.md) is
+locally qualified, with scoped handles, native transactions and revision
 history. Same-process close/reopen is not process-kill or host-loss evidence.
 
 The synthetic qualification-gate tracer is implemented and locally verified:

@@ -77,15 +77,17 @@ issue comments before discovery events, with previews only and no execution.
       contract: [Task 3 evidence](assessments/github-inbox-contract.md), 12000 new
       sequence cases, 518 total tests / 2422 assertions, clean independent review
       of `18695a6`. No native transaction or durability guarantee implied.
-- [ ] Add the scoped SQLite inbox and native transaction, rollback, revision and
-      two-connection checks (Task 4, separately approved and in progress).
+- [x] Add the scoped SQLite inbox and native transaction, rollback, revision and
+      two-connection checks: [Task 4 evidence](assessments/github-sqlite-inbox.md),
+      31 native cases, 549 total tests / 3810 assertions, clean independent review
+      of `db21cc4`. Same-process reopen is not process-kill or host-loss evidence.
 - [ ] Prove signed fixtures, runtime validation, current local authorisation,
       transactional deduplication and SQLite process-restart behavior, with no
       model calls, listener, workers, coordinator invocation or GitHub writes.
 
 The strict compatibility probe and pure Task 2 policy are locally qualified.
-Task 3's service/memory contract is locally qualified. Task 4's native inbox is
-in progress; no verified ingress application is implemented. The package
+Task 3's service/memory contract and Task 4's native inbox are locally qualified;
+no verified ingress application is implemented. The package
 gate does not satisfy the remaining transactional or persistence requirements.
 Production hosting, live permission retrieval, execution and publication remain
 separately gated even if a future offline probe passes.

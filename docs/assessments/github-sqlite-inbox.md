@@ -2,8 +2,8 @@
 
 Task 4 of the [offline admission plan](../superpowers/plans/2026-10-20-github-admission.md)
 is separately approved after the [in-memory contract](github-inbox-contract.md).
-Source is stable after focused native/channel tests and full controller gates.
-Independent task review remains in progress; no whole-plan acceptance is claimed.
+Source is complete at `db21cc4`, with full controller gates and clean independent
+spec/quality review. This is local Task 4 acceptance, not whole-plan acceptance.
 
 ## Boundary
 
@@ -84,10 +84,14 @@ pure/engine admission cases remain unchanged; these native cases are determinist
 transaction tests, not newly generated laws. Lock changes are exactly the two
 existing workspace links, with no external pin changes. Current lock SHA-256:
 `a03b2f20874301814ba165f945b3fa55df5f20023f29ba5b873f3d16537cadc3`.
-Independent review is still pending. No hosted/CI or cross-platform acceptance
-is inferred from these local gates.
+Independent review approved `ea6aed3..db21cc4` with no findings requiring changes.
+It inspected native atomicity, historical identity, revision/time/capacity checks,
+config snapshots and child-scope cleanup without rerunning the full suites.
+The gate results above are controller-observed, not reviewer-reproduced history.
+All 141 Effect rules and one physical Effect instance remain verified. No
+hosted/CI or cross-platform acceptance is inferred from these local gates.
 
-Required proof includes real file-backed recording and reopen, native rollback
+Verified cases include real file-backed recording and reopen, native rollback
 counts from fresh handles, two-connection lock contention/duplicates, capacity,
 revision reuse, explicit-time races and immediate cleanup on failed acquisition.
 Post-commit synthetic reply loss is distinct from pre-commit rollback.

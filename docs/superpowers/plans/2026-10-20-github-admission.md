@@ -26,7 +26,9 @@ new pure law cases. See [Task 2 evidence](../../assessments/github-command-polic
 Task 3's inferred service and test-only memory inbox contract is complete at
 `18695a6`, with clean independent review, 518 total tests / 2422 assertions and
 12000 new sequence-law cases. See [Task 3 evidence](../../assessments/github-inbox-contract.md).
-Task 4's scoped native SQLite adapter is now separately approved and in progress;
+Task 4's scoped native SQLite adapter is complete at `db21cc4`, with clean
+independent review and 549 total tests / 3810 assertions. See
+[Task 4 evidence](../../assessments/github-sqlite-inbox.md).
 Tasks 5-6 remain pending separate approval. No live
 GitHub access, merge or push is authorised.
 
@@ -222,11 +224,11 @@ current-revision/state installation is idempotent. It is not a GitHub API.
 SQLite fault points are `BeforeRecord`, `AfterDecision`, `BeforeCommit`,
 `AfterCommit`, `Close`; test construction owns them, requests cannot select them.
 
-- [ ] **1. Write/observe failing adapter contract tests.** The real file-backed adapter must satisfy `record once`, `duplicate original`, `conflicting delivery cannot overwrite`, `stale authority cannot commit`, `rollback after decision insert has no partial rows`, and `fresh read returns detached schema-valid record`. Run `tests/sqlite-inbox.test.ts` in the new probe and capture RED before adapter code.
-- [ ] **2. Implement native schema/lifetime.** Use authority rows keyed by ingress scope with revision/snapshot and clock floor plus unique used-revision history; decisions unique by command key; receipts unique by transport key and referring to decisions. Enforce SQL constraints/foreign keys and validate JSON on read. A new database without an explicit initial fixture has unavailable authority, not an enabled default; reopen never reseeds it. Acquire/init/close with Effect resource ownership; failed initialization closes the handle. Never store full comment/raw body, secret, signature or exception text; only normalised fields/digests/evidence. No run/conversation database is created.
-- [ ] **3. Implement one synchronous write transaction.** Resolve identical receipts/commands first as explicitly historical results. For new work compare expected authority revision inside the transaction, read injected current time, enforce floor/freshness for new previews and recheck the pure policy against the current authority. Insert receipt/request/decision and update floor atomically. Capacity or mismatch rolls everything back; assign decision ID once. Do not await inside the transaction or call runtime helpers to obtain time.
-- [ ] **4. Prove transaction and resource edges.** Two separately opened connections race the same fixture command: one original only, others duplicate or explicit retryable busy/conflict; sequential deliberate retry converges to that original. Inject each pre-commit fault and inspect fresh connection counts. Post-commit response loss must retain the original. At capacities 256/1024, known duplicates still work but new rows refuse without eviction. Busy lock, corrupt file, invalid stored schema, caller mutation, clock rollback, expiry equality and init-plus-close failure remain visible without leaking handles or swallowing the primary error.
-- [ ] **5. Verify/commit/review.** Run focused suites and full gates. Record local transactional evidence separately from memory laws. Commit `feat: persist offline command admissions in SQLite`; review under the selected execution method before ingress integration.
+- [x] **1. Write/observe failing adapter contract tests.** The real file-backed adapter must satisfy `record once`, `duplicate original`, `conflicting delivery cannot overwrite`, `stale authority cannot commit`, `rollback after decision insert has no partial rows`, and `fresh read returns detached schema-valid record`. Run `tests/sqlite-inbox.test.ts` in the new probe and capture RED before adapter code.
+- [x] **2. Implement native schema/lifetime.** Use authority rows keyed by ingress scope with revision/snapshot and clock floor plus unique used-revision history; decisions unique by command key; receipts unique by transport key and referring to decisions. Enforce SQL constraints/foreign keys and validate JSON on read. A new database without an explicit initial fixture has unavailable authority, not an enabled default; reopen never reseeds it. Acquire/init/close with Effect resource ownership; failed initialization closes the handle. Never store full comment/raw body, secret, signature or exception text; only normalised fields/digests/evidence. No run/conversation database is created.
+- [x] **3. Implement one synchronous write transaction.** Resolve identical receipts/commands first as explicitly historical results. For new work compare expected authority revision inside the transaction, read injected current time, enforce floor/freshness for new previews and recheck the pure policy against the current authority. Insert receipt/request/decision and update floor atomically. Capacity or mismatch rolls everything back; assign decision ID once. Do not await inside the transaction or call runtime helpers to obtain time.
+- [x] **4. Prove transaction and resource edges.** Two separately opened connections race the same fixture command: one original only, others duplicate or explicit retryable busy/conflict; sequential deliberate retry converges to that original. Inject each pre-commit fault and inspect fresh connection counts. Post-commit response loss must retain the original. At capacities 256/1024, known duplicates still work but new rows refuse without eviction. Busy lock, corrupt file, invalid stored schema, caller mutation, clock rollback, expiry equality and init-plus-close failure remain visible without leaking handles or swallowing the primary error.
+- [x] **5. Verify/commit/review.** Run focused suites and full gates. Record local transactional evidence separately from memory laws. Commit `feat: persist offline command admissions in SQLite`; review under the selected execution method before ingress integration.
 
 In `rollback after decision insert has no partial rows`, inject `AfterDecision`
 failure and count rows using a fresh native connection, not the adapter cache:
@@ -359,5 +361,5 @@ the remaining tasks just because their plans are written.
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
 are linked above. Tasks 2 and 3 are complete with independent task review.
-Task 4 is separately approved and in progress; Tasks 5-6 have not started.
+Task 4 is complete and reviewed; Tasks 5-6 have not started.
 Live GitHub use remains unauthorised.
