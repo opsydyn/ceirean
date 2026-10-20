@@ -49,8 +49,12 @@ pull requests is not the success measure.
 - The owner selected `@xstate/effect` for local worker lifecycle orchestration,
   not another durable coordinator. The written spec and ADR-0002 are approved;
   execution is approved, and Task 1's exact-cohort gate is committed and reviewed
-  clean at `91c0f01`. Tasks 1-5 are independently reviewed clean through `ee0d0f8`;
-  Task 6 qualification and final whole-implementation approval remain separate.
+  clean at `91c0f01`. All six task reviews are complete and clean through
+  `781c71c`. Final review found I1: normal released ownership was incorrectly
+  reported as ActorFailed. The scoped fix passes 458 tests / 1900 assertions,
+  including RED/GREEN regressions; independent
+  scoped rereview remains pending, not whole-branch approval. See the
+  [measured assessment](docs/assessments/worker-lifecycle.md).
 - No automatic merge, package release or deployment.
 
 ## Proposed First Slice

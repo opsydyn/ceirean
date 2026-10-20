@@ -612,6 +612,37 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
         yield* fencePeers(entry).pipe(Effect.when(reconciling));
         const available = Option.fromNullishOr(actor);
         function deliver(actor: EffectActor<typeof workerLifecycleMachine>) {
+          function released() {
+            const state = actor.getSnapshot();
+            return Match.value(state.status).pipe(
+              Match.when('done', () => state.matches('released')),
+              Match.orElse(() => false),
+            );
+          }
+          function* observeReleased() {
+            yield* retainSnapshot(entry, actor.getSnapshot());
+            yield* inspectFailure(entry);
+            const snapshot = yield* load(operationId);
+            const confirmed = Option.exists(snapshot.cleanup, (cleanup) =>
+              Match.value(cleanup).pipe(
+                Match.tag('CleanupConfirmed', () => true),
+                Match.orElse(() => false),
+              ),
+            );
+            const result = Match.value(released() && confirmed).pipe(
+              Match.when(true, () => Result.succeed(snapshot)),
+              Match.orElse(() => Result.fail(runtimeFailure(operationId))),
+            );
+            return yield* Effect.fromResult(result);
+          }
+          const completion = Effect.gen(observeReleased);
+          function* completedTransition() {
+            const snapshot = yield* completion;
+            yield* Effect.fromResult(
+              requireFact(!execution, { _tag: 'AlreadyClaimed', operationId }),
+            );
+            return snapshot;
+          }
           function* deliverAndObserve() {
             const execution = Match.value(method).pipe(
               Match.when('requestExecution', () => true),
@@ -645,14 +676,19 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
               Stream.runHead,
             );
             const waiter = yield* Effect.forkScoped(waiting);
-            const failure = Effect.fail(runtimeFailure(operationId));
-            const ended = Deferred.await(entry.closed).pipe(Effect.andThen(failure));
+            const ended = Deferred.await(entry.closed).pipe(
+              Effect.andThen(completion),
+              Effect.asVoid,
+            );
             yield* Deferred.await(listening).pipe(Effect.raceFirst(ended), Effect.scoped);
             const type = Match.value(execution).pipe(
               Match.when(true, () => 'RequestedExecution' as const),
               Match.orElse(() => 'RequestedReconciliation' as const),
             );
-            yield* send(actor, { type, operationId, revision: current.revision });
+            const unreleased = Effect.sync(() => !released());
+            yield* send(actor, { type, operationId, revision: current.revision }).pipe(
+              Effect.when(unreleased),
+            );
             const state = yield* Fiber.join(waiter);
             yield* inspectFailure(entry);
             const snapshot = yield* load(operationId);
@@ -675,7 +711,12 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
             yield* Option.match(refusal, { onNone: () => Effect.void, onSome: Effect.fail });
             return snapshot;
           }
-          const program = Effect.gen(deliverAndObserve);
+          const completed = Effect.gen(completedTransition);
+          const observing = Effect.gen(deliverAndObserve);
+          const program = Match.value(released()).pipe(
+            Match.when(true, () => completed),
+            Match.orElse(() => observing),
+          );
           return program;
         }
         const delivery = Option.match(available, {

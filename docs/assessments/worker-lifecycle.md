@@ -1,10 +1,12 @@
 # Worker Lifecycle Qualification
 
 Task 1's compatibility gate below is historical evidence from 2026-10-19; its
-then-pending review subsequently passed at `91c0f01`. Tasks 1-5 are independently
-reviewed clean through `ee0d0f82d1070e9e64ff12db27f20c5830f39f18`, including the
-recorded fixes. Task 6 adds author-run offline qualification; its task review and
-the final whole-implementation review remain controller-owned and pending.
+then-pending review subsequently passed at `91c0f01`. All six task reviews are
+complete and clean through `781c71cc83889271702b8aa68e81ded0cc84e975`, including
+the recorded fixes. Final whole-implementation review at that source returned
+With fixes for I1: normal released-owner reconciliation incorrectly ActorFailed.
+The single scoped fix has author RED/GREEN proof; independent scoped rereview
+remains controller-owned and pending. No whole-branch approval is claimed.
 ADR-0002's framework selection is unchanged. No live mechanism is qualified.
 
 ## Implementation Decisions
@@ -283,11 +285,12 @@ same control promptly falsifies with ConflictingOperation. Later stricter test
 experiments incorrectly demanded that every generated service call succeed or
 reuse exactly the drain error. A preliminary engine run was 212 pass / 21 fail
 (1083 assertions), and two smaller experiments were 0/4. Traces included shutdown
-then reconcile, and cancel/reconcile/reconcile after Released. These are surfaced
-sanitized actor errors, not a forbidden mutation or success receipt. Final tests
-keep those actions, audit typed failures, validate their sanitized channel, and
-still require constructive progress. This adjusts the test expectation, not the
-approved safety laws, their budgets, or production semantics.
+then reconcile, and cancel/reconcile/reconcile after Released. At the Task 6
+source these surfaced sanitized actor errors and passed safety-channel auditing;
+that historical policy did not prove correct completed-operation classification.
+Final review identified normal-release reconciliation as I1. The scoped fix
+corrects that API defect without adding an arbitrary-success requirement or
+changing any safety law or budget. Historical experiment results remain above.
 
 The deferred root-supervision regression uses the existing journal seam:
 a real Claim commits normally, but only its schema-valid returned snapshot omits
@@ -298,8 +301,9 @@ definition** observes failed real `join`, root status `error`, `taskError: null`
 service test verifies sanitized ActorFailed retention through read, shutdown,
 repeated shutdown and later read with no leaked cause. This is an adversarial
 journal-return contract violation, not normal journal operation or durability
-proof. Author evidence addresses the test gap; independent review must confirm
-the distinction before the controller closes that deferred minor.
+proof. Task 6 and final independent review confirmed this distinction; the
+controller closed the deferred minor. The retained root/task failure contracts
+remain binding on the final I1 fix.
 
 ## Measured Verification
 
@@ -346,18 +350,84 @@ Against Task 6 base, manifests/lock have no diff. Current lock blob/SHA-256 rema
 `15c84a8a0dac6c0d43c169c682d710674232b6a6` /
 `aa90aa27ce4e98d36624b1b701e2f93ea988afa52dc157294b9219809cd5e32e`.
 
+## Final I1 Fix Verification
+
+One final fix wave starts at exact source
+`781c71cc83889271702b8aa68e81ded0cc84e975`. Only the service transition helper
+changes in production. Successful `done`/`released` ownership must also have
+committed CleanupConfirmed; snapshot and retained failures are inspected first.
+The same check handles closure racing listener startup. Execution on a completed
+owner refuses AlreadyClaimed; no new actor, claim replay or public result shape.
+
+The new `worker-completion.test.ts` literal tests cover normal execution release,
+normal cancellation release, and release racing an in-flight reconciliation's
+waiter startup. They use the real service and memory journal, TestClock, a
+test-only journal-load barrier and an ActorScope finalizer signal, not sleeps or
+a production injection API. In the OPEN service both repeated reconciliations
+observe the tombstone; reacquisition, later read, first/repeated drain and fresh
+service reconstruction work with unchanged complete intent records and exactly
+9 execution-path or 8 cancellation-path calls. Execution cannot restart them.
+
+Final test source against the exact original service: **0 pass / 3 fail, 13
+assertions**, all ActorFailed. Restoring the fix: **3 pass / 0 fail, 58
+assertions**. Command from `packages/engine`, with only PATH/HOME/TMPDIR:
+`bun --no-env-file --no-install test tests/worker-completion.test.ts --timeout 30000`.
+The unchanged genuine root/task/drain error controls separately pass **6 / 55**.
+
+Fresh sequential final gates, each with only PATH/HOME/TMPDIR, all exit 0:
+
+| Gate                                             | Result                                                     |
+| ------------------------------------------------ | ---------------------------------------------------------- |
+| `bun run check`                                  | 0 warnings/errors; 63 files, 210 rules; 92 formatted files |
+| `moon run domain:typecheck --force --no-actions` | strict/vendor checking passes                              |
+| `moon run engine:typecheck --force --no-actions` | strict/vendor checking passes                              |
+| `moon run probe:typecheck --force --no-actions`  | existing policy passes                                     |
+| `moon run domain:test --force --no-actions`      | 186 tests / 634 assertions                                 |
+| `moon run engine:test --force --no-actions`      | 236 / 1162                                                 |
+| `moon run probe:test --force --no-actions`       | 36 / 104                                                   |
+| `git diff --check`                               | clean                                                      |
+
+Total: **458 tests / 1900 assertions**, including the unchanged 30,000 worker-law
+primary cases and all existing law budgets (138,000 primary cases overall).
+Frozen script-free install: 126 installs / 180 packages, no changes. Installed
+manifest/realpath/baseline-lock audit and package listing pass: exact cohort,
+one physical Effect 4.0.5, all 141 Effect rules at error, original strict/vendor
+policy. No timeout or budget change. Documentation-only measurement edits are
+followed by a fresh root check before commit.
+
+Actual verified source Git blobs: service
+`78527618e41711d92952cd1736f307c4f95be9a9`; new completion test
+`79681e381130d842a0d232fb5dc2ea8cd649c761`. The original Task 6 law/fixture,
+memory-journal and lock identities above remain unchanged. Protected comparison
+against the exact input HEAD is empty with only these exact file exclusions:
+`README.md`, this assessment, `docs/superpowers/plans/2026-10-19-worker-lifecycle.md`,
+`docs/superpowers/specs/2026-10-19-worker-lifecycle-design.md`,
+`packages/engine/src/worker-lifecycle-service.ts`, and
+`packages/engine/tests/worker-completion.test.ts`. No source-directory blanket.
+
+Full commands/output, final-source RED/GREEN, authoring diagnostics, source/commit
+identity and scoped author self-review are retained in
+`.superpowers/sdd/2026-10-19-worker-lifecycle/final-fix-report.md` and
+`final-fix-*.log`. No additional real author finding remains. All six task
+reviews are complete; independent final scoped rereview is still pending with
+the controller. No whole-branch approval or native/durable proof is claimed.
+
 ## Remaining Boundaries
 
-Repeated reconciliation of an already released/closed live owner can surface
-sanitized ActorFailed. Task 6 records this behavior rather than claiming
-post-release transition idempotence; controller final review should judge that
-API expectation. Positive release and tombstone/reconstruction proof remain
-separate from such transition attempts.
+The historical Task 6 post-release ActorFailed concern was adjudicated as I1,
+not accepted as a limitation. The scoped fix observes a committed tombstone only
+for successful done/released ownership, including closure during waiter startup;
+it retains failure inspection and does not blanket-catch ActorFailed or accept
+all inactive actors. Literal execution/cancellation release and deterministic
+in-flight reconciliation regressions pass, without new calls or claims. Final
+scoped rereview remains pending. Historical controls and identities above refer
+to their original source, not this changed service.
 
 All proof here is local Bun, the actual statechart/application service and a
 memory journal with controlled fakes. Registry/package admission is separate
 from synthetic protocol qualification. Browser/manual proof: none. Native
 Docker cleanup/isolation, real providers/subprocess driver, production adapter,
 durable storage/controller fencing, process/host-loss recovery, deployment,
-real migration, throughput/scaling proof: none. No merge or push. Task 6 task
-approval and whole-implementation review remain pending with the controller.
+real migration, throughput/scaling proof: none. No merge or push. All six task
+reviews are complete; the controller owns final scoped rereview and any eventual
+whole-implementation approval.

@@ -5,12 +5,13 @@ owner selected `@xstate/effect` as the framework, not an alternative to investig
 The owner separately approved [implementation-plan](../plans/2026-10-19-worker-lifecycle.md)
 execution on 2026-10-19. Task 1's exact-cohort compatibility gate is committed and
 independently reviewed clean at `91c0f01`; see the
-[local evidence](../../assessments/worker-lifecycle.md). Tasks 2-5 and their fixes
-are independently reviewed clean through `ee0d0f8`. The earlier domain-only
-pending status was historical. Task 6 adds author-run stateful qualification;
-its independent task review and final whole-implementation review remain pending
-with the controller. This status does not authorise live execution or establish
-durable recovery.
+[local evidence](../../assessments/worker-lifecycle.md). All six task reviews,
+including their fixes, are complete and clean through `781c71c`. Final review at
+that source returned With fixes for I1 (normal released-owner reconciliation
+misclassified as ActorFailed). The single scoped fix has author RED/GREEN proof;
+controller-owned independent scoped rereview remains pending. This is not
+whole-branch approval and does not authorise live execution or establish durable
+recovery.
 
 ## Intent And Baseline
 
