@@ -1,6 +1,6 @@
 # Leviathan Roadmap
 
-Local delivery map, updated 2026-10-19. Checkboxes describe delivered outcomes,
+Local delivery map, updated 2026-10-20. Checkboxes describe delivered outcomes,
 not permission to implement unchecked items. The organisation-discovery direction
 is requested by the owner; its architecture, implementation plan, permissions,
 hosting and execution appetite still require review.
@@ -50,6 +50,26 @@ hosting and execution appetite still require review.
       unattended organisation-wide expansion.
 - [ ] Deliver organisation discovery and configuration self-PRs as described below.
 - [ ] Only then consider campaigns, more ecosystems or external tenants.
+
+## Offline GitHub Admission Design
+
+This is a separately approved design exercise, not permission to bypass the
+real-worker or live GitHub gates above. The owner selected explicit operator
+issue comments before discovery events, with previews only and no execution.
+
+- [x] Review the conversational command/authority, inbox/replay and acceptance
+      design sections for `/leviathan assess` on ordinary issues.
+- [ ] Review the written [offline admission spec](superpowers/specs/2026-10-20-github-admission-design.md).
+- [ ] Review its implementation plan and select an execution method.
+- [ ] Qualify the exact GitHub channel artifact against the pinned Bun/Flue cohort
+      and universal lint rules before implementing the adapter.
+- [ ] Prove signed fixtures, runtime validation, current local authorisation,
+      transactional deduplication and SQLite process-restart behavior, with no
+      model calls, listener, workers, coordinator invocation or GitHub writes.
+
+These are future evidence requirements, not implemented capability. Production
+hosting, live permission retrieval, execution and publication remain separately
+gated even if the offline probe passes.
 
 ## Organisation Discovery And Configuration Self-PRs
 

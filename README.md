@@ -107,6 +107,17 @@ run paid jobs or change external systems.
 organisation discovery and config-only self-PRs against Leviathan for new repos.
 Discovery does not automatically enable migrations or grant execution access.
 
+## Offline GitHub Admission Proposal
+
+The owner approved the conversational design for an offline `/leviathan assess`
+issue-comment admission probe. The
+[written spec](docs/superpowers/specs/2026-10-20-github-admission-design.md)
+awaits review before implementation planning. It proposes verified ingress,
+application-owned authorisation and a transactional local inbox producing
+historical admission previews only. Nothing is implemented or installed for this
+slice; models, a public endpoint, worker execution and GitHub writes remain out
+of scope. It does not change the CLI-first deployment direction.
+
 ## Architecture Draft
 
 [Internal Upgrade Service Design](docs/superpowers/specs/2026-10-18-internal-upgrade-service-design.md)
