@@ -7,7 +7,19 @@ import {
   WorkerHostId,
   WorkerDaemonId,
 } from '@leviathan/domain';
-import { Clock, Deferred, Effect, Fiber, Layer, Match, Option, Queue, Ref, Result } from 'effect';
+import {
+  Cause,
+  Clock,
+  Deferred,
+  Effect,
+  Fiber,
+  Layer,
+  Match,
+  Option,
+  Queue,
+  Ref,
+  Result,
+} from 'effect';
 import { TestClock } from 'effect/testing';
 
 import * as Engine from '../src/index.ts';
@@ -106,6 +118,120 @@ async function concurrentAcquisition() {
 test(
   'concurrent identical acquisition owns one root and rejects immutable conflicts',
   concurrentAcquisition,
+);
+
+async function rejectedFirstAcquisition() {
+  function* scenario() {
+    const c = makeWorkerCase();
+    const h = yield* LifecycleHarness;
+    yield* TestClock.setTime(950);
+    const service = yield* Engine.makeWorkerLifecycle(issuer);
+    const conflicting = { ...c.operation, purpose: 'Baseline' };
+    expect(yield* service.acquire(conflicting)).toEqual({
+      _tag: 'Refused',
+      refusal: { _tag: 'ConflictingOperation', operationId: c.operation.operationId },
+    });
+    expect(yield* Ref.get(h.fake.calls)).toEqual([]);
+    expect(yield* service.acquire(c.operation)).toEqual({
+      _tag: 'Accepted',
+      operationId: c.operation.operationId,
+    });
+    const create = yield* Queue.take(h.fake.barriers.mutations);
+    expect(create.request.operation.purpose).toBe('Candidate');
+    expect((yield* Ref.get(h.edits)).map((edit) => edit._tag)).toEqual(['Claim']);
+    expect(yield* service.acquire(conflicting)).toEqual({
+      _tag: 'Refused',
+      refusal: { _tag: 'ConflictingOperation', operationId: c.operation.operationId },
+    });
+    expect((yield* service.acquire(c.operation))._tag).toBe('Accepted');
+    expect((yield* Ref.get(h.fake.calls)).filter(isMutation)).toHaveLength(1);
+  }
+  const program = Effect.gen(scenario);
+  const scoped = Effect.scoped(program);
+  const provided = Effect.provide(scoped, lifecycleTestLayer(makeWorkerSnapshot()));
+  await Effect.runPromise(provided);
+}
+test(
+  'rejected conflicting-first intake cannot poison later canonical persisted-operation ownership',
+  rejectedFirstAcquisition,
+);
+
+async function rejectedConcurrentAcquisition() {
+  function* scenario() {
+    const c = makeWorkerCase();
+    const h = yield* LifecycleHarness;
+    yield* TestClock.setTime(950);
+    const service = yield* Engine.makeWorkerLifecycle(issuer);
+    const gate = yield* journalGate(h, 'before-load');
+    const rejected = yield* service
+      .acquire({ ...c.operation, purpose: 'Baseline' })
+      .pipe(Effect.forkScoped);
+    yield* Deferred.await(gate.entered);
+    const canonical = yield* service.acquire(c.operation).pipe(Effect.forkScoped);
+    const duplicate = yield* service.acquire(c.operation).pipe(Effect.forkScoped);
+    yield* service.read(c.operation.operationId);
+    expect(canonical.pollUnsafe()).toBeUndefined();
+    expect(duplicate.pollUnsafe()).toBeUndefined();
+    yield* Deferred.succeed(gate.resume, undefined);
+    expect((yield* Fiber.join(rejected))._tag).toBe('Refused');
+    expect(yield* Fiber.join(canonical)).toEqual({
+      _tag: 'Accepted',
+      operationId: c.operation.operationId,
+    });
+    expect(yield* Fiber.join(duplicate)).toEqual({
+      _tag: 'Accepted',
+      operationId: c.operation.operationId,
+    });
+    const create = yield* Queue.take(h.fake.barriers.mutations);
+    expect(create.request.operation.purpose).toBe('Candidate');
+    expect((yield* Ref.get(h.edits)).map((edit) => edit._tag)).toEqual(['Claim']);
+    expect((yield* Ref.get(h.fake.calls)).filter(isMutation)).toHaveLength(1);
+  }
+  const program = Effect.gen(scenario);
+  const scoped = Effect.scoped(program);
+  const provided = Effect.provide(scoped, lifecycleTestLayer(makeWorkerSnapshot()));
+  await Effect.runPromise(provided);
+}
+test(
+  'canonical concurrent intake waits out a rejected pre-actor reservation and shares one owner',
+  rejectedConcurrentAcquisition,
+);
+
+async function rejectedReservationDrainRace() {
+  function* scenario() {
+    const c = makeWorkerCase();
+    const h = yield* LifecycleHarness;
+    yield* TestClock.setTime(950);
+    const service = yield* Engine.makeWorkerLifecycle(issuer);
+    const gate = yield* journalGate(h, 'before-load');
+    const rejected = yield* service
+      .acquire({ ...c.operation, purpose: 'Baseline' })
+      .pipe(Effect.forkScoped);
+    yield* Deferred.await(gate.entered);
+    const canonical = yield* service.acquire(c.operation).pipe(Effect.forkScoped);
+    const draining = yield* service.shutdown().pipe(Effect.result, Effect.forkScoped);
+    yield* Effect.yieldNow;
+    expect(yield* service.acquire(c.operation)).toEqual({
+      _tag: 'Refused',
+      refusal: { _tag: 'ShuttingDown', operationId: c.operation.operationId },
+    });
+    yield* Deferred.succeed(gate.resume, undefined);
+    expect((yield* Fiber.join(rejected))._tag).toBe('Refused');
+    expect((yield* Fiber.join(canonical))._tag).toBe('Refused');
+    const drained = yield* Fiber.join(draining);
+    expect(drained._tag).toBe('Failure');
+    expect(yield* service.shutdown().pipe(Effect.result)).toEqual(drained);
+    expect(yield* Ref.get(h.fake.calls)).toEqual([]);
+    expect(yield* Ref.get(h.edits)).toEqual([]);
+  }
+  const program = Effect.gen(scenario);
+  const scoped = Effect.scoped(program);
+  const provided = Effect.provide(scoped, lifecycleTestLayer(makeWorkerSnapshot()));
+  await Effect.runPromise(provided);
+}
+test(
+  'pre-actor rejection retirement cannot reopen the atomic drain gate for a waiting canonical caller',
+  rejectedReservationDrainRace,
 );
 
 async function shutdownAcquisitionRace() {
@@ -317,6 +443,69 @@ test(
   'shutdown retains a typed readback failure instead of masking it as drain expiry',
   shutdownReadbackFailure,
 );
+
+for (const failure of ['defect', 'typed failure'] as const) {
+  async function shutdownCleanupFault() {
+    function* scenario() {
+      const c = makeWorkerCase();
+      const h = yield* LifecycleHarness;
+      yield* TestClock.setTime(950);
+      const service = yield* Engine.makeWorkerLifecycle(issuer);
+      yield* service.acquire(c.operation);
+      yield* answerObservation(yield* Queue.take(h.fake.barriers.observations));
+      yield* answerObservation(yield* Queue.take(h.fake.barriers.observations));
+      const journalError = new WorkerJournalError({ operation: 'commit', code: 'CommitFailed' });
+      const fault = Match.value(failure).pipe(
+        Match.when('defect', () => ({
+          _tag: 'Defect' as const,
+          defect: 'private-cleanup-journal-defect',
+        })),
+        Match.orElse(() => ({ _tag: 'Failure' as const, error: journalError })),
+      );
+      yield* Ref.set(h.cleanupFault, Option.some(fault));
+      const first = yield* service.shutdown().pipe(Effect.exit);
+      const calls = yield* Ref.get(h.fake.calls);
+      const repeated = yield* service.shutdown().pipe(Effect.exit);
+      const laterRead = yield* service.read(c.operation.operationId).pipe(Effect.exit);
+      const expected = Match.value(failure).pipe(
+        Match.when('defect', () => ({
+          _tag: 'WorkerLifecycleRuntimeError',
+          operationId: 'worker-1',
+          code: 'ActorFailed',
+        })),
+        Match.orElse(() => ({
+          _tag: 'WorkerJournalError',
+          operation: 'commit',
+          code: 'CommitFailed',
+        })),
+      );
+      for (const exit of [first, repeated, laterRead]) {
+        const cause = Match.value(exit).pipe(
+          Match.tag('Failure', ({ cause }) => cause),
+          Match.orElse(() => expect.unreachable('cleanup failure must remain visible')),
+        );
+        expect(cause.reasons.map((reason) => reason._tag)).toEqual(['Fail']);
+        const reason = Cause.findFail(cause).pipe(Result.getSuccess, Option.getOrThrow);
+        const error = reason.error;
+        expect(error).toEqual(expect.objectContaining(expected));
+        expect(error.message).not.toContain('private-cleanup-journal-defect');
+        expect('cause' in error).toBe(false);
+      }
+      expect(repeated).toEqual(first);
+      expect(yield* Ref.get(h.fake.calls)).toEqual(calls);
+      const snapshot = Option.getOrThrow(yield* h.journal.inspect(c.operation.operationId));
+      expect(snapshot.cleanup).toEqual(Option.none());
+    }
+    const program = Effect.gen(scenario);
+    const scoped = Effect.scoped(program);
+    const provided = Effect.provide(scoped, lifecycleTestLayer(makeStartedWorkerSnapshot()));
+    await Effect.runPromise(provided);
+  }
+  test(
+    `shutdown cleanup ${failure} is tagged before caching and remains visible on repeated shutdown and read`,
+    shutdownCleanupFault,
+  );
+}
 
 function completeMutation(barrier: MutationBarrier, running: boolean, absent = false) {
   function* completeExternalWork() {
@@ -577,6 +766,10 @@ async function successfulShutdownAndTombstone() {
     expect(yield* service.acquire(snapshot.operation)).toEqual({
       _tag: 'Accepted',
       operationId: snapshot.operation.operationId,
+    });
+    expect(yield* service.acquire({ ...snapshot.operation, purpose: 'Baseline' })).toEqual({
+      _tag: 'Refused',
+      refusal: { _tag: 'ConflictingOperation', operationId: snapshot.operation.operationId },
     });
     expect(yield* service.acquire(snapshot.operation)).toEqual({
       _tag: 'Accepted',

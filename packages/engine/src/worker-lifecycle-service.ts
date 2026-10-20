@@ -8,6 +8,7 @@ import {
 import { createEffectActor, join, send, snapshots, type EffectActor } from '@xstate/effect';
 import {
   Clock,
+  Cause,
   Context,
   Deferred,
   Effect,
@@ -103,6 +104,25 @@ function runtimeFailure(
 ) {
   return new WorkerLifecycleRuntimeError({ operationId, code });
 }
+const isOperationalError = Schema.is(
+  Schema.Union([
+    Schema.instanceOf(WorkerJournalError),
+    Schema.instanceOf(WorkerMechanismError),
+    Schema.instanceOf(WorkerLifecycleRuntimeError),
+  ]),
+);
+function shutdownFailure(cause: Cause.Cause<unknown>, operationId: WorkerOperationId) {
+  const typed = Cause.findFail(cause).pipe(
+    Result.getSuccess,
+    Option.map(({ error }) => error),
+    Option.filter(isOperationalError),
+  );
+  const knownOnly = cause.reasons.every(
+    (reason) => Cause.isFailReason(reason) && isOperationalError(reason.error),
+  );
+  const safe = Option.filter(typed, () => knownOnly);
+  return Option.getOrElse(safe, () => runtimeFailure(operationId));
+}
 function requireFact(condition: boolean, refusal: WorkerRefusal) {
   return Match.value(condition).pipe(
     Match.when(true, () => Result.succeed(undefined)),
@@ -129,13 +149,16 @@ function makeOwned(operation: WorkerOperation) {
   const acquisition = Effect.gen(allocateOwner);
   return acquisition;
 }
-function reserve(state: Registry, candidate: Owned) {
+function reserve(
+  state: Registry,
+  candidate: Owned,
+): readonly [
+  Result.Result<{ readonly entry: Owned; readonly fresh: boolean }, WorkerRefusal>,
+  Registry,
+] {
   const operationId = candidate.operation.operationId;
   function existing(entry: Owned) {
-    return requireFact(sameOperation(entry.operation, candidate.operation), {
-      _tag: 'ConflictingOperation',
-      operationId,
-    }).pipe(Result.map(() => ({ entry, fresh: false })));
+    return Result.succeed({ entry, fresh: false });
   }
   function open() {
     const previous = HashMap.get(state.entries, operationId);
@@ -164,6 +187,15 @@ function retain(
     yield* Deferred.fail(entry.failed, error);
   }
   const program = Effect.gen(recordFailure);
+  return program;
+}
+function retainDrainCause(entry: Owned, cause: Cause.Cause<unknown>) {
+  function* recordDrainFailure() {
+    const error = shutdownFailure(cause, entry.operation.operationId);
+    yield* retain(entry, error);
+    return yield* Effect.fail(error);
+  }
+  const program = Effect.gen(recordDrainFailure);
   return program;
 }
 function inspectFailure(entry: Owned) {
@@ -284,8 +316,25 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
       const program = Effect.gen(registerAbsent);
       return program;
     }
-    function own(entry: Owned) {
-      function* hostActor() {
+    function retireRejected(entry: Owned) {
+      function removeUnowned(state: Registry) {
+        const current = HashMap.get(state.entries, entry.operation.operationId);
+        const removable = Option.filter(
+          current,
+          (owner) => owner === entry && Option.isNone(state.drain),
+        );
+        return Option.match(removable, {
+          onNone: () => state,
+          onSome: () =>
+            Struct.evolve(state, {
+              entries: (entries) => HashMap.remove(entries, entry.operation.operationId),
+            }),
+        });
+      }
+      return Ref.update(registry, removeUnowned);
+    }
+    function admit(entry: Owned) {
+      function* validateBeforeOwnership() {
         const operationId = entry.operation.operationId;
         const stored = yield* find(operationId);
         const snapshot = yield* Option.match(stored, {
@@ -298,6 +347,21 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
             operationId,
           }),
         );
+        return snapshot;
+      }
+      function rejected(
+        refusal: Extract<WorkerRefusal, { readonly _tag: 'ConflictingOperation' }>,
+      ) {
+        const failure = Effect.fail(refusal);
+        return retireRejected(entry).pipe(Effect.andThen(failure));
+      }
+      const validation = Effect.gen(validateBeforeOwnership);
+      return validation.pipe(Effect.catchTag('ConflictingOperation', rejected));
+    }
+    function own(entry: Owned) {
+      function* hostActor() {
+        const operationId = entry.operation.operationId;
+        const snapshot = yield* admit(entry);
         const released = Option.exists(snapshot.cleanup, (cleanup) =>
           Match.value(cleanup).pipe(
             Match.tag('CleanupConfirmed', () => true),
@@ -342,19 +406,72 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
       const program = Effect.forkIn(lifetime, scope);
       return program;
     }
-    function acquireDecoded(operation: WorkerOperation) {
-      function* acquireOwned() {
+    function confirmOwned(entry: Owned, operation: WorkerOperation) {
+      function* confirmInput() {
+        yield* Effect.fromResult(
+          requireFact(sameOperation(entry.operation, operation), {
+            _tag: 'ConflictingOperation',
+            operationId: operation.operationId,
+          }),
+        );
+        yield* inspectFailure(entry);
+        return Option.some({ _tag: 'Accepted' as const, operationId: operation.operationId });
+      }
+      const program = Effect.gen(confirmInput);
+      return program;
+    }
+    function acquireAttempt(operation: WorkerOperation) {
+      function* selectOwned() {
         const candidate = yield* makeOwned(operation);
         const selection = yield* Ref.modify(registry, (state) => reserve(state, candidate));
         const selected = yield* Effect.fromResult(selection);
         const fresh = Effect.sync(() => selected.fresh);
         const starting = start(selected.entry).pipe(Effect.when(fresh));
         yield* starting;
-        yield* Deferred.await(selected.entry.ready);
-        yield* inspectFailure(selected.entry);
-        return { _tag: 'Accepted' as const, operationId: operation.operationId };
+        const settled = yield* Deferred.await(selected.entry.ready).pipe(Effect.result);
+        function rejectedOwner(
+          error:
+            | WorkerRefusal
+            | WorkerJournalError
+            | WorkerMechanismError
+            | WorkerLifecycleRuntimeError,
+        ) {
+          function* checkRetiredReservation() {
+            yield* Deferred.await(selected.entry.closed);
+            const state = yield* Ref.get(registry);
+            const current = HashMap.get(state.entries, operation.operationId);
+            const retired = !Option.contains(current, selected.entry);
+            const conflict = Match.value(error).pipe(
+              Match.tag('ConflictingOperation', () => true),
+              Match.orElse(() => false),
+            );
+            const retryAdmission =
+              retired && conflict && !sameOperation(selected.entry.operation, operation);
+            return yield* Match.value(retryAdmission).pipe(
+              Match.when(true, () =>
+                Effect.succeed(Option.none<Extract<Acquisition, { readonly _tag: 'Accepted' }>>()),
+              ),
+              Match.orElse(() => Effect.fail(error)),
+            );
+          }
+          const program = Effect.gen(checkRetiredReservation);
+          return program;
+        }
+        const outcome = Result.match(settled, {
+          onSuccess: () => confirmOwned(selected.entry, operation),
+          onFailure: rejectedOwner,
+        });
+        return yield* outcome;
       }
-      const program = Effect.gen(acquireOwned);
+      const program = Effect.gen(selectOwned);
+      return program;
+    }
+    function acquireDecoded(operation: WorkerOperation) {
+      // Repeat only admission after a different caller's pre-actor rejection, never an intent or actor.
+      const program = acquireAttempt(operation).pipe(
+        Effect.repeat({ until: Option.isSome }),
+        Effect.map(Option.getOrThrow),
+      );
       return program.pipe(
         Effect.catchDefect(() => Effect.fail(runtimeFailure(operation.operationId))),
       );
@@ -629,6 +746,7 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
         Effect.catchIf(Schema.is(WorkerRefusal), () =>
           Effect.fail(runtimeFailure(entry.operation.operationId, 'ObservationFailed')),
         ),
+        Effect.catchCause((cause) => retainDrainCause(entry, cause)),
       );
     }
     function attemptDrain(entries: readonly Owned[], deadlineMs: number) {
@@ -658,8 +776,15 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
         const failures = yield* Effect.forEach(entries, (entry) => Ref.get(entry.failure));
         const retained = Option.fromNullishOr(failures.find(Option.isSome)).pipe(Option.flatten);
         const observed = Option.match(retained, { onNone: () => exit, onSome: Exit.fail });
-        yield* Deferred.done(drain.result, observed);
-        return yield* Exit.match(observed, {
+        const sanitized = Exit.match(observed, {
+          onSuccess: Exit.succeed,
+          onFailure: function sanitizeShutdown(cause) {
+            const error = shutdownFailure(cause, entries[0]!.operation.operationId);
+            return Exit.fail(error);
+          },
+        });
+        yield* Deferred.done(drain.result, sanitized);
+        return yield* Exit.match(sanitized, {
           onSuccess: Effect.succeed,
           onFailure: Effect.failCause,
         });

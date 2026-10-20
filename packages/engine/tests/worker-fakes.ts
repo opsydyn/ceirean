@@ -1,5 +1,5 @@
 import type { WorkerObservation } from '@leviathan/domain';
-import { Array, Clock, Context, Deferred, Effect, Layer, Option, Queue, Ref } from 'effect';
+import { Array, Clock, Context, Deferred, Effect, Layer, Match, Option, Queue, Ref } from 'effect';
 import { TestClock } from 'effect/testing';
 
 import type {
@@ -9,7 +9,7 @@ import type {
   WorkerJournalSnapshot,
   WorkerJournalEdit,
 } from '../src/worker-contracts.ts';
-import type { WorkerMechanismError } from '../src/worker-errors.ts';
+import type { WorkerJournalError, WorkerMechanismError } from '../src/worker-errors.ts';
 import { WorkerJournal, WorkerMechanism } from '../src/worker-ports.ts';
 import { makeWorkerCase } from './worker-fixtures.ts';
 import { makeMemoryWorkerJournal } from './worker-memory-journal.ts';
@@ -117,6 +117,18 @@ interface JournalGate {
   readonly resume: Deferred.Deferred<void>;
 }
 
+type CleanupJournalFault =
+  | { readonly _tag: 'Defect'; readonly defect: unknown }
+  | { readonly _tag: 'Failure'; readonly error: WorkerJournalError };
+
+function failCleanupCommit(fault: CleanupJournalFault) {
+  return Match.value(fault).pipe(
+    Match.tag('Defect', ({ defect }) => Effect.die(defect)),
+    Match.tag('Failure', ({ error }) => Effect.fail(error)),
+    Match.exhaustive,
+  );
+}
+
 function pauseJournal(gates: Ref.Ref<Option.Option<JournalGate>>, point: string) {
   function* pauseAtBarrier() {
     const configured = yield* Ref.get(gates);
@@ -151,6 +163,7 @@ function acquireHarness(seed: WorkerJournalSnapshot, peers: readonly WorkerJourn
     });
     const gate = yield* Ref.make<Option.Option<JournalGate>>(Option.none());
     const edits = yield* Ref.make<readonly WorkerJournalEdit[]>([]);
+    const cleanupFault = yield* Ref.make<Option.Option<CleanupJournalFault>>(Option.none());
     function load(id: typeof c.operation.operationId) {
       function* readThroughGate() {
         yield* pauseJournal(gate, 'before-load');
@@ -163,7 +176,16 @@ function acquireHarness(seed: WorkerJournalSnapshot, peers: readonly WorkerJourn
       function* commitThroughGate() {
         yield* pauseJournal(gate, `before-${edit._tag}`);
         yield* pauseJournal(gate, `before-${edit._tag}:${edit.operationId}`);
-        const result = yield* journal.service.commit(edit);
+        const configured = yield* Ref.get(cleanupFault);
+        const fault = Match.value(edit).pipe(
+          Match.tag('RequestCleanup', () => configured),
+          Match.orElse(() => Option.none()),
+        );
+        const committing = Option.match(fault, {
+          onNone: () => journal.service.commit(edit),
+          onSome: failCleanupCommit,
+        });
+        const result = yield* committing;
         yield* Ref.update(edits, (previous) => Array.append(previous, edit));
         yield* pauseJournal(gate, `after-${edit._tag}`);
         return result;
@@ -171,7 +193,14 @@ function acquireHarness(seed: WorkerJournalSnapshot, peers: readonly WorkerJourn
       const program = Effect.gen(commitThroughGate);
       return program;
     }
-    return { journal, fake, gate, edits, service: WorkerJournal.of({ load, commit }) };
+    return {
+      journal,
+      fake,
+      gate,
+      edits,
+      cleanupFault,
+      service: WorkerJournal.of({ load, commit }),
+    };
   }
   const acquisition = Effect.gen(acquireServices);
   return acquisition;
