@@ -10,21 +10,20 @@
 
 **Spec:** [Approved worker lifecycle design](../specs/2026-10-19-worker-lifecycle-design.md); [accepted ADR-0002](../../decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md).
 
-Status: owner approved execution on 2026-10-19, retaining the controller-managed sequential implementer/review workflow. All six task reviews are complete and clean through `781c71c`, including Task 3 fixes at `2cbf8ae`, Task 4 cleanup fix at `0e530ed`, and Task 5 boundary fixes at `ee0d0f8`. Final review returned With fixes for I1 (normal released-owner reconciliation incorrectly ActorFailed). The single scoped author fix has RED/GREEN proof; independent scoped rereview is controller-owned and pending. No whole-branch approval, live or durable proof is claimed.
+Status: offline implementation complete. Owner approved execution on 2026-10-19, retaining the controller-managed sequential implementer/review workflow. All six task reviews are clean through `781c71c`, including Task 3 fixes at `2cbf8ae`, Task 4 cleanup fix at `0e530ed`, and Task 5 boundary fixes at `ee0d0f8`. Final review's I1 (normal released-owner reconciliation incorrectly ActorFailed) is fixed at `f38b0e4` with clean independent scoped rereview. Controller gates independently pass. No merge, push, live or durable acceptance is implied.
 
 Task 6 author qualification adds 10 stateful/constructive Effect laws (30,000
 primary cases at unchanged budgets), root-channel coverage and three behavioral
 negative controls. Historical full gates at `781c71c`: 455 tests / 1842 assertions.
-Task 6 review is clean; final approval remains separate and pending I1 scoped
-rereview. See the committed assessment for
+Task 6 review and final I1 scoped rereview are clean. See the committed assessment for
 controller rulings, exact controls, fixture corrections and external proof gaps.
 
 The final I1 fix wave passes fresh sequential full gates: 458 tests / 1900
 assertions, including three literal completion regressions (58 assertions).
 Final-source RED is 0/3 ActorFailed; GREEN is 3/0. Frozen/cohort/protected and
 genuine root/task controls pass. Existing law budgets and historical evidence
-are unchanged. Independent scoped rereview remains pending with the controller;
-Task 6's combined final whole-branch approval checkbox below stays open.
+are unchanged. Independent scoped rereview and controller verification are clean
+at `f38b0e4`; Task 6's combined final approval is complete for this offline slice.
 
 ## Global Constraints
 
@@ -138,7 +137,7 @@ expect(snapshot.context.containerId).toBe('container-1');
 - [x] **1. Write and observe RED atomic-contract tests.** Two concurrent claims for Create produce one Committed and one Conflict/AlreadyClaimed, exactly one issuer. Reclaim with another intentId or issuer still refuses after reload. Revision `Number.MAX_SAFE_INTEGER` cannot wrap. Duplicate Register with different immutable input refuses; identical registration never overwrites records. Cancellation/replacement committed before a claim prevents Create/Start; cleanup of recorded old resources is allowed but replacement IDs are refused. Run the named focused files and record failure before adding source implementations.
 - [x] **2. Implement real factories and the memory journal.** Use synchronous Result driver contracts for production-shaped inference; preserve delayed invocation and tagged error mapping. Memory journal uses one Ref.modify for validation, authority check, revision comparison, claim/outcome append and returned detached snapshot. No journal transaction encloses an awaited operation. `.of` Effect-native implementations satisfy the inferred ports directly.
 - [x] **3. Test factory failures and alias protection.** Assert driver not called at construction, typed Result failures preserved, unexpected throws/rejections sanitized, interruption signal propagated. Mutate seeded/loaded/committed data and prove stored journal records unaffected. Refuse stale/foreign outcomes, evidence regression and missing custody. Crash after claim is represented by an unresolved Claim, never Completed/Failed by default. RecordCleanup cannot confirm unresolved Create/Start or present/unknown disposable resources; retained evidence is not a disposable resource. Preserve/rebuild Option wrappers while detaching payloads, including reconstruction.
-- [x] **4. Pin cancellation/authority linearization.** Task 3 proves atomic cancellation/claim ordering and post-cancel final-read snapshots, including same-run sibling fencing, checked cleanup addition and earliest deadlines after reconstruction. No test-only dispatch orchestrator. Actual cancellation-between-claim-and-dispatch/no-mechanism-call interleavings remain pending Task 4's real machine tests; this moves test ownership without dropping acceptance. Never imply atomicity across journal and Docker; dispatched unresolved work remains potentially external.
+- [x] **4. Pin cancellation/authority linearization.** Task 3 proves atomic cancellation/claim ordering and post-cancel final-read snapshots, including same-run sibling fencing, checked cleanup addition and earliest deadlines after reconstruction. No test-only dispatch orchestrator. Task 4 proves the actual cancellation-between-claim-and-dispatch/no-mechanism-call interleavings with its real machine tests; this moves test ownership without dropping acceptance. Never imply atomicity across journal and Docker; dispatched unresolved work remains potentially external.
 - [x] **5. Verify, commit, review.** Implementation `49ed1be`, readiness/time-floor fixes `2cbf8ae`; independent review is clean after fixes, as confirmed by the owner and execution ledger. Task 4 may consume the current contracts and journal.
 
 ## Task 4: Real Actor Lifecycle With Persistence Barriers
@@ -177,7 +176,7 @@ expect(snapshot.context.containerId).toBe('container-1');
 - [x] **2. Execute effectful laws.** Use installed `Arbitrary.checkEffect` with named inferred Effect predicates; reuse `validateCheckResult` for exact run-count/failure diagnostics without changing existing `checkLaw`. Apply every fixed seed/budget from Global Constraints. Laws: mutation always has its unique prior claim; no action has two issuers/calls; no execution after recorded cancellation/replacement won authorization; readiness always binds full matching readback/current authority; cleanup confirmation has complete absence and no unresolved Create/Start; foreign/replacement/retained resources never targeted; reconstructed limits/deadlines never increase. Add dedicated constructive valid readiness/execution/release laws so an always-blocked implementation cannot pass. Count primary property cases separately from shrinks and Bun assertions.
 - [x] **3. Verify negative controls.** Temporarily remove the claim guard, permit cleanup with unresolved Create and reset deadline on reconstruction, one at a time. Each relevant law/literal race must fail with reproducible seed and diagnostic. Restore correct code before the gate. Preserve evidence of the control runs without committing broken code. A false/exhausted/missing-case property result is a failed test, never a green report.
 - [x] **4. Run clean qualification.** Frozen script-free install, cohort audit and every command below pass sequentially. Record HEAD/tree/lock identities, actual test/assertion/law counts, command exit codes, lint-rule count, strict config and exact resolved versions. Do not copy previous counts as new evidence. Separate registry/package admission, synthetic actor/journal proof, browser/manual proof (none), Docker cleanup/isolation proof (none) and durable host-loss proof (none).
-- [ ] **5. Commit and obtain whole-branch review.** Update docs with measured capability and remaining blockers, not scaling claims. Commit `test: qualify worker lifecycle races and recovery laws`. Independent reviewer reads the full implementation diff and reruns relevant controls/gates; fix findings in verified follow-up commits. Mark plan tasks complete only after their reviews. No automatic merge or push.
+- [x] **5. Commit and obtain whole-branch review.** Qualification `781c71c` has clean task review; final whole review's I1 is fixed in `f38b0e4` with clean scoped rereview. Controller independently reran every full gate (458 tests / 1900 assertions); reviewer independently ran the genuine root-error controls. Historical behavioral controls and exact limitations are preserved in the assessment. No automatic merge or push.
 
 ## Verification Commands And Cohort Audit
 
@@ -204,7 +203,7 @@ Audit `git diff -- package.json packages/engine/package.json bun.lock`, `bun pm 
 - Shared data/evidence belongs to Task 2; atomic authority/claim evidence to Task 3; machine sequencing/cleanup to Task 4; ownership/reconstruction/shutdown to Task 5; cross-sequence non-vacuity to Task 6. Task 1 blocks all dependent code on concrete compatibility failure.
 - All five Review Focus cases have named owning tests. Public methods return committed data/refusals, not raw actor handles; service types derive from real factories. Native mechanism boundaries return unknown data for runtime decoding, never an unknown public failure channel.
 - Inspection/custody checks do not prove containment; memory snapshots do not prove durability; local cancellation does not prove external work stopped; no-match does not resolve an outstanding create. Live journal/controller fencing, Docker/staging mutation, egress/resource enforcement and real migration remain separate designs.
-- Next gate: owner reviews this plan and confirms execution. Then use the preserved subagent-driven preference, commit each verified task and stop for any cohort/barrier deviation. No installation or implementation is authorized by writing this document.
+- Next gate: owner chooses branch integration. Real worker isolation, durable storage/controller fencing and native execution remain separate designs and qualification; this completed offline plan does not authorize them.
 
 ### Plan Preparation Verification
 

@@ -89,9 +89,9 @@ whose execution was separately approved on 2026-10-19. Existing
 
 ## Later Verification
 
-Checkboxes record local author evidence only, not independent approval of Task 6
-or the full implementation. Tasks 1-5 are independently reviewed clean through
-`ee0d0f8`. The measured [assessment](../assessments/worker-lifecycle.md) preserves
+Checkboxes record local synthetic evidence, not native or durable acceptance.
+All six task reviews and final whole-implementation review are clean through
+`f38b0e4`. The measured [assessment](../assessments/worker-lifecycle.md) preserves
 the controller's implementation rulings and exact qualification boundaries.
 
 - [x] Exact packages work under Bun with one Effect instance, no vendor exception,
@@ -114,9 +114,11 @@ All checked behavioral items above are limited to synthetic actor/service and
 memory-journal proof, not real recovery or isolation. The unchecked retention
 item has synthetic cancellation/absence/custody coverage, but actual artifact
 preservation through native cleanup is still unqualified. Measured author gates:
-455 tests / 1842 assertions, 30,000 new primary stateful cases at unchanged
+458 tests / 1900 assertions, 30,000 new primary stateful cases at unchanged
 budgets; three behavioral negative controls fail before exact restoration.
-Task 6/root-channel and final whole-implementation review remain controller-owned.
+Controller gates independently confirm these counts. Root-channel coverage and
+the final released-owner fix are independently reviewed; native qualification
+and any branch integration remain separate.
 
 ## Consequences And Revisit
 

@@ -51,9 +51,9 @@ pull requests is not the success measure.
   execution is approved, and Task 1's exact-cohort gate is committed and reviewed
   clean at `91c0f01`. All six task reviews are complete and clean through
   `781c71c`. Final review found I1: normal released ownership was incorrectly
-  reported as ActorFailed. The scoped fix passes 458 tests / 1900 assertions,
-  including RED/GREEN regressions; independent
-  scoped rereview remains pending, not whole-branch approval. See the
+  reported as ActorFailed. Fix `f38b0e4` has clean independent scoped rereview,
+  closing the whole-implementation review. Controller gates independently pass
+  458 tests / 1900 assertions, including RED/GREEN regressions. See the
   [measured assessment](docs/assessments/worker-lifecycle.md).
 - No automatic merge, package release or deployment.
 
@@ -170,12 +170,13 @@ The written spec, ADR and plan execution are approved. The selected evaluation p
 and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The implementation is
 an offline actor/memory-journal tracer, not Docker or durable recovery.
 The [implementation plan](docs/superpowers/plans/2026-10-19-worker-lifecycle.md)
-records clean independent reviews of Tasks 1-5 through `ee0d0f8`.
+records clean independent reviews of all six tasks and the final fix through
+`f38b0e4`.
 The [measured qualification](docs/assessments/worker-lifecycle.md) separates pinned
 package admission from real statechart/service tests with controlled fakes,
-stateful Effect Arbitrary laws and simulated service reconstruction. Task 6's
-author verification is not its independent task review or final whole-branch
-approval. Those remain controller-owned; the whole plan is not complete.
+stateful Effect Arbitrary laws and simulated service reconstruction. The offline
+plan is complete: task reviews, whole-implementation review, scoped final-fix
+rereview and controller verification are clean. The branch remains unmerged.
 No browser/manual, native Docker isolation/cleanup, durable journal/host-loss,
 deployment, real migration or throughput/scaling proof is claimed.
 

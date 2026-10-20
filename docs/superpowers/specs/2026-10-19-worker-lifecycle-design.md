@@ -8,10 +8,10 @@ independently reviewed clean at `91c0f01`; see the
 [local evidence](../../assessments/worker-lifecycle.md). All six task reviews,
 including their fixes, are complete and clean through `781c71c`. Final review at
 that source returned With fixes for I1 (normal released-owner reconciliation
-misclassified as ActorFailed). The single scoped fix has author RED/GREEN proof;
-controller-owned independent scoped rereview remains pending. This is not
-whole-branch approval and does not authorise live execution or establish durable
-recovery.
+misclassified as ActorFailed). Fix `f38b0e4` has clean independent scoped rereview,
+closing the final whole-implementation review. Controller verification independently
+passes 458 tests / 1900 assertions. This approves the offline branch quality,
+not a merge, live execution, deployment or durable recovery.
 
 ## Intent And Baseline
 

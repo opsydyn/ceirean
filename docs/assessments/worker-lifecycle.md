@@ -5,8 +5,10 @@ then-pending review subsequently passed at `91c0f01`. All six task reviews are
 complete and clean through `781c71cc83889271702b8aa68e81ded0cc84e975`, including
 the recorded fixes. Final whole-implementation review at that source returned
 With fixes for I1: normal released-owner reconciliation incorrectly ActorFailed.
-The single scoped fix has author RED/GREEN proof; independent scoped rereview
-remains controller-owned and pending. No whole-branch approval is claimed.
+The single scoped fix `f38b0e45f531c186217af493e444222e9d2ef61c` has clean
+independent scoped rereview, closing the whole-implementation review. Controller
+verification independently passes 458 tests / 1900 assertions at that source.
+This is offline branch-quality approval, not production or deployment approval.
 ADR-0002's framework selection is unchanged. No live mechanism is qualified.
 
 ## Implementation Decisions
@@ -40,6 +42,11 @@ These are preserved controller rulings, not new architecture approval:
   shared audit; the scenario interpreter only drives the actual service and
   checks evidence. It is not a second lifecycle oracle. Reversal costs one-file
   consolidation into `worker-properties.test.ts`.
+- Safety traces audit typed failures instead of requiring every adversarial
+  action to succeed; constructive laws require progress. This does not approve
+  every error classification. The final review's separate API regressions found
+  and corrected I1; the cost of this policy is maintaining that complementary
+  success/failure contract coverage.
 
 ## Historical Task 1 Gate
 
@@ -253,11 +260,10 @@ const reconstructed =
 ```
 
 `git diff --exit-code -- packages/engine/src packages/engine/tests/worker-memory-journal.ts`
-exits 0 after restoration. The three final control logs are
-`task-6-qualified-control-{claim,cleanup,deadline}-{typecheck,red}.log` in the
-plan scratch directory; patch captures and earlier diagnostics remain there
-until controller final review. The table, substitutions and replay coordinates
-above intentionally survive deletion of that scratch directory.
+exited 0 after restoration at Task 6 qualification. The three final control logs
+were `task-6-qualified-control-{claim,cleanup,deadline}-{typecheck,red}.log` in
+the transient plan scratch directory. The table, substitutions and replay
+coordinates above preserve the evidence after final-review scratch cleanup.
 
 ## Investigation And Root Error Evidence
 
@@ -405,12 +411,27 @@ against the exact input HEAD is empty with only these exact file exclusions:
 `packages/engine/src/worker-lifecycle-service.ts`, and
 `packages/engine/tests/worker-completion.test.ts`. No source-directory blanket.
 
-Full commands/output, final-source RED/GREEN, authoring diagnostics, source/commit
-identity and scoped author self-review are retained in
-`.superpowers/sdd/2026-10-19-worker-lifecycle/final-fix-report.md` and
-`final-fix-*.log`. No additional real author finding remains. All six task
-reviews are complete; independent final scoped rereview is still pending with
-the controller. No whole-branch approval or native/durable proof is claimed.
+The execution reports/logs were transient controller scratch. The commands,
+final-source RED/GREEN, source identities and measured results above preserve
+the qualification independently of scratch cleanup. All six task reviews and
+the final scoped rereview are clean; no open finding remains.
+
+Controller verification at `f38b0e45f531c186217af493e444222e9d2ef61c` independently
+ran frozen install, root check, all three typechecks, all three test workspaces,
+cohort audit and whitespace check sequentially. Every exit was 0: domain
+186 tests / 634 assertions, engine 236 / 1162, probe 36 / 104, totaling
+458 / 1900. Lint reported zero warnings/errors across 63 files and 210 rules;
+all 92 matched files were formatted. The exact cohort, one physical Effect,
+all 141 Effect rules and strict/vendor policy remain unchanged. Property budgets
+remain 138,000 primary cases in total, including Task 6's 30,000.
+
+The original final review covered `698806c..781c71c`; scoped rereview covered
+`781c71c..f38b0e4`, addressing I1 without new breakage. Its race judgment is
+precise: the literal holds an in-flight request's pre-transition journal load
+while release finishes; the later listener-installation closure fallback is
+additionally source-reviewed, not claimed as a separately injected runtime race.
+Subsequent completion edits are documentation only. No native/durable proof is
+inferred from this approval.
 
 ## Remaining Boundaries
 
@@ -420,7 +441,7 @@ for successful done/released ownership, including closure during waiter startup;
 it retains failure inspection and does not blanket-catch ActorFailed or accept
 all inactive actors. Literal execution/cancellation release and deterministic
 in-flight reconciliation regressions pass, without new calls or claims. Final
-scoped rereview remains pending. Historical controls and identities above refer
+scoped rereview is clean at `f38b0e4`. Historical controls and identities above refer
 to their original source, not this changed service.
 
 All proof here is local Bun, the actual statechart/application service and a
@@ -429,5 +450,5 @@ from synthetic protocol qualification. Browser/manual proof: none. Native
 Docker cleanup/isolation, real providers/subprocess driver, production adapter,
 durable storage/controller fencing, process/host-loss recovery, deployment,
 real migration, throughput/scaling proof: none. No merge or push. All six task
-reviews are complete; the controller owns final scoped rereview and any eventual
-whole-implementation approval.
+reviews and the final whole-implementation review are complete and clean for
+this offline slice. A local merge or push still needs owner approval.

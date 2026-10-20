@@ -34,11 +34,12 @@ hosting and execution appetite still require review.
 - [x] Implement Task 2's pure worker data, binding/readiness and custody checks.
 - [x] Obtain clean independent reviews of Tasks 2-5 and their fixes, through
       `ee0d0f8`; earlier pending-review notes are historical.
-- [ ] Obtain Task 6's independent review after author qualification of stateful
+- [x] Obtain Task 6's independent review after author qualification of stateful
       actor laws, constructive success paths and behavioral negative controls.
-- [ ] Obtain final whole-implementation review and controller approval; author
-      gates do not complete this approval. Live Docker, durable storage and
-      scaling guarantees remain separate.
+- [x] Obtain final whole-implementation review and controller approval through
+      `f38b0e4`, including the reviewed released-owner fix and independent gates
+      (458 tests / 1900 assertions). Live Docker, durable storage and scaling
+      guarantees remain separate. No merge or push is implied.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
