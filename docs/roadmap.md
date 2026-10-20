@@ -69,13 +69,15 @@ issue comments before discovery events, with previews only and no execution.
       1924 assertions and fresh-directory frozen installation. The
       [unmodified artifact failure](assessments/github-admission.md) is preserved;
       this is not admission of the original unpatched artifact.
-- [ ] Implement and verify pure exact-command, identity and authority policy with
-      six Effect Arbitrary laws (Task 2, approved and in progress).
+- [x] Implement and verify pure exact-command, identity and authority policy with
+      six Effect Arbitrary laws: [Task 2 evidence](assessments/github-command-policy.md),
+      18000 new primary cases, 481 total tests / 2058 assertions, clean independent
+      task review of `0a435bc`. No inbox or verified ingress implementation implied.
 - [ ] Prove signed fixtures, runtime validation, current local authorisation,
       transactional deduplication and SQLite process-restart behavior, with no
       model calls, listener, workers, coordinator invocation or GitHub writes.
 
-Only the strict compatibility probe is currently qualified; Task 2 is in progress.
+The strict compatibility probe and pure Task 2 policy are locally qualified.
 No admission service, inbox or ingress application is implemented. The package
 gate does not satisfy the remaining transactional or persistence requirements.
 Production hosting, live permission retrieval, execution and publication remain

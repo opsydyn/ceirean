@@ -48,10 +48,19 @@ The controller's fresh sequential workspace gates passed:
 | Total                                                            | **481 pass / 2058 assertions**, no failures |
 | Frozen installation and whitespace check                         | Pass                                        |
 
-Independent task review is pending; these are controller-observed local gates,
-not whole-plan completion or live/CI qualification. Full commands remain in the
+Independent task review approved spec compliance and code quality for
+`629ada7..0a435bc`, with no findings. Full gates above are controller-observed,
+not reviewer-rerun, whole-plan completion or live/CI qualification. Full commands remain in the
 implementation plan; each Moon command used `--force --no-actions` in the
 specified minimal environment, without overlapping suites or automatic retries.
+
+The reviewer inspected the unchanged safe-number/digest primitives and law
+budget helper for named risks, and a focused validation probe rejected a
+newline-bearing decimal decision ID. Runtime freezing, signature provenance and
+future transactional/replay guarantees are not implied by schema-derived readonly
+types. Controller checks also confirmed all 141 configured Effect rules, one
+physical Effect instance across four workspaces, 43 resolving local documentation
+links and unchanged toolchain/dependency/configuration inputs.
 
 The frozen install initially hit a sandbox temporary-directory permission
 failure; rerunning the same script-free frozen command with scoped access

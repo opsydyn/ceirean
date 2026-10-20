@@ -20,7 +20,10 @@ The owner subsequently approved the bounded
 [compatibility repair](../../assessments/github-admission-repair.md), committed
 at `629ada7`. The patched local cohort passes strict new-probe types, all existing
 checks and 466 tests / 1924 assertions, including eight real-handler tests.
-The owner then approved **Task 2 only**, now in progress. Tasks 3-6 remain pending
+The owner then approved **Task 2 only**, completed at `0a435bc` with clean
+independent spec/quality review, 481 passing tests / 2058 assertions, and 18000
+new pure law cases. See [Task 2 evidence](../../assessments/github-command-policy.md).
+Tasks 3-6 remain pending
 separate approval. No live GitHub access, merge or push is authorised.
 
 **Approved compatibility amendment:** retain the two version-scoped declaration
@@ -140,11 +143,11 @@ operator `66`, issue number `1`, scope `fixture-app`, profile `foldkit`, and
 revisions `authority-1`, `policy-1`, `profile-1`. All other fixture packages reuse
 these literal values without production source importing test modules.
 
-- [ ] **1. Write focused failing literals.** `exact command only` asserts the exact literal parses and whitespace/newline/quotes/arguments/case variants do not. `coherent available authority admits preview` asserts all profile/evidence bindings. `one changed authority fact refuses` covers every identity, access, operator and profile dimension; unavailable evidence is explicit. Run `bun --no-env-file --no-install test tests/command-admission.test.ts --timeout 30000` from domain and observe the missing implementation failure.
-- [ ] **2. Implement schema/decision files.** Derive immutable records and reason unions, validate finite safe IDs/times and unique bounded operators, and compare complete immutable bindings. Make validity end exclusive. No external calls, timestamps inferred from comments, repository instructions or default current time.
-- [ ] **3. Pin boundary cases.** `expiry is exclusive` asserts admit at `1999`, refuse at `2000`/`2001`; `invalid/future observation fails` covers NaN/infinity/fraction/overflow/negative time; `rename is metadata, transfer is authority` tests name-only changes versus owner/install changes. `tuple keys do not alias` asserts distinct validated tuples cannot collide and display changes leave keys stable.
-- [ ] **4. Add six nonvacuous laws.** At the fixed budget test coherent admission, single authority-binding mutation refuses, invalid interval/time refuses, rename invariance, key injectivity, and exact-command rejection under generated extra text. Use existing `checkLaw`; each law has a constructive admitted/control case, not filtered-away inputs. Retain failure seed and replay diagnostic.
-- [ ] **5. Verify/commit/review.** Run focused RED/GREEN, all available full gates and new law count validation. Commit `feat: define pure assessment admission policy`; review under the selected execution method before Task 3.
+- [x] **1. Write focused failing literals.** `exact command only` asserts the exact literal parses and whitespace/newline/quotes/arguments/case variants do not. `coherent available authority admits preview` asserts all profile/evidence bindings. `one changed authority fact refuses` covers every identity, access, operator and profile dimension; unavailable evidence is explicit. Run `bun --no-env-file --no-install test tests/command-admission.test.ts --timeout 30000` from domain and observe the missing implementation failure.
+- [x] **2. Implement schema/decision files.** Derive immutable records and reason unions, validate finite safe IDs/times and unique bounded operators, and compare complete immutable bindings. Make validity end exclusive. No external calls, timestamps inferred from comments, repository instructions or default current time.
+- [x] **3. Pin boundary cases.** `expiry is exclusive` asserts admit at `1999`, refuse at `2000`/`2001`; `invalid/future observation fails` covers NaN/infinity/fraction/overflow/negative time; `rename is metadata, transfer is authority` tests name-only changes versus owner/install changes. `tuple keys do not alias` asserts distinct validated tuples cannot collide and display changes leave keys stable.
+- [x] **4. Add six nonvacuous laws.** At the fixed budget test coherent admission, single authority-binding mutation refuses, invalid interval/time refuses, rename invariance, key injectivity, and exact-command rejection under generated extra text. Use existing `checkLaw`; each law has a constructive admitted/control case, not filtered-away inputs. Retain failure seed and replay diagnostic.
+- [x] **5. Verify/commit/review.** Run focused RED/GREEN, all available full gates and new law count validation. Commit `feat: define pure assessment admission policy`; review under the selected execution method before Task 3.
 
 Literal assertions in `expiry is exclusive`:
 
@@ -345,5 +348,5 @@ the remaining tasks just because their plans are written.
 
 The owner approved the plan and selected subagent-driven execution. The original
 strict failure and its later explicitly approved, independently reviewed repair
-are linked above. Task 2 is the next bounded approved slice; that approval does
+are linked above. Task 2 is the completed bounded slice; that approval does
 not automatically start Tasks 3-6. Live GitHub use remains unauthorised.
