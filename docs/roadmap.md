@@ -110,8 +110,9 @@ separately gated even if a future offline probe passes.
 - [x] Agree the conversational scope: one repository/installation, explicit
       operator IDs plus fresh write-or-higher permission checks, local Bun/SQLite
       and an operator-managed temporary HTTPS tunnel; admission previews only.
-- [ ] Review the written [local ingress spec](superpowers/specs/2026-10-20-local-github-ingress-design.md).
-- [ ] Review a subsequent implementation plan and select its execution method.
+- [x] Review the written [local ingress spec](superpowers/specs/2026-10-20-local-github-ingress-design.md).
+- [ ] Review the [local ingress implementation plan](superpowers/plans/2026-10-20-local-github-ingress.md)
+      and select its execution method.
 - [ ] Qualify local adapters, listener, immutable live evidence and replay-first
       admission with synthetic credentials and independent review.
 - [ ] Separately approve the exact live target, App grants, credentials, tunnel

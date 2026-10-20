@@ -1,7 +1,7 @@
 # Local GitHub Ingress Rehearsal
 
-Status: conversational design approved on 2026-10-20; written spec awaiting owner
-review. This document does not approve implementation, credentials, a listener,
+Status: conversational design and written spec approved by the owner on
+2026-10-20. This document does not approve implementation, credentials, a listener,
 an App installation, a tunnel, or live GitHub activity. An implementation plan
 and execution-method selection follow written-spec approval. A live rehearsal
 requires a separate, exact-target approval after local qualification.
@@ -198,6 +198,12 @@ same database must refuse startup. CLI status is read-only, runs without GitHub
 credentials, and reports counts and structured outcomes, not secrets or full
 payloads. Broken storage never becomes an empty successful ledger.
 
+Implementation-plan proposal for review: an owner-only `<database>.owner.sqlite`
+sidecar supplies a lifetime SQLite exclusive lock on a separate connection, not
+an open admission transaction. It is operational ownership state, not another
+inbox. Missing or mismatched sidecar state blocks start; child-process tests must
+prove competing-owner exclusion and lock release after process death.
+
 Persist only normalised command facts/IDs, digests, receipts, timestamps, decisions,
 policy/profile revisions and immutable minimal permission evidence. Existing
 bounded repository names may remain as display metadata, never authority. Do not
@@ -307,7 +313,9 @@ host-loss durability or exactly-once execution.
 
 ## Handoff
 
-Review this written spec before writing the implementation plan. The plan must
-resolve concrete module placement, dependency/API-version pins and test tasks
-within these boundaries; broader architecture changes require renewed approval.
-No implementation or live activity begins from conversational approval alone.
+The owner approved this written spec. The subsequent
+[implementation plan](../plans/2026-10-20-local-github-ingress.md) requires review
+and execution-method selection before implementation. It resolves concrete
+module placement, dependency/API-version pins and test tasks within these
+boundaries; broader architecture changes require renewed approval. Live activity
+remains separately gated.
