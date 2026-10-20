@@ -18,7 +18,8 @@ function makeBarrier<Request>(request: Request) {
   function* acquireBarrier() {
     const reply = yield* Deferred.make<unknown, WorkerMechanismError>();
     const interrupted = yield* Deferred.make<void>();
-    return { request, reply, interrupted };
+    const finished = yield* Deferred.make<void>();
+    return { request, reply, interrupted, finished };
   }
   const acquisition = Effect.gen(acquireBarrier);
   return acquisition;
@@ -102,6 +103,7 @@ function waitCall<Request>(
     yield* Queue.offer(queue, barrier);
     const pending = Deferred.await(barrier.reply).pipe(
       Effect.onInterrupt(() => Deferred.succeed(barrier.interrupted, undefined)),
+      Effect.ensuring(Deferred.succeed(barrier.finished, undefined)),
     );
     return yield* pending;
   }
@@ -138,10 +140,10 @@ function waitJournalGate(gates: Ref.Ref<Option.Option<JournalGate>>, gate: Journ
   return program;
 }
 
-function acquireHarness(seed: WorkerJournalSnapshot) {
+function acquireHarness(seed: WorkerJournalSnapshot, peers: readonly WorkerJournalSnapshot[]) {
   function* acquireServices() {
     const c = makeWorkerCase();
-    const journal = yield* makeMemoryWorkerJournal([seed]);
+    const journal = yield* makeMemoryWorkerJournal([seed, ...peers]);
     const fake = yield* makeControlledWorkerMechanism({
       ...c.observation,
       atMs: 950,
@@ -160,6 +162,7 @@ function acquireHarness(seed: WorkerJournalSnapshot) {
     function commit(edit: WorkerJournalEdit) {
       function* commitThroughGate() {
         yield* pauseJournal(gate, `before-${edit._tag}`);
+        yield* pauseJournal(gate, `before-${edit._tag}:${edit.operationId}`);
         const result = yield* journal.service.commit(edit);
         yield* Ref.update(edits, (previous) => Array.append(previous, edit));
         yield* pauseJournal(gate, `after-${edit._tag}`);
@@ -179,9 +182,12 @@ export class LifecycleHarness extends Context.Service<
   Effect.Success<ReturnType<typeof acquireHarness>>
 >()('@leviathan/test/LifecycleHarness') {}
 
-export function lifecycleTestLayer(seed: WorkerJournalSnapshot) {
+export function lifecycleTestLayer(
+  seed: WorkerJournalSnapshot,
+  peers: readonly WorkerJournalSnapshot[] = [],
+) {
   function* assemble() {
-    const harness = yield* acquireHarness(seed);
+    const harness = yield* acquireHarness(seed, peers);
     return Layer.mergeAll(
       Layer.succeed(LifecycleHarness, harness),
       Layer.succeed(WorkerJournal, harness.service),
