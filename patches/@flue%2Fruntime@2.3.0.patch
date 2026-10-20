@@ -1,0 +1,7 @@
+diff --git a/types/index.d.ts b/types/index.d.ts
+index 9ef66bc5c1bdad2509c59ad5b82cfe856a87165a..c6df6f6edf765fbf94b9bb325a4ab9ed694d1b61 100644
+--- a/types/index.d.ts
++++ b/types/index.d.ts
+@@ -4 +4 @@
+-export * from '../dist/index.d.mts';
++export * from '../dist/index.mjs';

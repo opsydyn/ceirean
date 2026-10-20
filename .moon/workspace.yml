@@ -3,3 +3,4 @@ projects:
   probe: probes/bun-effect-flue
   domain: packages/domain
   engine: packages/engine
+  github-admission: probes/github-admission

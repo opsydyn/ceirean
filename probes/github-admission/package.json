@@ -1,0 +1,16 @@
+{
+  "name": "@leviathan/github-admission-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@flue/github": "2.3.0",
+    "@flue/runtime": "2.3.0",
+    "effect": "4.0.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.25.2"
+  }
+}

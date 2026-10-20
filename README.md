@@ -14,6 +14,12 @@ canonical typecheck passes with strict source checking and the owner-approved
 probe-local vendor declaration policy. This does not qualify production use.
 There is no production application, GitHub remote, scheduled job or deployment.
 
+The new private GitHub channel probe retains strict vendor declaration checking.
+Its owner-approved compatibility repair is tracked in
+[GitHub Channel Compatibility Repair](docs/assessments/github-admission-repair.md),
+including the two declaration-only Bun patches and Google's explicit optional
+MCP type peer. This does not implement the GitHub admission service.
+
 The synthetic qualification-gate tracer is implemented and locally verified:
 119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
 Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect
@@ -208,6 +214,8 @@ apps/cli/                   Future CLI and live dependency composition
 packages/domain/            Pure qualification evidence and run decisions
 packages/engine/            Qualification coordinator and inferred ports
 probes/bun-effect-flue/      Private compatibility fixture
+probes/github-admission/     Strict offline GitHub channel compatibility fixture
+patches/                    Version-scoped declaration-only dependency repairs
 docs/                       Decisions, specifications, plans and evidence
 ```
 
@@ -231,9 +239,11 @@ moon run workspace:check --force --no-actions
 moon run domain:typecheck --force --no-actions
 moon run engine:typecheck --force --no-actions
 moon run probe:typecheck --force --no-actions
+moon run github-admission:typecheck --force --no-actions
 moon run domain:test --force --no-actions
 moon run engine:test --force --no-actions
 moon run probe:test --force --no-actions
+moon run github-admission:test --force --no-actions
 ```
 
 `oxlint.config.ts` enables every Effect 4-applicable rule from

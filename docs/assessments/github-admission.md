@@ -1,5 +1,9 @@
 # GitHub Admission Compatibility: Blocked
 
+> Historical result for the unmodified published artifacts. The owner subsequently
+> approved a bounded repair; see [Compatibility Repair](github-admission-repair.md)
+> for the patched-cohort evidence. The original failure below remains unchanged.
+
 Task 1 was attempted on 2026-10-20 with the owner's explicit execution and
 installation approval. **The published-channel dependency gate is rejected.**
 No admission implementation or new dependency workspace is retained. Tasks 2-6
