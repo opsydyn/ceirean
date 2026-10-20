@@ -10,7 +10,14 @@
 
 **Spec:** [Approved worker lifecycle design](../specs/2026-10-19-worker-lifecycle-design.md); [accepted ADR-0002](../../decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md).
 
-Status: owner approved execution on 2026-10-19, retaining the controller-managed sequential implementer/review workflow. Tasks 1-4 are independently reviewed clean, including Task 3 fixes at `2cbf8ae` and Task 4 cleanup fix at `0e530ed`. Task 5 implementation is present, with gate/commit evidence tracked in its local report; controller independent review is pending. Task 6 and whole-branch review remain incomplete; no live or durable proof is claimed. Do not dispatch dependent tasks concurrently.
+Status: owner approved execution on 2026-10-19, retaining the controller-managed sequential implementer/review workflow. Tasks 1-5 are independently reviewed clean, including Task 3 fixes at `2cbf8ae`, Task 4 cleanup fix at `0e530ed`, and Task 5 boundary fixes at `ee0d0f8`. Task 6 is in progress; its review and whole-branch review remain incomplete. No live or durable proof is claimed. Do not dispatch dependent tasks concurrently.
+
+Task 6 author qualification adds 10 stateful/constructive Effect laws (30,000
+primary cases at unchanged budgets), root-channel coverage and three behavioral
+negative controls. Measured full gates: 455 tests / 1842 assertions. Its task
+review and whole-implementation approval remain pending; no Task 6 completion
+checkbox is promoted by author verification. See the committed assessment for
+controller rulings, exact controls, fixture corrections and external proof gaps.
 
 ## Global Constraints
 
@@ -151,7 +158,7 @@ expect(snapshot.context.containerId).toBe('container-1');
 - [x] **3. Reconstruct in a fresh service scope.** Close the first interpreter at controlled post-claim/pre-call, in-flight-create, post-create/pre-outcome and in-flight-remove barriers; seed a fresh memory journal from detached business snapshots plus controlled external observations, then acquire again. Assert reconciliation first, no snapshot option, no replay, no renewed deadline/spend/repairs, persisted cancellation honored, original issuer claims still exclusive. These are simulated reconstruction tests, not crash/disk recovery. A claimed-but-not-called action stays ambiguous despite zero matches until authoritative resolution.
 - [x] **4. Prove superseded cleanup.** Replace authority with generation 4/container-2, then reconcile generation 3/container-1. Only old recorded resources can be stopped/removed, replacement untouched, no run qualification or budget update. Host/daemon change, foreign ID, conflicting custody or malformed state blocks destructive work. Same-run cancellation/replacement notifications interrupt stale owned siblings without cancelling current replacement authority.
 - [x] **5. Prove shutdown/error visibility.** Persist cleanup while dependencies and actors are alive, drain until the fixed `100ms` bound, close local scopes after the attempt. Repeat shutdown without resetting the deadline or duplicating claims. Pending cleanup/readback failure/late child defect returns tagged visible failure and leaves unknown/pending evidence; scope/finalizer completion alone never writes CleanupConfirmed. Verify invocation versus root resource lifetime and all fibers are joined/interrupted within owned scopes. SIGKILL is explicitly not tested here. The reviewed failed-Start cleanup fix remains intact and covered through the service.
-- [ ] **6. Verify, commit, review.** Author implementation, gate and commit evidence: `.superpowers/sdd/2026-10-19-worker-lifecycle/task-5-report.md`. Commit message: `feat: own worker actors and reconcile bounded shutdown`. Controller independent review of ownership/recovery remains pending before Task 6 and final qualification; author verification is not independent approval.
+- [x] **6. Verify, commit, review.** Implementation `aae8b4a`, boundary fixes `ee0d0f8`; independent review and scoped re-review are clean. Full sequential gates pass with 422 tests / 1,793 assertions. Task 6 may consume the reviewed application service. Root-machine error runtime coverage remains a recorded non-blocking qualification gap to resolve or disclose.
 
 ## Task 6: Stateful Properties And Qualification Report
 

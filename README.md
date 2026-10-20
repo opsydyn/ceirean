@@ -49,7 +49,8 @@ pull requests is not the success measure.
 - The owner selected `@xstate/effect` for local worker lifecycle orchestration,
   not another durable coordinator. The written spec and ADR-0002 are approved;
   execution is approved, and Task 1's exact-cohort gate is committed and reviewed
-  clean at `91c0f01`. Task 2's pure domain implementation awaits controller review.
+  clean at `91c0f01`. Tasks 1-5 are independently reviewed clean through `ee0d0f8`;
+  Task 6 qualification and final whole-implementation approval remain separate.
 - No automatic merge, package release or deployment.
 
 ## Proposed First Slice
@@ -159,17 +160,20 @@ later docs-only corrections do not extend that reviewed range.
 
 ## Worker Lifecycle Design
 
-The next design is
+The offline lifecycle design is
 [Worker Ownership And XState Effect Lifecycle](docs/superpowers/specs/2026-10-19-worker-lifecycle-design.md).
 The written spec, ADR and plan execution are approved. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
-and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The first planned
-implementation is an offline actor/journal tracer, not Docker or durable recovery.
+and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The implementation is
+an offline actor/memory-journal tracer, not Docker or durable recovery.
 The [implementation plan](docs/superpowers/plans/2026-10-19-worker-lifecycle.md)
-records Task 1's clean independent review and commit `91c0f01`; its
-[measured cohort evidence](docs/assessments/worker-lifecycle.md) is local-only.
-Task 2's pure schemas/readiness/custody checks are implemented; controller review
-is pending before Task 3. No lifecycle engine protocol, Docker or durable recovery
-is established by this domain-only work. The whole plan remains incomplete.
+records clean independent reviews of Tasks 1-5 through `ee0d0f8`.
+The [measured qualification](docs/assessments/worker-lifecycle.md) separates pinned
+package admission from real statechart/service tests with controlled fakes,
+stateful Effect Arbitrary laws and simulated service reconstruction. Task 6's
+author verification is not its independent task review or final whole-branch
+approval. Those remain controller-owned; the whole plan is not complete.
+No browser/manual, native Docker isolation/cleanup, durable journal/host-loss,
+deployment, real migration or throughput/scaling proof is claimed.
 
 ## Monorepo Layout
 

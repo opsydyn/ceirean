@@ -15,8 +15,9 @@ application adapter. A machine alone does not qualify either boundary or prove
 improved throughput.
 
 The owner accepted this written record and its companion spec on 2026-10-19.
-Installation/implementation still await detailed-plan review and execution gates;
-architecture acceptance is not evidence of package compatibility.
+At acceptance, installation/implementation still awaited detailed-plan review
+and execution gates; that is historical status, not the current task position.
+Architecture acceptance alone is not evidence of package compatibility.
 
 ## Decision
 
@@ -27,8 +28,8 @@ the application ledger owns committed business records and operation intent.
 Flue retains reasoning only.
 
 Select exact `@xstate/effect@0.1.0-alpha.6` and `xstate@6.0.0-alpha.64`, retaining
-Effect `4.0.5` and Bun `1.4.2`. Peers admit this combination; strict types/Bun
-behavior remain unmeasured. Both additions are experimental. A reviewed plan
+Effect `4.0.5` and Bun `1.4.2`. Peers admitted this combination; strict types/Bun
+behavior were unmeasured at acceptance. Both additions remain experimental. The reviewed plan
 adds them only to private engine with one root lockfile and one Effect instance.
 
 This narrowly amends [ADR-0001](0001-adopt-effect-and-domain-boundaries.md), not
@@ -83,26 +84,39 @@ contract. The later implementation plan must address:
    failure controls and external proof gaps.
 
 These areas are expanded in the [implementation plan](../superpowers/plans/2026-10-19-worker-lifecycle.md),
-which awaits execution approval. Existing
+whose execution was separately approved on 2026-10-19. Existing
 `qualifyRun`, domain run decisions and probe source stay unchanged initially.
 
 ## Later Verification
 
-- [ ] Exact packages work under Bun with one Effect instance, no vendor exception,
+Checkboxes record local author evidence only, not independent approval of Task 6
+or the full implementation. Tasks 1-5 are independently reviewed clean through
+`ee0d0f8`. The measured [assessment](../assessments/worker-lifecycle.md) preserves
+the controller's implementation rulings and exact qualification boundaries.
+
+- [x] Exact packages work under Bun with one Effect instance, no vendor exception,
       rule relaxation or unintended dependency upgrade.
-- [ ] Real factories infer services, composition occurs once, actor failures are
+- [x] Real factories infer services, composition occurs once, actor failures are
       observed and unexpected failures become tagged application errors.
-- [ ] No mutation precedes its intent commit or follows a lost execution-authority
+- [x] No mutation precedes its intent commit or follows a lost execution-authority
       check; timeout/re-entry/reconstruction cannot duplicate it.
-- [ ] Lost responses/interruption cannot claim readiness, a fresh deadline or cleanup.
-- [ ] Foreign resources are protected; superseded cleanup cannot touch replacements.
+- [x] Lost responses/interruption cannot claim readiness, a fresh deadline or cleanup.
+- [x] Foreign resources are protected; superseded cleanup cannot touch replacements.
 - [ ] Cancellation keeps cleanup active; missing readback cannot confirm absence;
       retained artifacts survive disposable cleanup.
-- [ ] Recovery uses journal data and observation, no snapshot restoration/replay/reset.
-- [ ] TestClock/Deferred tests and non-vacuous bounded properties execute under
+- [x] Recovery uses journal data and observation, no snapshot restoration/replay/reset.
+- [x] TestClock/Deferred tests and non-vacuous bounded properties execute under
       unchanged budgets, and all existing checks still pass.
-- [ ] Measured evidence separates synthetic proof from real Docker isolation,
+- [x] Measured evidence separates synthetic proof from real Docker isolation,
       durable recovery, external cleanup and production scaling.
+
+All checked behavioral items above are limited to synthetic actor/service and
+memory-journal proof, not real recovery or isolation. The unchecked retention
+item has synthetic cancellation/absence/custody coverage, but actual artifact
+preservation through native cleanup is still unqualified. Measured author gates:
+455 tests / 1842 assertions, 30,000 new primary stateful cases at unchanged
+budgets; three behavioral negative controls fail before exact restoration.
+Task 6/root-channel and final whole-implementation review remain controller-owned.
 
 ## Consequences And Revisit
 
