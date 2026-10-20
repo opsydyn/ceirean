@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 
-import { Effect, Fiber, Option, Result } from 'effect';
+import { LiveAdmissionDraft, decideLiveAdmission } from '@leviathan/domain';
+import { Effect, Exit, Fiber, Option, Result, Schema } from 'effect';
 
 import { LiveAuthorityError } from '../src/live-admission-errors.ts';
 import {
@@ -335,3 +336,155 @@ async function reloadClockCase() {
   expect(h.memory.records()).toHaveLength(0);
 }
 test('clock reload cannot roll backward across a live check', reloadClockCase);
+
+async function malformedNativeEnvelopes() {
+  const fixture = liveFixture();
+  const lease = leaseFor(fixture);
+  const draft = Schema.decodeUnknownSync(LiveAdmissionDraft)({
+    verified: fixture.verified,
+    expectedLocalRevision: fixture.policy.revision,
+    decision: decideLiveAdmission({ ...fixture, evidence: Option.some(lease), now: fixture.at }),
+    provenance: { _tag: 'LiveChecked', evidence: lease.evidence },
+    evaluatedAtMs: fixture.at.wallMs,
+    evaluatedMonotonicMs: fixture.at.monotonicMs,
+    startedMonotonicMs: lease.startedMonotonicMs,
+  });
+  const malformed = [
+    null,
+    undefined,
+    {},
+    { _tag: 'Other' },
+    { _tag: 'Success' },
+    { _tag: 'Failure' },
+  ];
+  for (const value of malformed) {
+    for (const operation of ['load', 'replay', 'commit'] as const) {
+      const memory = makeMemoryLiveInbox();
+      const driver = { ...memory.driver };
+      const method = { load: 'loadPolicy', replay: 'resolveReplay', commit: 'commit' }[operation];
+      Object.defineProperty(driver, method, { value: () => value });
+      const inbox = makeLiveInbox(driver);
+      const calls = {
+        load: inbox.loadPolicy('fixture-app').pipe(Effect.asVoid),
+        replay: inbox.resolveReplay(fixture.verified).pipe(Effect.asVoid),
+        commit: inbox.commit(draft).pipe(Effect.asVoid),
+      };
+      const outcome = await Effect.runPromiseExit(calls[operation].pipe(Effect.result));
+      expect(Exit.isSuccess(outcome)).toBe(true);
+      const result = Exit.getSuccess(outcome);
+      expect(Option.getOrThrow(result)).toMatchObject({
+        _tag: 'Failure',
+        failure: { _tag: 'LiveInboxError', operation, code: 'InvalidData' },
+      });
+      expect(memory.records()).toHaveLength(0);
+      expect(memory.receipts()).toHaveLength(0);
+    }
+    const native = {
+      check: (_query: Parameters<LiveAuthorityDriver>[0], _signal: AbortSignal) =>
+        Promise.resolve(Result.succeed(lease)),
+    };
+    Object.defineProperty(native, 'check', { value: () => Promise.resolve(value) });
+    const authority = makeLiveAuthority(native.check);
+    const checking = authority.check(fixture).pipe(Effect.result);
+    const outcome = await Effect.runPromiseExit(checking);
+    expect(Exit.isSuccess(outcome)).toBe(true);
+    const result = Exit.getSuccess(outcome);
+    expect(Option.getOrThrow(result)).toMatchObject({
+      _tag: 'Failure',
+      failure: { _tag: 'LiveAuthorityError', phase: 'permission', code: 'InvalidResponse' },
+    });
+  }
+}
+test(
+  'I1 malformed native Result envelopes are finite failures, never defects',
+  malformedNativeEnvelopes,
+);
+
+async function commitEvaluationRollback() {
+  for (const monotonicMs of [200, 345]) {
+    for (const operatorId of [66, 99]) {
+      const memory = makeMemoryLiveInbox();
+      const initial = memory.observation();
+      memory.setObservation({ ...initial, at: { ...initial.at, monotonicMs } });
+      const evaluated: unknown[] = [];
+      function commit(draft: Parameters<typeof memory.driver.commit>[0]) {
+        evaluated.push(structuredClone(draft));
+        const observation = memory.observation();
+        memory.setObservation({
+          ...observation,
+          at: { ...observation.at, monotonicMs: observation.at.monotonicMs - 1 },
+        });
+        return memory.driver.commit(draft);
+      }
+      const driver = { ...memory.driver, commit };
+      const acquisition = makeLiveAdmission().pipe(
+        Effect.provideService(LiveInbox, makeLiveInbox(driver)),
+        Effect.provideService(
+          LiveAuthority,
+          makeLiveAuthority((query) => Promise.resolve(Result.succeed(leaseFor(query)))),
+        ),
+      );
+      const service = await Effect.runPromise(acquisition);
+      const fixture = liveFixture();
+      const input = {
+        ...fixture.verified,
+        candidate: { ...fixture.verified.candidate, operatorId },
+      };
+      const reply = await Effect.runPromise(service.admit(input));
+      expect(reply).toMatchObject({ _tag: 'Unrecorded', decision: { reason: 'InvalidClock' } });
+      expect(evaluated).toHaveLength(1);
+      expect(evaluated[0]).toMatchObject({ evaluatedMonotonicMs: monotonicMs });
+      expect(memory.records()).toHaveLength(0);
+      expect(memory.receipts()).toHaveLength(0);
+    }
+  }
+  const h = harness();
+  const reading = { wallMs: 1000, monotonicMs: 345 };
+  const before = h.memory.observation();
+  h.memory.setObservation({ ...before, at: reading });
+  const service = await Effect.runPromise(h.acquire);
+  const reply = await Effect.runPromise(service.admit(liveFixture().verified));
+  expect(reply).toMatchObject({
+    _tag: 'Recorded',
+    record: { decision: { _tag: 'AdmittedPreview' } },
+  });
+  for (const record of h.memory.records()) {
+    expect(Object.hasOwn(record, 'evaluatedMonotonicMs')).toBe(false);
+    expect(Object.hasOwn(record, 'startedMonotonicMs')).toBe(false);
+  }
+  for (const receipt of h.memory.receipts())
+    expect(Object.hasOwn(receipt, 'evaluatedMonotonicMs')).toBe(false);
+}
+test(
+  'I2 final commit refuses evaluation-relative monotonic rollback for live and local drafts',
+  commitEvaluationRollback,
+);
+
+async function checkedPermissionRefusal() {
+  for (const basePermission of ['read', 'none'] as const) {
+    const h = harness();
+    function check(query: Parameters<LiveAuthorityDriver>[0]) {
+      const lease = leaseFor(query);
+      return Promise.resolve(
+        Result.succeed({ ...lease, evidence: { ...lease.evidence, basePermission } }),
+      );
+    }
+    h.setAuthority(check);
+    const service = await Effect.runPromise(h.acquire);
+    const reply = await Effect.runPromise(service.admit(liveFixture().verified));
+    expect(reply).toMatchObject({
+      _tag: 'Recorded',
+      record: {
+        decision: { _tag: 'Rejected', reason: 'OperatorDenied' },
+        provenance: { _tag: 'LiveChecked', evidence: { basePermission } },
+      },
+    });
+    expect(h.calls()).toBe(1);
+    expect(h.memory.records()).toHaveLength(1);
+    expect(h.memory.receipts()).toHaveLength(1);
+  }
+}
+test(
+  'I3 checked read/none permission retains a genuine recorded live refusal',
+  checkedPermissionRefusal,
+);

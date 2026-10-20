@@ -54,6 +54,7 @@ export function makeLiveAdmission() {
                   provenance: { _tag: 'LiveChecked', evidence: lease.evidence },
                   startedMonotonicMs: lease.startedMonotonicMs,
                   evaluatedAtMs: current.at.wallMs,
+                  evaluatedMonotonicMs: current.at.monotonicMs,
                 };
                 const draft = Schema.decodeUnknownResult(LiveAdmissionDraft)(raw);
                 const refusal = Match.value(decision).pipe(
@@ -96,6 +97,7 @@ export function makeLiveAdmission() {
                 decision,
                 provenance: { _tag: 'LocalPolicy', revision: observation.policy.revision },
                 evaluatedAtMs: observation.at.wallMs,
+                evaluatedMonotonicMs: observation.at.monotonicMs,
               }),
             ),
             Match.orElse(() => Effect.succeed(unrecorded('MalformedInput'))),

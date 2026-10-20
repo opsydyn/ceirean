@@ -145,6 +145,7 @@ function provenanceLaw(c: Case) {
     expectedLocalRevision: c.policy.revision,
     decision: decide(c),
     evaluatedAtMs: c.now.wallMs,
+    evaluatedMonotonicMs: c.now.monotonicMs,
   };
   const live = {
     ...common,

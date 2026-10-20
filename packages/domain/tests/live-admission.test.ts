@@ -4,7 +4,11 @@ import { Option, Schema } from 'effect';
 
 import { commandKey } from '../src/command-admission.ts';
 import { decideLiveAdmission } from '../src/live-admission-policy.ts';
-import { LiveAdmissionDraft, LivePermissionEvidence } from '../src/live-admission.ts';
+import {
+  LiveAdmissionDraft,
+  LiveAdmissionRecord,
+  LivePermissionEvidence,
+} from '../src/live-admission.ts';
 import { commandFixture } from './command-fixtures.ts';
 
 function fixture() {
@@ -156,6 +160,7 @@ function provenanceSchemas() {
     verified: input.verified,
     expectedLocalRevision: 'local-1',
     evaluatedAtMs: 1000,
+    evaluatedMonotonicMs: 200,
   };
   const decision = decideLiveAdmission(input);
   const draft = {
@@ -205,4 +210,100 @@ function provenanceSchemas() {
 test(
   'draft schema cannot validate invented local admission or mismatched live provenance',
   provenanceSchemas,
+);
+
+function evaluationMonotonicSchema() {
+  const input = fixture();
+  const lease = Option.getOrThrow(input.evidence);
+  const common = {
+    verified: input.verified,
+    expectedLocalRevision: input.policy.revision,
+    evaluatedAtMs: 1000,
+    evaluatedMonotonicMs: 200,
+  };
+  const local = {
+    ...common,
+    decision: { _tag: 'Rejected', reason: 'OperatorDenied' },
+    provenance: { _tag: 'LocalPolicy', revision: input.policy.revision },
+  };
+  const live = {
+    ...common,
+    decision: decideLiveAdmission(input),
+    provenance: { _tag: 'LiveChecked', evidence: lease.evidence },
+    startedMonotonicMs: 100,
+  };
+  assertValid(LiveAdmissionDraft, local, true);
+  assertValid(LiveAdmissionDraft, live, true);
+  for (const draft of [local, live]) {
+    for (const value of [undefined, NaN, Infinity, -1, 0.5])
+      assertValid(LiveAdmissionDraft, { ...draft, evaluatedMonotonicMs: value }, false);
+  }
+  for (const evaluatedMonotonicMs of [99, 6100, 6101])
+    assertValid(LiveAdmissionDraft, { ...live, evaluatedMonotonicMs }, false);
+  assertValid(LiveAdmissionDraft, { ...live, evaluatedMonotonicMs: 6099 }, true);
+}
+test(
+  'I2 draft evaluation requires safe monotonic time and live start/age ordering',
+  evaluationMonotonicSchema,
+);
+
+function liveRefusalRelationships() {
+  const input = fixture();
+  const lease = Option.getOrThrow(input.evidence);
+  const admitted = decideLiveAdmission(input);
+  const draft = {
+    verified: input.verified,
+    expectedLocalRevision: input.policy.revision,
+    evaluatedAtMs: 1000,
+    evaluatedMonotonicMs: 200,
+    startedMonotonicMs: 100,
+    provenance: { _tag: 'LiveChecked', evidence: lease.evidence },
+    decision: admitted,
+  };
+  const record = {
+    decisionId: '1',
+    commandKey: commandKey(input.verified.candidate),
+    candidate: input.verified.candidate,
+    localPolicyRevision: input.policy.revision,
+    evaluatedAtMs: 1000,
+    committedAtMs: 1001,
+    provenance: draft.provenance,
+    decision: admitted,
+  };
+  for (const basePermission of ['write', 'admin', 'read', 'none'] as const) {
+    const evidence = { ...lease.evidence, basePermission };
+    const provenance = { _tag: 'LiveChecked', evidence };
+    const lowPermission = ['read', 'none'].includes(basePermission);
+    assertValid(LiveAdmissionDraft, { ...draft, provenance }, !lowPermission);
+    assertValid(LiveAdmissionRecord, { ...record, provenance }, !lowPermission);
+    const denied = { _tag: 'Rejected', reason: 'OperatorDenied' };
+    assertValid(LiveAdmissionDraft, { ...draft, provenance, decision: denied }, lowPermission);
+    assertValid(LiveAdmissionRecord, { ...record, provenance, decision: denied }, lowPermission);
+    for (const reason of [
+      'AuthorityUnavailable',
+      'NotCommand',
+      'IdentityMismatch',
+      'AuthorityExpired',
+      'InvalidClock',
+      'InvalidAuthority',
+      'ProfileUnavailable',
+      'AccessRevoked',
+      'MalformedInput',
+      'AuthorityChanged',
+      'CommandConflict',
+      'DeliveryConflict',
+      'CapacityExceeded',
+    ]) {
+      const decision = { _tag: 'Rejected', reason };
+      assertValid(LiveAdmissionDraft, { ...draft, provenance, decision }, false);
+      assertValid(LiveAdmissionRecord, { ...record, provenance, decision }, false);
+    }
+    const mismatch = { _tag: 'LiveChecked', evidence: { ...evidence, operatorId: 99 } };
+    assertValid(LiveAdmissionDraft, { ...draft, provenance: mismatch, decision: denied }, false);
+    assertValid(LiveAdmissionRecord, { ...record, provenance: mismatch, decision: denied }, false);
+  }
+}
+test(
+  'I3 live draft and record reject impossible refusals but retain low-permission denials',
+  liveRefusalRelationships,
 );

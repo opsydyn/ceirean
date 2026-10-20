@@ -1,5 +1,6 @@
 import {
   AdmissionDecision,
+  ClockReading,
   LiveAdmissionRecord,
   LocalPolicyObservation,
   commandKey,
@@ -147,7 +148,13 @@ export function makeMemoryLiveInbox() {
           () => unrecorded('AuthorityChanged'),
         ),
         Match.when(
-          () => at.wallMs < draft.evaluatedAtMs || at.wallMs < floor,
+          () =>
+            ![
+              Schema.is(ClockReading)(at),
+              at.wallMs >= draft.evaluatedAtMs,
+              at.wallMs >= floor,
+              at.monotonicMs >= draft.evaluatedMonotonicMs,
+            ].every(Boolean),
           () => unrecorded('InvalidClock'),
         ),
         Match.when(

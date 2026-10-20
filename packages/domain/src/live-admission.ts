@@ -2,6 +2,7 @@ import { Match, Schema } from 'effect';
 
 import {
   AdmissionLimits,
+  AdmittedPreview,
   AssessmentProfile,
   AuthorityRevision,
   CommandCandidate,
@@ -81,6 +82,10 @@ export type LiveEvidenceLease = typeof LiveEvidenceLease.Type;
 
 const LocalPolicy = Schema.TaggedStruct('LocalPolicy', { revision: AuthorityRevision });
 const LiveChecked = Schema.TaggedStruct('LiveChecked', { evidence: LivePermissionEvidence });
+const liveDecision = Schema.Union([
+  AdmittedPreview,
+  Schema.TaggedStruct('Rejected', { reason: Schema.Literal('OperatorDenied') }),
+]);
 const localRefusal = RejectedAssessment.check(
   Schema.makeFilter((decision) =>
     Match.value(decision.reason).pipe(
@@ -116,7 +121,11 @@ export function livePermissionAllowed(permission: LivePermissionEvidence['basePe
 
 function boundDecision(decision: RecordedAssessmentDecision, evidence: LivePermissionEvidence) {
   return Match.value(decision).pipe(
-    Match.tag('Rejected', () => true),
+    Match.when(
+      { _tag: 'Rejected', reason: 'OperatorDenied' },
+      () => !livePermissionAllowed(evidence.basePermission),
+    ),
+    Match.tag('Rejected', () => false),
     Match.tag('AdmittedPreview', (preview) =>
       [
         livePermissionAllowed(evidence.basePermission),
@@ -135,6 +144,7 @@ const draftFields = {
   verified: VerifiedCommand,
   expectedLocalRevision: AuthorityRevision,
   evaluatedAtMs: NonNegativeSafeInteger,
+  evaluatedMonotonicMs: NonNegativeSafeInteger,
 };
 const localDraft = Schema.Struct({
   ...draftFields,
@@ -143,7 +153,7 @@ const localDraft = Schema.Struct({
 }).check(Schema.makeFilter((d) => d.provenance.revision === d.expectedLocalRevision));
 const liveDraft = Schema.Struct({
   ...draftFields,
-  decision: RecordedAssessmentDecision,
+  decision: liveDecision,
   provenance: LiveChecked,
   startedMonotonicMs: NonNegativeSafeInteger,
 }).check(
@@ -154,6 +164,9 @@ const liveDraft = Schema.Struct({
       boundDecision(d.decision, d.provenance.evidence),
       d.provenance.evidence.checkedAtMs <= d.evaluatedAtMs,
       d.evaluatedAtMs < d.provenance.evidence.validUntilMs,
+      d.startedMonotonicMs <= d.evaluatedMonotonicMs,
+      d.evaluatedMonotonicMs - d.startedMonotonicMs <
+        d.provenance.evidence.validUntilMs - d.provenance.evidence.observedAtMs,
     ].every(Boolean),
   ),
 );
@@ -170,7 +183,7 @@ const recordFields = {
 };
 const recordSchema = Schema.Union([
   Schema.Struct({ ...recordFields, decision: localRefusal, provenance: LocalPolicy }),
-  Schema.Struct({ ...recordFields, decision: RecordedAssessmentDecision, provenance: LiveChecked }),
+  Schema.Struct({ ...recordFields, decision: liveDecision, provenance: LiveChecked }),
 ]);
 function validRecord(r: typeof recordSchema.Type) {
   const internal = [

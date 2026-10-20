@@ -48,6 +48,24 @@ const authorityFailure = Schema.Struct({
   phase: LiveAuthorityPhase,
   code: LiveAuthorityErrorCode,
 });
+const nativeResultEnvelope = Schema.Union([
+  Schema.TaggedStruct('Success', { success: Schema.Unknown }),
+  Schema.TaggedStruct('Failure', { failure: Schema.Unknown }),
+]);
+
+// Interpret untrusted native containers before handing canonical Results to Effect.
+function interpretNativeResult<E>(input: unknown, invalid: E, sanitize: (error: unknown) => E) {
+  const decoded = Schema.decodeUnknownResult(nativeResultEnvelope)(input).pipe(
+    Result.mapError(() => invalid),
+  );
+  return Result.flatMap(decoded, (envelope) =>
+    Match.value(envelope).pipe(
+      Match.tag('Success', ({ success }) => Result.succeed(success)),
+      Match.tag('Failure', ({ failure }) => Result.fail(sanitize(failure))),
+      Match.exhaustive,
+    ),
+  );
+}
 
 function safeInbox(error: unknown, operation: LiveInboxError['operation']) {
   const decoded = Schema.decodeUnknownResult(inboxFailure)(error);
@@ -82,8 +100,16 @@ export function makeLiveInbox(driver: LiveInboxDriver) {
         Effect.flatMap(Effect.fromResult),
         Effect.mapError(() => new LiveInboxError({ operation: 'load', code: 'InvalidData' })),
       );
+      function loadNative() {
+        const result = driver.loadPolicy(scope);
+        return interpretNativeResult(
+          result,
+          new LiveInboxError({ operation: 'load', code: 'InvalidData' }),
+          (error) => safeInbox(error, 'load'),
+        );
+      }
       const raw = yield* Effect.try({
-        try: () => driver.loadPolicy(scope),
+        try: loadNative,
         catch: () => new LiveInboxError({ operation: 'load', code: 'ReadFailed' }),
       }).pipe(
         Effect.flatMap(Effect.fromResult),
@@ -111,8 +137,16 @@ export function makeLiveInbox(driver: LiveInboxDriver) {
         Effect.flatMap(Effect.fromResult),
         Effect.mapError(() => new LiveInboxError({ operation: 'replay', code: 'InvalidData' })),
       );
+      function resolveNative() {
+        const result = driver.resolveReplay(structuredClone(verified));
+        return interpretNativeResult(
+          result,
+          new LiveInboxError({ operation: 'replay', code: 'InvalidData' }),
+          (error) => safeInbox(error, 'replay'),
+        );
+      }
       const raw = yield* Effect.try({
-        try: () => driver.resolveReplay(structuredClone(verified)),
+        try: resolveNative,
         catch: () => new LiveInboxError({ operation: 'replay', code: 'ReadFailed' }),
       }).pipe(
         Effect.flatMap(Effect.fromResult),
@@ -146,8 +180,16 @@ export function makeLiveInbox(driver: LiveInboxDriver) {
         Effect.flatMap(Effect.fromResult),
         Effect.mapError(() => new LiveInboxError({ operation: 'commit', code: 'InvalidData' })),
       );
+      function commitNative() {
+        const result = driver.commit(structuredClone(draft));
+        return interpretNativeResult(
+          result,
+          new LiveInboxError({ operation: 'commit', code: 'InvalidData' }),
+          (error) => safeInbox(error, 'commit'),
+        );
+      }
       const raw = yield* Effect.try({
-        try: () => driver.commit(structuredClone(draft)),
+        try: commitNative,
         catch: () => new LiveInboxError({ operation: 'commit', code: 'CommitFailed' }),
       }).pipe(
         Effect.flatMap(Effect.fromResult),
@@ -214,8 +256,16 @@ export function makeLiveAuthority(driver: LiveAuthorityDriver) {
           ),
         ),
       );
+      async function checkNative(signal: AbortSignal) {
+        const result = await driver(structuredClone(query), signal);
+        return interpretNativeResult(
+          result,
+          new LiveAuthorityError({ phase: 'permission', code: 'InvalidResponse' }),
+          safeAuthority,
+        );
+      }
       const raw = yield* Effect.tryPromise({
-        try: (signal) => driver(structuredClone(query), signal),
+        try: checkNative,
         catch: () => new LiveAuthorityError({ phase: 'permission', code: 'Unavailable' }),
       }).pipe(Effect.flatMap(Effect.fromResult), Effect.mapError(safeAuthority));
       const lease = yield* decodeClone(LiveEvidenceLease, raw).pipe(
