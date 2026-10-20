@@ -739,6 +739,77 @@ test(
   'application disposal interrupts pending capture and releases owned reader',
   disposePendingCapture,
 );
+async function disposeHeldCancellation({
+  settlement,
+  status,
+  code,
+}: {
+  settlement: 'resolve' | 'reject';
+  status: number;
+  code: string;
+}) {
+  const { app, file } = await opened();
+  const original = await signed();
+  const pulled = Promise.withResolvers<void>();
+  const cancellationEntered = Promise.withResolvers<void>();
+  const cancellation = Promise.withResolvers<void>();
+  let cancellations = 0;
+  let disposed = false;
+  let responseSettled = false;
+  const body = new ReadableStream<Uint8Array>({
+    pull() {
+      pulled.resolve();
+    },
+    cancel() {
+      cancellations++;
+      cancellationEntered.resolve();
+      return cancellation.promise;
+    },
+  });
+  function finishResponse(response: Response) {
+    responseSettled = true;
+    return response;
+  }
+  const pending = app
+    .fetch(new Request(original.url, { method: 'POST', headers: original.headers, body }))
+    .then(finishResponse);
+  await pulled.promise;
+  const disposal = app.dispose().then(() => {
+    disposed = true;
+  });
+  await cancellationEntered.promise;
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  const beforeRelease = { disposed, responseSettled, locked: body.locked, cancellations };
+  function settleCancellation() {
+    return Match.value(settlement).pipe(
+      Match.when('reject', () => cancellation.reject(new TypeError('private held cancel failure'))),
+      Match.orElse(() => cancellation.resolve()),
+    );
+  }
+  settleCancellation();
+  const response = await pending;
+  await disposal;
+  expect(beforeRelease).toEqual({
+    disposed: false,
+    responseSettled: false,
+    locked: true,
+    cancellations: 1,
+  });
+  expect(body.locked).toBe(false);
+  expect(disposed).toBe(true);
+  expect(response.status).toBe(status);
+  const responseBody = await response.text();
+  expect(responseBody).not.toContain('private held cancel failure');
+  expect(responseBody).toContain(code);
+  expect(counts(file)).toEqual([{ n: 0 }, { n: 0 }]);
+}
+test.each([
+  { settlement: 'resolve' as const, status: 503, code: 'OperationalFailure' },
+  { settlement: 'reject' as const, status: 400, code: 'ReadFailed' },
+])(
+  'disposal owns reader until held asynchronous cancellation settles: $settlement',
+  disposeHeldCancellation,
+);
 async function sdkOperationalFailure() {
   const { app, file } = await opened();
   const request = await signed();

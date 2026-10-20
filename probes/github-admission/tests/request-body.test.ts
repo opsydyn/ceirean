@@ -1,9 +1,9 @@
 import { expect, spyOn, test } from 'bun:test';
 
 import { Digest } from '@leviathan/domain';
-import { Effect, Result } from 'effect';
+import { Cause, Effect, Exit, Result } from 'effect';
 
-import { captureRequestBody } from '../src/request-body.ts';
+import { captureRequestBody, RequestBodyError } from '../src/request-body.ts';
 
 function request(body: ReadableStream<Uint8Array>, signal?: AbortSignal) {
   return new Request('http://leviathan.invalid/webhook', { method: 'POST', body, signal });
@@ -99,3 +99,48 @@ async function digestFailure() {
   expect(result).toMatchObject({ _tag: 'Failure', failure: { code: 'DigestFailed' } });
 }
 test('digest failure is sanitized after releasing body reader', digestFailure);
+
+function rejectingCancellationFixture() {
+  const cancellationEntered = Promise.withResolvers<void>();
+  const cancellation = Promise.withResolvers<void>();
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new Uint8Array([1]));
+    },
+    cancel() {
+      cancellationEntered.resolve();
+      return cancellation.promise;
+    },
+  });
+  return { input: request(body), body, cancellationEntered, cancellation };
+}
+async function rejectingCancel() {
+  const fixture = rejectingCancellationFixture();
+  let settled = false;
+  const program = captureRequestBody(fixture.input, 0);
+  const capturing = Effect.runPromiseExit(program);
+  function finish(exit: Awaited<typeof capturing>) {
+    settled = true;
+    return exit;
+  }
+  const pending = capturing.then(finish);
+  await fixture.cancellationEntered.promise;
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  const beforeRejection = { settled, locked: fixture.body.locked };
+  fixture.cancellation.reject(new TypeError('private rejected cancel exception'));
+  const exit = await pending;
+  const errors = Exit.match(exit, {
+    onSuccess: () => [],
+    onFailure: (cause) => cause.reasons.filter(Cause.isFailReason).map((reason) => reason.error),
+  });
+  expect(beforeRejection).toEqual({ settled: false, locked: true });
+  expect(fixture.body.locked).toBe(false);
+  expect(errors).toContainEqual(new RequestBodyError({ code: 'TooLarge' }));
+  expect(errors).toContainEqual(new RequestBodyError({ code: 'ReadFailed' }));
+  const diagnostic = Exit.match(exit, { onSuccess: () => '', onFailure: Cause.pretty });
+  expect(diagnostic).not.toContain('private rejected cancel exception');
+}
+test(
+  'rejecting cancellation releases lock and preserves sanitized primary and cleanup failures',
+  rejectingCancel,
+);
