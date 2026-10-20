@@ -2,10 +2,16 @@
   "name": "@leviathan/github-adapter",
   "private": true,
   "type": "module",
+  "exports": {
+    "./protocol": "./src/verified-ingress.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@flue/github": "2.3.0",
+    "@flue/runtime": "2.3.0",
+    "@leviathan/domain": "workspace:*",
     "effect": "4.0.5",
     "jose": "6.2.12"
   },
