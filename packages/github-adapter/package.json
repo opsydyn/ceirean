@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./protocol": "./src/verified-ingress.ts"
+    "./protocol": "./src/verified-ingress.ts",
+    "./authority": "./src/github-authority.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -12,6 +13,7 @@
     "@flue/github": "2.3.0",
     "@flue/runtime": "2.3.0",
     "@leviathan/domain": "workspace:*",
+    "@leviathan/engine": "workspace:*",
     "effect": "4.0.5",
     "jose": "6.2.12"
   },
