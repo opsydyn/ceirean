@@ -32,7 +32,8 @@ before selecting or changing any real target.
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a blocked
 qualification probe, not a deployed tunnel: the entrypoint refuses registration
-while the declaration-policy decision and fresh operational checks are pending. The
+while fresh operational checks are pending. Its infrastructure-only third-party
+declaration exception is owner-approved; source remains strict. The
 [offline ownership report](docs/runbooks/alchemy-tunnel-ownership-report.md)
 records the reproduced failures; no connector, listener or webhook was activated.
 

@@ -1,7 +1,7 @@
 # Ceirean Tunnel Preparation
 
-Status: offline declaration tests pass; the declaration-policy decision and fresh
-operational preflight remain pending. The stack entrypoint still fails closed.
+Status: the owner approved the infrastructure-only declaration exception;
+operational preflight remains pending. The stack entrypoint still fails closed.
 No Cloudflare resources have been applied. No CLI credential has been configured.
 
 This private workspace declares the proposed `CeireanHooks` / `rehearsal` stack:
@@ -39,9 +39,11 @@ bun run check
 Alchemy `2.0.0-beta.83` shares the existing Effect `4.0.5`; no existing lockfile
 package resolution changed. Its public Cloudflare declarations pull in Workers
 globals and optional database peers. Full dependency checking currently fails
-with incompatible Workers/Bun/Node globals. `skipLibCheck` remains false; all
-existing Effect lint rules and cohort pins remain unchanged. This is a failed
-qualification gate, not permission to bypass types or deploy.
+with incompatible Workers/Bun/Node globals. The owner approved `skipLibCheck: true`
+only in this workspace on 2026-10-21. TypeScript still checks our source with the
+root's strict settings; third-party declarations are not validated here. All
+existing Effect lint rules, other workspace configs and cohort pins are unchanged.
+This scoped policy is not a fix to the SDK declarations or deployment approval.
 Adding Workers ambient types and database peers was tested and did not produce
 a compatible host type environment; those experimental additions were removed.
 The dependency set stays limited to Alchemy and its Effect platform peers.
@@ -84,10 +86,12 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [x] Verify the active account and zone in the Cloudflare dashboard.
 - [x] Inspect the full DNS inventory: no explicit hostname conflict; preserve wildcard.
 - [x] Test exact routing, the proposed resource set and secret-free outputs offline.
-- [ ] Pass dependency type qualification without an unapproved exception.
+- [x] Owner approves infrastructure-only declaration exception; strict source checking retained.
+- [x] Pass the canonical infrastructure typecheck with that approved policy.
 - [x] Owner accepts bounded unique-name mitigation; keep the SDK defect documented.
 - [ ] Approve and configure scoped Alchemy authentication with protected custody.
-- [ ] Inspect tunnels for a `ceirean-rehearsal-bcea4099a8934e32` name collision; never adopt one.
+- [x] Inspect all four existing tunnels: no `ceirean-rehearsal-bcea4099a8934e32` collision; repeat immediately before apply.
+- [x] Create owner-only operational/auth directories outside Git; no credential entered.
 - [ ] Review a remote plan: exactly three creates, no replacements/deletions/adoption.
 - [ ] Apply only that plan; verify remote route/DNS and zero connectors.
 
@@ -129,5 +133,34 @@ with Alchemy using the bounded mitigation above. The 64-bit random suffix was
 generated once and pinned in source, not regenerated on each plan. All three
 resources now explicitly set engine adoption off as well as the Tunnel provider
 property. A diagnostic `tsc --noEmit --skipLibCheck` passes; no persistent
-declaration-check exception has been approved or applied. Browser preflight was
+declaration-check exception had been approved or applied at that checkpoint. Browser preflight was
 attempted but the Mac was locked; no unlock bypass or Cloudflare mutation occurred.
+
+The owner subsequently approved the infrastructure-only `skipLibCheck` exception
+and unlocked the Mac. The exception is now applied to this workspace alone;
+operational preflight and dedicated authentication remain separate gates.
+
+All seven canonical Moon workspace typechecks now pass, including infrastructure;
+lint/format and all five offline infrastructure tests pass. The approved policy
+only changes this workspace's `skipLibCheck`; the root strict settings, other
+workspace configs, Effect lint config and lockfile are unchanged.
+
+The signed-in dashboard's complete four-tunnel inventory has no matching name.
+The seven-record DNS inventory has no explicit Ceirean hostname. These are
+read-only observations, not a collision lock or permission to skip a fresh check
+before applying. No resource was created or adopted.
+
+Created `/Users/alancurrie/Library/Application Support/Ceirean/infrastructure`
+and its `auth` subdirectory, both owned by `alancurrie` and mode 0700. No credential
+was generated or entered. The browser is left at the unsubmitted account-token
+review for `ceirean-rehearsal-setup`, expiring 28 October 2026. Proposed policies:
+
+- Account: `Cloudflare One Connector: cloudflared Write` (account-wide tunnel
+  management; Cloudflare does not scope this policy to our one name).
+- Only `opsydyn.xyz`: `DNS Write` and `Zone Read`. Alchemy's DNS lookup calls
+  `getZone` when checking an absent record, so the metadata read is required.
+
+The owner must review/create the token and keep its value private. Do not read
+the token screen, clipboard or credential file. After the owner leaves that
+screen, configure the dedicated Alchemy profile using its masked stored-token
+prompt and protected `ALCHEMY_HOME`; do not use broad OAuth or a global key.

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "skipLibCheck": false
+    "skipLibCheck": true
   },
   "include": ["alchemy.run.ts", "src", "tests"]
 }

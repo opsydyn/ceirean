@@ -25,8 +25,9 @@ as a peer, which accepts Ceirean's pinned 4.0.5. This metadata is not installati
 typecheck or deployment qualification. The isolated `@ceirean/infrastructure`
 workspace now pins this release and 4.0.5. Its offline tests exercise real Alchemy
 resource registration and output resolution, without cloud providers or network.
-Dependency declaration qualification remains blocked by incompatible Workers and
-Bun/Node globals; no type suppression or lint exception has been introduced.
+The owner approved infrastructure-only `skipLibCheck: true` for the incompatible
+Workers/Bun/Node declaration globals. Our source remains strict and every Effect
+lint rule remains enforced; this does not validate or fix the skipped declarations.
 
 Recommend an isolated infrastructure workspace, not a dependency of the ingress
 application or domain/engine packages. Keep all existing Effect lint rules and
@@ -50,8 +51,8 @@ Provisioning must not run a connector, listener, OS service, GitHub update, prof
 enablement or assessment. The intended final tunnel state is disconnected with
 zero connectors, not an active origin behind the new hostname.
 
-Preparation is pending the dependency declaration-policy decision, fresh collision
-preflight and dedicated Alchemy authentication. In the pinned provider, an existing
+Preparation is pending fresh collision preflight and dedicated Alchemy
+authentication. In the pinned provider, an existing
 same-name tunnel can be reused despite `adopt: false`; preflight alone does not
 close a race. The owner accepted the stable random-suffixed name and supervised
 preflight as a bounded mitigation, not a provider fix. All three resources pin
@@ -63,6 +64,13 @@ not accept All/Basic scopes for this tunnel-only task. See the infrastructure
 [README](../../packages/infrastructure/README.md) for custody and permission gates.
 No remote tunnel, ingress configuration or DNS record has been created. Tunnel
 collision checks and a reviewed remote plan must precede apply.
+
+After the owner unlocked the Mac, the complete four-tunnel dashboard inventory
+showed no match for the pinned Ceirean name. Repeat this check just before apply.
+Protected operational/auth directories now exist outside Git, both mode 0700.
+An account-owned seven-day token review is prepared but not submitted: cloudflared
+Write for the account, plus DNS Write and Zone Read for `opsydyn.xyz` only.
+Credential generation/entry is an owner handoff; no token value was read.
 
 - Map only the selected hostname's `/webhook` path to `http://127.0.0.1:8787`;
   reject unmatched paths. The application still validates method, signature,

@@ -45,7 +45,7 @@ export const declareRehearsal = Effect.gen(declareRehearsalInfrastructure);
 
 const operationalPreparationPending = new ConfigProvider.SourceError({
   message:
-    'Remote preparation awaits the declaration-policy decision and fresh protected-state/collision preflight. No resources may be registered yet.',
+    'Remote preparation awaits fresh protected-state/collision preflight and dedicated authentication. No resources may be registered yet.',
 });
 
 // Keep deployment closed until the approved operational preparation is verified.

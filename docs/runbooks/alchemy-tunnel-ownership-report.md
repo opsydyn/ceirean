@@ -99,9 +99,11 @@ Preserve all existing lint rules and the current dependency-checking policy.
 The owner accepted a stable random-suffixed name, fresh collision preflight,
 reviewed creates and preserved state as a bounded mitigation for supervised
 preparation. This does not fix the provider or eliminate race risk. The entrypoint
-remains gated while type-policy and operational preparation are pending.
+remains gated while operational preparation is pending. The owner separately
+approved an infrastructure-only third-party declaration exception; source
+checking and Effect lint rules remain strict.
 Publishing this report is explicitly disallowed. Opening an upstream PR, changing
-SDK adoption semantics locally, installing a preview or accepting a typecheck
+SDK adoption semantics locally, installing a preview or accepting an additional typecheck
 exception are separate next actions, not implied by this diagnostic result.
 Do not configure credentials, deploy, start a connector/listener, enable webhooks
 or run the live rehearsal without the separately required approvals.
