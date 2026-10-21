@@ -1,5 +1,7 @@
+import { Database } from 'bun:sqlite';
 import { afterEach, expect, jest, test } from 'bun:test';
 
+import { LiveAdmissionRecord, LivePermissionEvidence } from '@leviathan/domain';
 import { Effect } from 'effect';
 import { Match, Schema } from 'effect';
 
@@ -469,3 +471,172 @@ async function importSafety() {
   expect(await new Response(child.stderr).text()).toBe('');
 }
 test('public source imports do not acquire config, credentials, runtime or server', importSafety);
+
+async function killedAt(fixture: Fixture, phase: string, expected: number) {
+  await initialize(fixture);
+  const child = Bun.spawn(
+    [
+      process.execPath,
+      '--no-env-file',
+      '--no-install',
+      `${import.meta.dir}/restart-child.ts`,
+      fixture.root,
+      phase,
+    ],
+    { env: {}, stdin: 'ignore', stdout: 'pipe', stderr: 'pipe' },
+  );
+  const reader = child.stdout.getReader();
+  let watchdogFired = false;
+  const watchdog = setTimeout(() => {
+    watchdogFired = true;
+    child.kill('SIGKILL');
+  }, 5000);
+  async function exercise() {
+    const first = await reader.read();
+    const phaseJson = Schema.fromJsonString(Schema.Struct({ phase: Schema.String }));
+    const observed = Schema.decodeUnknownSync(phaseJson)(new TextDecoder().decode(first.value));
+    expect(observed).toEqual({
+      phase,
+    });
+    child.kill('SIGKILL');
+    await child.exited;
+    expect(child.signalCode).toBe('SIGKILL');
+    expect(watchdogFired).toBe(false);
+    expect(await new Response(child.stderr).text()).toBe('');
+    const status = await runCli(argv(fixture, 'status'), { host: fixture.host, silent: true });
+    expect(status.output).toMatchObject({
+      decisions: expected,
+      receipts: expected,
+      evidence: expected,
+      authorityRevisions: 1,
+    });
+    const db = new Database(`${fixture.root}/github-admission.sqlite`, { readonly: true });
+    const records = db.query<{ record: string }, []>('SELECT record FROM decisions').all();
+    const evidence = db.query<{ evidence: string }, []>('SELECT evidence FROM evidence').all();
+    db.close();
+    expect(records).toHaveLength(expected);
+    expect(evidence).toHaveLength(expected);
+    const decodeRecord = Schema.decodeUnknownSync(Schema.fromJsonString(LiveAdmissionRecord));
+    const decodeEvidence = Schema.decodeUnknownSync(Schema.fromJsonString(LivePermissionEvidence));
+    const historical = records.map((row) => decodeRecord(row.record));
+    const bound = historical.map((record) =>
+      Match.value(record.provenance).pipe(
+        Match.tag('LiveChecked', (live) => live.evidence),
+        Match.orElse(() => undefined),
+      ),
+    );
+    expect(bound).toEqual(evidence.map((row) => decodeEvidence(row.evidence)));
+    const github = api();
+    const app = await openLocalGitHubApp(argv(fixture, 'start'), {
+      host: fixture.host,
+      fetch: github.fetch,
+    });
+    async function replay() {
+      const response = await app.fetch(await webhook());
+      const outcome = Match.value(expected).pipe(
+        Match.when(1, () => ({ disposition: 'Duplicate', calls: 0 })),
+        Match.orElse(() => ({ disposition: 'Recorded', calls: 5 })),
+      );
+      expect(await response.json()).toMatchObject({
+        disposition: outcome.disposition,
+      });
+      expect(github.calls).toHaveLength(outcome.calls);
+    }
+    await replay().finally(app.dispose);
+    const reopened = new Database(`${fixture.root}/github-admission.sqlite`, { readonly: true });
+    const final = reopened.query<{ record: string }, []>('SELECT record FROM decisions').all();
+    reopened.close();
+    expect(final).toHaveLength(1);
+    const unchanged = Match.value(expected).pipe(
+      Match.when(1, () => expect(final).toEqual(records)),
+      Match.orElse(() => undefined),
+    );
+    void unchanged;
+  }
+  async function cleanup() {
+    clearTimeout(watchdog);
+    child.kill('SIGKILL');
+    await child.exited;
+    reader.releaseLock();
+  }
+  await exercise().finally(cleanup);
+}
+for (const [phase, expected] of [
+  ['BeforeTransaction', 0],
+  ['AfterDecision', 0],
+  ['AfterEvidence', 0],
+  ['AfterCommit', 1],
+  ['ApiPending', 0],
+] as const) {
+  test(`SIGKILL ${phase}: atomic recovery, released owner and source-bound replay`, () =>
+    qualify((fixture) => killedAt(fixture, phase, expected)));
+}
+
+async function lateFailures(fixture: Fixture) {
+  await initialize(fixture);
+  const key = await Effect.runPromise(fixture.fs.readFileString(fixture.config.privateKeyFile));
+  await Effect.runPromise(
+    fixture.fs.writeFileString(fixture.config.privateKeyFile, 'not a PKCS8 key'),
+  );
+  const opening = openLocalGitHubApp(argv(fixture, 'start'), {
+    host: fixture.host,
+    fetch: api().fetch,
+  });
+  await expect(opening).rejects.toBeDefined();
+  await Effect.runPromise(fixture.fs.writeFileString(fixture.config.privateKeyFile, key));
+  const occupied = Bun.serve({ hostname: '127.0.0.1', port: 0, fetch: () => new Response() });
+  async function bindFailure() {
+    const binding = runCli(argv(fixture, 'start'), {
+      host: fixture.host,
+      fetch: api().fetch,
+      port: occupied.port,
+      silent: true,
+    });
+    await expect(binding).rejects.toBeDefined();
+  }
+  await bindFailure().finally(() => occupied.stop(true));
+  const status = await runCli(argv(fixture, 'status'), { host: fixture.host, silent: true });
+  expect(status.output).toMatchObject({ decisions: 0, receipts: 0, evidence: 0 });
+  const started = await runCli(argv(fixture, 'start'), {
+    host: fixture.host,
+    fetch: api().fetch,
+    port: occupied.port,
+    silent: true,
+  });
+  await started.app.dispose();
+}
+test('late malformed key and bind failure unwind storage ownership and leave no residual listener', () =>
+  qualify(lateFailures));
+
+async function olderSnapshot(fixture: Fixture) {
+  await initialize(fixture);
+  const file = `${fixture.root}/github-admission.sqlite`;
+  const snapshot = await Effect.runPromise(fixture.fs.readFile(file));
+  const first = await openLocalGitHubApp(argv(fixture, 'start'), {
+    host: fixture.host,
+    fetch: api().fetch,
+  });
+  await first.fetch(await webhook()).finally(first.dispose);
+  expect(
+    (await runCli(argv(fixture, 'status'), { host: fixture.host, silent: true })).output,
+  ).toMatchObject({ decisions: 1 });
+  await Effect.runPromise(fixture.fs.writeFile(file, snapshot));
+  // A valid old snapshot has lost replay history; it cannot reconstruct later admissions.
+  expect(
+    (await runCli(argv(fixture, 'status'), { host: fixture.host, silent: true })).output,
+  ).toMatchObject({ decisions: 0, receipts: 0, evidence: 0 });
+  const github = api();
+  const restored = await openLocalGitHubApp(argv(fixture, 'start'), {
+    host: fixture.host,
+    fetch: github.fetch,
+  });
+  async function redeliver() {
+    expect(await (await restored.fetch(await webhook())).json()).toMatchObject({
+      disposition: 'Recorded',
+    });
+    expect(github.calls).toHaveLength(5);
+  }
+  await redeliver().finally(restored.dispose);
+}
+test('older snapshot restoration is replay-history loss, not reconciliation or exactly-once proof', () =>
+  qualify(olderSnapshot));
