@@ -1,12 +1,12 @@
 # Ceirean Tunnel Preparation
 
 Status: the owner approved the infrastructure-only declaration exception and
-guarded operational entrypoint. Protected plan-only review passed; apply remains
-unapproved. The entrypoint fails closed outside its required local context.
-No Cloudflare resources have been applied. The owner supplied a scoped token in
+guarded operational entrypoint. The three-resource apply was separately approved
+and completed on 2026-10-21; independent verification found zero connectors.
+The entrypoint fails closed outside its required local context. The owner supplied a scoped token in
 the ignored root `.env`; no stored Alchemy auth profile has been created.
 
-This private workspace declares the proposed `CeireanHooks` / `rehearsal` stack:
+This private workspace owns the provisioned `CeireanHooks` / `rehearsal` stack:
 
 - A remotely managed tunnel named `ceirean-rehearsal-bcea4099a8934e32`, without adoption.
 - An exact `ceirean-hooks.opsydyn.xyz` + `^/webhook$` route to
@@ -116,8 +116,8 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [x] Create owner-only operational/auth directories outside Git; no credential entered.
 - [x] Review a plan-only run: exactly three creates, no updates/replacements/deletions/adoption.
 - [x] Guard the operational entrypoint and test rejected contexts before registration.
-- [ ] Obtain separate apply approval, repeat collision checks and verify the new plan.
-- [ ] Apply only that approved plan; verify remote route/DNS and zero connectors.
+- [x] Obtain separate apply approval, repeat collision checks and verify the new plan.
+- [x] Apply only that approved plan; verify remote route/DNS and zero connectors.
 
 Do not use `alchemy dev`, `--adopt`, automatic approval, or start cloudflared.
 The [bounded rehearsal plan](../../docs/runbooks/ceirean-live-rehearsal-plan.md)
@@ -307,3 +307,50 @@ The final detailed `plan` through the real guarded entrypoint exited 0 on
 reviewed properties. The protected resource state remained empty and port 8787
 remained closed. No apply, connector, real listener, webhook activation, merge
 or push was performed. Plan/read proof still does not establish write grants.
+
+## Provisioned, Disconnected Checkpoint
+
+On 2026-10-21 at 17:49-17:52 UTC, after the owner separately approved provisioning,
+the guarded main checkout at `bf5b901` created only the reviewed three resources.
+Fresh GET-only checks immediately beforehand confirmed an active token, matching
+account/zone, and no live/deleted tunnel-name or exact-hostname DNS collision.
+
+The initial deploy attempt refused the coding-agent terminal as non-interactive
+and exited without changes. The retry used Alchemy's documented `ALCHEMY_TUI=1`
+override in a PTY, preserving its interactive confirmation. The complete detailed
+three-create plan was reviewed and explicitly confirmed. No `--yes`, `--adopt`,
+provider patch or alternate resource declaration was used. Apply exited 0.
+
+| Resource    | Verified Identity                           |
+| ----------- | ------------------------------------------- |
+| Tunnel      | `1df21420-1ba8-4797-a43b-8fcbab108ea7`      |
+| Tunnel name | `ceirean-rehearsal-bcea4099a8934e32`        |
+| DNS record  | `8b6fd6f3472000041e6d5b654ee791ad`          |
+| Endpoint    | `https://ceirean-hooks.opsydyn.xyz/webhook` |
+
+Independent Cloudflare GETs verified exactly one matching remotely managed
+tunnel, zero connectors, and a proxied CNAME targeting
+`1df21420-1ba8-4797-a43b-8fcbab108ea7.cfargotunnel.com`. The remote configuration
+contains only the exact hostname/path rule to loopback and the final 404
+catch-all. The successful create/configuration/DNS operations demonstrate those
+write capabilities in this scope; they are not a general permission audit.
+
+The protected local store now contains the three resource records and stack
+output under `.alchemy/state/CeireanHooks/rehearsal`. Metadata-only inspection
+confirmed directories 0700, files 0600 and owner `alancurrie`. The SDK persists
+the tunnel's connector credential in this sensitive state; never print, inspect
+into agent output, commit, move or delete it. A fresh CLI plan reloaded the store
+and reported all three resources `noop`. This proves fresh-process state reuse,
+not disaster recovery, backups or generic remote-drift detection.
+
+Port 8787 remains closed. Read-only ingress status reports profile Disabled,
+zero decisions/receipts/evidence, and the same single authority revision. No
+connector installation or process, live listener, GitHub webhook update,
+assessment enablement or live rehearsal was performed. No Git push occurred.
+The management token still expires on 2026-10-28; future management after expiry
+requires a separately supplied credential, not a broader grant.
+
+Next is the separately approved bounded rehearsal, with an explicit issue,
+session timebox/operator and activation/teardown checklist. Fallow remains queued
+until rehearsal teardown. Do not start cloudflared or enable webhook delivery
+merely because these disconnected resources now exist.

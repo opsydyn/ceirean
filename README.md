@@ -31,9 +31,10 @@ before selecting or changing any real target.
 
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
-preparation workspace, not a deployed tunnel: the entrypoint refuses registration
-outside the verified stage, mode and protected local directories. Its plan contains
-exactly three creates; apply requires separate approval and a fresh collision check.
+preparation workspace. The three approved Cloudflare resources are provisioned
+and independently verified, with zero connectors and no active origin. The
+entrypoint refuses registration outside the verified stage, mode and protected
+local directories. Connector/listener/webhook activation requires separate approval.
 Its infrastructure-only third-party
 declaration exception is owner-approved; source remains strict. The
 [offline ownership report](docs/runbooks/alchemy-tunnel-ownership-report.md)
@@ -43,7 +44,8 @@ The offline compatibility probe's 36 tests cover pure decisions, real Flue tools
 through Effect, process-kill recovery and distinct read/abort semantics. The
 canonical typecheck passes with strict source checking and the owner-approved
 probe-local vendor declaration policy. This does not qualify production use.
-There is no deployed production application, scheduled job or deployment.
+There is no deployed production application or scheduled job; tunnel-only
+infrastructure preparation is not application activation.
 
 The new private GitHub channel probe retains strict vendor declaration checking.
 Its owner-approved compatibility repair is tracked in
@@ -123,7 +125,9 @@ Fresh final-fix evidence is separate from historical `b7f5d4e` qualification.
 See the [local-only runbook](docs/runbooks/local-github-ingress.md),
 [assessment](docs/assessments/local-github-ingress.md) and
 [source-bound evidence](docs/evidence/local-github-ingress.json).
-Real credentials and GitHub API/tunnel rehearsal remain unapproved.
+Named Cloudflare tunnel infrastructure has been provisioned under separate
+approval. GitHub runtime credential acquisition, real webhook delivery and the
+live rehearsal remain unapproved; the local assessment profile remains Disabled.
 
 ## Proposed First Slice
 

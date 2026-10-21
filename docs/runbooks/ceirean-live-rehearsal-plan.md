@@ -1,8 +1,9 @@
 # Bounded FoldKit Live Rehearsal
 
-Status: rehearsal design approved on 2026-10-21; activation remains gated by the
-exact endpoint, session time and issue. No listener, tunnel or webhook has been
-enabled by this plan. See the [approval worksheet](ceirean-rehearsal-approval.md)
+Status: rehearsal design approved on 2026-10-21; the separately approved named
+tunnel/configuration/DNS resources are provisioned with zero connectors. Live
+activation remains gated by the exact endpoint, session time and issue. No listener,
+connector or webhook has been enabled. See the [approval worksheet](ceirean-rehearsal-approval.md)
 for verified IDs, protected local paths and preparation evidence.
 
 ## Tunnel Recommendation
@@ -13,7 +14,8 @@ The intended endpoint is `https://ceirean-hooks.opsydyn.xyz/webhook`. The signed
 dashboard verified account `d95812af050c2e549a3296899b7b43b3` and active zone
 `65de6815d54763e90ebf4e5df3a7030c`. The seven-record DNS inventory had no explicit
 `ceirean-hooks` record; its existing wildcard and all other records remain untouched.
-The dedicated tunnel identity remains unverified; no resources have been created.
+The provisioned tunnel is `1df21420-1ba8-4797-a43b-8fcbab108ea7`; its exact ingress,
+proxied CNAME and zero connectors were independently verified on 2026-10-21.
 This replaces the Quick Tunnel recommendation for this setup. A Quick Tunnel
 remains a disposable alternative, not the selected endpoint.
 
@@ -80,8 +82,11 @@ checked with isolated temporary auth storage and telemetry disabled; no credenti
 was entered through that CLI flow. Alchemy's default OAuth scope selection is broad, so do
 not accept All/Basic scopes for this tunnel-only task. See the infrastructure
 [README](../../packages/infrastructure/README.md) for custody and permission gates.
-No remote tunnel, ingress configuration or DNS record has been created. Tunnel
-collision checks and a reviewed remote plan must precede apply.
+The later separately approved apply created only the reviewed tunnel, ingress
+configuration and DNS record. Fresh collision checks preceded interactive plan
+confirmation. Protected state files are 0600 under 0700 directories, and a fresh
+CLI plan reports no changes. See the infrastructure README's provisioned checkpoint
+for exact non-secret IDs and evidence; no live rehearsal has occurred.
 
 After the owner unlocked the Mac, the complete four-tunnel dashboard inventory
 showed no match for the pinned Ceirean name. Repeat this check just before apply.
