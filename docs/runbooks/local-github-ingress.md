@@ -120,6 +120,11 @@ Capture stderr only to operator-controlled protected local storage during an
 approved rehearsal. Do not upload it automatically or treat logs as authority
 evidence. Authority deadlines, grants and replay policy are unchanged.
 
+Installation tokens are bounded, header-safe opaque credentials. Both legacy
+and dot-bearing stateless GitHub formats are accepted without inspecting JWT
+contents. Never infer authority from token claims or log token values; explicit
+installation, repository, permission, identity and expiry checks still apply.
+
 Start binds only `127.0.0.1:8787`, serving only `POST /webhook`. It refuses a
 second owner. A bind failure or malformed acquired key unwinds storage ownership.
 Never delete an ownership sidecar to bypass an active owner. Process death

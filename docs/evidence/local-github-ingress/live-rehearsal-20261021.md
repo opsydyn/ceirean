@@ -155,3 +155,36 @@ and stateless-token regression tests plus invalid/control-character cases, and
 retain every scope, permission, identity, expiry and deadline check. Do not add
 JWT introspection or opt out of GitHub's rollout. No product source was changed
 by this probe; any repeat probe or live rehearsal requires separate approval.
+
+## Approved Opaque-token Compatibility Fix
+
+The owner approved the compatibility repair with property-based regression
+coverage. The production change adds only literal `.` to the token character
+class, preserving the nonempty 4096-character bound. Installation-token contents
+remain opaque: no JWT decoding, signature validation or claim-based authority is
+introduced, and all existing identity, grants, expiry and deadline checks remain.
+
+Offline properties exercise the actual authority driver and HTTP request builder
+with generated synthetic keys/responses, seeds 0, 1 and 163, and 75 cases per
+seed. Each acceptance case checks both legacy and dot-bearing stateless shapes,
+unchanged Bearer forwarding through repository/user/permission reads, and token
+absence from returned evidence: 450 accepted-token executions. Safety cases
+insert sampled forbidden characters at the start, middle and end: 675 rejection
+executions, each requiring `token/InvalidResponse` after exactly two requests.
+Deterministic boundary checks accept 4096 characters and reject empty/4097.
+
+The three compatibility properties and boundary test were observed failing
+against the old dot-rejecting validator before the production change; all seven
+new tests pass with the repair. The tests deliberately use non-signed synthetic
+JWT-like segments to prove the adapter does not depend on token internals.
+Independent review found no blocking safety or test-validity issue.
+
+This closes the reproduced offline token-format compatibility defect, not the
+original rehearsal's live acceptance matrix. No real key, network, production
+ledger, listener, tunnel or webhook was used during this repair. Repeat live
+authority probing and any full rehearsal remain separately approval-gated.
+
+Final verification for this repair: all 962 workspace tests passed, including
+207 adapter tests; all seven workspace typechecks and `bun run check` passed.
+The seven new property/boundary tests made 6,774 assertions in a focused run.
+The local profile remained Disabled and port 8787 remained closed.

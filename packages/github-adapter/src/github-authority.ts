@@ -27,7 +27,7 @@ const installationSchema = Schema.Struct({
   suspended_at: Schema.NullOr(Schema.String),
 });
 const tokenSchema = Schema.Struct({
-  token: Schema.String.check(Schema.isPattern(/^[A-Za-z0-9_-]{1,4096}$/)),
+  token: Schema.String.check(Schema.isPattern(/^[A-Za-z0-9_.-]{1,4096}$/)),
   expires_at: Schema.String,
   permissions: Schema.Record(Schema.String, Schema.String),
   repository_selection: Schema.String,

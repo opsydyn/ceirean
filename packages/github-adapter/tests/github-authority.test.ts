@@ -2,7 +2,7 @@ import { afterEach, beforeAll, expect, test } from 'bun:test';
 
 import { AuthorityQuery, Digest, LiveEvidenceLease } from '@ceirean/domain';
 import { makeLiveAuthority } from '@ceirean/engine';
-import { Effect, Match, Option, Result, Schema } from 'effect';
+import { Arbitrary, Effect, Match, Option, Result, Schema } from 'effect';
 import { exportPKCS8, generateKeyPair, jwtVerify } from 'jose';
 
 import { makeGitHubAuthorityDriver } from '../src/github-authority.ts';
@@ -138,6 +138,128 @@ function expectFailure(result: unknown, code: string, phase?: string) {
   expect(serialized).not.toContain('PRIVATE KEY');
   expect(serialized).not.toContain('secret-native');
 }
+
+const tokenCharacters = Schema.Literals(
+  Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-'),
+);
+const tokenCharacterArbitrary = Arbitrary.schema(tokenCharacters);
+const tokenPartArbitrary = Arbitrary.map(
+  Arbitrary.array(tokenCharacterArbitrary, { minLength: 1, maxLength: 256 }),
+  (characters) => characters.join(''),
+);
+const tokenInput = Arbitrary.all({
+  legacy: tokenPartArbitrary,
+  header: tokenPartArbitrary,
+  payload: tokenPartArbitrary,
+  signature: tokenPartArbitrary,
+});
+function tokenResponse(token: string) {
+  return {
+    token,
+    expires_at: new Date(wall + 3600000).toISOString(),
+    permissions: { metadata: 'read' },
+    repository_selection: 'selected',
+    repositories: [{ id: 22 }],
+  };
+}
+async function acceptedToken(token: string) {
+  const values = replies();
+  values[1] = tokenResponse(token);
+  const h = harness(values);
+  async function exercise() {
+    const result = await (await h.acquire())(query(), new AbortController().signal);
+    expect(Result.isSuccess(result)).toBe(true);
+    expect(h.calls).toHaveLength(5);
+    for (const { init } of h.calls.slice(2)) {
+      expect(new Headers(init.headers).get('authorization')).toBe(`Bearer ${token}`);
+    }
+    expect(encodeJson(result)).not.toContain(token);
+  }
+  await exercise().finally(h.dispose);
+}
+async function compatibleTokenLaw(input: {
+  legacy: string;
+  header: string;
+  payload: string;
+  signature: string;
+}) {
+  await acceptedToken(`ghs_${input.legacy}`);
+  // Deliberately not a signed JWT: installation tokens must remain opaque.
+  await acceptedToken(`ghs_77_${input.header}.${input.payload}.${input.signature}`);
+  return true;
+}
+function compatibleTokenProperty(input: Parameters<typeof compatibleTokenLaw>[0]) {
+  const program = Effect.promise(() => compatibleTokenLaw(input));
+  return program;
+}
+const invalidTokenInput = Arbitrary.all({
+  part: tokenPartArbitrary,
+  forbidden: Arbitrary.schema(
+    Schema.Literals(['\r', '\n', '\t', ' ', '\0', '\x7f', '\u00e9', '/', '+', '=', ':', '"']),
+  ),
+});
+async function rejectedToken(token: string) {
+  const values = replies();
+  values[1] = tokenResponse(token);
+  const h = harness(values);
+  async function exercise() {
+    const result = await (await h.acquire())(query(), new AbortController().signal);
+    expectFailure(result, 'InvalidResponse', 'token');
+    expect(h.calls).toHaveLength(2);
+  }
+  await exercise().finally(h.dispose);
+}
+async function unsafeTokenLaw(input: { part: string; forbidden: string }) {
+  const token = `ghs_${input.part}.${input.part}`;
+  await rejectedToken(`${input.forbidden}${token}`);
+  await rejectedToken(`ghs_${input.part}.${input.forbidden}.${input.part}`);
+  await rejectedToken(`${token}${input.forbidden}`);
+  return true;
+}
+function unsafeTokenProperty(input: Parameters<typeof unsafeTokenLaw>[0]) {
+  const program = Effect.promise(() => unsafeTokenLaw(input));
+  return program;
+}
+for (const seed of [0, 1, 163]) {
+  async function tokenCompatibility() {
+    const result = await Effect.runPromise(
+      Arbitrary.checkEffect(tokenInput, compatibleTokenProperty, {
+        seed,
+        runs: 75,
+        size: 50,
+        maxShrinks: 100,
+        maxDiscards: 100,
+      }),
+    );
+    expect(result._tag).toBe('Passed');
+  }
+  test(
+    `property: legacy and stateless installation tokens pass unchanged; seed ${seed}`,
+    tokenCompatibility,
+  );
+  async function tokenSafety() {
+    const result = await Effect.runPromise(
+      Arbitrary.checkEffect(invalidTokenInput, unsafeTokenProperty, {
+        seed,
+        runs: 75,
+        size: 50,
+        maxShrinks: 100,
+        maxDiscards: 100,
+      }),
+    );
+    expect(result._tag).toBe('Passed');
+  }
+  test(
+    `property: unsafe installation tokens stop before authenticated API reads; seed ${seed}`,
+    tokenSafety,
+  );
+}
+async function tokenBounds() {
+  await acceptedToken(`ghs_${'a'.repeat(4090)}.b`);
+  await rejectedToken('');
+  await rejectedToken(`ghs_${'a'.repeat(4091)}.b`);
+}
+test('installation token bounds remain nonempty and at most 4096 characters', tokenBounds);
 
 async function protocolCase() {
   const h = harness();
