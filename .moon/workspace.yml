@@ -5,3 +5,4 @@ projects:
   engine: packages/engine
   github-admission: probes/github-admission
   github-adapter: packages/github-adapter
+  github-ingress: apps/github-ingress

@@ -1,0 +1,13 @@
+{
+  "status": "NEEDS_CONTEXT",
+  "checkout": "/private/tmp/leviathan-compatibility",
+  "branch": "codex/local-github-ingress",
+  "source": "bb2c3cd01fe355f76fbd327c79c64dc240f90937",
+  "tree": "bea410fa0fdf070bee7d664a3a37deb506deee2b",
+  "initialWorkingTree": "clean",
+  "implementationStarted": false,
+  "redGreen": "not run",
+  "finalGates": "not run",
+  "commit": null,
+  "question": "Approved production Effect Config transport for trusted filesystem declaration and host exclusion roots"
+}
