@@ -1,6 +1,6 @@
 import { Arbitrary, Data, Effect, Match, Result } from 'effect';
 
-export class LawFailure extends Data.TaggedError('LawFailure')<{
+class LawFailure extends Data.TaggedError('LawFailure')<{
   readonly name: string;
   readonly seed: number;
   readonly diagnostic: string;

@@ -2,8 +2,6 @@ import { AdmissionReply, type NonAdmittedDecision, type VerifiedCommand } from '
 import { makeVerifiedGitHubIngress, type CapturedBody } from '@ceirean/github-adapter/protocol';
 import { Match, Schema } from 'effect';
 
-export { IngressFailure } from '@ceirean/github-adapter/protocol';
-
 function decisionResponse(decision: NonAdmittedDecision) {
   const status = Match.value(decision.reason).pipe(
     Match.when('FieldTooLarge', () => 413),

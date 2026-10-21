@@ -61,7 +61,7 @@ export function leaseFor(query: {
   };
 }
 
-export function unrecorded(reason: AdmissionReason): LiveAdmissionReply {
+function unrecorded(reason: AdmissionReason): LiveAdmissionReply {
   return { _tag: 'Unrecorded', decision: { _tag: 'Rejected', reason } };
 }
 

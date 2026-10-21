@@ -1,5 +1,1 @@
-export {
-  captureRequestBody,
-  RequestBodyError,
-  type CapturedBody,
-} from '@ceirean/github-adapter/protocol';
+export { captureRequestBody, RequestBodyError } from '@ceirean/github-adapter/protocol';

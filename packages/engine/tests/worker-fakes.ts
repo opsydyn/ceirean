@@ -29,9 +29,7 @@ export type MutationBarrier = Effect.Success<ReturnType<typeof makeBarrier<Worke
 export type ObservationBarrier = Effect.Success<
   ReturnType<typeof makeBarrier<WorkerObservationRequest>>
 >;
-export type ExecutionBarrier = Effect.Success<
-  ReturnType<typeof makeBarrier<WorkerExecutionRequest>>
->;
+type ExecutionBarrier = Effect.Success<ReturnType<typeof makeBarrier<WorkerExecutionRequest>>>;
 
 export type Audit =
   | { readonly kind: 'mutate'; readonly request: WorkerMutationRequest }

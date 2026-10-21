@@ -7,7 +7,7 @@ const count = Schema.Number.check(
   Schema.isBetween({ minimum: 0, maximum: Number.MAX_SAFE_INTEGER }),
 );
 const positive = count.check(Schema.isGreaterThan(0));
-export const qualificationWorkspaces = [
+const qualificationWorkspaces = [
   'domain',
   'engine',
   'probe',
@@ -15,7 +15,7 @@ export const qualificationWorkspaces = [
   'github-adapter',
   'github-ingress',
 ] as const;
-export const qualificationGateIds = [
+const qualificationGateIds = [
   'install',
   'check',
   'domain:typecheck',
@@ -33,7 +33,7 @@ export const qualificationGateIds = [
   'whitespace',
   'integrity',
 ] as const;
-export const qualificationControls = [
+const qualificationControls = [
   'EvidenceBinding',
   'PolicyRevision',
   'ReplayUniqueness',
@@ -83,7 +83,7 @@ const report = Schema.Struct({
   live: Schema.Literal(false),
   deployed: Schema.Literal(false),
 });
-export const QualificationFailure = Schema.Literals([
+const QualificationFailure = Schema.Literals([
   'InvalidReport',
   'GateCoverage',
   'SourceMismatch',

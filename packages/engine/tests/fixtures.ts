@@ -11,7 +11,7 @@ import {
   type VerificationRequest,
 } from '../src/index.ts';
 
-export { makeEvidenceCase, makeFrozenRun };
+export { makeEvidenceCase };
 
 export function coordinatorTestLayers(
   repository: typeof RunRepository.Service,

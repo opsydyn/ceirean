@@ -13,7 +13,7 @@ export class CliError extends Schema.TaggedError<CliError>()('CliError', {
 const isDot = Schema.is(Schema.Literals(['.', '..']));
 const isRoot = Schema.is(Schema.Literal('/'));
 const isConfigure = Schema.is(Schema.Literal('configure'));
-export const AbsolutePath = Schema.String.check(
+const AbsolutePath = Schema.String.check(
   Schema.isMaxLength(4096),
   Schema.makeFilter(
     (value) =>

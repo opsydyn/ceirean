@@ -183,7 +183,7 @@ function validEvidence(evidence: typeof EvidenceFields.Type) {
     )
   );
 }
-export const MeasuredEvidence = EvidenceFields.check(Schema.makeFilter(validEvidence));
+const MeasuredEvidence = EvidenceFields.check(Schema.makeFilter(validEvidence));
 export type MeasuredEvidence = typeof MeasuredEvidence.Type;
 
 /** Validates supplied observations only; it never invokes tools or measures a gate itself. */

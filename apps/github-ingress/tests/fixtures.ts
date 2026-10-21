@@ -8,10 +8,10 @@ import { runCli } from '../src/cli.ts';
 const platform = Layer.merge(BunFileSystem.layer, BunPath.layer);
 const json = Schema.fromJsonString(Schema.Unknown);
 const encode = Schema.encodeSync(json);
-export function webhookSecret() {
+function webhookSecret() {
   return 'synthetic-webhook-secret-not-a-real-key';
 }
-export function policy() {
+function policy() {
   return {
     revision: 'local-1',
     ingressScopeId: 'test-app',

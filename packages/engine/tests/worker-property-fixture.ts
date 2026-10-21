@@ -31,7 +31,7 @@ import { makeControlledWorkerMechanism, type Audit, type MutationBarrier } from 
 import { makeWorkerCase, makeWorkerSnapshot } from './worker-fixtures.ts';
 import { makeMemoryWorkerJournal } from './worker-memory-journal.ts';
 
-export type Readback =
+type Readback =
   | 'Valid'
   | 'Absent'
   | 'NotRunning'
@@ -41,7 +41,7 @@ export type Readback =
   | 'Mismatch'
   | 'Malformed'
   | 'StagingPresent';
-export type Outcome = 'Completed' | 'Failed' | 'Unknown' | 'Lost' | 'FailedStart';
+type Outcome = 'Completed' | 'Failed' | 'Unknown' | 'Lost' | 'FailedStart';
 export type Evidence =
   | {
       readonly _tag: 'Commit';

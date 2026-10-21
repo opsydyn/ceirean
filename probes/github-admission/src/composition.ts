@@ -17,13 +17,10 @@ const LifecycleIssue = Schema.Struct({
   operation: Schema.Union([CommandInboxOperation, Schema.Literal('runtime')]),
   code: Schema.Union([CommandInboxErrorCode, Schema.Literal('RuntimeFailed')]),
 });
-export class ProbeLifecycleError extends Schema.TaggedError<ProbeLifecycleError>()(
-  'ProbeLifecycleError',
-  {
-    phase: Schema.Literals(['Acquire', 'Dispose']),
-    issues: Schema.Array(LifecycleIssue),
-  },
-) {}
+class ProbeLifecycleError extends Schema.TaggedError<ProbeLifecycleError>()('ProbeLifecycleError', {
+  phase: Schema.Literals(['Acquire', 'Dispose']),
+  issues: Schema.Array(LifecycleIssue),
+}) {}
 function issuesFrom(error: unknown): ReadonlyArray<typeof LifecycleIssue.Type> {
   function fromCause(cause: Cause.Cause<unknown>) {
     return cause.reasons.flatMap((reason) =>
@@ -48,7 +45,7 @@ function issuesFrom(error: unknown): ReadonlyArray<typeof LifecycleIssue.Type> {
     Match.orElse(decode),
   );
 }
-export function makeAdmissionProbeLayer(config: ProbeConfig) {
+function makeAdmissionProbeLayer(config: ProbeConfig) {
   const native = makeSqliteInbox(config);
   const acquiredInbox = native.pipe(Effect.map(({ driver }) => makeCommandInbox(driver)));
   const inbox = Layer.effect(CommandInbox, acquiredInbox);

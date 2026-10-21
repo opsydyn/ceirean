@@ -89,7 +89,7 @@ export const runCaseArbitrary = Arbitrary.map(
 );
 
 // Replacement is fixture seeding only: a new validated identity, never a retry command.
-export function replaceFrozenRun(before: FrozenRun, increment: number) {
+function replaceFrozenRun(before: FrozenRun, increment: number) {
   const generation = before.generation + increment;
   return FrozenRun.make({
     ...before,

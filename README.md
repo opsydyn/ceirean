@@ -36,6 +36,9 @@ The first [Fallow report-only audit](docs/assessments/fallow-20261021.md) is
 recorded separately: 29 findings, no removals, suppressions or new CI gate.
 Use the documented clean-snapshot procedure for a secret-free, network-denied
 scan; there is no working-directory convenience command or CI integration.
+The [internal export cleanup](docs/assessments/internal-export-cleanup-20261021.md)
+reduces that report from 29 to five findings while retaining implementations and
+compatibility dependencies; the remaining declarations are not suppressed.
 
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded

@@ -73,12 +73,12 @@ export const encodePolicy = Schema.encodeSync(policyJson);
 export const encodeRecord = Schema.encodeSync(recordJson);
 export const encodeVerified = Schema.encodeSync(verifiedJson);
 export const encodeEvidence = Schema.encodeSync(evidenceJson);
-export const decodePolicy = Schema.decodeUnknownSync(policyJson);
-export const decodeRecord = Schema.decodeUnknownSync(recordJson);
-export const decodeVerified = Schema.decodeUnknownSync(verifiedJson);
-export const decodeEvidence = Schema.decodeUnknownSync(evidenceJson);
+const decodePolicy = Schema.decodeUnknownSync(policyJson);
+const decodeRecord = Schema.decodeUnknownSync(recordJson);
+const decodeVerified = Schema.decodeUnknownSync(verifiedJson);
+const decodeEvidence = Schema.decodeUnknownSync(evidenceJson);
 
-export function invalidData(): never {
+function invalidData(): never {
   throw new LiveInboxError({ operation: 'load', code: 'InvalidData' });
 }
 export function requireData(valid: boolean) {
