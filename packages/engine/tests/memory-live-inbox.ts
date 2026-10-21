@@ -87,6 +87,9 @@ export function makeMemoryLiveInbox() {
         receipts.set(delivery, structuredClone(verified));
         return { _tag: 'Duplicate', record: structuredClone(existing) };
       }
+      function preserveReceipt(): ReplayResolution {
+        return { _tag: 'Duplicate', record: structuredClone(existing) };
+      }
       return Match.value(true).pipe(
         Match.when(
           () => !sameCommandFacts(existing.candidate, verified.candidate),
@@ -96,6 +99,7 @@ export function makeMemoryLiveInbox() {
           () => Option.isNone(prior) && receipts.size >= 1024,
           () => ({ _tag: 'CapacityExceeded' as const }),
         ),
+        Match.when(() => Option.isSome(prior), preserveReceipt),
         Match.orElse(addReceipt),
       );
     }

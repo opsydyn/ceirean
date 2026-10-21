@@ -11,6 +11,7 @@ import {
 } from '../src/live-sqlite-inbox.ts';
 import { prepareLocalState } from '../src/local-state.ts';
 import { ownedConfig } from './live-sqlite-fixtures.ts';
+import { readBoundedLine } from './readiness.ts';
 
 const platform = Layer.merge(BunFileSystem.layer, BunPath.layer);
 afterEach(() => mock.restore());
@@ -251,11 +252,13 @@ async function ownedChildDeath() {
     function readReady(signal: AbortSignal) {
       const abort = () => child.kill('SIGKILL');
       signal.addEventListener('abort', abort, { once: true });
-      return reader.read().finally(() => signal.removeEventListener('abort', abort));
+      return readBoundedLine(reader, abort).finally(() =>
+        signal.removeEventListener('abort', abort),
+      );
     }
     const reading = Effect.promise(readReady);
     const ready = yield* reading.pipe(Effect.timeout('5 seconds'));
-    expect(new TextDecoder().decode(ready.value)).toContain('OWNED');
+    expect(ready).toBe('OWNED');
     const blocked = yield* openLiveInbox(config).pipe(Effect.result);
     expect(blocked).toMatchObject({ _tag: 'Failure', failure: { code: 'OwnershipBusy' } });
     expect((yield* readLiveInboxStatus(config)).decisions).toBe(0);

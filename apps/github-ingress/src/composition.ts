@@ -1,5 +1,5 @@
 import { BunFileSystem, BunPath, BunStdio } from '@effect/platform-bun';
-import type { ClockReading } from '@leviathan/domain';
+import { LocalIngressPolicy, type ClockReading } from '@leviathan/domain';
 import {
   LiveAdmission,
   LiveAuthority,
@@ -171,6 +171,14 @@ function acquireStart({ config, host, storage, options }: Settings) {
     const secret = yield* readCredential(config.webhookSecretFile, host.ownerUid, 4096);
     const privateKey = yield* readCredential(config.privateKeyFile, host.ownerUid, 16384);
     const inbox = yield* openLiveInbox(storage);
+    const active = yield* readLiveInboxStatus(storage);
+    const samePolicy = Schema.toEquivalence(LocalIngressPolicy)(active.policy, config.policy);
+    yield* Effect.fromResult(
+      Match.value(samePolicy).pipe(
+        Match.when(true, () => Result.succeed(undefined)),
+        Match.orElse(() => Result.fail(new CliError({ code: 'OperationFailed' }))),
+      ),
+    );
     const acquisition = Effect.tryPromise({
       try: () =>
         makeGitHubAuthorityDriver({

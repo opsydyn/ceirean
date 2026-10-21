@@ -5,6 +5,7 @@ import { LiveAdmissionRecord, LivePermissionEvidence } from '@leviathan/domain';
 import { Effect } from 'effect';
 import { Match, Schema } from 'effect';
 
+import { readBoundedLine } from '../../../packages/github-adapter/tests/readiness.ts';
 import { runCli } from '../src/cli.ts';
 import { openLocalGitHubApp } from '../src/composition.ts';
 import { CliError } from '../src/config.ts';
@@ -140,9 +141,8 @@ async function forcedShutdown(fixture: Fixture) {
   );
   async function exercise() {
     const reader = child.stdout.getReader();
-    const first = await reader.read();
-    const text = new TextDecoder().decode(first.value);
-    expect(text).toContain('NativePending');
+    const text = await readBoundedLine(reader, () => child.kill('SIGKILL'));
+    expect(text).toBe('{"phase":"NativePending"}');
     const started = performance.now();
     child.kill('SIGTERM');
     expect(await child.exited).toBe(1);
@@ -438,8 +438,8 @@ async function cleanShutdown(fixture: Fixture) {
   );
   async function exercise() {
     const reader = child.stdout.getReader();
-    const first = await reader.read();
-    expect(new TextDecoder().decode(first.value)).toContain('CleanReady');
+    const first = await readBoundedLine(reader, () => child.kill('SIGKILL'));
+    expect(first).toBe('{"phase":"CleanReady"}');
     child.kill('SIGTERM');
     expect(await child.exited).toBe(0);
     expect(await new Response(child.stderr).text()).toBe('');
@@ -492,9 +492,9 @@ async function killedAt(fixture: Fixture, phase: string, expected: number) {
     child.kill('SIGKILL');
   }, 5000);
   async function exercise() {
-    const first = await reader.read();
+    const first = await readBoundedLine(reader, () => child.kill('SIGKILL'));
     const phaseJson = Schema.fromJsonString(Schema.Struct({ phase: Schema.String }));
-    const observed = Schema.decodeUnknownSync(phaseJson)(new TextDecoder().decode(first.value));
+    const observed = Schema.decodeUnknownSync(phaseJson)(first);
     expect(observed).toEqual({
       phase,
     });

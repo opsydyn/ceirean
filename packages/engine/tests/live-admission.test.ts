@@ -68,6 +68,27 @@ async function replayCase() {
 }
 test('known replay performs zero authority calls; new delivery only adds a receipt', replayCase);
 
+async function preserveReceiptMetadata() {
+  const h = harness();
+  const input = liveFixture().verified;
+  const service = await Effect.runPromise(h.acquire);
+  await Effect.runPromise(service.admit(input));
+  const receipts = h.memory.receipts();
+  const records = h.memory.records();
+  const renamed = {
+    ...input,
+    candidate: { ...input.candidate, ownerLogin: 'renamed', repositoryName: 'renamed' },
+  };
+  expect((await Effect.runPromise(service.admit(renamed)))._tag).toBe('Duplicate');
+  expect(h.memory.receipts()).toEqual(receipts);
+  expect(h.memory.records()).toEqual(records);
+  expect(h.calls()).toBe(1);
+}
+test(
+  'M1 known receipt retains original display metadata on fact-equivalent replay',
+  preserveReceiptMetadata,
+);
+
 async function freshCase() {
   const h = harness();
   const input = liveFixture().verified;

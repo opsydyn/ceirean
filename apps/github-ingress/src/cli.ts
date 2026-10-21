@@ -10,9 +10,13 @@ export async function runCli(argv: ReadonlyArray<string>, options: ApplicationOp
       Match.orElse(() => app.write(output)),
     );
   }
-  async function complete(output: unknown) {
+  async function complete(output: Extract<typeof app.session, { _tag: 'Completed' }>['output']) {
     await print(output).finally(app.dispose);
-    return { kind: 'Completed' as const, output, app };
+    const exitCode = Match.value(output).pipe(
+      Match.when({ _tag: 'Refused' }, () => 1),
+      Match.orElse(() => 0),
+    );
+    return { kind: 'Completed' as const, output, app, exitCode };
   }
   async function start() {
     async function bind() {

@@ -21,9 +21,9 @@ export async function main(argv: ReadonlyArray<string>, invoke: typeof runCli = 
       await result.app.dispose();
       return 0;
     }
-    return Match.value(result.kind).pipe(
-      Match.when('Listening', listening),
-      Match.when('Completed', () => 0),
+    return Match.value(result).pipe(
+      Match.when({ kind: 'Listening' }, listening),
+      Match.when({ kind: 'Completed' }, (completed) => completed.exitCode),
       Match.exhaustive,
     );
   }

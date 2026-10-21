@@ -29,6 +29,7 @@ import {
   policyFixture,
   verifiedFixture,
 } from './live-sqlite-fixtures.ts';
+import { readBoundedLine } from './readiness.ts';
 
 const platform = Layer.merge(BunFileSystem.layer, BunPath.layer);
 afterEach(() => mock.restore());
@@ -67,8 +68,8 @@ async function nativeOwnershipQualification() {
       },
     );
     const reader = child.stdout.getReader();
-    const ready = yield* Effect.promise(() => reader.read());
-    expect(new TextDecoder().decode(ready.value)).toContain('OWNED');
+    const ready = yield* Effect.promise(() => readBoundedLine(reader, () => child.kill('SIGKILL')));
+    expect(ready).toBe('OWNED');
     const competitor = new Database(file, { create: false, strict: true });
     competitor.run('PRAGMA busy_timeout=0');
     const blocked = Result.try(() => competitor.run('BEGIN EXCLUSIVE'));

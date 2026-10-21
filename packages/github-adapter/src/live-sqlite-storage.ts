@@ -2,7 +2,12 @@ import type { Database } from 'bun:sqlite';
 
 import {
   AdmissionDecision,
+  AuthorityRevision,
   ClockReading,
+  CommandKey,
+  DecisionId,
+  DecisionProvenance,
+  GitHubId,
   LiveAdmissionRecord,
   LivePermissionEvidence,
   LocalIngressPolicy,
@@ -10,7 +15,6 @@ import {
   commandKey,
   decideLiveAdmission,
   transportKey,
-  type DecisionProvenance,
 } from '@leviathan/domain';
 import { LiveInboxError, sameCommandFacts } from '@leviathan/engine';
 import { Match, Option, Result, Schema } from 'effect';
@@ -38,6 +42,33 @@ const policyJson = Schema.fromJsonString(LocalIngressPolicy);
 const recordJson = Schema.fromJsonString(LiveAdmissionRecord);
 const verifiedJson = Schema.fromJsonString(VerifiedCommand);
 const evidenceJson = Schema.fromJsonString(LivePermissionEvidence);
+const nonNegative = Schema.Number.check(
+  Schema.isInt(),
+  Schema.isGreaterThanOrEqualTo(0),
+  Schema.isLessThanOrEqualTo(Number.MAX_SAFE_INTEGER),
+);
+const localOutcome = Schema.Struct({
+  decisionId: DecisionId,
+  commandKey: CommandKey,
+  operatorId: GitHubId,
+  localPolicyRevision: AuthorityRevision,
+  decision: AdmissionDecision,
+  provenance: DecisionProvenance,
+  evaluatedAtMs: nonNegative,
+  committedAtMs: nonNegative,
+});
+const localStatus = Schema.Struct({
+  decisions: nonNegative,
+  receipts: nonNegative,
+  evidence: nonNegative,
+  authorityRevisions: nonNegative,
+  revision: AuthorityRevision,
+  clockFloor: nonNegative,
+  ingressScopeId: LocalIngressPolicy.fields.ingressScopeId,
+  policy: LocalIngressPolicy,
+  policies: Schema.Array(LocalIngressPolicy).check(Schema.isMaxLength(256)),
+  outcomes: Schema.Array(localOutcome).check(Schema.isMaxLength(256)),
+});
 export const encodePolicy = Schema.encodeSync(policyJson);
 export const encodeRecord = Schema.encodeSync(recordJson);
 export const encodeVerified = Schema.encodeSync(verifiedJson);
@@ -314,12 +345,26 @@ function validateRows(db: Database, scope: string, identity: string) {
     referenced.add(receipt.record.decisionId);
   }
   requireData(referenced.size === records.size);
-  return {
+  return Schema.decodeUnknownSync(localStatus)({
     ...totals,
     revision: current.policy.revision,
     clockFloor: current.floor,
     ingressScopeId: scope,
-  };
+    policy: current.policy,
+    policies: [...policies.values()].sort((a, b) => a.revision.localeCompare(b.revision)),
+    outcomes: [...records.values()]
+      .sort((a, b) => Number(a.decisionId) - Number(b.decisionId))
+      .map((record) => ({
+        decisionId: record.decisionId,
+        commandKey: record.commandKey,
+        operatorId: record.candidate.operatorId,
+        localPolicyRevision: record.localPolicyRevision,
+        decision: record.decision,
+        provenance: record.provenance,
+        evaluatedAtMs: record.evaluatedAtMs,
+        committedAtMs: record.committedAtMs,
+      })),
+  });
 }
 
 export function validateLedger(db: Database, scope: string, identity: string) {

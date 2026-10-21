@@ -49,6 +49,7 @@ function preview(reply: LiveAdmissionReply) {
   );
 }
 const sameRecords = Schema.toEquivalence(Schema.Array(LiveAdmissionRecord));
+const isDuplicate = Schema.is(Schema.Literal('Duplicate'));
 function inputFor(id: number, delivery: string): VerifiedCommand {
   const input = liveFixture().verified;
   return {
@@ -60,39 +61,71 @@ function inputFor(id: number, delivery: string): VerifiedCommand {
 function success(query: AuthorityQuery) {
   return Promise.resolve(Result.succeed(leaseFor(query)));
 }
+function normalizeRecord(record: LiveAdmissionRecord) {
+  const decision = Match.value(record.decision).pipe(
+    Match.tag('AdmittedPreview', (preview) => ({ ...preview, evidenceRevision: 'normalized' })),
+    Match.orElse((value) => value),
+  );
+  const provenance = Match.value(record.provenance).pipe(
+    Match.tag('LiveChecked', (live) => ({
+      ...live,
+      evidence: { ...live.evidence, evidenceId: 'normalized' },
+    })),
+    Match.orElse((value) => value),
+  );
+  return Schema.decodeUnknownSync(LiveAdmissionRecord)({
+    ...record,
+    decisionId: '1',
+    decision,
+    provenance,
+  });
+}
 
 function permutationLaw(sequence: Actions) {
+  function deliveries(action: Actions[number], index: number) {
+    const input = inputFor(action.id, `permuted-${index}`);
+    return [input, input, inputFor(action.id, `alternate-${index}`)];
+  }
+  const history = sequence.flatMap(deliveries);
+  // Both orders begin with an empty store: first receipts and incidental IDs may differ.
+  function runHistory(inputs: ReadonlyArray<VerifiedCommand>) {
+    function* trace() {
+      const memory = makeMemoryLiveInbox();
+      let calls = 0;
+      function check(query: AuthorityQuery) {
+        calls += 1;
+        return success(query);
+      }
+      const service = yield* acquire(memory, check);
+      let safe = true;
+      const seen = new Set<number>();
+      for (const input of inputs) {
+        const reply = yield* service.admit(input);
+        const duplicate = seen.has(input.candidate.commentId);
+        const correct = Match.value(duplicate).pipe(
+          Match.when(true, () => isDuplicate(reply._tag)),
+          Match.orElse(() => preview(reply)),
+        );
+        safe = safe && correct;
+        seen.add(input.candidate.commentId);
+      }
+      const normalized = memory
+        .records()
+        .map(normalizeRecord)
+        .sort((a, b) => a.commandKey.localeCompare(b.commandKey));
+      const distinctReceipts = new Set(inputs.map((input) => input.receipt.deliveryId));
+      return {
+        safe: safe && calls === seen.size && memory.receipts().length === distinctReceipts.size,
+        normalized,
+      };
+    }
+    const program = Effect.gen(trace);
+    return program;
+  }
   function* trace() {
-    const memory = makeMemoryLiveInbox();
-    let calls = 0;
-    function check(query: AuthorityQuery) {
-      calls += 1;
-      return success(query);
-    }
-    const service = yield* acquire(memory, check);
-    const unique = [...new Set(sequence.map((action) => action.id))];
-    let safe = true;
-    for (const id of unique) {
-      const first = yield* service.admit(inputFor(id, `first-${id}`));
-      safe = safe && preview(first);
-    }
-    const originals = memory.records();
-    const before = calls;
-    for (const [index, action] of [...sequence].reverse().entries()) {
-      const duplicate = yield* service.admit(inputFor(action.id, `permuted-${index}`));
-      const duplicated = Match.value(duplicate).pipe(
-        Match.tag('Duplicate', () => true),
-        Match.orElse(() => false),
-      );
-      safe = safe && duplicated;
-    }
-    return [
-      safe,
-      calls === before,
-      before === unique.length,
-      sameRecords(originals, memory.records()),
-      memory.receipts().length === unique.length + sequence.length,
-    ].every(Boolean);
+    const forward = yield* runHistory(history);
+    const reverse = yield* runHistory([...history].reverse());
+    return forward.safe && reverse.safe && sameRecords(forward.normalized, reverse.normalized);
   }
   const program = Effect.gen(trace);
   return program;
