@@ -4,7 +4,8 @@
   "type": "module",
   "exports": {
     "./protocol": "./src/verified-ingress.ts",
-    "./authority": "./src/github-authority.ts"
+    "./authority": "./src/github-authority.ts",
+    "./storage": "./src/live-sqlite-inbox.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
