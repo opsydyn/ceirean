@@ -1,10 +1,11 @@
 # Local GitHub Ingress Qualification
 
-## Current Candidate
+## Local Qualification
 
-Tasks 1-7 are accepted by the controller. Whole-branch acceptance remains pending
-scoped final-fix review and controller verification; no merge or live acceptance
-is implied. The original 916-test `b7f5d4e` qualification is historical, not proof
+Tasks 1-7, whole-branch review, scoped final-fix review and fresh controller
+verification are complete: 935 tests, 8995 assertions and six typechecks pass.
+See the [controller closure](../evidence/local-github-ingress/controller-closure.md).
+No merge or live acceptance is implied. The original 916-test `b7f5d4e` qualification is historical, not proof
 for the changed final-fix source. See the
 [final-fix report](../evidence/local-github-ingress/final-fix/final-fix-report.md).
 The [manifest](../evidence/local-github-ingress.json) binds actual final-source

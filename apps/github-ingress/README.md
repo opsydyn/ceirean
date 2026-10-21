@@ -56,9 +56,10 @@ if cleanup remains stuck; FailedShutdown does not claim a clean close.
 
 Only synthetic/injected HTTP and test-owned loopback have been exercised here.
 Live credentials, GitHub API access, tunnels and live acceptance are separate
-operator-authorized work. Tasks 1-7 are accepted by the controller; the whole
-branch remains pending scoped final-fix review and controller verification,
-not merge acceptance. Start requires complete active/file policy equality;
+operator-authorized work. Tasks 1-7, scoped final-fix review and fresh controller
+verification are complete: 935 tests and six typechecks pass. See the
+[controller closure](../../docs/evidence/local-github-ingress/controller-closure.md).
+Local acceptance is not merge acceptance. Start requires complete active/file policy equality;
 configure Refused prints typed JSON and exits 1. Local read-only status includes
 bounded policies and decision/provenance/permission observations, never secrets
 or raw bodies, and has no public route.

@@ -83,11 +83,12 @@ pull requests is not the success measure.
 
 ## Local GitHub Ingress
 
-Tasks 1-7 are accepted by the controller: native authority, immutable SQLite
-evidence, bounded local CLI/listener and recovery qualification. The whole branch
-remains pending scoped final-fix review and controller verification. Task
-acceptance is not merge acceptance or live readiness. Fresh final-fix evidence
-is separate from the historical `b7f5d4e` qualification.
+Tasks 1-7, whole-branch review and final controller verification are complete:
+native authority, immutable SQLite evidence, bounded local CLI/listener and
+recovery qualification. The final controller run passed 935 tests and six
+typechecks. This is local acceptance, not merge or live readiness. See the
+[controller closure](docs/evidence/local-github-ingress/controller-closure.md).
+Fresh final-fix evidence is separate from historical `b7f5d4e` qualification.
 See the [local-only runbook](docs/runbooks/local-github-ingress.md),
 [assessment](docs/assessments/local-github-ingress.md) and
 [source-bound evidence](docs/evidence/local-github-ingress.json).

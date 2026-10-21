@@ -1,0 +1,145 @@
+{
+  "verifiedHead": "7131d5998d203603dce4e280d1db248d61641ab0",
+  "testedSource": {
+    "commit": "5e531ae60f7f11e91310e24965e2a74805d4d173",
+    "tree": "42f3d7af0bcc7b3716e1adf8081373d45ffc5899",
+    "filesHash": "83db0a82dc238faaf906a26c33962eb460ba9d82b8dc65042b8304a69dc459c2",
+    "lockHash": "8cb4d58bd88280daee28101e542cd9b7120ec7ee63dd5094daf59c2a45fddf59"
+  },
+  "sourceFiles": 169,
+  "effectRules": 141,
+  "resolutions": {
+    "domain": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+    "engine": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+    "probe": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+    "github-admission": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+    "github-adapter": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js",
+    "github-ingress": "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/dist/index.js"
+  },
+  "gates": [
+    {
+      "name": "00-head",
+      "exit": 0,
+      "logHash": "d73059bef5da0495d00c76478f95c96b7047f94ceb094c3224aacceee8fd4224"
+    },
+    {
+      "name": "01-install",
+      "exit": 0,
+      "logHash": "d59db8395eb923855cc045412b206f2bebedbf66cb473198ae427e58794fbd99"
+    },
+    {
+      "name": "02-check",
+      "exit": 0,
+      "logHash": "c19c2e9f6142c51186aa8bed8388b4324631f08644665d0313897da37119e3ac"
+    },
+    {
+      "name": "domain-typecheck",
+      "exit": 0,
+      "logHash": "fb883ffb06b80a14baaae00a97b00bcb3e258b6c10ddecca60611cd70616b222"
+    },
+    {
+      "name": "engine-typecheck",
+      "exit": 0,
+      "logHash": "0838b700f6cba30d05ab7d62886248ffb6704d40d14f7f95e67d4a22775dee82"
+    },
+    {
+      "name": "probe-typecheck",
+      "exit": 0,
+      "logHash": "8b44193c1bd146f1a3eb236fdb2d783024dffa3799e57c913cd80e2e621e69b2"
+    },
+    {
+      "name": "github-admission-typecheck",
+      "exit": 0,
+      "logHash": "128a77420b9849af10d17a9eb86b71932926bde1a5596c0b92d500507fc08dd4"
+    },
+    {
+      "name": "github-adapter-typecheck",
+      "exit": 0,
+      "logHash": "71a8e611fffe3561eb4458a5d8393cb93b7027b85cefea84310eaacc1457b769"
+    },
+    {
+      "name": "github-ingress-typecheck",
+      "exit": 0,
+      "logHash": "ec60e8ec7bfcc7c980f5a83d25d53bc534aab8361c53c73aade608ba7c970574"
+    },
+    {
+      "name": "domain-test",
+      "exit": 0,
+      "logHash": "51921f15c5b165eaa94320910a1ad6905c3bef56900f137f2d91e11ec4644490"
+    },
+    {
+      "name": "engine-test",
+      "exit": 0,
+      "logHash": "7a97d7419b41e308cd7d922a81b145142c1c26ea46986445662f8412a69e0e77"
+    },
+    {
+      "name": "probe-test",
+      "exit": 0,
+      "logHash": "7492926c65edb4c52c8ed0a887f1530dda2c6b810d8593f10666f0cb87185e73"
+    },
+    {
+      "name": "github-admission-test",
+      "exit": 0,
+      "logHash": "bacc69f247b3078d708b229d3655ef8a3e548454749dd315875922e953555f6e"
+    },
+    {
+      "name": "github-adapter-test",
+      "exit": 0,
+      "logHash": "74f045a85a99d17506e800a21702d86b419185c0916b8d5a4289a5314c9fb6ba"
+    },
+    {
+      "name": "github-ingress-test",
+      "exit": 0,
+      "logHash": "60296f04eb106f371ee7a01c26248bdb9a1391585130e40463f6a090eecbc04f"
+    },
+    {
+      "name": "99-whitespace",
+      "exit": 0,
+      "logHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "suites": [
+    {
+      "workspace": "domain",
+      "passed": 211,
+      "failed": 0,
+      "assertions": 965
+    },
+    {
+      "workspace": "engine",
+      "passed": 301,
+      "failed": 0,
+      "assertions": 2723
+    },
+    {
+      "workspace": "probe",
+      "passed": 36,
+      "failed": 0,
+      "assertions": 104
+    },
+    {
+      "workspace": "github-admission",
+      "passed": 135,
+      "failed": 0,
+      "assertions": 1828
+    },
+    {
+      "workspace": "github-adapter",
+      "passed": 199,
+      "failed": 0,
+      "assertions": 2777
+    },
+    {
+      "workspace": "github-ingress",
+      "passed": 53,
+      "failed": 0,
+      "assertions": 598
+    }
+  ],
+  "totals": {
+    "passed": 935,
+    "failed": 0,
+    "assertions": 8995
+  },
+  "liveQualified": false
+}

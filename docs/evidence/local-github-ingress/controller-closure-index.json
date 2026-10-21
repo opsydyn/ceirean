@@ -1,0 +1,287 @@
+{
+  "archive": "controller-closure.tar.gz",
+  "sha256": "3787f50e7d276b6942488f965c4752f56a11f56171b4faf85cb466ebe21f4c12",
+  "payloadOnly": true,
+  "members": [
+    {
+      "name": "archive-controller-closure.mjs",
+      "bytes": 3065,
+      "sha256": "bfce65c450ea05a9aefcf2dedb355b1b7af4b1047b4fd75ea00cd8609e5b0c2f"
+    },
+    {
+      "name": "controller-final-audit.mjs",
+      "bytes": 4089,
+      "sha256": "658f4c441e2a0c73bd57fbeebe084d06f50384761514fcee86abc73ea2d53517"
+    },
+    {
+      "name": "controller-final-gates/00-head.command",
+      "bytes": 20,
+      "sha256": "b282cd57755e7a1b67ac79ac952c68e20f53296fdfc535636eaec5458b3264cf"
+    },
+    {
+      "name": "controller-final-gates/00-head.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/00-head.log",
+      "bytes": 41,
+      "sha256": "d73059bef5da0495d00c76478f95c96b7047f94ceb094c3224aacceee8fd4224"
+    },
+    {
+      "name": "controller-final-gates/01-install.command",
+      "bytes": 48,
+      "sha256": "32133c9de65cf163c5d6f9a7a1b38baa08fbb467f6ae0aee577ee8832188eaf3"
+    },
+    {
+      "name": "controller-final-gates/01-install.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/01-install.log",
+      "bytes": 158,
+      "sha256": "d59db8395eb923855cc045412b206f2bebedbf66cb473198ae427e58794fbd99"
+    },
+    {
+      "name": "controller-final-gates/02-check.command",
+      "bytes": 15,
+      "sha256": "b265262cea22225c9daffe099db74b556f1d7f19e5e11f96e54cbd3cb25c85ad"
+    },
+    {
+      "name": "controller-final-gates/02-check.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/02-check.log",
+      "bytes": 358,
+      "sha256": "c19c2e9f6142c51186aa8bed8388b4324631f08644665d0313897da37119e3ac"
+    },
+    {
+      "name": "controller-final-gates/99-whitespace.command",
+      "bytes": 18,
+      "sha256": "e34962efe3181e7251d3af0c3911c5752f605e21f7a38187d8acc5b19d2b271b"
+    },
+    {
+      "name": "controller-final-gates/99-whitespace.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/99-whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "controller-final-gates/controller-verification.json",
+      "bytes": 4341,
+      "sha256": "57dbe94708a77e76c91216159a961e0c6b134cc9fe036584abba12cf4f2ea19a"
+    },
+    {
+      "name": "controller-final-gates/domain-test.command",
+      "bytes": 43,
+      "sha256": "b9cc593af06e3c1c9f24ea383d46dfaab7eed6049718304684fa9aff883b0acc"
+    },
+    {
+      "name": "controller-final-gates/domain-test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/domain-test.log",
+      "bytes": 15814,
+      "sha256": "51921f15c5b165eaa94320910a1ad6905c3bef56900f137f2d91e11ec4644490"
+    },
+    {
+      "name": "controller-final-gates/domain-typecheck.command",
+      "bytes": 48,
+      "sha256": "c61c5fbf9476153bb2a5411d8a103b0194c4903993d8fccf4eb29778dd56129e"
+    },
+    {
+      "name": "controller-final-gates/domain-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/domain-typecheck.log",
+      "bytes": 432,
+      "sha256": "fb883ffb06b80a14baaae00a97b00bcb3e258b6c10ddecca60611cd70616b222"
+    },
+    {
+      "name": "controller-final-gates/engine-test.command",
+      "bytes": 43,
+      "sha256": "8a3e6b679e21d6e1529db77c4664d76b5180687eec54faeb9adecbda3f949a7a"
+    },
+    {
+      "name": "controller-final-gates/engine-test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/engine-test.log",
+      "bytes": 27394,
+      "sha256": "7a97d7419b41e308cd7d922a81b145142c1c26ea46986445662f8412a69e0e77"
+    },
+    {
+      "name": "controller-final-gates/engine-typecheck.command",
+      "bytes": 48,
+      "sha256": "c52262ae7f4ccaa49c1805445a5a8351cfee65eb30d87cfd7123193721f160bc"
+    },
+    {
+      "name": "controller-final-gates/engine-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/engine-typecheck.log",
+      "bytes": 438,
+      "sha256": "0838b700f6cba30d05ab7d62886248ffb6704d40d14f7f95e67d4a22775dee82"
+    },
+    {
+      "name": "controller-final-gates/github-adapter-test.command",
+      "bytes": 51,
+      "sha256": "88bbdccadaf68fff1ad13bed6bcdcf40a3123603f2dd3e0f3b4ca60e426a0745"
+    },
+    {
+      "name": "controller-final-gates/github-adapter-test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/github-adapter-test.log",
+      "bytes": 17042,
+      "sha256": "74f045a85a99d17506e800a21702d86b419185c0916b8d5a4289a5314c9fb6ba"
+    },
+    {
+      "name": "controller-final-gates/github-adapter-typecheck.command",
+      "bytes": 56,
+      "sha256": "e58957a92e1c5155f2cce5bf298bb9f17fcce802470bd2f969fc4b02e79c3533"
+    },
+    {
+      "name": "controller-final-gates/github-adapter-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/github-adapter-typecheck.log",
+      "bytes": 454,
+      "sha256": "71a8e611fffe3561eb4458a5d8393cb93b7027b85cefea84310eaacc1457b769"
+    },
+    {
+      "name": "controller-final-gates/github-admission-test.command",
+      "bytes": 53,
+      "sha256": "20811a98c310534a1e8cd9c888e112dc608a757b60714628adbc536bf73b2d6b"
+    },
+    {
+      "name": "controller-final-gates/github-admission-test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/github-admission-test.log",
+      "bytes": 11247,
+      "sha256": "bacc69f247b3078d708b229d3655ef8a3e548454749dd315875922e953555f6e"
+    },
+    {
+      "name": "controller-final-gates/github-admission-typecheck.command",
+      "bytes": 58,
+      "sha256": "be2c989f6fb3c860bf77c3d89600f851c3f1f77035e1eb979aaf7c1d562da07e"
+    },
+    {
+      "name": "controller-final-gates/github-admission-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/github-admission-typecheck.log",
+      "bytes": 458,
+      "sha256": "128a77420b9849af10d17a9eb86b71932926bde1a5596c0b92d500507fc08dd4"
+    },
+    {
+      "name": "controller-final-gates/github-ingress-test.command",
+      "bytes": 51,
+      "sha256": "1e813d39aa54bd736d543bbd2aecad052d59af113b4faba7c8fd391d51e4dd78"
+    },
+    {
+      "name": "controller-final-gates/github-ingress-test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/github-ingress-test.log",
+      "bytes": 6116,
+      "sha256": "60296f04eb106f371ee7a01c26248bdb9a1391585130e40463f6a090eecbc04f"
+    },
+    {
+      "name": "controller-final-gates/github-ingress-typecheck.command",
+      "bytes": 56,
+      "sha256": "d17ca2733f36edfe21f444490d9fbdcbb2fef725fb7266a0a5fbc8ed7d8d9f37"
+    },
+    {
+      "name": "controller-final-gates/github-ingress-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/github-ingress-typecheck.log",
+      "bytes": 454,
+      "sha256": "ec60e8ec7bfcc7c980f5a83d25d53bc534aab8361c53c73aade608ba7c970574"
+    },
+    {
+      "name": "controller-final-gates/probe-test.command",
+      "bytes": 42,
+      "sha256": "44dd46bdc4325d1b9b15dbedc6eca05427e7a0d717a6df0c6db905e7819de6ef"
+    },
+    {
+      "name": "controller-final-gates/probe-test.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/probe-test.log",
+      "bytes": 2994,
+      "sha256": "7492926c65edb4c52c8ed0a887f1530dda2c6b810d8593f10666f0cb87185e73"
+    },
+    {
+      "name": "controller-final-gates/probe-typecheck.command",
+      "bytes": 47,
+      "sha256": "d67799dd05967bf6d08a53a58b9d52e697c09c46e2a71e2a811fe667d88d2c03"
+    },
+    {
+      "name": "controller-final-gates/probe-typecheck.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "name": "controller-final-gates/probe-typecheck.log",
+      "bytes": 430,
+      "sha256": "8b44193c1bd146f1a3eb236fdb2d783024dffa3799e57c913cd80e2e621e69b2"
+    },
+    {
+      "name": "final-rereview.md",
+      "bytes": 8449,
+      "sha256": "c5184d7d71ba412c5440ee736c9024db6ccd3d277d720264319d8049cd0f8fa9"
+    },
+    {
+      "name": "final-review.md",
+      "bytes": 18900,
+      "sha256": "28f2e3fd901ee523d2fac75a9776b389030f6aff903af3d22f679df5fb3be8a5"
+    },
+    {
+      "name": "progress.md",
+      "bytes": 30446,
+      "sha256": "6551e564810b66f27ee2adcee0a7f96dd168dd3f3ce7630a0483503822bd4927"
+    },
+    {
+      "name": "run-controller-final-gates.sh",
+      "bytes": 1264,
+      "sha256": "b0f1fbf1fba689c7db2b858d65c85452d12ef5dd8405233ac5ec6dbc67a05560"
+    },
+    {
+      "name": "task-7-review.md",
+      "bytes": 8896,
+      "sha256": "58b182ce17a9e802d906d736f5217ce8f82da463fd5516b50977d7c2168290aa"
+    }
+  ]
+}

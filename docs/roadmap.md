@@ -113,7 +113,7 @@ separately gated even if a future offline probe passes.
 - [x] Review the written [local ingress spec](superpowers/specs/2026-10-20-local-github-ingress-design.md).
 - [x] Review the [local ingress implementation plan](superpowers/plans/2026-10-20-local-github-ingress.md)
       and select its execution method.
-- [ ] Qualify local adapters, listener, immutable live evidence and replay-first
+- [x] Qualify local adapters, listener, immutable live evidence and replay-first
       admission with synthetic credentials and independent review.
 - [ ] Separately approve the exact live target, App grants, credentials, tunnel
       and finite rehearsal session before any live access or listener starts.
@@ -122,15 +122,16 @@ This is local implementation/qualification work only. No deployment, GitHub
 writes, worker execution or cloud storage is authorised. Local test persistence
 is not production durability.
 
-Tasks 1-6 are independently accepted through `e8fb83c` (903 tests at that source,
-six typechecks and full gates). Task 7 adds recovery qualification, behavioral
-controls, a pure report validator and the [local-only runbook](runbooks/local-github-ingress.md)
-as a candidate pending controller review. The overall qualification checkbox
-remains open until Task 7 review and fresh whole-branch review/triage complete.
+Tasks 1-7, whole-branch review, final-fix scoped review and fresh controller
+verification are complete through tested source `5e531ae`: 935 tests, six
+typechecks, clean lint/format and all five restored behavioral controls.
+The [controller closure](evidence/local-github-ingress/controller-closure.md)
+records the review dispositions and independent final run.
 The [measured manifest](evidence/local-github-ingress.json) distinguishes final
-tested source from later evidence-only commits. Task 3 M1/M2 and Moon update
-notices remain explicit final-triage items. No live rehearsal or broader
-execution/publication scope is authorized.
+tested source from later evidence-only commits. Task 3 M1/M2 and Task 7's
+readiness/archive findings are fixed. Moon notices and historical test-first
+evidence limitations remain disclosed. Integration and live rehearsal need
+separate owner choices; no broader execution/publication scope is authorized.
 
 ## Organisation Discovery And Configuration Self-PRs
 

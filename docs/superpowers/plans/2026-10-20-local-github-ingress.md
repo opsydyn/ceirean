@@ -12,10 +12,12 @@
 
 Status: the owner approved the written spec and selected subagent-driven plan
 execution on 2026-10-20. Tasks 1-7 are committed and accepted by the controller.
-The whole branch remains pending scoped final-fix review and controller
-verification, not merge acceptance. The final fix wave is personal execution
-without agents or reviewers; the controller resumes Mill for scoped rereview.
-No author-dispatched review or integration is authorized.
+Whole-branch review, scoped final-fix review and fresh controller verification
+are complete through tested source `5e531ae`: 935 tests and six typechecks pass.
+The final fix author did not dispatch a reviewer; the controller's independent
+scoped rereview closed I1-I3 and M1-M4. See the
+[controller closure](../../evidence/local-github-ingress/controller-closure.md).
+Integration remains an owner choice; no merge, push or live rehearsal is authorized.
 The original b7 qualification remains historical. Fresh source/gates are recorded in
 `docs/evidence/local-github-ingress.json`, separately from later docs commits.
 All 24000 new primary law cases remain distinct from legacy cases and controls.
@@ -222,7 +224,8 @@ with finite validation reasons. It cannot set live/deployed qualification flags.
 - [x] **3. Run full gates.** Task-level source-bound qualification accepted. Its b7 records remain historical. Changed final-fix source requires the complete six-workspace gate block and 24000 new/168000 legacy primary law budgets without reusing old source binding.
 - [x] **4. Write runbook/report.** Task-level local-only runbook and measured report accepted. Live checklist remains unchecked; no real credentials, API/tunnel, deployment, durability/availability or exactly-once execution claim.
 - [x] **5. Commit/task review.** Task 7 commit and task review are accepted by the controller. Tested source remains distinct from docs/evidence commits.
-- [ ] **Whole-branch final-fix review/integration.** The first whole-branch review required I1-I3 and bounded M1-M4 fixes. The controller resumes Mill for scoped rereview, then handles final verification and integration choice. No merge, push or live rehearsal is implied by task acceptance.
+- [x] **Whole-branch final-fix review/controller verification.** The first whole-branch review required I1-I3 and bounded M1-M4 fixes. Independent scoped rereview closed every finding; fresh controller gates passed 935 tests, six typechecks and integrity checks on the exact final source.
+- [ ] **Owner integration choice.** Select local merge, push/PR or retaining the branch. No merge, push or live rehearsal is implied by local acceptance.
 
 ## Full Gate Block
 

@@ -2,8 +2,9 @@
 
 ## Approval Boundary
 
-Tasks 1-7 are accepted by the controller. The whole branch remains pending scoped
-final-fix review and controller verification, not merge or live acceptance.
+Tasks 1-7, scoped final-fix review and fresh whole-branch controller verification
+are complete. This is local acceptance, not merge or live acceptance. See the
+[controller closure](../evidence/local-github-ingress/controller-closure.md).
 This runbook proposes an operator-controlled
 rehearsal; none of its live steps has been performed. No deployment, production
 availability/durability or exactly-once execution guarantee is made. Admission
@@ -165,7 +166,7 @@ webhook/API bodies. Canonical qualification artifacts live in
 ## Unapproved Live Checklist
 
 - [x] Controller accepts Tasks 1-7 (task acceptance only).
-- [ ] Controller completes scoped final-fix review and whole-branch verification/triage.
+- [x] Controller completes scoped final-fix review and whole-branch verification/triage.
 - [ ] Owner approves real App/installation/owner/repository/operator immutable IDs.
 - [ ] Operator inspects actual App installation grants, repository restriction,
       token permissions and fresh base write/admin response; no broadened grants.
