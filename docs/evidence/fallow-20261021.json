@@ -1,0 +1,820 @@
+{
+  "kind": "dead-code",
+  "schema_version": 10,
+  "version": "3.34.1",
+  "elapsed_ms": 49,
+  "total_issues": 29,
+  "entry_points": { "total": 74, "sources": { "manual_entry": 68, "package.json": 6 } },
+  "summary": {
+    "total_issues": 29,
+    "unused_files": 0,
+    "unused_exports": 21,
+    "unused_types": 7,
+    "private_type_leaks": 0,
+    "deprecated_exports_in_use": 0,
+    "unused_dependencies": 1,
+    "unused_enum_members": 0,
+    "unused_class_members": 0,
+    "unused_store_members": 0,
+    "unprovided_injects": 0,
+    "unrendered_components": 0,
+    "unused_component_props": 0,
+    "absent_component_props": 0,
+    "unused_component_emits": 0,
+    "unused_component_inputs": 0,
+    "unused_component_outputs": 0,
+    "unused_svelte_events": 0,
+    "unused_effect_layers": 0,
+    "unused_tagged_errors": 0,
+    "unproduced_catch_tags": 0,
+    "unused_server_actions": 0,
+    "unused_load_data_keys": 0,
+    "unresolved_imports": 0,
+    "unlisted_dependencies": 0,
+    "duplicate_exports": 0,
+    "type_only_dependencies": 0,
+    "test_only_dependencies": 0,
+    "dev_dependencies_in_production": 0,
+    "circular_dependencies": 0,
+    "re_export_cycles": 0,
+    "package_cycles": 0,
+    "boundary_violations": 0,
+    "boundary_coverage_violations": 0,
+    "boundary_call_violations": 0,
+    "policy_violations": 0,
+    "stale_suppressions": 0,
+    "unused_catalog_entries": 0,
+    "empty_catalog_groups": 0,
+    "unresolved_catalog_references": 0,
+    "unused_dependency_overrides": 0,
+    "misconfigured_dependency_overrides": 0,
+    "invalid_client_exports": 0,
+    "mixed_client_server_barrels": 0,
+    "misplaced_directives": 0,
+    "route_collisions": 0,
+    "dynamic_segment_name_conflicts": 0
+  },
+  "unused_files": [],
+  "unused_exports": [
+    {
+      "path": "apps/github-ingress/src/config.ts",
+      "export_name": "AbsolutePath",
+      "is_type_only": false,
+      "line": 16,
+      "col": 13,
+      "span_start": 545,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:194e0e79a6413ff3",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "apps/github-ingress/src/qualification-report.ts",
+      "export_name": "qualificationWorkspaces",
+      "is_type_only": false,
+      "line": 10,
+      "col": 13,
+      "span_start": 406,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:b8dd38e58ea1606c",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "apps/github-ingress/src/qualification-report.ts",
+      "export_name": "qualificationGateIds",
+      "is_type_only": false,
+      "line": 18,
+      "col": 13,
+      "span_start": 556,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:9f6e6d64ca01705d",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "apps/github-ingress/src/qualification-report.ts",
+      "export_name": "qualificationControls",
+      "is_type_only": false,
+      "line": 36,
+      "col": 13,
+      "span_start": 945,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:ed5814def1426f24",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "apps/github-ingress/src/qualification-report.ts",
+      "export_name": "QualificationFailure",
+      "is_type_only": false,
+      "line": 86,
+      "col": 13,
+      "span_start": 2403,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:21bbabeff2197866",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "apps/github-ingress/tests/fixtures.ts",
+      "export_name": "webhookSecret",
+      "is_type_only": false,
+      "line": 11,
+      "col": 16,
+      "span_start": 383,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:f473985ed26a85e3",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "apps/github-ingress/tests/fixtures.ts",
+      "export_name": "policy",
+      "is_type_only": false,
+      "line": 14,
+      "col": 16,
+      "span_start": 471,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:98d3f70f86289730",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/domain/tests/fixtures.ts",
+      "export_name": "replaceFrozenRun",
+      "is_type_only": false,
+      "line": 92,
+      "col": 16,
+      "span_start": 2736,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:b84a986b12fda6d5",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/domain/tests/properties.ts",
+      "export_name": "LawFailure",
+      "is_type_only": false,
+      "line": 3,
+      "col": 13,
+      "span_start": 79,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:2bf83bbea89f38c3",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/engine/tests/command-fixtures.ts",
+      "export_name": "commandApplication",
+      "is_type_only": false,
+      "line": 17,
+      "col": 16,
+      "span_start": 304,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:0a5678fd3a46d449",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/engine/tests/fixtures.ts",
+      "export_name": "makeFrozenRun",
+      "is_type_only": false,
+      "line": 14,
+      "col": 27,
+      "span_start": 475,
+      "is_re_export": true,
+      "finding_id": "dc1:unused-export:baaaa5689f968dfb",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API",
+          "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/engine/tests/memory-live-inbox.ts",
+      "export_name": "unrecorded",
+      "is_type_only": false,
+      "line": 64,
+      "col": 16,
+      "span_start": 1973,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:b9382eeced2662d8",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/github-adapter/src/live-sqlite-storage.ts",
+      "export_name": "decodePolicy",
+      "is_type_only": false,
+      "line": 76,
+      "col": 13,
+      "span_start": 3152,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:897e5107fba785b5",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/github-adapter/src/live-sqlite-storage.ts",
+      "export_name": "decodeRecord",
+      "is_type_only": false,
+      "line": 77,
+      "col": 13,
+      "span_start": 3218,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:6b01e1b42d56ab14",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/github-adapter/src/live-sqlite-storage.ts",
+      "export_name": "decodeVerified",
+      "is_type_only": false,
+      "line": 78,
+      "col": 13,
+      "span_start": 3284,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:90492367fa3cd3eb",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/github-adapter/src/live-sqlite-storage.ts",
+      "export_name": "decodeEvidence",
+      "is_type_only": false,
+      "line": 79,
+      "col": 13,
+      "span_start": 3354,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:e9abac17ca98f2b8",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/github-adapter/src/live-sqlite-storage.ts",
+      "export_name": "invalidData",
+      "is_type_only": false,
+      "line": 81,
+      "col": 16,
+      "span_start": 3428,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:afd59ddcf401f8c8",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/composition.ts",
+      "export_name": "ProbeLifecycleError",
+      "is_type_only": false,
+      "line": 20,
+      "col": 13,
+      "span_start": 735,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:8a69edb7e20b2a9e",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/composition.ts",
+      "export_name": "makeAdmissionProbeLayer",
+      "is_type_only": false,
+      "line": 51,
+      "col": 16,
+      "span_start": 1949,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:bdeea2afb1942822",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/github-ingress.ts",
+      "export_name": "IngressFailure",
+      "is_type_only": false,
+      "line": 5,
+      "col": 9,
+      "span_start": 245,
+      "is_re_export": true,
+      "finding_id": "dc1:unused-export:b3891e94bc16c176",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API",
+          "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/report.ts",
+      "export_name": "MeasuredEvidence",
+      "is_type_only": false,
+      "line": 186,
+      "col": 13,
+      "span_start": 6266,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-export:0ff00ee5dec83c41",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the unused export from the public API"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-export"
+        }
+      ],
+      "effective_severity": "error"
+    }
+  ],
+  "unused_types": [
+    {
+      "path": "apps/github-ingress/src/qualification-report.ts",
+      "export_name": "QualificationFailure",
+      "is_type_only": true,
+      "line": 94,
+      "col": 12,
+      "span_start": 2579,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-type:0d8987cbf49c0498",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/engine/tests/worker-fakes.ts",
+      "export_name": "ExecutionBarrier",
+      "is_type_only": true,
+      "line": 32,
+      "col": 12,
+      "span_start": 1283,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-type:7a57ffb707c7c392",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/engine/tests/worker-property-fixture.ts",
+      "export_name": "Readback",
+      "is_type_only": true,
+      "line": 34,
+      "col": 12,
+      "span_start": 846,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-type:eb3333762eaf6f95",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "packages/engine/tests/worker-property-fixture.ts",
+      "export_name": "Outcome",
+      "is_type_only": true,
+      "line": 44,
+      "col": 12,
+      "span_start": 1011,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-type:37a75e84b8b60562",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/report.ts",
+      "export_name": "RestartResult",
+      "is_type_only": true,
+      "line": 8,
+      "col": 12,
+      "span_start": 234,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-type:9cf9f6f98878a4c4",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/report.ts",
+      "export_name": "MeasuredEvidence",
+      "is_type_only": true,
+      "line": 187,
+      "col": 12,
+      "span_start": 6353,
+      "is_re_export": false,
+      "finding_id": "dc1:unused-type:ba72977e272a50c7",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    },
+    {
+      "path": "probes/github-admission/src/request-body.ts",
+      "export_name": "CapturedBody",
+      "is_type_only": true,
+      "line": 4,
+      "col": 2,
+      "span_start": 53,
+      "is_re_export": true,
+      "finding_id": "dc1:unused-type:3223a63b5dc24a34",
+      "actions": [
+        {
+          "type": "remove-export",
+          "auto_fixable": true,
+          "description": "Remove the `export` (or `export type`) keyword from the type declaration",
+          "note": "This finding originates from a re-export; verify it is not part of your public API before removing"
+        },
+        {
+          "type": "suppress-line",
+          "auto_fixable": false,
+          "description": "Suppress with an inline comment above the line",
+          "comment": "// fallow-ignore-next-line unused-type"
+        }
+      ],
+      "effective_severity": "error"
+    }
+  ],
+  "private_type_leaks": [],
+  "deprecated_exports_in_use": [],
+  "unused_dependencies": [],
+  "unused_dev_dependencies": [
+    {
+      "package_name": "@modelcontextprotocol/sdk",
+      "location": "devDependencies",
+      "path": "probes/github-admission/package.json",
+      "line": 17,
+      "finding_id": "dc1:unused-dev-dependency:4d1f9387b6116938",
+      "actions": [
+        {
+          "type": "remove-dependency",
+          "auto_fixable": true,
+          "description": "Remove from devDependencies in package.json"
+        },
+        {
+          "type": "add-to-config",
+          "auto_fixable": false,
+          "description": "Add \"@modelcontextprotocol/sdk\" to ignoreDependencies in fallow config",
+          "config_key": "ignoreDependencies",
+          "value": "@modelcontextprotocol/sdk",
+          "value_schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json#/properties/ignoreDependencies/items"
+        }
+      ],
+      "effective_severity": "warn"
+    }
+  ],
+  "unused_optional_dependencies": [],
+  "unused_enum_members": [],
+  "unused_class_members": [],
+  "unresolved_imports": [],
+  "unlisted_dependencies": [],
+  "duplicate_exports": [],
+  "type_only_dependencies": [],
+  "test_only_dependencies": [],
+  "dev_dependencies_in_production": [],
+  "circular_dependencies": [],
+  "re_export_cycles": [],
+  "package_cycles": [],
+  "boundary_violations": [],
+  "boundary_coverage_violations": [],
+  "boundary_call_violations": [],
+  "policy_violations": [],
+  "stale_suppressions": [],
+  "unused_catalog_entries": [],
+  "empty_catalog_groups": [],
+  "unresolved_catalog_references": [],
+  "unused_dependency_overrides": [],
+  "misconfigured_dependency_overrides": [],
+  "invalid_client_exports": [],
+  "mixed_client_server_barrels": [],
+  "misplaced_directives": [],
+  "route_collisions": [],
+  "dynamic_segment_name_conflicts": [],
+  "gate_outcomes": {
+    "error-severity-findings": {
+      "status": "fail",
+      "enforced": true,
+      "observed": 28.0,
+      "threshold_label": "error"
+    }
+  },
+  "workspace_diagnostics": [
+    {
+      "path": ".",
+      "kind": "boundaries-not-configured",
+      "message": "No architecture boundaries are configured, so the boundary detector did not run and its violation counts are zero because nothing was measured. Add `boundaries` to the config, or set `boundary-violation` to off to state that the check is not wanted."
+    },
+    {
+      "path": ".",
+      "kind": "rule-packs-not-configured",
+      "message": "No rule packs are configured, so the policy detector did not run and its violation counts are zero because nothing was measured. Add `rulePacks` to the config, or set `policy-violation` to off to state that the check is not wanted."
+    }
+  ],
+  "next_steps": [
+    {
+      "id": "trace-unused-export",
+      "command": "fallow dead-code --trace apps/github-ingress/src/config.ts:AbsolutePath",
+      "reason": "verify an export is truly unused before deleting"
+    }
+  ],
+  "_meta": { "telemetry": { "analysis_run_id": "run_c4f82fc4529befa3" } }
+}

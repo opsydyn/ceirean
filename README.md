@@ -32,6 +32,11 @@ All live controls are now off. Use the
 [rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md) before
 resuming ingress or selecting/changing any real target.
 
+The first [Fallow report-only audit](docs/assessments/fallow-20261021.md) is
+recorded separately: 29 findings, no removals, suppressions or new CI gate.
+Use the documented clean-snapshot procedure for a secret-free, network-denied
+scan; there is no working-directory convenience command or CI integration.
+
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
 preparation workspace. The three approved Cloudflare resources are provisioned

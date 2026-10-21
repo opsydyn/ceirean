@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/fallow/schema.json",
+  "minimumVersion": "3.34.1",
+  "entry": [
+    "oxlint.config.ts",
+    "apps/github-ingress/src/main.ts",
+    "packages/infrastructure/alchemy.run.ts",
+    "**/tests/**/*.test.ts",
+    "apps/github-ingress/tests/*-child.ts",
+    "probes/*/src/*-child.ts"
+  ],
+  "ignorePatterns": ["docs/evidence/**"],
+  "typeAware": { "enabled": false }
+}

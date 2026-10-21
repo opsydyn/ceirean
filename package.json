@@ -17,6 +17,7 @@
   "devDependencies": {
     "@opsydyn/oxlint-effect": "2.0.1",
     "bun-types": "1.4.2",
+    "fallow": "3.34.1",
     "oxfmt": "0.73.0",
     "oxlint": "1.88.0",
     "typescript": "7.0.2"
