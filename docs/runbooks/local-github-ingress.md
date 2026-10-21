@@ -107,6 +107,19 @@ facts, never reusable permission leases. No credentials, tokens, raw bodies,
 receipt digests or display names are returned. Corrupt rows fail status rather
 than yielding partial/empty success. No public status route exists.
 
+Operational admission failures still return only the generic HTTP 503 code and
+a correlation ID. Local stderr emits a matching `IngressOperationalFailure`
+record with finite authority `phase`/`code` or inbox `operation`/`code`. Unknown
+failures are `Unknown/UnexpectedFailure`; raw causes, stack traces, response
+bodies, URLs, headers and credentials are never serialized. Diagnostic writes
+are request-cancellable and bounded to 100ms, with no retry or detached logging;
+a stalled or failed sink cannot turn the original refusal into an admission.
+Listener abort/deadline failures use the same request correlation ID. A diagnostic
+may be lost if its sink fails, stalls or is cancelled; absence is not success.
+Capture stderr only to operator-controlled protected local storage during an
+approved rehearsal. Do not upload it automatically or treat logs as authority
+evidence. Authority deadlines, grants and replay policy are unchanged.
+
 Start binds only `127.0.0.1:8787`, serving only `POST /webhook`. It refuses a
 second owner. A bind failure or malformed acquired key unwinds storage ownership.
 Never delete an ownership sidecar to bypass an active owner. Process death

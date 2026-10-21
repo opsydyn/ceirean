@@ -150,7 +150,17 @@ async function forcedShutdown(fixture: Fixture) {
     expect(elapsed).toBeGreaterThanOrEqual(9900);
     expect(elapsed).toBeLessThan(13000);
     const stderr = await new Response(child.stderr).text();
-    expect(stderr.trim()).toBe('{"_tag":"FailedShutdown"}');
+    const lines = stderr.trim().split('\n');
+    expect(lines).toHaveLength(2);
+    const json = Schema.fromJsonString(Schema.Unknown);
+    const decode = Schema.decodeUnknownSync(json);
+    expect(decode(lines[0])).toEqual({
+      _tag: 'IngressOperationalFailure',
+      source: 'Unknown',
+      code: 'UnexpectedFailure',
+      correlationId: expect.any(String),
+    });
+    expect(lines[1]).toBe('{"_tag":"FailedShutdown"}');
     reader.releaseLock();
     const status = await runCli(argv(fixture, 'status'), { host: fixture.host, silent: true });
     expect(status.output).toMatchObject({ decisions: 0, receipts: 0, evidence: 0 });

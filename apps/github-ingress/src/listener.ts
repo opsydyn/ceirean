@@ -21,18 +21,23 @@ const FailureCode = Schema.Literals([
   'MethodNotAllowed',
   'Saturated',
 ]);
-export function publicFailure(status: number, code: typeof FailureCode.Type) {
-  return Response.json(
-    { _tag: 'IngressFailure', code, correlationId: crypto.randomUUID() },
-    { status },
-  );
+export function publicFailure(
+  status: number,
+  code: typeof FailureCode.Type,
+  correlationId: string = crypto.randomUUID(),
+) {
+  return Response.json({ _tag: 'IngressFailure', code, correlationId }, { status });
 }
 function scheduleNative(callback: () => void, ms: number) {
   const timer = setTimeout(callback, ms);
   return () => clearTimeout(timer);
 }
 export function makeBoundedListener(options: {
-  readonly fetch: (request: Request, signal: AbortSignal) => Promise<Response>;
+  readonly fetch: (
+    request: Request,
+    signal: AbortSignal,
+    correlationId: string,
+  ) => Promise<Response>;
   readonly clock?: () => number;
   readonly schedule?: (callback: () => void, ms: number) => () => void;
 }) {
@@ -45,21 +50,23 @@ export function makeBoundedListener(options: {
   let stopped: Promise<void> | undefined;
   const owners = new Set<{ controller: AbortController; settled: Promise<unknown> }>();
   function execute(request: Request) {
+    const correlationId = crypto.randomUUID();
     const controller = new AbortController();
     const signal = AbortSignal.any([request.signal, controller.signal]);
     const aborted = Promise.withResolvers<Response>();
     function onAbort() {
-      aborted.resolve(publicFailure(503, 'Aborted'));
+      aborted.resolve(publicFailure(503, 'Aborted', correlationId));
     }
     signal.addEventListener('abort', onAbort, { once: true });
     const cancelTimer = schedule(() => {
-      aborted.resolve(publicFailure(503, 'Timeout'));
+      aborted.resolve(publicFailure(503, 'Timeout', correlationId));
       controller.abort();
     }, 8000);
-    const started = Result.try(() => options.fetch(request, signal));
+    const started = Result.try(() => options.fetch(request, signal, correlationId));
     const work = Result.match(started, {
-      onFailure: () => Promise.resolve(publicFailure(503, 'OperationalFailure')),
-      onSuccess: (promise) => promise.catch(() => publicFailure(503, 'OperationalFailure')),
+      onFailure: () => Promise.resolve(publicFailure(503, 'OperationalFailure', correlationId)),
+      onSuccess: (promise) =>
+        promise.catch(() => publicFailure(503, 'OperationalFailure', correlationId)),
     });
     const owner = { controller, settled: work };
     owners.add(owner);

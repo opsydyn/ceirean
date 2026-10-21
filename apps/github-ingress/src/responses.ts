@@ -4,9 +4,10 @@ import { Match, Result, Schema } from 'effect';
 
 import { publicFailure } from './listener.ts';
 
+const CorrelationId = Schema.String.check(Schema.isPattern(/^[a-f0-9-]{36}$/));
 const PublicReply = Schema.Struct({
   disposition: Schema.Literals(['Recorded', 'Duplicate', 'Rejected', 'Ignored']),
-  correlationId: Schema.String.check(Schema.isPattern(/^[a-f0-9-]{36}$/)),
+  correlationId: CorrelationId,
 });
 function response(disposition: (typeof PublicReply.Type)['disposition'], status = 200) {
   return Response.json(PublicReply.make({ disposition, correlationId: crypto.randomUUID() }), {
@@ -53,8 +54,13 @@ export function projectReply(reply: LiveAdmissionReply) {
   );
 }
 const Unrecorded = Schema.TaggedStruct('Unrecorded', { decision: NonAdmittedDecision });
-const ProtocolResponse = Schema.Union([Unrecorded, IngressFailure, PublicReply]);
+const CorrelatedFailure = Schema.Struct({
+  ...IngressFailure.fields,
+  correlationId: CorrelationId,
+});
+const ProtocolResponse = Schema.Union([Unrecorded, CorrelatedFailure, IngressFailure, PublicReply]);
 const isUnrecorded = Schema.is(Unrecorded);
+const isCorrelatedFailure = Schema.is(CorrelatedFailure);
 const isIngressFailure = Schema.is(IngressFailure);
 export async function projectProtocolResponse(input: Response) {
   async function project() {
@@ -63,6 +69,9 @@ export async function projectProtocolResponse(input: Response) {
     function outcome(value: Result.Result.Success<typeof decoded>) {
       return Match.value(value).pipe(
         Match.when(isUnrecorded, ({ decision }) => refusal(decision)),
+        Match.when(isCorrelatedFailure, ({ code, correlationId }) =>
+          publicFailure(input.status, code, correlationId),
+        ),
         Match.when(isIngressFailure, ({ code }) => publicFailure(input.status, code)),
         Match.orElse((reply) => Response.json(reply, { status: input.status })),
       );

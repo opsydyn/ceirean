@@ -41,6 +41,7 @@ import {
   type Arguments,
   type Configuration,
 } from './config.ts';
+import { operationalDiagnostic } from './diagnostics.ts';
 import { makeBoundedListener, publicFailure } from './listener.ts';
 import { projectProtocolResponse, projectReply } from './responses.ts';
 
@@ -271,6 +272,25 @@ function makeApplicationLayer(argv: ReadonlyArray<string>, options: ApplicationO
   return acquisition;
 }
 
+function printOutput(output: unknown, error: boolean) {
+  function* print() {
+    const stdio = yield* Stdio.Stdio;
+    const sink = Match.value(error).pipe(
+      Match.when(true, () => stdio.stderr()),
+      Match.orElse(() => stdio.stdout()),
+    );
+    const json = Schema.fromJsonString(Schema.Unknown);
+    const text = Schema.encodeSync(json)(output);
+    yield* Stream.run(Stream.make(`${text}\n`), sink);
+  }
+  const printing = Effect.gen(print);
+  return printing;
+}
+function printDiagnostic(output: unknown) {
+  const printing = printOutput(output, true);
+  return printing.pipe(Effect.timeoutOption(100), Effect.asVoid);
+}
+
 // The only runtime and Bun platform provisioning boundary. No import starts it.
 export async function openLocalGitHubApp(
   argv: ReadonlyArray<string>,
@@ -286,11 +306,17 @@ export async function openLocalGitHubApp(
     throw new CliError({ code: 'OperationFailed' });
   }
   const session = await Exit.match(acquired, { onFailure: failed, onSuccess: (value) => value });
-  function bridge(request: Request, signal: AbortSignal) {
+  function bridge(request: Request, signal: AbortSignal, correlationId: string) {
     function verifiedBridge(started: Extract<typeof session, { _tag: 'Start' }>) {
       async function admit(command: Parameters<typeof started.admission.admit>[0]) {
-        const reply = await runtime.runPromise(started.admission.admit(command), { signal });
-        return projectReply(reply);
+        const reply = await runtime.runPromiseExit(started.admission.admit(command), { signal });
+        async function failed(cause: Extract<typeof reply, { _tag: 'Failure' }>['cause']) {
+          const diagnostic = operationalDiagnostic(cause, correlationId);
+          // A failed diagnostic sink must not replace the original safe refusal.
+          await write(diagnostic, true, signal).catch(() => undefined);
+          return publicFailure(503, 'OperationalFailure', correlationId);
+        }
+        return Exit.match(reply, { onFailure: failed, onSuccess: projectReply });
       }
       const ingress = makeVerifiedGitHubIngress({
         secret: started.secret,
@@ -322,19 +348,12 @@ export async function openLocalGitHubApp(
       });
     return disposal;
   }
-  function write(output: unknown, error = false) {
-    function* print() {
-      const stdio = yield* Stdio.Stdio;
-      const sink = Match.value(error).pipe(
-        Match.when(true, () => stdio.stderr()),
-        Match.orElse(() => stdio.stdout()),
-      );
-      const json = Schema.fromJsonString(Schema.Unknown);
-      const text = Schema.encodeSync(json)(output);
-      yield* Stream.run(Stream.make(`${text}\n`), sink);
-    }
-    const printing = Effect.gen(print);
-    return runtime.runPromise(printing);
+  function write(output: unknown, error = false, signal?: AbortSignal) {
+    const bounded = Match.value(error).pipe(
+      Match.when(true, () => printDiagnostic(output)),
+      Match.orElse(() => printOutput(output, false)),
+    );
+    return runtime.runPromise(bounded, { signal });
   }
   return { session, fetch: listener.fetch, listen: listener.listen, dispose, write };
 }

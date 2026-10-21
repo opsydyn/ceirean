@@ -78,8 +78,10 @@ async function deadline() {
   const time = controlledTime();
   const gate = Promise.withResolvers<Response>();
   let signal: AbortSignal | undefined;
-  async function work(_request: Request, owned: AbortSignal) {
+  let correlationId: string | undefined;
+  async function work(_request: Request, owned: AbortSignal, id?: string) {
     signal = owned;
+    correlationId = id;
     return gate.promise;
   }
   const listener = makeBoundedListener({ ...time, fetch: work });
@@ -87,7 +89,10 @@ async function deadline() {
   time.advance(7999);
   expect(signal?.aborted).toBe(false);
   time.advance(1);
-  expect((await pending).status).toBe(503);
+  const response = await pending;
+  expect(response.status).toBe(503);
+  expect(correlationId).toMatch(/^[a-f0-9-]{36}$/);
+  expect(await response.json()).toMatchObject({ code: 'Timeout', correlationId });
   expect(signal?.aborted).toBe(true);
   let drained = false;
   const drain = listener.dispose().then(() => {

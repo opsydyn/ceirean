@@ -78,3 +78,37 @@ Next: diagnose `OperationalFailure` offline, add a focused regression test and
 verify the fix before proposing a new explicitly approved live window. Keep the
 connector, listener and webhook delivery off in the meantime. Fallow remains a
 separate queued follow-up; it was not installed or run during this rehearsal.
+
+## Offline Follow-up
+
+The original runtime cause cannot be recovered from the generic saved response.
+Independent offline investigation reproduced the same symptom for denied HTTP,
+invalid token response, excessive token grants and request timeout. None proves
+which occurred in this rehearsal. Existing authority and ingress fixtures passed;
+they validate our boundary behavior, not the real GitHub response contract.
+
+The confirmed diagnostic defect was loss of the adapter's finite error phase and
+code at the admission/protocol boundary. Offline regression tests first failed
+for all five authority phases, then exposed correlation-ID replacement during
+response projection. The fix adds only allowlisted local diagnostics with the
+public response ID. A property-based test exercises 100 generated phase/code and
+extra-text inputs; tests also exclude raw defects and forged error fields.
+
+Review additionally reproduced stderr backpressure delaying the refusal and
+breaking correlation at the listener deadline. A stalled-sink regression failed
+before adding a request-cancellable 100ms logging bound. Diagnostic logging is
+awaited within that bound, not detached; listener timeout IDs remain correlated.
+The stuck-native-shutdown test now expects the finite diagnostic before its
+separate `FailedShutdown` record.
+
+This is a verified observability/correlation repair, **not a verified repair of
+the original live 503**. No real credential, external API or production ledger
+was used during offline diagnosis. No live service or webhook was activated.
+Do not resume or redeliver the failed comment without a new approved window.
+
+Final offline verification: `bun run check` passed with unchanged universal
+rules; `moon run :typecheck --force --no-actions` passed all seven workspaces;
+`moon run :test --force --no-actions` passed 955 tests with zero failures.
+Independent review cleared the bounded diagnostic sink after reproducing both
+backpressure and caller abort without retained stderr listeners. The real local
+configuration remained Disabled and port 8787 had no listener.
