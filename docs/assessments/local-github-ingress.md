@@ -1,5 +1,50 @@
 # Local GitHub Ingress Qualification
 
+## Current Candidate
+
+Tasks 1-6 are independently accepted through `e8fb83c` (903 tests at that
+source). Task 7 is a candidate pending controller review and subsequent fresh
+whole-branch review; it is not accepted whole-branch or live qualification.
+The [manifest](../evidence/local-github-ingress.json) binds actual final-source
+gate exits, log hashes, suite/assertion totals and restored behavioral controls.
+It keeps the tested source commit/tree separate from later docs/evidence commits.
+The [runbook](../runbooks/local-github-ingress.md) is explicitly operator-gated.
+
+Task 7 tests real child SIGKILL at pretransaction, staged decision/evidence,
+committed-before-response and pending API phases, then reopens the same ledger
+with synthetic credentials. Zero or one complete record, immutable matching
+evidence, released ownership and duplicate replay without fresh API checks are
+asserted. Late malformed-key and bind-failure cleanup coverage closes Task 6 M1.
+An old valid snapshot demonstrably loses replay history; it is not reconciled
+into a completeness or exactly-once claim. The report validator is pure schema
+and consistency checking, not a filesystem/network measurer or cryptographic
+attestation. The evidence tooling measures bytes and Git identities separately.
+It cannot promote live or deployed flags; both remain false.
+
+Five controls independently break evidence binding, policy revision comparison,
+known-receipt replay, transaction rollback and abort cleanup ownership. Each
+qualifying control fails twice for its intended assertion, restores exact source
+bytes and passes. Initial replay/abort test selections that did not detect the
+mutation are retained as nonqualifying attempts, not counted as RED or law cases.
+
+Canonical historical evidence is archived losslessly under
+`docs/evidence/local-github-ingress/`. Its index byte-compares 212 selected
+members, including all seven accidentally tracked Task 6 scratch copies, before
+index-only relocation. Original scratch files remain available until final review.
+Task reports, final-source gate logs, review closures and every ledger ruling
+(including cost if wrong) are retained. No future review result is fabricated.
+
+Historical limitations remain: initial Task 5 broad-batch test-first history is
+incomplete; later RED/GREEN cannot recreate it. Task 6 TDD material is a summary
+with excerpts, distinct from its archived raw gate logs. Task 3 M1 memory receipt
+metadata and M2 permutation-law weakness remain deferred to final triage. Moon
+update advertisements are preserved, not lint warnings or proof of pristine
+console output. Frozen installation is not zero-network evidence. No real key,
+GitHub API, tunnel, deployed listener or production durability was qualified.
+
+The Task 1 section below preserves its original source-specific findings; its
+future-tense statements do not describe the current Task 6 application status.
+
 ## Task 1: Authentication And Bun Platform Compatibility
 
 This is local dependency qualification, not permission to start ingress or use

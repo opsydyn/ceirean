@@ -122,10 +122,15 @@ This is local implementation/qualification work only. No deployment, GitHub
 writes, worker execution or cloud storage is authorised. Local test persistence
 is not production durability.
 
-Implementation is now approved and in progress on an isolated local branch:
-Tasks 1-3 are independently reviewed through `f707065` (699 local tests; all
-available gates). Native adapters, listener and final qualification are pending.
-This does not authorise a live rehearsal or broaden execution/publication scope.
+Tasks 1-6 are independently accepted through `e8fb83c` (903 tests at that source,
+six typechecks and full gates). Task 7 adds recovery qualification, behavioral
+controls, a pure report validator and the [local-only runbook](runbooks/local-github-ingress.md)
+as a candidate pending controller review. The overall qualification checkbox
+remains open until Task 7 review and fresh whole-branch review/triage complete.
+The [measured manifest](evidence/local-github-ingress.json) distinguishes final
+tested source from later evidence-only commits. Task 3 M1/M2 and Moon update
+notices remain explicit final-triage items. No live rehearsal or broader
+execution/publication scope is authorized.
 
 ## Organisation Discovery And Configuration Self-PRs
 

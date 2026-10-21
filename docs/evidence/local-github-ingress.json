@@ -1,0 +1,361 @@
+{
+  "schema": "leviathan.local-github-ingress.qualification.v1",
+  "status": "Task7CandidatePendingControllerReview",
+  "acceptedTasks": [1, 2, 3, 4, 5, 6],
+  "localQualification": {
+    "source": {
+      "commit": "b7f5d4e3d621e4f09579f76dc4d620dcde521569",
+      "tree": "9ecbfc4977ef3899c70b0e6ac18029c60a83b6e8",
+      "filesHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108",
+      "lockHash": "8cb4d58bd88280daee28101e542cd9b7120ec7ee63dd5094daf59c2a45fddf59"
+    },
+    "gates": [
+      {
+        "id": "install",
+        "exit": 0,
+        "logHash": "edcebbd9fa6fb307a6666258c185f2bab591f089245250aa75961f6ab6196bc7",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "check",
+        "exit": 0,
+        "logHash": "def2e5c05be2e1b24b81a5fd91b2a8a7c36ae2e45dd063ecc5853ae057a44276",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "domain:typecheck",
+        "exit": 0,
+        "logHash": "dbc656b4bd30f4442631fe2689c560d4d1e14ccd87c8b017b939100f48327649",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "engine:typecheck",
+        "exit": 0,
+        "logHash": "402a560ec945e32912b58006fd75cc805f367e8e665314f62929fe00a718fdca",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "probe:typecheck",
+        "exit": 0,
+        "logHash": "197d71a28771c209d5ab7307efd4986bccf36576c248071801f1e42ccef9b418",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "github-admission:typecheck",
+        "exit": 0,
+        "logHash": "cb774cdceec79a9acb123783d629a2d64ac3f828d456eedffe6d1b407a5e4a49",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "github-adapter:typecheck",
+        "exit": 0,
+        "logHash": "cb5d5a0067a030f84271c85a3fe20b3fad9e85e76af7b890388a2d9dab992456",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "github-ingress:typecheck",
+        "exit": 0,
+        "logHash": "028aac39f06789ccb83f155fa2951130ac4e5168de9b1b1b537b64f8d5490b7a",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "domain:test",
+        "exit": 0,
+        "logHash": "47fc58d3e5f2961c99c60a62b7c8e916ec76e8aa0f4adfb68b4e7adc6ea6450c",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "engine:test",
+        "exit": 0,
+        "logHash": "10226fc79cef906d9fb2af845b42ef144293632bd87ca3ad06c086a4288a8c2c",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "probe:test",
+        "exit": 0,
+        "logHash": "a7cc7a85eba853a34ba11a08e42376c8c56751c05adfa5f0852d0e4f881713ec",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "github-admission:test",
+        "exit": 0,
+        "logHash": "3794b41fd3a85a071fcbf98870f1b296450d189e2324255f11383f122fd09651",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "github-adapter:test",
+        "exit": 0,
+        "logHash": "49f5240306ec7945d3a289af4c3de110edbff91e5d9b287d84761e10b2d3fd2a",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "github-ingress:test",
+        "exit": 0,
+        "logHash": "7cadd269cca44eadd24a544e37b121588c0a9280f714afe0eac6c3b9292e52a9",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "whitespace",
+        "exit": 0,
+        "logHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      },
+      {
+        "id": "integrity",
+        "exit": 0,
+        "logHash": "4e62b36c45b1178619ea1bfc73adaa9c431d5bc410eddfd67898c25136ad1b72",
+        "sourceHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108"
+      }
+    ],
+    "suites": [
+      {
+        "workspace": "domain",
+        "passed": 211,
+        "failed": 0,
+        "assertions": 965
+      },
+      {
+        "workspace": "engine",
+        "passed": 300,
+        "failed": 0,
+        "assertions": 2719
+      },
+      {
+        "workspace": "probe",
+        "passed": 36,
+        "failed": 0,
+        "assertions": 104
+      },
+      {
+        "workspace": "github-admission",
+        "passed": 135,
+        "failed": 0,
+        "assertions": 1828
+      },
+      {
+        "workspace": "github-adapter",
+        "passed": 196,
+        "failed": 0,
+        "assertions": 2771
+      },
+      {
+        "workspace": "github-ingress",
+        "passed": 38,
+        "failed": 0,
+        "assertions": 506
+      }
+    ],
+    "totals": {
+      "passed": 916,
+      "failed": 0,
+      "assertions": 8893
+    },
+    "laws": {
+      "newPrimary": 24000,
+      "legacyPrimary": 168000,
+      "shrinks": 0
+    },
+    "controls": [
+      {
+        "name": "EvidenceBinding",
+        "beforeHash": "37963b7fc6421be1ca2d095decc8892351188af4034d94fd64fe350542159f13",
+        "mutatedHash": "438fc0071190d9a5fcc74af809f8bc06fee344a2e208c09e8b1bff64d9103343",
+        "restoredHash": "37963b7fc6421be1ca2d095decc8892351188af4034d94fd64fe350542159f13",
+        "red": [
+          {
+            "exit": 1,
+            "logHash": "99f50d1e9d8c15f7135f8d7210544923e8d9dc3fa2adbb39a7918f0dad43f201",
+            "reason": "EvidenceBinding"
+          },
+          {
+            "exit": 1,
+            "logHash": "7da343ee0236c30c019dc5b9dd0fa287ea9a9a81cc8cab22b337cfa5b7c95462",
+            "reason": "EvidenceBinding"
+          }
+        ],
+        "green": {
+          "exit": 0,
+          "logHash": "6d84660aab6828dc50b4f283e174df3b819ccddb4dba9d10704c2242b951f64b"
+        }
+      },
+      {
+        "name": "PolicyRevision",
+        "beforeHash": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+        "mutatedHash": "3e04a1225fdc5eebeab8237dc123963fdbb3bb49f3bd350ca0993550988b4220",
+        "restoredHash": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+        "red": [
+          {
+            "exit": 1,
+            "logHash": "fd1d77b32c6aefd311d2f5f55c072e514b44e6ba1ad73fad71fb04dee4076491",
+            "reason": "PolicyRevision"
+          },
+          {
+            "exit": 1,
+            "logHash": "b60f2033f99a4bc139a42b7edaad353f015477941971c9be736779779223eb74",
+            "reason": "PolicyRevision"
+          }
+        ],
+        "green": {
+          "exit": 0,
+          "logHash": "d703acf3ac5c36702d9e55bcec6718fb57791560bf37fae732de78dd22578163"
+        }
+      },
+      {
+        "name": "ReplayUniqueness",
+        "beforeHash": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+        "mutatedHash": "6300de223f9bb0e4186dc4f6a25e985066ce4d2c8c9dbbb3e5a6fcd0b02adb43",
+        "restoredHash": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+        "red": [
+          {
+            "exit": 1,
+            "logHash": "99c30ccd3618b7c40c835b868038ed1ff78c154e8cbf7dd857b3851c4731917e",
+            "reason": "ReplayUniqueness"
+          },
+          {
+            "exit": 1,
+            "logHash": "79e8889d8e9c28dce528491b95cd96e5aec0add53b46d4fc93cf55e5bc3ed51e",
+            "reason": "ReplayUniqueness"
+          }
+        ],
+        "green": {
+          "exit": 0,
+          "logHash": "841ca54b9b3f5eba2184e55382c59339cfb42d892d97f7c3b2967ebf98dd1b09"
+        }
+      },
+      {
+        "name": "TransactionRollback",
+        "beforeHash": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+        "mutatedHash": "0685844b5f5f5c97a5685ed445b039ec08ef7eb5c1af073b86d401fd3cf54d49",
+        "restoredHash": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+        "red": [
+          {
+            "exit": 1,
+            "logHash": "41c7a033590628685d5cf34c229b87da5e188296ce8843f89da8aa090e81f4a8",
+            "reason": "TransactionRollback"
+          },
+          {
+            "exit": 1,
+            "logHash": "bf8f6e3023158fd3aa6a7110c1337669ad7d210b0391eaf5a25d0b3ac7422469",
+            "reason": "TransactionRollback"
+          }
+        ],
+        "green": {
+          "exit": 0,
+          "logHash": "119b086c961efaeef0620313a022ea1257251c74fa1f695e57ef61f4ed7707fa"
+        }
+      },
+      {
+        "name": "AbortOwnership",
+        "beforeHash": "c986dd5dfd961b6e29a13f5a1543f661f01b94a2712d1351ebb8baaa984ab5c8",
+        "mutatedHash": "034d547fdb22a4946a91bf0d5a39c51faf2ab7bce3d696c0219f21844cdb45a1",
+        "restoredHash": "c986dd5dfd961b6e29a13f5a1543f661f01b94a2712d1351ebb8baaa984ab5c8",
+        "red": [
+          {
+            "exit": 1,
+            "logHash": "60186bb0f5efc17b40baf3ea084331c98774e9c45e603ebb1d5848c716df2183",
+            "reason": "AbortOwnership"
+          },
+          {
+            "exit": 1,
+            "logHash": "9ae5d0673c2102522e0e33ecf5ad703651d0269a5f85d03473b24d348ce74e8b",
+            "reason": "AbortOwnership"
+          }
+        ],
+        "green": {
+          "exit": 0,
+          "logHash": "4bd6419dc0b236e4b4f18387454944c9e4b3cf8ef6eabeb921023c85ecf6fea7"
+        }
+      }
+    ],
+    "live": false,
+    "deployed": false
+  },
+  "sourceInventory": "local-github-ingress/task-7/source.json",
+  "documentationVerification": "local-github-ingress/docs-verification.tar.gz",
+  "rawLogs": {
+    "archive": "local-github-ingress/task-7-raw.tar.gz",
+    "sha256": "436619039e170d91774041cde28fb1ce7e2aadb8928e112faf322e5ccd4a1d69",
+    "index": "local-github-ingress/task-7-raw-index.json",
+    "byteComparedMembers": 154,
+    "memberRoot": "task-7/",
+    "sourceCommit": "b7f5d4e3d621e4f09579f76dc4d620dcde521569"
+  },
+  "historicalArchive": {
+    "path": "local-github-ingress/accepted-tasks-1-6.tar.gz",
+    "sha256": "c77f07d6948f90643e7de03cca14a5ab08083aa59e9b817e09656b09efc39b1d",
+    "byteComparedMembers": 212,
+    "index": "local-github-ingress/accepted-tasks-1-6-index.json"
+  },
+  "controlBindings": [
+    {
+      "name": "EvidenceBinding",
+      "path": "packages/github-adapter/src/live-sqlite-storage.ts",
+      "test": "packages/github-adapter/tests/live-sqlite-inbox.test.ts",
+      "testHash": "8d646f5a7a8ae6f68cbb58ce4cfa6584801acb99d40c4de7fa9d9737df76b0f4",
+      "logPrefix": "evidence",
+      "identityPrefix": "evidence"
+    },
+    {
+      "name": "PolicyRevision",
+      "path": "packages/github-adapter/src/live-sqlite-inbox.ts",
+      "test": "packages/github-adapter/tests/live-sqlite-inbox.test.ts",
+      "testHash": "8d646f5a7a8ae6f68cbb58ce4cfa6584801acb99d40c4de7fa9d9737df76b0f4",
+      "logPrefix": "policy",
+      "identityPrefix": "policy"
+    },
+    {
+      "name": "ReplayUniqueness",
+      "path": "packages/github-adapter/src/live-sqlite-inbox.ts",
+      "test": "packages/github-adapter/tests/live-sqlite-inbox.test.ts",
+      "testHash": "8d646f5a7a8ae6f68cbb58ce4cfa6584801acb99d40c4de7fa9d9737df76b0f4",
+      "logPrefix": "replay-v2",
+      "identityPrefix": "replay"
+    },
+    {
+      "name": "TransactionRollback",
+      "path": "packages/github-adapter/src/live-sqlite-inbox.ts",
+      "test": "packages/github-adapter/tests/live-sqlite-inbox.test.ts",
+      "testHash": "8d646f5a7a8ae6f68cbb58ce4cfa6584801acb99d40c4de7fa9d9737df76b0f4",
+      "logPrefix": "rollback",
+      "identityPrefix": "rollback"
+    },
+    {
+      "name": "AbortOwnership",
+      "path": "apps/github-ingress/src/listener.ts",
+      "test": "apps/github-ingress/tests/listener.test.ts",
+      "testHash": "7d5c2a0e23c1d3dff1f965de88e3170f794c31f8ed91618919c14f441980c351",
+      "logPrefix": "abort-v2",
+      "identityPrefix": "abort"
+    }
+  ],
+  "lawAccounting": {
+    "seeds": [0, 1, 163],
+    "runsPerSeed": 1000,
+    "size": 50,
+    "maxShrinks": 1000,
+    "maxDiscards": 10000,
+    "newDomainLaws": 4,
+    "newEngineLaws": 4,
+    "legacyDomainLaws": 42,
+    "legacyEngineLaws": 14,
+    "primaryShrinks": 0,
+    "note": "Primary laws passed without failure shrinking. Diagnostic false-property/shrink tests and behavioral controls are not primary cases; raw outputs retain diagnostics. Legacy domain = 13 receipt + 18 run + 6 command + 5 worker; legacy engine = 4 command + 7 safety + 3 constructive."
+  },
+  "review": {
+    "task7": "PendingController",
+    "wholeBranch": "PendingController",
+    "integration": "NotAuthorized"
+  },
+  "limitations": [
+    "Initial Task 5 broad-batch RED history incomplete",
+    "Task 6 TDD excerpts are not raw gate logs",
+    "Task 3 M1 receipt display metadata and M2 permutation law deferred",
+    "Moon update notices preserved",
+    "No installer network trace or zero-network claim",
+    "No real key/API/tunnel/live/deployed qualification",
+    "Older snapshot restoration loses replay history",
+    "Pure validator checks supplied evidence consistency, not external truth",
+    "Initial final check failed generated JSON formatting; dependent gates stopped until formatting fixed",
+    "Initial replay and abort control test selections passed mutations and are retained as nonqualifying attempts"
+  ]
+}

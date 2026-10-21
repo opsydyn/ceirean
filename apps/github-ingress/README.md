@@ -56,4 +56,10 @@ if cleanup remains stuck; FailedShutdown does not claim a clean close.
 
 Only synthetic/injected HTTP and test-owned loopback have been exercised here.
 Live credentials, GitHub API access, tunnels and live acceptance are separate
-operator-authorized work, not supplied by Task 6.
+operator-authorized work. Tasks 1-6 are accepted through `e8fb83c`; Task 7 is a
+candidate pending controller review, not accepted whole-branch qualification.
+The [local-only runbook](../../docs/runbooks/local-github-ingress.md) covers
+PKCS#8 preparation, permission checks, explicit commands, capacity stops,
+failed shutdown, operator redelivery and replay-history loss after old restores.
+See the [measured manifest](../../docs/evidence/local-github-ingress.json) for
+tested source identity, raw logs, controls and historical evidence boundaries.

@@ -81,6 +81,17 @@ pull requests is not the success measure.
   [measured assessment](docs/assessments/worker-lifecycle.md).
 - No automatic merge, package release or deployment.
 
+## Local GitHub Ingress
+
+Tasks 1-6 are independently accepted through `e8fb83c`: native authority,
+immutable SQLite evidence and the bounded local CLI/listener. Task 7 recovery
+and measured-report work is a candidate pending controller review, followed by
+a fresh whole-branch review. It is not whole-branch acceptance or live readiness.
+See the [local-only runbook](docs/runbooks/local-github-ingress.md),
+[assessment](docs/assessments/local-github-ingress.md) and
+[source-bound evidence](docs/evidence/local-github-ingress.json).
+Real credentials, GitHub API/tunnel rehearsal, push and merge remain unapproved.
+
 ## Proposed First Slice
 
 A manually requested FoldKit migration from an immutable base revision, executed

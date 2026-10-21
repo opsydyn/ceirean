@@ -1,0 +1,933 @@
+{
+  "base": "e8fb83c437ebcf1709be4f0e119597319728c653",
+  "tree": "9ecbfc4977ef3899c70b0e6ac18029c60a83b6e8",
+  "filesHash": "fe9e8f19f924bd8b55553de1ff5982e9e4ee1ef6750587ffa35b2ba3ca76c108",
+  "lockHash": "8cb4d58bd88280daee28101e542cd9b7120ec7ee63dd5094daf59c2a45fddf59",
+  "files": {
+    ".gitignore": "6b595bbffb2aa0d3b871f72e01f349375af47276e462af28ece56b10e3345f63",
+    ".moon/toolchains.yml": "24333a46707cb84a7e5db09a623c4c0ad1138b374f7ce63d21ca678487fd3522",
+    ".moon/workspace.yml": "c80a1f51df448a0240347a66ac0e673210690671ab0643cbe3be73560a2106ee",
+    ".oxfmtrc.json": "3b956edf46d2cb45aa5e1bfec676acbfa2f8aca08b66ab324ead358aba779459",
+    ".prototools": "584f72ca5e35a6d7a7a9d3bdf690d3fc372214ef726516d6fcc91130818c298a",
+    "apps/github-ingress/moon.yml": "b70e0a5e533cbb1b6736d61837c7e9c05424b35597beec092089a7372751e068",
+    "apps/github-ingress/package.json": "8b0d2893b44f9963bb215d197c2e34cbab2239e3fc718111b20265abd682f5a8",
+    "apps/github-ingress/src/cli.ts": "80f8c9bd879b035dccdb4d3bf827aea3b1945f9a21e088c2493cade967b5fe54",
+    "apps/github-ingress/src/composition.ts": "4278934869c75fe30535f5906e6db230480e7aacbd79639012b3c54a84a4443a",
+    "apps/github-ingress/src/config.ts": "fd3b936db606f66ebd3facb8ac4c65204a250bdf5291f73cbd7e6a6565f86dcb",
+    "apps/github-ingress/src/listener.ts": "c986dd5dfd961b6e29a13f5a1543f661f01b94a2712d1351ebb8baaa984ab5c8",
+    "apps/github-ingress/src/main.ts": "af09848bdcbf0c89b0c69f74e3a21b5b20c88c9a7e9370cd88293c9e7f667988",
+    "apps/github-ingress/src/qualification-report.ts": "eac1d8f90d9d2812ba56f1b109fbd9313c5fb4d16026d3436ebf83f0b986fbde",
+    "apps/github-ingress/src/responses.ts": "63ab114899d58dc6c1d2488d453e7aebeba5b6e4cdc99214f147956c6f0d0f05",
+    "apps/github-ingress/tests/cli.test.ts": "6b5841dc5ac224665cd6a1655fe128d24f6015164bb7dba6c1cb311e99d0bad3",
+    "apps/github-ingress/tests/config.test.ts": "c8153f16c38ab74556b7c087e60206070156dc62cb61bd7ea6d3849cec7e68b5",
+    "apps/github-ingress/tests/fixtures.ts": "7c0144a06e5bf4ce99968dd2146a7e8aba77a772934519db75177e68fa1c4de0",
+    "apps/github-ingress/tests/listener.test.ts": "7d5c2a0e23c1d3dff1f965de88e3170f794c31f8ed91618919c14f441980c351",
+    "apps/github-ingress/tests/qualification-report.test.ts": "dc48e7869c836a4338a30ca87099d2bd8fa38303018405444355b2aa5155f9b5",
+    "apps/github-ingress/tests/restart-child.ts": "9c05123d72c52ef231f8ad4178049ee8542daeae8f48bcf1fa4d8220adfaf5a5",
+    "apps/github-ingress/tests/restart.test.ts": "8c28c5dea2af53365083ff6a6ca49e3ca860cf632eca6d9d24eb7c0b2e878e17",
+    "apps/github-ingress/tsconfig.json": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60",
+    "bun.lock": "8cb4d58bd88280daee28101e542cd9b7120ec7ee63dd5094daf59c2a45fddf59",
+    "moon.yml": "a3562d29c46971060f908f88cd11b90d3123e3bd72696b8e8fbbc43f9051c2be",
+    "oxlint.config.ts": "a4ee5835f4246a48d82ecc569aa533db3a22dd27b24d66c3acdec396bc25ca9d",
+    "package.json": "60741d6386ec0a2190e7ecc4f5b2eff4cb49cc2689bbe18ea8cf0e6b84f99b9e",
+    "packages/domain/moon.yml": "8125b57f6c301d3e6059c13b4bd19eb867966692571ed5a8b1d53e3086d07312",
+    "packages/domain/package.json": "2922c6fda06a77150cbad37895ed075e1c18e30c9a50d2dad10be23d1d9cb78f",
+    "packages/domain/src/command-admission-policy.ts": "1abf0df32439a412482b48e4919441b2edd0e1a53b129a5eab3e886cf91e7b39",
+    "packages/domain/src/command-admission.ts": "f8375d4d87bf8ea6fa627d90fe16975e53b172c45da6fa090b7a635327093f5e",
+    "packages/domain/src/identities.ts": "b26d7fc6feb131a20aadaa120a13d39fc25b2f8e394db80ca77cc916471fe133",
+    "packages/domain/src/index.ts": "1cc4bb1ecb9cebea053e733a6f85c642e212f7403761581f52fb81a986906dea",
+    "packages/domain/src/live-admission-policy.ts": "60e0773dbf0a71323ff2cc532662ece2dc918a489fa36c58f2234d44dc13bf96",
+    "packages/domain/src/live-admission.ts": "8703a94da5305421b5f0fab2823997ed9077d433cd40e8f3fbb362317773a25f",
+    "packages/domain/src/upgrade-run.ts": "7a8818bc82bf070149c481b127f286e61fc567839c63680102a8a9b15a9d9d97",
+    "packages/domain/src/verification.ts": "e0da23a0c240087d0c8ecf93a2f259653909a3db25fe605edacc93b13f1e7866",
+    "packages/domain/src/worker-evidence.ts": "92752fc7a452c7dcc9a24c830df0d4432bd085c6fd9b096ee6aea44d3e91f1ce",
+    "packages/domain/src/worker-operation.ts": "0e370f53696abf2c42b0786c3e5f8bbfaed63829370909326cfe72103e0afe0c",
+    "packages/domain/tests/command-admission.test.ts": "e85411383a722b3ab766fc23a9c4c203fc17bd039aa428f8b66ac55f397c0784",
+    "packages/domain/tests/command-fixtures.ts": "68594a8e7b30038c246dd569e477847fe8871d99746a13e280696c14dad3bf94",
+    "packages/domain/tests/command-properties.test.ts": "e76e7f83f93a0a6221ec5f15c73d3ca5cadc266b78ffb287ffa158a50815621a",
+    "packages/domain/tests/fixtures.ts": "17ee9c090a420acb74cc8a8c0bd637779069524695db5243ecc04374d7d71964",
+    "packages/domain/tests/live-admission-properties.test.ts": "29bf0d4921ec8ba033bbeabc180f02d2d44b21f0bd7b6cd9c392cbdd385c0006",
+    "packages/domain/tests/live-admission.test.ts": "25058b681679c906938104009258613d537ed7833c4a93839e04f6b58f8a7166",
+    "packages/domain/tests/properties.test.ts": "d90645fbc59272fcc230290b59107645e40e1b251286dc4b105c44ace82c5c35",
+    "packages/domain/tests/properties.ts": "457e10efadc4fce51dbf3eb5f44df8a2837e03c854ace29693fb90a68cd71483",
+    "packages/domain/tests/run-properties.test.ts": "9c255b5ce547fd99efb53cbb4740bfb8213203f85e712eb575eb5d0ca6b925cc",
+    "packages/domain/tests/upgrade-run.test.ts": "781941ecd846f5be71b21cfaa48f358ef13b84aaaba56fc157dcd0e25935981e",
+    "packages/domain/tests/verification.test.ts": "dbe6b23c57838766168e7ee3a09228c3cff8cad0518791bea70462c3d427ba17",
+    "packages/domain/tests/worker-evidence.test.ts": "3112083bb799d9a574d69dc308286e8fd72c7e066e14fd7fffe13dbcbd9a04c0",
+    "packages/domain/tests/worker-fixtures.ts": "4dc02e1e54888e2204d37105297ccfe6f820f6ad18bac8ca26cfc56b4577f608",
+    "packages/domain/tests/worker-operation.test.ts": "e4ea7d15a99b8e7a76c5c10d22b82bca6036becf7df64ff23e94db8dce25b0f8",
+    "packages/domain/tsconfig.json": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60",
+    "packages/engine/moon.yml": "8125b57f6c301d3e6059c13b4bd19eb867966692571ed5a8b1d53e3086d07312",
+    "packages/engine/package.json": "12eb7586b98dc27e721e3c91bf5711bfb46c39a8464b79ec8e471dc63043d70f",
+    "packages/engine/src/command-admission.ts": "50f105b6db272e89ec61e45c3c661ba95591b315a3273c788c1682807e1214d0",
+    "packages/engine/src/command-inbox-contracts.ts": "07339f95ae0d550a475322a9745d03d2e3c14ca457ebd38bf1a35872ad915a42",
+    "packages/engine/src/command-inbox-errors.ts": "1213fa6c38081574f3a42b7d8493b7ddca63b987b1a225556c9a3310098decfc",
+    "packages/engine/src/command-inbox-factory.ts": "0361e60061189368faf514d0047f0562b9517e6e930f17b0d4c63d2bacd2d6f5",
+    "packages/engine/src/command-inbox-port.ts": "5967ff4d3182271d5fb6657c9a32b48c841238d5044ff941305e4c7d5f2f65b3",
+    "packages/engine/src/contracts.ts": "571c37b9ba2951211b95865dbe4d9c4ae0fbf7d694b7fdc047b09484b4c10cc1",
+    "packages/engine/src/errors.ts": "16771331887559e73120d603e0b4e2f19892f16187f9507f14c081e85c779736",
+    "packages/engine/src/index.ts": "6e0261d0ff2a5c3e8deb2066505b4ef6f8948c6f9c9420e47fef033f588c69f3",
+    "packages/engine/src/live-admission-errors.ts": "de3fefccb6cc236e49f09632aa586c91b1d260a609d12252fd4453a15df897e3",
+    "packages/engine/src/live-admission-factories.ts": "2f311be107d394677e0d27903fc9887ddb41c1a41d9475bef2c50db7a2da84e9",
+    "packages/engine/src/live-admission-ports.ts": "70b7732cb3a6c1eda623f9b21705df08fa605e5e1cdf4706f2019f0beab01103",
+    "packages/engine/src/live-admission-service.ts": "2b924269b04116ead674328d0bd6aab4ba8eae7c381843ebd3de3ca24b5e8d33",
+    "packages/engine/src/ports.ts": "82b7e690953d7a146a8e119b6bd50dbf5108b248eda064c12e7f381a8183b22a",
+    "packages/engine/src/run-coordinator.ts": "41eff383b50cbdc5f89143b1120c0e3b8baac82b362c33b7b44200be34c0cf2f",
+    "packages/engine/src/service-factories.ts": "446c0d26e0f3f5c3b067eb9fdf7ac1cea527945c434189fc1741ef2d02e22505",
+    "packages/engine/src/worker-contracts.ts": "6cf24452e90a15851bfd53ea57b7d06839a48aae790745c8cce2ce60c7070ef6",
+    "packages/engine/src/worker-errors.ts": "a760969fe32acd8c0a4fa8e01963b755f8da7ee93f42868770d7f779f3bd77db",
+    "packages/engine/src/worker-lifecycle-service.ts": "8ba7d7c7a7e745889e2a16b015eea1dd2b0d1a4ffec32c0d2ffb6cfc2691ac0a",
+    "packages/engine/src/worker-lifecycle-tasks.ts": "454a104f7e2bb88d789c6bfd95792682c08747f2924df6f93b8d6cafd26a1129",
+    "packages/engine/src/worker-lifecycle.ts": "5b555f6474e2ab29eed7ec15b63bdb6ee2cc2c8cb1d9dc69f09f90673bf912b3",
+    "packages/engine/src/worker-ports.ts": "00d535c897d947397ac18ec6c57f6c3884fb63a281ffdac6e865105a4b5820c4",
+    "packages/engine/src/worker-service-factories.ts": "d79c6f7e1729dd2e41617e1cb3f4e09c2df9ef1c6961b30356b032aef91b2dff",
+    "packages/engine/tests/command-admission.test.ts": "40f55349e48022909176f31c1ca83bdeb4e8b2e1eeaf70cb5c69c147cd3a56c1",
+    "packages/engine/tests/command-fixtures.ts": "bb709e5364c0e289bfb575ea317af618121e63267cca5f92bd8a89ea169aafc8",
+    "packages/engine/tests/command-inbox.test.ts": "26a7f467ec4fdf65f31fec3cdc8a4ee5662900ca380cb4176ba42201f7094d86",
+    "packages/engine/tests/command-properties.test.ts": "bde5b8dae54de5f77d409daa14326b2aa71cfe263634781e8bd79f5de93bb01c",
+    "packages/engine/tests/fixtures.ts": "e6d84539d25d114c007cf5b61f9c6aa765110b9a73d1c3678cfd49b9fb703774",
+    "packages/engine/tests/live-admission-properties.test.ts": "e78c741df87cf10b2d23b0b1aad0c7d892bc71f048a7c843d44cbd7c969026af",
+    "packages/engine/tests/live-admission.test.ts": "8b4ef0a3b8c9ade84828f3fe2815a4919e822aa5b501296c956f398055a535a6",
+    "packages/engine/tests/memory-command-inbox.ts": "7a551a38ec639405eb4048c77d1075af1498db3105dfb960c0af43d27c9f7fe2",
+    "packages/engine/tests/memory-live-inbox.ts": "906e8b551b026a5f7734ee483b0684e809f41eb66fd929103bd0f8571f39c234",
+    "packages/engine/tests/memory-repository.ts": "a10ea6835729ba8f35dd3c845901494d7c5a40169586ce192b4ec31af8418f2a",
+    "packages/engine/tests/qualification-races.test.ts": "bc7f65e7fa31219acbc997a4983531563e1667272454c7480abf3e0fc664dc1f",
+    "packages/engine/tests/repository.test.ts": "4323bb536b915e0ffed7b78ba0cd490f0cad66148074257c746df47a4bf4298f",
+    "packages/engine/tests/run-coordinator.test.ts": "cb2599ebf5528d9d5598579c866bce58379cab2af5d9dde24b4a6525e21443ed",
+    "packages/engine/tests/service-factories.test.ts": "3ec35f7a6b0680a4af4f9a3e86fe6fc7718d354fa8d18343a1e5d532ebb64e6a",
+    "packages/engine/tests/worker-completion.test.ts": "47cd304152673008d8964b136a312dbb9b6d3a102a78a035bfb5fbc6b6738f30",
+    "packages/engine/tests/worker-controller.test.ts": "28cdfe47d5a5a152ba5799cd5418fbdf1b10a42d40d75738eb7c4a17a8dd89fa",
+    "packages/engine/tests/worker-fakes.ts": "0e7d445597fd23d6ab52be7ff8e75824232c734fbc972a0ce135dff78a2fe5d1",
+    "packages/engine/tests/worker-fixtures.ts": "d2581cef8a44a0fc156950afae6b3b6dd7116a3f9ebfb9989d5d884e2d62a791",
+    "packages/engine/tests/worker-journal.test.ts": "070f43c797157cefa1da2de6dd412d7e96007627fa2ef6b2cfd99f10ad3a4051",
+    "packages/engine/tests/worker-lifecycle.test.ts": "090d68c1dee360d9b106a422a45c82bde429239ce83c58c9e6350b2e169047be",
+    "packages/engine/tests/worker-memory-journal.ts": "b629b981146782fa5a2dfb836594fbeeefcf30bf76f087c1ad2c104d48234ab7",
+    "packages/engine/tests/worker-properties.test.ts": "00aeea8e2bed47617a0341bb6cc645355b6ab1479d5c60b88ce98f1f74fb2391",
+    "packages/engine/tests/worker-property-fixture.ts": "290d49d7e293560f97be95a4cfbfcc7784cfa326a88348dafbdc3107e0f552fd",
+    "packages/engine/tests/worker-service-factories.test.ts": "e163f804d50058e5434d07f42d07d56802866a24368c1921710939b69129bd71",
+    "packages/engine/tests/xstate-compatibility.test.ts": "4ea6a20c35dbb392adc72bc785491f36d35fdc8bb9675726237ee493b1fdf578",
+    "packages/engine/tsconfig.json": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60",
+    "packages/github-adapter/moon.yml": "b70e0a5e533cbb1b6736d61837c7e9c05424b35597beec092089a7372751e068",
+    "packages/github-adapter/package.json": "87eb1cab55001f2aa746e0cf800ee5a5d7f60a4aec252869e549936f6daecd7f",
+    "packages/github-adapter/src/github-auth.ts": "58e59d5a2c0cd698a14db0575b677714e8488028d19fc1f6cc2906e1c825517c",
+    "packages/github-adapter/src/github-authority.ts": "33893ec18925349ed024b09cb8e06d36c65a9ec9d66ddccc33493703d7451f44",
+    "packages/github-adapter/src/github-http.ts": "a0bed418e543196605c73e394a0d59f2c98fc61e8986b9df582c97c3fd89a941",
+    "packages/github-adapter/src/github-payload.ts": "5392debc4ae1d14f632d90e5d4812ecd1c40dc4cd11e68d247cacd213555369d",
+    "packages/github-adapter/src/live-sqlite-inbox.ts": "37cc653f07689507c7e1593ad010699ee8df2dd3fbf8e2858da61848cefae32c",
+    "packages/github-adapter/src/live-sqlite-storage.ts": "37963b7fc6421be1ca2d095decc8892351188af4034d94fd64fe350542159f13",
+    "packages/github-adapter/src/local-state.ts": "7a03da85b3e3f9dc11ffc07eb5af0b99c9272840eb021e645501693814fb380c",
+    "packages/github-adapter/src/request-body.ts": "6023cdbffc82590882578d2a677ec3831c859a7449d9fae071869d118bfa49a3",
+    "packages/github-adapter/src/verified-ingress.ts": "cbf4c13dbb5384785ee6844f7c8d1ec4b072bd61403d676ab02492c4b1ab5890",
+    "packages/github-adapter/tests/compatibility.test.ts": "45c485f41fea334a02422fa84e1b6d0094d299969150aa87f655cac624924bf5",
+    "packages/github-adapter/tests/github-authority.test.ts": "a7012618ec92da7ff73894498fbd7b5852e5f1d3a96b25f5f40fe667469c1d67",
+    "packages/github-adapter/tests/live-sqlite-fixtures.ts": "32aea97fa68b811c11453467b1b51cd8c8dcb0f97c1a5a69edab9501b0211952",
+    "packages/github-adapter/tests/live-sqlite-inbox.test.ts": "8d646f5a7a8ae6f68cbb58ce4cfa6584801acb99d40c4de7fa9d9737df76b0f4",
+    "packages/github-adapter/tests/local-state.test.ts": "c713a6f997178a7a74b6f965c66d0fc00a272f16a44484b8fbaf5ed5f7c4da53",
+    "packages/github-adapter/tests/protocol.test.ts": "4dde82796f9d7d75cbbbb6bc37d0091824802eccbd6533770cd026c62b728f76",
+    "packages/github-adapter/tsconfig.json": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60",
+    "patches/@flue%2Fruntime@2.3.0.patch": "07d115c8c98bea3c28011afe76e838a89a5126b2f401bad1091af678c008931a",
+    "patches/gaxios@7.3.1.patch": "7ea7b1f29d158ab1595b71f798b71c9c44249ae29567b12dcf6d5d7e35239e3e",
+    "probes/bun-effect-flue/moon.yml": "8438f009494116f63dcb645a842bece20c07bd95be1196f936f52108f7e846e7",
+    "probes/bun-effect-flue/package.json": "3698bb31cec0c989d31ed0f3520967290f83341c2af882e93a06ab405e881b19",
+    "probes/bun-effect-flue/src/cancellation-child.ts": "48299c2f81348c386ccd72a15e4b1219597e6b8fd543e992f3d802dd5c27b603",
+    "probes/bun-effect-flue/src/composition.ts": "4cc5bf300b1aa4cfd88843b81e21d5b09739df7ff735ce35b8ff30ef9f27ed52",
+    "probes/bun-effect-flue/src/fixture.ts": "2c9f7976037e0e56956dfc4fa388e706908574081a590ab9fb5e253e1aa1def3",
+    "probes/bun-effect-flue/src/flue-probe.ts": "2617564dec52dff46c8431b37ef95462582f119e7ca4fc0ced0495387ed6d5ba",
+    "probes/bun-effect-flue/src/ledger.ts": "15d3dbd288576ef4e985d963a8e16d3a7bc05532279888a964d35c047594ea09",
+    "probes/bun-effect-flue/src/protocol.ts": "262ccacd5aeff674a47933a0f5ccb81baa2f0bc4eb848e7e6089b6cff9d75476",
+    "probes/bun-effect-flue/src/recorder.ts": "2f3896f43c1074141cafd28aa082d1589452df1a39ca50f72b250c9062b49e4a",
+    "probes/bun-effect-flue/src/report.ts": "ce3c10947c7b49c2f5938964b1ed6deac9aa041af5d99a36956735e27e9128e0",
+    "probes/bun-effect-flue/src/restart-child.ts": "fbbbab44710b2af50ca52f52f7d64e3cde660b7e81739d919a91754d9017a9ec",
+    "probes/bun-effect-flue/tests/cancellation.test.ts": "c69a15d5b11fc19f5bfcd4111cd4d36cc12da3e634adfc7497c235dd72d46a87",
+    "probes/bun-effect-flue/tests/fixture.test.ts": "247e5634a0982c931f31e4342c562e36eb2297bae81a19cdfc905916f22b9f85",
+    "probes/bun-effect-flue/tests/flue.test.ts": "e717330d98c6ba68baf1d81904e12bacd8bb9cf0df18fed23cdb87ca68330a7f",
+    "probes/bun-effect-flue/tests/ledger.test.ts": "e16952f93b60e86b2f22920f8c3b61eaa2356e3a0e0bf3ca94ebf4bf9e747590",
+    "probes/bun-effect-flue/tests/process.ts": "8fab980543812adac27f21102c20c3f9756c7168328f52c929846ef6f981b279",
+    "probes/bun-effect-flue/tests/protocol.test.ts": "5855c46dd5d2852a76fb15cee7829b2d6d17f430c02ee2f2c3875e9b3e742391",
+    "probes/bun-effect-flue/tests/report.test.ts": "57c8a69bb8cd5f2b78e5aff368790555f8f0c6ad8130b76e8df82d0109912a06",
+    "probes/bun-effect-flue/tests/restart.test.ts": "6a38299949208f66ee2ad769fce4edad7dbdb7b62422ee12e7a41ec67125afcb",
+    "probes/bun-effect-flue/tsconfig.json": "2fd112124a95843621a820ba00f3076903df2ac3a52c7d21fb7f0f6d60a0ca02",
+    "probes/github-admission/moon.yml": "b70e0a5e533cbb1b6736d61837c7e9c05424b35597beec092089a7372751e068",
+    "probes/github-admission/package.json": "88e33206d7af4a406dd5614fa7ec1f3359e99de93ebde1cd19515c1a4190b446",
+    "probes/github-admission/src/composition.ts": "b89af5e3714246678db7ab0e86d261504137184f953b5bae682b54a970b97f7d",
+    "probes/github-admission/src/fixture.ts": "633eaab210f2e0c5084dbf5eb4a9ab61eddc3600f9dc49506b3352cd54607f3c",
+    "probes/github-admission/src/github-ingress.ts": "13491c9364115c74dde6eb86bd609d99d448a1afad87cdaa243d4e820a36cbc4",
+    "probes/github-admission/src/github-payload.ts": "195865aeafabcd2bfc68530f76472cb48cca24ebd9a816603b3459389e93969c",
+    "probes/github-admission/src/report.ts": "9d2597bfe0690edb57e494cef02b4b3152feccb922e6b1dadb57532bdb24a0e2",
+    "probes/github-admission/src/request-body.ts": "f6fb4c4d8e523b8af0b9aa594131dcfd58912cc9449a2f6eca21431fab06c4f6",
+    "probes/github-admission/src/restart-child.ts": "302ce7e074e6b6395d664c04b5375ce2c723be1346a7751dea4266c6d0dc26c8",
+    "probes/github-admission/src/sqlite-inbox.ts": "875331c0e14d00104bfd65737dc655965920ef78bded748716a59c6417fe5a50",
+    "probes/github-admission/src/sqlite-storage.ts": "85c04c9d570d200a86fa25adc58e558a33462087897f709d42a2e9c0ca786fc7",
+    "probes/github-admission/tests/compatibility.test.ts": "e13542fdabfe2673308a73372ea673eaec526c5dc6a7a5bd8152e227fad72bdc",
+    "probes/github-admission/tests/composition.test.ts": "22cd860f7096947a0d8addb66c2346fc3b3c4a45272dda7ab6ec7cd00ae6af8c",
+    "probes/github-admission/tests/github-ingress.test.ts": "b5869b7a168f3a3adef11bbb68fb78127419e00beb59ea3fb4cdb6ff7276b451",
+    "probes/github-admission/tests/github-payload.test.ts": "6bb44e845ca32da51d1acabbd2cc25a43010172e014016a2612cf520d6227a0c",
+    "probes/github-admission/tests/native-files.test.ts": "055542bcbbd9638b107e166d1c509668a672f49fa0b507a00178748a68e9ef6e",
+    "probes/github-admission/tests/report.test.ts": "d8fe85d9d75a7b0e5a3ca2bf205abd75029eac72413af2e87d38ba7e4ff8c3a6",
+    "probes/github-admission/tests/request-body.test.ts": "65945686c81f031a8db36b150ed56e527e0e7ec9c98df38c10ddb41ded1e61da",
+    "probes/github-admission/tests/restart-process.test.ts": "253c95940a594c601c9ab85ef023142cb14a5e2d18142c7fe13b985ea91fe3b6",
+    "probes/github-admission/tests/restart.test.ts": "9ccff023a211a009f2d64de97b811595258cf5a0011980cbe85b5438a098a88c",
+    "probes/github-admission/tests/sqlite-inbox.test.ts": "9559d84c7d8cf5c01f5a95b844c6dd7f47c5b47538cd4ccee838dbf1c62a710c",
+    "probes/github-admission/tsconfig.json": "81a7683d329f7084d8f611f59ca72fba77cb29b0783498107a7543dff2376e60",
+    "tsconfig.base.json": "e3b4043691ce77a31810768208b6719041723a3ecf794acb722994aaf2d3f895"
+  },
+  "physicalEffect": [
+    "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/package.json",
+    "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/package.json",
+    "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/package.json",
+    "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/package.json",
+    "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/package.json",
+    "/private/tmp/leviathan-compatibility/node_modules/.bun/effect@4.0.5/node_modules/effect/package.json"
+  ],
+  "rules": {
+    "linteffect/no-react-state": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-if-statement": "error",
+    "linteffect/no-switch-statement": "error",
+    "linteffect/no-ternary": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-return-null": "error",
+    "linteffect/no-option-as": "error",
+    "linteffect/no-effect-never": "error",
+    "linteffect/no-arrow-ladder": "error",
+    "linteffect/no-branch-in-object": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-iife-wrapper": "error",
+    "linteffect/no-return-in-arrow": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-return-in-callback": "error",
+    "linteffect/no-effect-fn-generator": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-effect-sync-console": "error",
+    "linteffect/no-console-in-effect-flow": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-effect-log-without-structured-context": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/require-span-on-public-service-method": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-runpromise-in-non-async-test-body": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/require-effect-flip-for-error-test": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-test-mock-layer-when-default-available": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-nested-effect-gen": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-yield-without-star-in-effect-gen": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-piped-yield-in-gen": "error",
+    "linteffect/no-gen-for-mapping": "error",
+    "linteffect/prefer-gen-for-workflow": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-business-logic-in-pipe": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-large-anonymous-flow": "error",
+    "linteffect/no-effect-in-flow": "error",
+    "linteffect/prefer-named-flow": "error",
+    "linteffect/prefer-flow-for-pure-pipeline": "error",
+    "linteffect/prefer-pipe-for-behavior": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/prefer-decorated-effect-before-gen": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-workflow-in-behavior-pipe": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-mixed-pillar-function": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-clever-effect-expression": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/prefer-extracted-concept": "error",
+    "linteffect/prefer-effect-service": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-layer-provide-in-service-definition": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-namespace-effect-import": "error",
+    "linteffect/no-manual-service-object-export": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-layer-merge-in-request-handler": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-service-method-returning-promise": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/prefer-layer-pipe": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-inline-layer-provide-in-program": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/prefer-layer-mergeall-for-infrastructure": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-service-layer-scatter": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-match-void-branch": "error",
+    "linteffect/no-json-parse-without-schema": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-date-now-in-effect": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-new-date-in-domain-logic": "error",
+    "linteffect/no-match-effect-branch": "error",
+    "linteffect/warn-effect-sync-wrapper": "error",
+    "linteffect/no-effect-side-effect-wrapper": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-effect-all-step-sequencing": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-async-effect-combinator-callback": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-throw-in-effect-logic": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-or-die-outside-boundary": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-swallowed-catch-all": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-effect-ignore": "error",
+    "linteffect/no-try-catch-in-effect-logic": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-promise-api-in-effect-logic": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-try-catch": "error",
+    "linteffect/no-effect-wrapper-alias": "error",
+    "linteffect/no-manual-effect-channels": "error",
+    "linteffect/no-wrapgraphql-catchall": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-render-side-effects": "error",
+    "linteffect/no-atom-registry-effect-sync": "error",
+    "linteffect/no-family-collection-read": "error",
+    "linteffect/no-inline-runtime-provide": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-naked-object-state-update": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-effect-succeed-variable": "error",
+    "linteffect/no-effect-type-alias": "error",
+    "linteffect/no-public-generic-effect-error": "error",
+    "linteffect/no-early-catchall-null": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-empty-error-tag": "error",
+    "linteffect/no-expected-state-as-error": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-exception-domain-error": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-effect-fail-error-message": "error",
+    "linteffect/no-catchall-generic-rethrow": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-log-only-error-handling": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-error-as-public-effect-error": "error",
+    "linteffect/no-unknown-public-error-channel": "error",
+    "linteffect/no-mixed-effect-error-shapes": "error",
+    "linteffect/no-model-overlay-cast": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-unknown-boolean-coercion-helper": "error",
+    "linteffect/no-fromnullable-nullish-coalesce": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-option-boolean-normalization": "error",
+    "linteffect/no-string-sentinel-return": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-string-sentinel-const": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-raw-domain-id-alias": "error",
+    "linteffect/no-boolean-domain-flag": "error",
+    "linteffect/no-magic-domain-string": "error",
+    "linteffect/no-raw-domain-primitive-params": "error",
+    "linteffect/no-raw-time-domain-field": "error",
+    "linteffect/no-hidden-effect-execution": [
+      "error",
+      {
+        "boundaryPaths": ["probes/bun-effect-flue/src/ledger.ts", "**/*.test.ts"]
+      }
+    ],
+    "linteffect/no-boundary-try-catch-without-effect-map": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-node-fs-in-effect-code": "error",
+    "linteffect/no-node-platform-in-shared-code": [
+      "error",
+      {
+        "boundaryPaths": [
+          "probes/bun-effect-flue/src/flue-probe.ts",
+          "probes/bun-effect-flue/src/restart-child.ts",
+          "probes/bun-effect-flue/tests/process.ts",
+          "**/*.test.ts"
+        ]
+      }
+    ],
+    "linteffect/no-process-env-direct-read": [
+      "error",
+      {
+        "boundaryPaths": ["probes/bun-effect-flue/tests/process.ts", "**/*.test.ts"],
+        "configPaths": []
+      }
+    ],
+    "linteffect/no-overloaded-options-object": "error",
+    "linteffect/no-domain-logic-in-conditional": "error",
+    "linteffect/no-implicit-state-machine-object": "error",
+    "linteffect/no-adhoc-domain-error": "error",
+    "linteffect/no-domain-meaning-by-folder-only": "error",
+    "linteffect/no-effect-as": "error",
+    "linteffect/no-effect-do": "error",
+    "linteffect/no-effect-bind": "error",
+    "linteffect/no-run-effect-outside-boundary": [
+      "error",
+      {
+        "effectVersion": 4,
+        "boundaryPaths": ["probes/bun-effect-flue/src/ledger.ts", "**/*.test.ts"]
+      }
+    ],
+    "linteffect/prevent-dynamic-imports": "error",
+    "linteffect/no-nested-effect-call": "error",
+    "linteffect/no-effect-ladder": "error",
+    "linteffect/no-flatmap-ladder": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-pipe-ladder": "error",
+    "linteffect/no-call-tower": "error",
+    "linteffect/no-unbounded-effect-all": "error",
+    "linteffect/no-fire-and-forget-fork": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-fork-in-loop": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-race-without-cleanup": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-unobserved-fiber": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-unbounded-concurrent-retry": "error",
+    "linteffect/no-blocking-call-in-effect": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-promise-concurrency-in-effect": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-shared-mutable-state-across-fibers": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-timeout-with-noninterruptible-promise": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-uninterruptible-concurrent-region": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-unbounded-queue-or-pubsub": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-global-mutable-concurrency-state": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-manual-deferred-coordination": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-acquire-without-scoped-release": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-manual-resource-close": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-unbound-scope": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-resource-succeed-escape": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-resource-without-acquire-release": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-request-scoped-long-lived-resource": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-global-resource-singleton": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-run-with-open-resource": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-nested-acquire-release": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-missing-layer-provision-at-run": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-yield-with-held-semaphore-permit": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-yield-with-held-mutable-ref": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ],
+    "linteffect/no-unscoped-background-fiber": [
+      "error",
+      {
+        "effectVersion": 4
+      }
+    ]
+  },
+  "graph": {
+    "apps/github-ingress/src/cli.ts": ["effect", "./composition.ts"],
+    "apps/github-ingress/src/composition.ts": [
+      "@effect/platform-bun",
+      "@leviathan/engine",
+      "@leviathan/github-adapter/authority",
+      "@leviathan/github-adapter/protocol",
+      "@leviathan/github-adapter/storage",
+      "effect",
+      "./config.ts",
+      "./listener.ts",
+      "./responses.ts"
+    ],
+    "apps/github-ingress/src/config.ts": ["@leviathan/domain", "effect"],
+    "apps/github-ingress/src/listener.ts": ["effect", "./config.ts"],
+    "apps/github-ingress/src/main.ts": ["effect", "./cli.ts"],
+    "apps/github-ingress/src/qualification-report.ts": ["effect"],
+    "apps/github-ingress/src/responses.ts": [
+      "@leviathan/domain",
+      "@leviathan/github-adapter/protocol",
+      "effect",
+      "./listener.ts"
+    ],
+    "packages/domain/src/command-admission-policy.ts": [
+      "effect",
+      "./command-admission.ts",
+      "./identities.ts"
+    ],
+    "packages/domain/src/command-admission.ts": ["effect", "./identities.ts"],
+    "packages/domain/src/identities.ts": ["effect"],
+    "packages/domain/src/index.ts": [
+      "./identities.ts",
+      "./verification.ts",
+      "./upgrade-run.ts",
+      "./worker-operation.ts",
+      "./worker-evidence.ts",
+      "./command-admission.ts",
+      "./command-admission-policy.ts",
+      "./live-admission.ts",
+      "./live-admission-policy.ts"
+    ],
+    "packages/domain/src/live-admission-policy.ts": [
+      "effect",
+      "./command-admission.ts",
+      "./live-admission.ts"
+    ],
+    "packages/domain/src/live-admission.ts": [
+      "effect",
+      "./command-admission.ts",
+      "./identities.ts"
+    ],
+    "packages/domain/src/upgrade-run.ts": ["effect", "./identities.ts", "./verification.ts"],
+    "packages/domain/src/verification.ts": ["effect", "./identities.ts"],
+    "packages/domain/src/worker-evidence.ts": [
+      "effect",
+      "./identities.ts",
+      "./worker-operation.ts"
+    ],
+    "packages/domain/src/worker-operation.ts": ["effect", "./identities.ts", "./upgrade-run.ts"],
+    "packages/engine/src/command-admission.ts": [
+      "@leviathan/domain",
+      "effect",
+      "./command-inbox-port.ts"
+    ],
+    "packages/engine/src/command-inbox-contracts.ts": ["@leviathan/domain"],
+    "packages/engine/src/command-inbox-errors.ts": ["effect"],
+    "packages/engine/src/command-inbox-factory.ts": [
+      "@leviathan/domain",
+      "effect",
+      "./command-inbox-errors.ts"
+    ],
+    "packages/engine/src/command-inbox-port.ts": ["effect", "./command-inbox-factory.ts"],
+    "packages/engine/src/contracts.ts": ["@leviathan/domain", "effect"],
+    "packages/engine/src/errors.ts": ["effect"],
+    "packages/engine/src/index.ts": [
+      "./contracts.ts",
+      "./errors.ts",
+      "./service-factories.ts",
+      "./ports.ts",
+      "./command-inbox-contracts.ts",
+      "./command-inbox-errors.ts",
+      "./command-inbox-factory.ts",
+      "./command-inbox-port.ts",
+      "./command-admission.ts",
+      "./live-admission-errors.ts",
+      "./live-admission-factories.ts",
+      "./live-admission-ports.ts",
+      "./live-admission-service.ts",
+      "./run-coordinator.ts",
+      "./worker-contracts.ts",
+      "./worker-errors.ts",
+      "./worker-service-factories.ts",
+      "./worker-ports.ts",
+      "./worker-lifecycle-service.ts"
+    ],
+    "packages/engine/src/live-admission-errors.ts": ["effect"],
+    "packages/engine/src/live-admission-factories.ts": [
+      "@leviathan/domain",
+      "effect",
+      "./command-inbox-factory.ts",
+      "./live-admission-errors.ts"
+    ],
+    "packages/engine/src/live-admission-ports.ts": ["effect", "./live-admission-factories.ts"],
+    "packages/engine/src/live-admission-service.ts": [
+      "@leviathan/domain",
+      "effect",
+      "./live-admission-ports.ts"
+    ],
+    "packages/engine/src/ports.ts": ["effect", "./service-factories.ts"],
+    "packages/engine/src/run-coordinator.ts": [
+      "@leviathan/domain",
+      "effect",
+      "./contracts.ts",
+      "./ports.ts"
+    ],
+    "packages/engine/src/service-factories.ts": ["effect", "./errors.ts"],
+    "packages/engine/src/worker-contracts.ts": ["@leviathan/domain", "effect"],
+    "packages/engine/src/worker-errors.ts": ["effect"],
+    "packages/engine/src/worker-lifecycle-service.ts": [
+      "@leviathan/domain",
+      "@xstate/effect",
+      "effect",
+      "./worker-contracts.ts",
+      "./worker-errors.ts",
+      "./worker-lifecycle.ts",
+      "./worker-ports.ts"
+    ],
+    "packages/engine/src/worker-lifecycle-tasks.ts": [
+      "@leviathan/domain",
+      "@xstate/effect",
+      "effect",
+      "xstate/validation",
+      "./worker-contracts.ts",
+      "./worker-errors.ts",
+      "./worker-ports.ts"
+    ],
+    "packages/engine/src/worker-lifecycle.ts": [
+      "@leviathan/domain",
+      "@xstate/effect",
+      "effect",
+      "xstate/validation",
+      "./worker-contracts.ts",
+      "./worker-errors.ts",
+      "./worker-lifecycle-tasks.ts"
+    ],
+    "packages/engine/src/worker-ports.ts": ["effect", "./worker-service-factories.ts"],
+    "packages/engine/src/worker-service-factories.ts": ["effect", "./worker-errors.ts"],
+    "packages/github-adapter/src/github-auth.ts": [
+      "@leviathan/domain",
+      "@leviathan/engine",
+      "effect",
+      "jose"
+    ],
+    "packages/github-adapter/src/github-authority.ts": [
+      "@leviathan/domain",
+      "@leviathan/engine",
+      "effect",
+      "./github-auth.ts",
+      "./github-http.ts"
+    ],
+    "packages/github-adapter/src/github-http.ts": ["@leviathan/engine", "effect"],
+    "packages/github-adapter/src/github-payload.ts": ["@leviathan/domain", "effect"],
+    "packages/github-adapter/src/live-sqlite-inbox.ts": [
+      "bun:sqlite",
+      "@leviathan/domain",
+      "@leviathan/engine",
+      "effect",
+      "./live-sqlite-storage.ts",
+      "./local-state.ts"
+    ],
+    "packages/github-adapter/src/live-sqlite-storage.ts": [
+      "@leviathan/domain",
+      "@leviathan/engine",
+      "effect"
+    ],
+    "packages/github-adapter/src/local-state.ts": ["@leviathan/engine", "effect"],
+    "packages/github-adapter/src/request-body.ts": ["@leviathan/domain", "effect"],
+    "packages/github-adapter/src/verified-ingress.ts": [
+      "@flue/github",
+      "@leviathan/domain",
+      "effect",
+      "./github-payload.ts",
+      "./request-body.ts",
+      "./request-body.ts",
+      "./github-payload.ts"
+    ]
+  },
+  "runtimeOwners": ["apps/github-ingress/src/composition.ts"],
+  "rootOverride": {
+    "@effect/platform-node-shared": "4.0.5"
+  }
+}
