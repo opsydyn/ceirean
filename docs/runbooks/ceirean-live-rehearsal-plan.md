@@ -59,9 +59,13 @@ permissions; use the absolute `--env-file` path described in the infrastructure
 README. Read-only API verification on 2026-10-21 confirmed an active token
 (expiry `2026-10-28T23:59:59Z`), the pinned zone/account, and zero exact-name
 collisions in complete live/deleted tunnel inventories and exact-hostname DNS.
-Write grants remain separate from this read-access proof. Preparation still
-requires protected-state qualification and review of the remote plan, with
-another collision check immediately before apply. In the pinned provider, an existing
+Write grants remain separate from this read-access proof. The owner-approved
+temporary plan-only config subsequently produced exactly three creates in both
+ordinary and detailed CLI plan runs, from owner-only protected local storage.
+The state directory remained empty; this is not write-durability/recovery proof.
+The temporary config was removed and the real entrypoint gate is unchanged.
+Provisioning requires a guarded operational entrypoint, separate apply approval
+and another collision check immediately before apply. In the pinned provider, an existing
 same-name tunnel can be reused despite `adopt: false`; preflight alone does not
 close a race. The owner accepted the stable random-suffixed name and supervised
 preflight as a bounded mitigation, not a provider fix. All three resources pin

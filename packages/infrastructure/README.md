@@ -110,7 +110,7 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [ ] Review write grants separately; successful GETs do not prove write permissions.
 - [x] Inspect all four existing tunnels: no `ceirean-rehearsal-bcea4099a8934e32` collision; repeat immediately before apply.
 - [x] Create owner-only operational/auth directories outside Git; no credential entered.
-- [ ] Review a remote plan: exactly three creates, no replacements/deletions/adoption.
+- [x] Review a plan-only run: exactly three creates, no updates/replacements/deletions/adoption.
 - [ ] Apply only that plan; verify remote route/DNS and zero connectors.
 
 Do not use `alchemy dev`, `--adopt`, automatic approval, or start cloudflared.
@@ -207,3 +207,44 @@ written, connector tokens retrieved, auth profile stored or services started.
 These reads prove live read access only, not write grants or deployment readiness.
 Repeat collision checks immediately before any approved apply. The actual stack
 entrypoint remains unconditionally closed pending protected-state/plan review.
+
+## Plan-Only Review
+
+2026-10-21, 16:42-16:43 UTC: the owner approved a disposable plan-only config
+using the unchanged declaration, exported credential boundary and local state.
+Both the ordinary and detailed pinned CLI `plan` invocations exited 0. The real
+`alchemy.run.ts` and its unconditional deployment gate were not changed. The
+temporary config was removed after review; it must not be reused for apply.
+
+The CLI was launched from
+`/Users/alancurrie/Library/Application Support/Ceirean/infrastructure`, with
+umask 077, its protected `auth` directory as `ALCHEMY_HOME`, telemetry disabled,
+Bun implicit dotenv loading disabled, the absolute root `.env` path, explicit
+profile `ceirean-rehearsal` and stage `rehearsal`. No `--adopt`, `--yes`,
+deploy, destroy, dev or apply invocation was used.
+
+The detailed plan contained exactly:
+
+| Resource            | Operation | Reviewed Properties                                                     |
+| ------------------- | --------- | ----------------------------------------------------------------------- |
+| `RehearsalTunnel`   | create    | Pinned random-suffixed name; remotely managed; `adopt: false`           |
+| `RehearsalIngress`  | create    | Exact hostname and `^/webhook$`; `http://127.0.0.1:8787`; 404 catch-all |
+| `RehearsalHostname` | create    | Exact hostname; pinned zone; proxied CNAME                              |
+
+The DNS target and ingress tunnel ID are unresolved references, shown as known
+after apply. Offline graph tests separately verify the CNAME target uses the
+new tunnel ID and `.cfargotunnel.com`. No updates, replacements, deletions or
+adoptions appeared in the plan. All three resources retain engine adoption off.
+
+Metadata-only inspection confirmed operational/auth/state/log directories are
+0700 and generated log/version-check files are 0600, owned by `alancurrie`.
+The SDK created an empty `auth/profiles/default` directory but no credential
+profile document. The protected `.alchemy/state` directory remained empty.
+This qualifies empty-state planning and storage permissions, not resource-state
+write durability or recovery after apply. Port 8787 had no listener afterward.
+
+No Cloudflare resource was applied, connector credential retrieved or service
+activated. Successful planning does not independently prove write grants. Before
+provisioning, review a guarded operational entrypoint, obtain separate apply
+approval and repeat the collision check. Do not simply remove the real gate or
+apply the deleted temporary config. Main and origin were not changed by this run.
