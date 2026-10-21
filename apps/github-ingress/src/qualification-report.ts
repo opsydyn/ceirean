@@ -83,15 +83,6 @@ const report = Schema.Struct({
   live: Schema.Literal(false),
   deployed: Schema.Literal(false),
 });
-const QualificationFailure = Schema.Literals([
-  'InvalidReport',
-  'GateCoverage',
-  'SourceMismatch',
-  'SuiteTotals',
-  'ControlCoverage',
-  'ControlRestoration',
-]);
-export type QualificationFailure = typeof QualificationFailure.Type;
 function complete(actual: ReadonlyArray<string>, required: ReadonlyArray<string>) {
   return (
     actual.length === required.length &&

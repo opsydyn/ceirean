@@ -83,6 +83,9 @@ was not rechecked; this local slice does not supersede rehearsal shutdown proof.
 
 ## Next Bounded Step
 
+Completed in the separately approved
+[unused-declaration cleanup](unused-declaration-cleanup-20261021.md).
+
 Review deletion of the one unused helper and three unused type aliases as a
 separate source-cleanup slice, preserving the required MCP peer. Do not downgrade
 rules or add suppressions to produce a zero count.

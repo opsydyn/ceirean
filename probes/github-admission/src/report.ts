@@ -5,7 +5,6 @@ export const RestartResult = Schema.Struct({
   disposition: Schema.Literals(['Recorded', 'Duplicate']),
   decisionId: DecisionId,
 });
-export type RestartResult = typeof RestartResult.Type;
 export const RestartPhase = Schema.Struct({
   phase: Schema.Literals(['AfterCommit', 'AfterDecision']),
 });
@@ -184,7 +183,6 @@ function validEvidence(evidence: typeof EvidenceFields.Type) {
   );
 }
 const MeasuredEvidence = EvidenceFields.check(Schema.makeFilter(validEvidence));
-export type MeasuredEvidence = typeof MeasuredEvidence.Type;
 
 /** Validates supplied observations only; it never invokes tools or measures a gate itself. */
 export function buildReport(input: unknown) {

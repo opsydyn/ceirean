@@ -5,20 +5,9 @@ import {
   Digest,
   decideAssessment,
 } from '@ceirean/domain';
-import { Effect, Layer, Match } from 'effect';
+import { Effect, Match } from 'effect';
 
-import {
-  CommandAdmission,
-  CommandInbox,
-  makeCommandAdmission,
-  makeCommandInbox,
-} from '../src/index.ts';
-
-export function commandApplication(driver: Parameters<typeof makeCommandInbox>[0]) {
-  const inbox = Layer.succeed(CommandInbox, makeCommandInbox(driver));
-  const admission = Layer.effect(CommandAdmission, makeCommandAdmission());
-  return admission.pipe(Layer.provide(inbox));
-}
+import { CommandInbox, makeCommandAdmission, makeCommandInbox } from '../src/index.ts';
 
 export function acquireCommandAdmission(driver: Parameters<typeof makeCommandInbox>[0]) {
   const acquisition = makeCommandAdmission();

@@ -39,6 +39,9 @@ scan; there is no working-directory convenience command or CI integration.
 The [internal export cleanup](docs/assessments/internal-export-cleanup-20261021.md)
 reduces that report from 29 to five findings while retaining implementations and
 compatibility dependencies; the remaining declarations are not suppressed.
+The subsequent [unused-declaration cleanup](docs/assessments/unused-declaration-cleanup-20261021.md)
+removes those four dead declarations. The current audit exits 0 with only the
+required MCP compatibility-peer warning retained, without suppressions.
 
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
