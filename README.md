@@ -83,10 +83,11 @@ pull requests is not the success measure.
 
 ## Local GitHub Ingress
 
-Tasks 1-6 are independently accepted through `e8fb83c`: native authority,
-immutable SQLite evidence and the bounded local CLI/listener. Task 7 recovery
-and measured-report work is a candidate pending controller review, followed by
-a fresh whole-branch review. It is not whole-branch acceptance or live readiness.
+Tasks 1-7 are accepted by the controller: native authority, immutable SQLite
+evidence, bounded local CLI/listener and recovery qualification. The whole branch
+remains pending scoped final-fix review and controller verification. Task
+acceptance is not merge acceptance or live readiness. Fresh final-fix evidence
+is separate from the historical `b7f5d4e` qualification.
 See the [local-only runbook](docs/runbooks/local-github-ingress.md),
 [assessment](docs/assessments/local-github-ingress.md) and
 [source-bound evidence](docs/evidence/local-github-ingress.json).

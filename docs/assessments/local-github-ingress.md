@@ -2,9 +2,11 @@
 
 ## Current Candidate
 
-Tasks 1-6 are independently accepted through `e8fb83c` (903 tests at that
-source). Task 7 is a candidate pending controller review and subsequent fresh
-whole-branch review; it is not accepted whole-branch or live qualification.
+Tasks 1-7 are accepted by the controller. Whole-branch acceptance remains pending
+scoped final-fix review and controller verification; no merge or live acceptance
+is implied. The original 916-test `b7f5d4e` qualification is historical, not proof
+for the changed final-fix source. See the
+[final-fix report](../evidence/local-github-ingress/final-fix/final-fix-report.md).
 The [manifest](../evidence/local-github-ingress.json) binds actual final-source
 gate exits, log hashes, suite/assertion totals and restored behavioral controls.
 It keeps the tested source commit/tree separate from later docs/evidence commits.
@@ -36,8 +38,14 @@ Task reports, final-source gate logs, review closures and every ledger ruling
 
 Historical limitations remain: initial Task 5 broad-batch test-first history is
 incomplete; later RED/GREEN cannot recreate it. Task 6 TDD material is a summary
-with excerpts, distinct from its archived raw gate logs. Task 3 M1 memory receipt
-metadata and M2 permutation-law weakness remain deferred to final triage. Moon
+with excerpts, distinct from its archived raw gate logs. The final fix preserves
+known memory receipt metadata and compares paired fresh reordered histories
+using normalized business outcomes. This corrects M2 coverage without asserting
+a production ordering defect. The original 24000 new/168000 legacy primary
+case budgets and all seeds remain unchanged. Readiness readers now accumulate
+bounded newline messages with EOF/byte/deadline handling. Canonical outer archives
+are payload-only and completely indexed; the unchanged nested Task 6 archive
+retains historical AppleDouble/PAX metadata as an inspected exception. Moon
 update advertisements are preserved, not lint warnings or proof of pristine
 console output. Frozen installation is not zero-network evidence. No real key,
 GitHub API, tunnel, deployed listener or production durability was qualified.

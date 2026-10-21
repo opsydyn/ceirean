@@ -1,0 +1,9 @@
+{
+  "files": {
+    "docs/evidence/local-github-ingress/final-fix/qualify.py": "4053742858647d242e730d8ba4c249e1c487b2794e17ccc80fd2f7ea3d7ad7cb"
+  },
+  "filesHash": "8d82664d8374db4d2f262ee1f72259c60f8b5acfee84a0124f6e7ad00612ef9e",
+  "interpreter": "Python 3.14.4",
+  "applicationTestRunner": "1.4.2",
+  "notSourceInventoryOrSelfReferential": true
+}

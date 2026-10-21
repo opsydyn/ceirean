@@ -1,0 +1,64 @@
+[
+  {
+    "index": "docs/evidence/local-github-ingress/accepted-tasks-1-6-index.json",
+    "previousSha256": "c77f07d6948f90643e7de03cca14a5ab08083aa59e9b817e09656b09efc39b1d",
+    "sha256": "a5cf3a6d32b06d2d7190c85a8add8bc5c29b8585b1233c27c979e83b47f40e9d",
+    "removedAppleDouble": 212,
+    "indexedPayloadsPreserved": 212,
+    "nested": [
+      {
+        "path": "task-6-evidence/raw-gate-logs.tar.gz",
+        "sha256": "7d9b86923cfc50b4115830ac81dce45afcd30bdabb0bf212da9142910a50f734",
+        "regularMembers": 56,
+        "appleDoubleMembers": 28,
+        "paxHeaderMembers": [
+          "01-install.log",
+          "02-check.log",
+          "03-domain-typecheck.log",
+          "04-engine-typecheck.log",
+          "05-probe-typecheck.log",
+          "06-github-admission-typecheck.log",
+          "07-github-adapter-typecheck.log",
+          "08-github-ingress-typecheck.log",
+          "09-domain-test.log",
+          "10-engine-test.log",
+          "11-probe-test.log",
+          "12-github-admission-test.log",
+          "13-github-adapter-test.log",
+          "14-github-ingress-test.log",
+          "15-diff-check.log",
+          "16-staged-diff-check.log",
+          "17-lock-delta.log",
+          "18-hashes.log",
+          "pre-host-fix/01-install.log",
+          "pre-host-fix/02-check.log",
+          "pre-host-fix/03-domain-typecheck.log",
+          "pre-host-fix/04-engine-typecheck.log",
+          "pre-host-fix/05-probe-typecheck.log",
+          "pre-host-fix/06-github-admission-typecheck.log",
+          "pre-host-fix/07-github-adapter-typecheck.log",
+          "pre-host-fix/08-github-ingress-typecheck.log",
+          "pre-host-fix/09-domain-test.log",
+          "pre-host-fix/10-engine-test.log"
+        ],
+        "preservedByteIdentity": true,
+        "classification": "HistoricalArtifactException"
+      }
+    ]
+  },
+  {
+    "index": "docs/evidence/local-github-ingress/task-7-raw-index.json",
+    "previousSha256": "436619039e170d91774041cde28fb1ce7e2aadb8928e112faf322e5ccd4a1d69",
+    "sha256": "c116d7b18914d721200bd109f86763d9dec946ee6d9df7741cba828d3cf12875",
+    "removedAppleDouble": 156,
+    "indexedPayloadsPreserved": 154,
+    "nested": []
+  },
+  {
+    "archive": "docs/evidence/local-github-ingress/docs-verification.tar.gz",
+    "previousSha256": "f82117e95df2f3813a645f21234703bd3a474520219f98b1460d4c3e4fdac873",
+    "sha256": "e9da78c19c03f759befafe38ed12c7c54b9b5c708cd7e31f9d360970a2f44e90",
+    "removedAppleDouble": 4,
+    "indexedPayloadsPreserved": 4
+  }
+]

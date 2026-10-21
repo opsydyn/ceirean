@@ -2,13 +2,15 @@
 
 ## Approval Boundary
 
-Task 7 is a locally tested candidate pending controller review, not accepted
-whole-branch or live qualification. This runbook proposes an operator-controlled
+Tasks 1-7 are accepted by the controller. The whole branch remains pending scoped
+final-fix review and controller verification, not merge or live acceptance.
+This runbook proposes an operator-controlled
 rehearsal; none of its live steps has been performed. No deployment, production
 availability/durability or exactly-once execution guarantee is made. Admission
 records do not execute assessments, agents, workers, repositories or GitHub writes.
 
-Tasks 1-6 are independently accepted through `e8fb83c`. See the
+The original `b7f5d4e` qualification remains historical; changed source is bound
+separately in [final-fix evidence](../evidence/local-github-ingress/final-fix/final-fix-report.md). See the
 [assessment](../assessments/local-github-ingress.md) and
 [measured manifest](../evidence/local-github-ingress.json). The manifest separates
 tested source from later documentation/evidence commits. Synthetic API fixtures
@@ -66,6 +68,24 @@ Status is local and read-only, not an HTTP endpoint. Configure requires stopped
 ingress, matching current revision and a unique next revision; it preserves
 replay keys. Stop the process before editing configuration, then configure and
 restart. Changing a file while running does not mutate the acquired policy/key.
+
+Before authority acquisition or listening, start holds ledger ownership and
+compares the complete validated file policy with the active stored policy.
+Any disagreement fails closed without installing policy or making API calls,
+and releases ownership. Status and configure intentionally do not require this
+equality: status inspects the ledger, and configure installs a different policy.
+`Refused` configure outcomes retain structured JSON (`AuthorityChanged`,
+`RevisionReused`, `CapacityExceeded`) and exit 1; Installed/init/status exit 0.
+
+Status reports counts, current policy, bounded policy history and up to 256
+structured outcomes from one validated read-only transaction, including while
+a listener owns the ledger. Outcomes contain decision identity/key, operator ID,
+decision/reason, local revision, timestamps and LocalPolicy or LiveChecked
+provenance. LiveChecked includes only the normalized permission observation's
+IDs, revisions, permission and observation/expiry times. These are historical
+facts, never reusable permission leases. No credentials, tokens, raw bodies,
+receipt digests or display names are returned. Corrupt rows fail status rather
+than yielding partial/empty success. No public status route exists.
 
 Start binds only `127.0.0.1:8787`, serving only `POST /webhook`. It refuses a
 second owner. A bind failure or malformed acquired key unwinds storage ownership.
@@ -144,7 +164,8 @@ webhook/API bodies. Canonical qualification artifacts live in
 
 ## Unapproved Live Checklist
 
-- [ ] Controller accepts Task 7 and completes fresh whole-branch review/triage.
+- [x] Controller accepts Tasks 1-7 (task acceptance only).
+- [ ] Controller completes scoped final-fix review and whole-branch verification/triage.
 - [ ] Owner approves real App/installation/owner/repository/operator immutable IDs.
 - [ ] Operator inspects actual App installation grants, repository restriction,
       token permissions and fresh base write/admin response; no broadened grants.

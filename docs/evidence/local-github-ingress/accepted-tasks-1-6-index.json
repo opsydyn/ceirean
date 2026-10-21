@@ -1,6 +1,6 @@
 {
   "archive": "docs/evidence/local-github-ingress/accepted-tasks-1-6.tar.gz",
-  "sha256": "c77f07d6948f90643e7de03cca14a5ab08083aa59e9b817e09656b09efc39b1d",
+  "sha256": "a5cf3a6d32b06d2d7190c85a8add8bc5c29b8585b1233c27c979e83b47f40e9d",
   "byteCompared": 212,
   "members": [
     {
@@ -1072,5 +1072,9 @@
     ".superpowers/sdd/2026-10-20-local-github-ingress/task-6-evidence/raw-gate-logs.tar.gz",
     ".superpowers/sdd/2026-10-20-local-github-ingress/task-6-evidence/tdd-progress.md",
     ".superpowers/sdd/2026-10-20-local-github-ingress/task-6-report.md"
-  ]
+  ],
+  "previousOuterSha256": "c77f07d6948f90643e7de03cca14a5ab08083aa59e9b817e09656b09efc39b1d",
+  "regularMembers": 212,
+  "unexpectedRegularMembers": 0,
+  "packaging": "USTAR payload-only; no AppleDouble, PAX or filesystem xattrs"
 }

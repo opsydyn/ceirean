@@ -56,8 +56,12 @@ if cleanup remains stuck; FailedShutdown does not claim a clean close.
 
 Only synthetic/injected HTTP and test-owned loopback have been exercised here.
 Live credentials, GitHub API access, tunnels and live acceptance are separate
-operator-authorized work. Tasks 1-6 are accepted through `e8fb83c`; Task 7 is a
-candidate pending controller review, not accepted whole-branch qualification.
+operator-authorized work. Tasks 1-7 are accepted by the controller; the whole
+branch remains pending scoped final-fix review and controller verification,
+not merge acceptance. Start requires complete active/file policy equality;
+configure Refused prints typed JSON and exits 1. Local read-only status includes
+bounded policies and decision/provenance/permission observations, never secrets
+or raw bodies, and has no public route.
 The [local-only runbook](../../docs/runbooks/local-github-ingress.md) covers
 PKCS#8 preparation, permission checks, explicit commands, capacity stops,
 failed shutdown, operator redelivery and replay-history loss after old restores.

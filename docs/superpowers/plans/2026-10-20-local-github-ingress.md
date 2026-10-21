@@ -11,14 +11,16 @@
 **Spec:** [Approved local GitHub ingress design](../specs/2026-10-20-local-github-ingress-design.md).
 
 Status: the owner approved the written spec and selected subagent-driven plan
-execution on 2026-10-20. Tasks 1-6 are committed and independently accepted
-through `e8fb83c` (903 tests and six typechecks at that source). Task 7 is a
-candidate pending controller review, then fresh whole-branch review. Task 7
-checkboxes remain unchecked until acceptance; no author-dispatched review or
-integration is authorized. Its measured final source/gates are recorded in
+execution on 2026-10-20. Tasks 1-7 are committed and accepted by the controller.
+The whole branch remains pending scoped final-fix review and controller
+verification, not merge acceptance. The final fix wave is personal execution
+without agents or reviewers; the controller resumes Mill for scoped rereview.
+No author-dispatched review or integration is authorized.
+The original b7 qualification remains historical. Fresh source/gates are recorded in
 `docs/evidence/local-github-ingress.json`, separately from later docs commits.
 All 24000 new primary law cases remain distinct from legacy cases and controls.
-Task 3 M1/M2 and Moon notices remain for final triage; initial Task 5 RED history
+Final-fix M1-M4 dispositions are in the canonical final-fix report/ledger.
+Moon notices remain preserved without upgrade; initial Task 5 RED history
 is incomplete and Task 6 TDD excerpts are not raw gate logs. Installer traffic
 was not independently traced.
 Live credentials, public tunnel, App modification, live GitHub access, merge and
@@ -215,11 +217,12 @@ local qualification report plus a usable, explicitly gated rehearsal runbook.
 gate exits/log hashes, restored controls and actual totals, returning a Result
 with finite validation reasons. It cannot set live/deployed qualification flags.
 
-- [ ] **1. RED restart/ambiguity cases.** Use phase sentinels and parent-owned watchdogs for real SIGKILL before transaction, after decision/evidence write, after commit/before response and while API work is pending. Reopen with synthetic credentials and confirm zero or one complete record, matching immutable evidence, no seeded history, released ownership and replay without fresh API checks where applicable. Restore of an older snapshot must be labelled replay-history loss, not automatically reconciled into completeness.
-- [ ] **2. Behavioural controls.** Temporarily break each of evidence binding, policy revision barrier, replay uniqueness, transaction rollback and abort ownership separately. Each focused case must fail twice for the intended reason, then exact source restoration and GREEN. Save control logs and restoration hashes; never commit a control mutation or count controls as property cases.
-- [ ] **3. Run full gates.** Sequential frozen install, root check, every workspace's uncached typecheck/test, whitespace and dependency/policy identity checks. Record exit codes, exact suite/assertion totals, 24000 new primary law cases separately from legacy law counts/shrinks, log hashes and source tree identity. Test report schema rejects missing/nonzero gates, unknown source identities and absent controls. Do not infer a passing result from a planned command list.
-- [ ] **4. Write runbook/report.** Document proposed CLI syntax, owner-only config/secret files, explicit init/start/status/configure, tunnel setup done by operator, exact permission checks, redelivery, full-capacity stop, failed shutdown, backup/reset caveats and secret-safe evidence. Default live checklist remains unchecked: real IDs, App grant inspection, tunnel provider/URL, external database path, finite duration, operator command/revocation/redelivery and restoration actions all need separate approval. Record live unavailable, no production durability/availability or exactly-once execution claim.
-- [ ] **5. Commit/review.** Commit `test: qualify local GitHub ingress recovery`; obtain a fresh whole-branch review and fix findings with verified commits. Link tested source separately from later docs-only evidence commits. Ask the owner how to integrate only after clean review/gates; do not merge/push or start the rehearsal implicitly.
+- [x] **1. RED restart/ambiguity cases.** Task-level recovery review accepted. Real SIGKILL phases cover pretransaction, staged decision/evidence, committed-before-response and pending API work. Old snapshots remain labelled replay-history loss, not completeness or exactly-once execution.
+- [x] **2. Behavioural controls.** Task-level controls accepted. Five controls require two intended REDs, exact restoration and GREEN; the final fix wave rebinds all five to the changed source. Controls are not primary law cases.
+- [x] **3. Run full gates.** Task-level source-bound qualification accepted. Its b7 records remain historical. Changed final-fix source requires the complete six-workspace gate block and 24000 new/168000 legacy primary law budgets without reusing old source binding.
+- [x] **4. Write runbook/report.** Task-level local-only runbook and measured report accepted. Live checklist remains unchecked; no real credentials, API/tunnel, deployment, durability/availability or exactly-once execution claim.
+- [x] **5. Commit/task review.** Task 7 commit and task review are accepted by the controller. Tested source remains distinct from docs/evidence commits.
+- [ ] **Whole-branch final-fix review/integration.** The first whole-branch review required I1-I3 and bounded M1-M4 fixes. The controller resumes Mill for scoped rereview, then handles final verification and integration choice. No merge, push or live rehearsal is implied by task acceptance.
 
 ## Full Gate Block
 

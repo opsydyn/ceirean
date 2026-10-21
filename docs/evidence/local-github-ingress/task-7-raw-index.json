@@ -1,6 +1,6 @@
 {
   "archive": "docs/evidence/local-github-ingress/task-7-raw.tar.gz",
-  "sha256": "436619039e170d91774041cde28fb1ce7e2aadb8928e112faf322e5ccd4a1d69",
+  "sha256": "c116d7b18914d721200bd109f86763d9dec946ee6d9df7741cba828d3cf12875",
   "byteCompared": 154,
   "members": [
     {
@@ -773,5 +773,9 @@
       "bytes": 4883,
       "sha256": "17dfdd35ce9ff5ca2be3ecd4f1045db6c9f3e932f2e895e046f4a273b4e89cef"
     }
-  ]
+  ],
+  "previousOuterSha256": "436619039e170d91774041cde28fb1ce7e2aadb8928e112faf322e5ccd4a1d69",
+  "regularMembers": 154,
+  "unexpectedRegularMembers": 0,
+  "packaging": "USTAR payload-only; no AppleDouble, PAX or filesystem xattrs"
 }

@@ -1,0 +1,17 @@
+{
+  "archive": "docs/evidence/local-github-ingress/final-fix/docs-verification.tar.gz",
+  "sha256": "b5bf73c869c4b1d9ab0ce413c32e69df6f87babd7cd674cce3948be7b8c595b9",
+  "unexpectedRegularMembers": 0,
+  "members": [
+    {
+      "path": "final-fix-docs-check.log",
+      "bytes": 358,
+      "sha256": "69c9e4dcdf6457614a2cf34f7ed22366a48e62d844360a5c163f4cf950586258"
+    },
+    {
+      "path": "final-fix-docs-integrity.log",
+      "bytes": 24583,
+      "sha256": "dd852840354a64f5d3a891db3b7f87a469f1ce9a8021c119c7c8faa0c03cd510"
+    }
+  ]
+}

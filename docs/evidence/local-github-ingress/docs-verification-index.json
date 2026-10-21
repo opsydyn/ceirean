@@ -1,0 +1,28 @@
+{
+  "archive": "docs/evidence/local-github-ingress/docs-verification.tar.gz",
+  "sha256": "e9da78c19c03f759befafe38ed12c7c54b9b5c708cd7e31f9d360970a2f44e90",
+  "members": [
+    {
+      "path": "task-7-docs-check.log",
+      "bytes": 358,
+      "sha256": "280074f29c0ba43127d70f66388bfa9b5c0a14b9e6902e2e0b293b5650487b02"
+    },
+    {
+      "path": "task-7-docs-integrity.log",
+      "bytes": 1070,
+      "sha256": "c9b9bab7c76e8cc379cecc39731660a7c24ee63e93b069b5a175b107231c0783"
+    },
+    {
+      "path": "task-7-docs-verify.mjs",
+      "bytes": 4436,
+      "sha256": "8c7744cf405bb5ca5f8d1c57de09f22eaa66babc90d6ceb14e75ddc92aa18a5c"
+    },
+    {
+      "path": "task-7-pack.mjs",
+      "bytes": 1776,
+      "sha256": "6e2ae9db5f75cae787a6cf482d049fcc3e24b72d6906cbf6632bdd53b66303e5"
+    }
+  ],
+  "previousOuterSha256": "f82117e95df2f3813a645f21234703bd3a474520219f98b1460d4c3e4fdac873",
+  "unexpectedRegularMembers": 0
+}
