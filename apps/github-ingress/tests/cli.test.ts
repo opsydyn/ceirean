@@ -12,7 +12,7 @@ const json = Schema.fromJsonString(Schema.Unknown);
 const encode = Schema.encodeSync(json);
 function* exercise() {
   const fs = yield* FileSystem.FileSystem;
-  const temporary = yield* fs.makeTempDirectoryScoped({ prefix: 'leviathan-cli-' });
+  const temporary = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-cli-' });
   const root = yield* fs.realPath(temporary);
   yield* fs.chmod(root, 0o700);
   const uid = Option.getOrThrow((yield* fs.stat(root)).uid);

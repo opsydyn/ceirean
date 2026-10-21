@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { WorkerIssuerId, WorkerContainerId } from '@leviathan/domain';
+import { WorkerIssuerId, WorkerContainerId } from '@ceirean/domain';
 import { createEffectActor, send, waitFor } from '@xstate/effect';
 import { Clock, Deferred, Effect, Exit, Fiber, Layer, Match, Option, Queue, Ref } from 'effect';
 import { TestClock } from 'effect/testing';

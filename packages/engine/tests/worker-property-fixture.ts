@@ -4,7 +4,7 @@ import {
   WorkerOperationId,
   type WorkerOperation,
   type WorkerObservation,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import {
   Array,
   Clock,
@@ -316,7 +316,7 @@ function makePropertyFixture(operation: WorkerOperation) {
 export class PropertyFixture extends Context.Service<
   PropertyFixture,
   Effect.Success<ReturnType<typeof makePropertyFixture>>
->()('@leviathan/test/PropertyFixture') {}
+>()('@ceirean/test/PropertyFixture') {}
 
 export function propertyFixtureLayer(operation: WorkerOperation = makeWorkerCase().operation) {
   function* assemble() {

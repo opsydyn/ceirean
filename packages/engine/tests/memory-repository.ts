@@ -1,4 +1,4 @@
-import type { RunId } from '@leviathan/domain';
+import type { RunId } from '@ceirean/domain';
 import { Effect, HashMap, Match, Option, Ref, Result, Schema } from 'effect';
 
 import { RunChange, RunSnapshot, type CommitResult } from '../src/contracts.ts';

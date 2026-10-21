@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, expect, test } from 'bun:test';
 
-import { AuthorityQuery, Digest, LiveEvidenceLease } from '@leviathan/domain';
-import { makeLiveAuthority } from '@leviathan/engine';
+import { AuthorityQuery, Digest, LiveEvidenceLease } from '@ceirean/domain';
+import { makeLiveAuthority } from '@ceirean/engine';
 import { Effect, Match, Option, Result, Schema } from 'effect';
 import { exportPKCS8, generateKeyPair, jwtVerify } from 'jose';
 
@@ -178,7 +178,7 @@ async function protocolCase() {
     const headers = new Headers(init.headers);
     expect(headers.get('Accept')).toBe('application/vnd.github+json');
     expect(headers.get('X-GitHub-Api-Version')).toBe('2026-03-10');
-    expect(headers.get('User-Agent')).toBe('Leviathan-Local-GitHub-Ingress');
+    expect(headers.get('User-Agent')).toBe('Ceirean-Local-GitHub-Ingress');
     expect(init.redirect).toBe('manual');
     expect(init.signal).toBeInstanceOf(AbortSignal);
   }

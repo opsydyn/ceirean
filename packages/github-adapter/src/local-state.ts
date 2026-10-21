@@ -1,4 +1,4 @@
-import { LiveInboxError } from '@leviathan/engine';
+import { LiveInboxError } from '@ceirean/engine';
 import { Effect, FileSystem, Match, Option, Path, Result, Schema } from 'effect';
 
 const uid = Schema.Number.check(

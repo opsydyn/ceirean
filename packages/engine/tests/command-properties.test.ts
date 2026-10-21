@@ -6,7 +6,7 @@ import {
   type AuthorityObservation,
   type AdmissionReply,
   type AdmissionDraft,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Arbitrary, Effect, Match, Schema } from 'effect';
 
 import { validateCheckResult } from '../../domain/tests/properties.ts';

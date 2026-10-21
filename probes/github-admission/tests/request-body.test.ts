@@ -1,12 +1,12 @@
 import { expect, spyOn, test } from 'bun:test';
 
-import { Digest } from '@leviathan/domain';
+import { Digest } from '@ceirean/domain';
 import { Cause, Effect, Exit, Result } from 'effect';
 
 import { captureRequestBody, RequestBodyError } from '../src/request-body.ts';
 
 function request(body: ReadableStream<Uint8Array>, signal?: AbortSignal) {
-  return new Request('http://leviathan.invalid/webhook', { method: 'POST', body, signal });
+  return new Request('http://ceirean.invalid/webhook', { method: 'POST', body, signal });
 }
 async function runCapture(input: Request) {
   const program = captureRequestBody(input, 65536).pipe(Effect.result);

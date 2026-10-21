@@ -193,11 +193,11 @@ function exactCommandLaw(c: CommandCase) {
   const extra = `${c.candidate.repositoryName}:${c.candidate.issueNumber}`;
   return (
     coherent(c) &&
-    !isNotCommand('/leviathan assess') &&
+    !isNotCommand('/ceirean assess') &&
     [
-      `${extra}/leviathan assess`,
-      `/leviathan assess${extra}`,
-      `${extra}\n/leviathan assess\n${extra}`,
+      `${extra}/ceirean assess`,
+      `/ceirean assess${extra}`,
+      `${extra}\n/ceirean assess\n${extra}`,
     ].every(isNotCommand)
   );
 }

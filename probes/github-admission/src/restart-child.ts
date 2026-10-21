@@ -1,4 +1,4 @@
-import { AdmissionReply } from '@leviathan/domain';
+import { AdmissionReply } from '@ceirean/domain';
 import { Match, Schema } from 'effect';
 
 import { openAdmissionProbe } from './composition.ts';

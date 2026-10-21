@@ -1,4 +1,4 @@
-import { decideCancellation, decideQualification } from '@leviathan/domain';
+import { decideCancellation, decideQualification } from '@ceirean/domain';
 import { Deferred, Effect, Layer, Match, Ref } from 'effect';
 import { TestClock } from 'effect/testing';
 

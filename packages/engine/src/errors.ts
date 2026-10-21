@@ -1,4 +1,4 @@
-import type { RunId } from '@leviathan/domain';
+import type { RunId } from '@ceirean/domain';
 import { Data } from 'effect';
 
 export class RunRepositoryError extends Data.TaggedError('RunRepositoryError')<{

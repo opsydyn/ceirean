@@ -5,8 +5,8 @@ import {
   LiveEvidenceLease,
   commandKey,
   decideLiveAdmission,
-} from '@leviathan/domain';
-import { LiveAuthorityError, type LiveAuthorityDriver } from '@leviathan/engine';
+} from '@ceirean/domain';
+import { LiveAuthorityError, type LiveAuthorityDriver } from '@ceirean/engine';
 import { Match, Option, Result, Schema } from 'effect';
 
 import { importAppSigner } from './github-auth.ts';

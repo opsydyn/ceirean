@@ -1,16 +1,16 @@
 {
-  "name": "@leviathan/github-admission-probe",
+  "name": "@ceirean/github-admission-probe",
   "private": true,
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ceirean/domain": "workspace:*",
+    "@ceirean/engine": "workspace:*",
+    "@ceirean/github-adapter": "workspace:*",
     "@flue/github": "2.3.0",
     "@flue/runtime": "2.3.0",
-    "@leviathan/domain": "workspace:*",
-    "@leviathan/engine": "workspace:*",
-    "@leviathan/github-adapter": "workspace:*",
     "effect": "4.0.5"
   },
   "devDependencies": {

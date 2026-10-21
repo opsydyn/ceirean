@@ -1,4 +1,4 @@
-import { VerifiedCommand, decideAssessment, type AdmissionReply } from '@leviathan/domain';
+import { VerifiedCommand, decideAssessment, type AdmissionReply } from '@ceirean/domain';
 import { Context, Effect, Match, Result, Schema } from 'effect';
 
 import { CommandInbox } from './command-inbox-port.ts';
@@ -61,4 +61,4 @@ export function makeCommandAdmission() {
 export class CommandAdmission extends Context.Service<
   CommandAdmission,
   Effect.Success<ReturnType<typeof makeCommandAdmission>>
->()('@leviathan/engine/CommandAdmission') {}
+>()('@ceirean/engine/CommandAdmission') {}

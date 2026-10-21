@@ -88,7 +88,7 @@ export async function withProcesses(
   run: (file: string, own: (mode: string) => Owned) => Promise<void>,
 ) {
   const root = tmpdir();
-  const directory = mkdtempSync(join(root, 'leviathan-restart-'));
+  const directory = mkdtempSync(join(root, 'ceirean-restart-'));
   const file = join(directory, 'inbox.sqlite');
   const children: Owned[] = [];
   function own(mode: string) {

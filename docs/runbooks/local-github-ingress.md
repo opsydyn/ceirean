@@ -3,7 +3,7 @@
 ## Approval Boundary
 
 Tasks 1-7, scoped final-fix review and fresh whole-branch controller verification
-are complete. This is local acceptance, not merge or live acceptance. See the
+are complete. That work was merged locally at `4877a8a`; this is not live acceptance. See the
 [controller closure](../evidence/local-github-ingress/controller-closure.md).
 This runbook proposes an operator-controlled
 rehearsal; none of its live steps has been performed. No deployment, production
@@ -21,11 +21,22 @@ do not prove real GitHub grants. Frozen installation is not zero-network proof.
 
 Use the pinned Bun toolchain and an operator-selected local, non-synced filesystem.
 Run from a local, non-synced checkout. The default state root is
-`$HOME/Library/Application Support/Leviathan`; an explicit absolute custom
+`$HOME/Library/Application Support/Ceirean`; an explicit absolute custom
 `stateRoot` is allowed. The database must be a contained descendant, outside
 repositories, build, temporary and known synced roots. Path checks do not discover
 arbitrary network mounts, external build roots or third-party sync software.
 Do not claim locality from a pathname alone.
+
+The local checkout may stay named `Leviathan`. Ceirean does not search the old
+default root or migrate/copy its ledger. Start never creates storage. Reusing a
+compatible existing ledger requires an explicit operator-approved configuration
+and preserved ownership/replay state; changing the replay boundary requires
+separate approval. The on-disk format and ownership identifiers are unchanged.
+Historical qualification artifacts retain their original names and source hashes.
+The retired `/leviathan assess` payload is now Ignored/NotCommand before inbox
+admission, including old delivery redeliveries. Its stored history is preserved
+and inspectable, but the rename does not promise cross-spelling replay responses.
+Use a fresh `/ceirean assess` comment for the new rehearsal; never edit old evidence.
 
 The operator must prepare an explicit JSON configuration and explicit webhook
 secret/private-key files outside the repository. Keep the directory 0700 and
@@ -48,6 +59,14 @@ installationId, ownerId, repositoryId, enabled profile ID/revision, policyRevisi
 and a nonempty unique allowlist of at most 100 immutable numeric operator IDs.
 Use verified real immutable IDs only after approval, not login names or the
 synthetic IDs from tests. Revisions must be new bounded values, not reused.
+
+Use a dedicated GitHub App installed only on the selected repository, with
+repository Metadata read and Issues read, subscribed to `issue_comment`, and no
+write grants. Issues read enables event delivery; the runtime deliberately mints
+metadata-only repository-restricted installation tokens for authority checks.
+Do not broaden token permissions to match the App's event-subscription grant.
+Fill out the [rehearsal approval worksheet](ceirean-rehearsal-approval.md) before
+creating/changing an App, reading credentials, listening or exposing a tunnel.
 
 ## Explicit Local Commands
 
@@ -100,7 +119,7 @@ temporary HTTPS tunnel to the exact loopback webhook endpoint. Tunnel provider,
 URL, access controls and teardown are operator decisions; this application does
 not provision a tunnel. Do not expose status/configuration or other local ports.
 
-Only a new ordinary-issue comment containing exactly `/leviathan assess` is
+Only a new ordinary-issue comment containing exactly `/ceirean assess` is
 eligible, from a human whose sender/author IDs agree. The configured App,
 installation, owner, repository and allowlisted operator IDs must all match.
 Each new admission freshly checks installation, restricted token, repository,
@@ -114,6 +133,13 @@ delivery resolves Duplicate without another permission check, retaining the
 original immutable evidence. Changed delivery digest or command actor/issue
 conflicts even when API access is unavailable. No automatic redelivery exists.
 Do not repeatedly send fresh deliveries to overcome an operational refusal.
+
+HTTP 200 is not proof of admission: business rejections also return 200. Inspect
+local structured outcomes. A duplicate intentionally skips reauthorization, so
+revocation must be tested with a fresh comment, not only a redelivery. A permission
+downgrade must leave the human able to comment; otherwise run only an explicitly
+approved allowlist-revocation test and retain the missing live permission-negative
+evidence. API failure is operational/uncommitted, not proof of denied permission.
 
 There are four retained request owners, 60 starts per rolling minute, an
 eight-second request outcome, six-second total API budget and two seconds per

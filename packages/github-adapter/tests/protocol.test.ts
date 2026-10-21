@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 
-import { Digest, type VerifiedCommand } from '@leviathan/domain';
-import { captureRequestBody, makeVerifiedGitHubIngress } from '@leviathan/github-adapter/protocol';
+import { Digest, type VerifiedCommand } from '@ceirean/domain';
+import { captureRequestBody, makeVerifiedGitHubIngress } from '@ceirean/github-adapter/protocol';
 import { Effect, Match, Schema, Struct } from 'effect';
 
 const fixture = { secret: 'synthetic-protocol-secret' };
@@ -12,7 +12,7 @@ function payload() {
     installation: { id: 11 },
     repository: { id: 22, name: 'repository', owner: { id: 33, login: 'owner' } },
     issue: { id: 44, number: 1 },
-    comment: { id: 55, body: '/leviathan assess', user: { id: 66, type: 'User' } },
+    comment: { id: 55, body: '/ceirean assess', user: { id: 66, type: 'User' } },
     sender: { id: 66, type: 'User' },
   };
 }
@@ -27,7 +27,7 @@ async function signed(body = encode(payload()), eventName = 'issue_comment') {
   );
   const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, bytes));
   const hex = Array.from(signature, (byte) => byte.toString(16).padStart(2, '0')).join('');
-  return new Request('http://leviathan.invalid/webhook', {
+  return new Request('http://ceirean.invalid/webhook', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -138,6 +138,13 @@ async function conflictingDigest() {
 test('conflicting digest is not rewritten by transport', conflictingDigest);
 
 const rejectedCases = [
+  {
+    name: 'retired product command',
+    event: 'issue_comment',
+    value: { ...payload(), comment: { ...payload().comment, body: '/leviathan assess' } },
+    status: 200,
+    reason: 'NotCommand',
+  },
   {
     name: 'unsupported event',
     event: 'push',

@@ -10,7 +10,7 @@ import {
   type WorkerIntent,
   type WorkerMutationReply,
   type WorkerReadyReceipt,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Deferred, Effect, Fiber, Match, Option, Result, Schema } from 'effect';
 
 import {
@@ -1302,7 +1302,7 @@ async function detachedOptions() {
     Reflect.set(seed.authority.identity, 'generation', 99);
     const stored = Option.getOrThrow(yield* journal.service.load(seed.operation.operationId));
     const storedMount = stored.operation.configuration.mounts[0];
-    expect(storedMount?.source).toBe('/synthetic/leviathan/worker-1');
+    expect(storedMount?.source).toBe('/synthetic/ceirean/worker-1');
     expect(isSnapshot(stored)).toBe(true);
     const decodedStored = decodeSnapshot(stored);
     expect(Result.isSuccess(decodedStored)).toBe(true);

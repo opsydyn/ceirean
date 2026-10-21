@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import type { WorkerOperationId } from '@leviathan/domain';
+import type { WorkerOperationId } from '@ceirean/domain';
 import { ActorScope } from '@xstate/effect';
 import { Context, Deferred, Effect, Fiber, Layer, Match, Option, Queue, Ref, Scope } from 'effect';
 import { TestClock } from 'effect/testing';
@@ -83,7 +83,7 @@ class CompletionFixture extends Context.Service<
     readonly resume: Deferred.Deferred<void>;
     readonly pauseLoad: Ref.Ref<boolean>;
   }
->()('@leviathan/test/CompletionFixture') {}
+>()('@ceirean/test/CompletionFixture') {}
 
 for (const { mode, callCount } of [
   { mode: 'execution', callCount: 9 },

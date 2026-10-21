@@ -1,5 +1,5 @@
 {
-  "name": "@leviathan/github-adapter",
+  "name": "@ceirean/github-adapter",
   "private": true,
   "type": "module",
   "exports": {
@@ -11,10 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ceirean/domain": "workspace:*",
+    "@ceirean/engine": "workspace:*",
     "@flue/github": "2.3.0",
     "@flue/runtime": "2.3.0",
-    "@leviathan/domain": "workspace:*",
-    "@leviathan/engine": "workspace:*",
     "effect": "4.0.5",
     "jose": "6.2.12"
   },

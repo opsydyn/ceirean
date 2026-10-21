@@ -1,6 +1,6 @@
 # GitHub Adapter Storage
 
-`@leviathan/github-adapter/storage` exports scoped `initializeLiveInbox`,
+`@ceirean/github-adapter/storage` exports scoped `initializeLiveInbox`,
 `openLiveInbox`, and `readLiveInboxStatus`. The future application owns platform
 layers, configuration, credentials and its single runtime. This adapter creates
 no runtime, listener or GitHub client. Status never reads credentials or takes
@@ -36,7 +36,7 @@ UID, absolute repository/build/temp exclusions and known sync roots. These are
 not webhook inputs or additional arbitrary keys in the specified CLI JSON.
 The application translates its validated config and host context once at its
 composition boundary. The CLI default remains
-`~/Library/Application Support/Leviathan/github-admission.sqlite`; this adapter
+`~/Library/Application Support/Ceirean/github-admission.sqlite`; this adapter
 does not select a home directory or read environment variables.
 
 Any explicit absolute custom production stateRoot is admissible, not only an

@@ -6,7 +6,7 @@ import {
   CommitReply,
   commandKey,
   type IngressScopeId,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Effect, Match, Result, Schema } from 'effect';
 
 import {

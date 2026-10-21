@@ -5,7 +5,7 @@ import {
   checkEligibility,
   decideQualification,
   decodeReceipt,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Clock, Effect, Match, Option, Result, Schema } from 'effect';
 
 import { RunSnapshot, type CommitResult } from './contracts.ts';

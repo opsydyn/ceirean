@@ -6,8 +6,8 @@ import {
   VerifiedCommand,
   commandKey,
   transportKey,
-} from '@leviathan/domain';
-import { CommandInboxError, sameCommandFacts } from '@leviathan/engine';
+} from '@ceirean/domain';
+import { CommandInboxError, sameCommandFacts } from '@ceirean/engine';
 import { Match, Option, Result, Schema } from 'effect';
 
 const authorityJson = Schema.fromJsonString(AuthorityState);

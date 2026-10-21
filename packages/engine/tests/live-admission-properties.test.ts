@@ -5,7 +5,7 @@ import {
   type AuthorityQuery,
   type LiveAdmissionReply,
   type VerifiedCommand,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Arbitrary, Effect, Fiber, Match, Option, Result, Schema } from 'effect';
 
 import { validateCheckResult } from '../../domain/tests/properties.ts';

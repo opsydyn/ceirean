@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { LiveAdmissionDraft, decideLiveAdmission } from '@leviathan/domain';
+import { LiveAdmissionDraft, decideLiveAdmission } from '@ceirean/domain';
 import { Effect, Exit, Fiber, Option, Result, Schema } from 'effect';
 
 import { LiveAuthorityError } from '../src/live-admission-errors.ts';

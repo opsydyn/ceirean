@@ -11,7 +11,7 @@ import {
   type LiveAdmissionReply,
   type ReplayResolution,
   type VerifiedCommand,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Match, Option, Result, Schema } from 'effect';
 
 import { sameCommandFacts } from '../src/command-inbox-factory.ts';

@@ -29,7 +29,12 @@ export function configuration(stateRoot?: string) {
 function configValidation() {
   const input = configuration();
   const decoded = decodeConfig(input, '/Users/operator').pipe(Result.getOrThrow);
-  expect(decoded.stateRoot).toBe('/Users/operator/Library/Application Support/Leviathan');
+  expect(decoded.stateRoot).toBe('/Users/operator/Library/Application Support/Ceirean');
+  const explicit = decodeConfig(
+    configuration('/Users/operator/Library/Application Support/Leviathan'),
+    '/Users/operator',
+  ).pipe(Result.getOrThrow);
+  expect(explicit.stateRoot).toBe('/Users/operator/Library/Application Support/Leviathan');
   for (const patch of [
     { arbitrary: true },
     { privateKeyFile: undefined },

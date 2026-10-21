@@ -1,4 +1,4 @@
-import type { WorkerObservation } from '@leviathan/domain';
+import type { WorkerObservation } from '@ceirean/domain';
 import { Array, Clock, Context, Deferred, Effect, Layer, Match, Option, Queue, Ref } from 'effect';
 import { TestClock } from 'effect/testing';
 
@@ -209,7 +209,7 @@ function acquireHarness(seed: WorkerJournalSnapshot, peers: readonly WorkerJourn
 export class LifecycleHarness extends Context.Service<
   LifecycleHarness,
   Effect.Success<ReturnType<typeof acquireHarness>>
->()('@leviathan/test/LifecycleHarness') {}
+>()('@ceirean/test/LifecycleHarness') {}
 
 export function lifecycleTestLayer(
   seed: WorkerJournalSnapshot,

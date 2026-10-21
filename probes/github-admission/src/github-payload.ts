@@ -1,1 +1,1 @@
-export { normaliseGitHubDelivery } from '@leviathan/github-adapter/protocol';
+export { normaliseGitHubDelivery } from '@ceirean/github-adapter/protocol';

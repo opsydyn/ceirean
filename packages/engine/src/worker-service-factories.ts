@@ -1,4 +1,4 @@
-import type { WorkerOperationId } from '@leviathan/domain';
+import type { WorkerOperationId } from '@ceirean/domain';
 import { Effect, Option, Result } from 'effect';
 
 import type {

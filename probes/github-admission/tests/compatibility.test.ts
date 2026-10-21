@@ -4,7 +4,7 @@ import { createGitHubChannel, type GitHubWebhookDelivery } from '@flue/github';
 
 const fixture = {
   secret: 'synthetic-offline-github-fixture-only',
-  body: '{"action":"created","comment":{"id":505,"body":"/leviathan assess"}}',
+  body: '{"action":"created","comment":{"id":505,"body":"/ceirean assess"}}',
 };
 
 interface SignedFixtureOptions {
@@ -34,7 +34,7 @@ async function signedFixture(options: SignedFixtureOptions = {}) {
     const hex = Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
     headers.set('x-hub-signature-256', `sha256=${hex}`);
   }
-  return new Request('http://leviathan.invalid/webhook', { method: 'POST', headers, body });
+  return new Request('http://ceirean.invalid/webhook', { method: 'POST', headers, body });
 }
 
 function recordingChannel() {
@@ -59,7 +59,7 @@ test('signed request reaches the real channel callback once', async () => {
   expect(calls[0]).toMatchObject({
     name: 'issue_comment',
     deliveryId: 'synthetic-delivery-1',
-    payload: { action: 'created', comment: { id: 505, body: '/leviathan assess' } },
+    payload: { action: 'created', comment: { id: 505, body: '/ceirean assess' } },
   });
 });
 

@@ -53,7 +53,7 @@ function matching() {
     policyDigest: 'f'.repeat(64),
     configDigest: 'b'.repeat(64),
     configuration: {
-      mounts: [{ source: '/synthetic/leviathan/worker-1', target: '/workspace', readOnly: false }],
+      mounts: [{ source: '/synthetic/ceirean/worker-1', target: '/workspace', readOnly: false }],
       network: 'synthetic-isolated',
       security: { user: '1000:1000', droppedCapabilities: ['ALL'], noNewPrivileges: true },
     },
@@ -224,22 +224,22 @@ function unsafePath(stagingDirectory: string) {
   );
 }
 test.each([
-  '/synthetic/leviathan-other/worker-1',
-  '/synthetic/leviathan/../foreign',
-  '/synthetic/leviathan/./worker-1',
-  '/synthetic/leviathan',
-  '/synthetic/leviathan//worker-1',
-  '/synthetic/leviathan/worker-1/',
-  'synthetic/leviathan/worker-1',
-  '/synthetic/leviathan/worker\\1',
+  '/synthetic/ceirean-other/worker-1',
+  '/synthetic/ceirean/../foreign',
+  '/synthetic/ceirean/./worker-1',
+  '/synthetic/ceirean',
+  '/synthetic/ceirean//worker-1',
+  '/synthetic/ceirean/worker-1/',
+  'synthetic/ceirean/worker-1',
+  '/synthetic/ceirean/worker\\1',
 ])('refuses unsafe custody staging %s', unsafePath);
 
 function custody() {
   const c = makeWorkerCase();
   for (const retainedArtifacts of [
-    ['/synthetic/leviathan/worker-1'],
-    ['/synthetic/leviathan/worker-1/file'],
-    ['/synthetic/leviathan'],
+    ['/synthetic/ceirean/worker-1'],
+    ['/synthetic/ceirean/worker-1/file'],
+    ['/synthetic/ceirean'],
     ['/'],
   ]) {
     expect(
@@ -249,12 +249,7 @@ function custody() {
       )._tag,
     ).toBe('Failure');
   }
-  for (const controllerRoot of [
-    '/',
-    'relative',
-    '/synthetic/../leviathan',
-    '/synthetic//leviathan',
-  ]) {
+  for (const controllerRoot of ['/', 'relative', '/synthetic/../ceirean', '/synthetic//ceirean']) {
     expect(
       validateWorkerCustody(
         { ...c.operation, custody: { ...c.operation.custody, controllerRoot } },

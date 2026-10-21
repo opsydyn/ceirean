@@ -27,7 +27,7 @@ async function ownedRuntime() {
   await app.dispose();
   expect(make).toHaveBeenCalledTimes(1);
   expect(close).toHaveBeenCalledTimes(1);
-  expect((await app.fetch(new Request('http://leviathan.invalid/webhook'))).status).toBe(503);
+  expect((await app.fetch(new Request('http://ceirean.invalid/webhook'))).status).toBe(503);
   make.mockRestore();
   close.mockRestore();
 }

@@ -1,4 +1,4 @@
-import { AuthorityRevision, LocalIngressPolicy } from '@leviathan/domain';
+import { AuthorityRevision, LocalIngressPolicy } from '@ceirean/domain';
 import { Effect, FileSystem, Match, Result, Schema } from 'effect';
 
 export class CliError extends Schema.TaggedError<CliError>()('CliError', {
@@ -39,7 +39,7 @@ export function decodeConfig(input: unknown, home: string) {
     Result.flatMap((config) =>
       Schema.decodeUnknownResult(Configuration)({
         ...config,
-        stateRoot: config.stateRoot ?? `${home}/Library/Application Support/Leviathan`,
+        stateRoot: config.stateRoot ?? `${home}/Library/Application Support/Ceirean`,
       }),
     ),
     Result.mapError(() => new CliError({ code: 'InvalidConfig' })),

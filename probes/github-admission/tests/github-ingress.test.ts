@@ -1,8 +1,8 @@
 import { Database } from 'bun:sqlite';
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
 
-import { AdmissionReply, AuthorityState } from '@leviathan/domain';
-import * as Engine from '@leviathan/engine';
+import { AdmissionReply, AuthorityState } from '@ceirean/domain';
+import * as Engine from '@ceirean/engine';
 import { Effect, ManagedRuntime, Match, Result, Schema, Struct } from 'effect';
 
 import { openAdmissionProbe, type ProbeConfig } from '../src/composition.ts';
@@ -45,7 +45,7 @@ function payload() {
     installation: { id: 11 },
     repository: { id: 22, name: 'repository', owner: { id: 33, login: 'owner' } },
     issue: { id: 44, number: 1 },
-    comment: { id: 55, body: '/leviathan assess', user: { id: 66, type: 'User' } },
+    comment: { id: 55, body: '/ceirean assess', user: { id: 66, type: 'User' } },
     sender: { id: 66, type: 'User' },
   };
 }
@@ -71,7 +71,7 @@ async function signed(
   );
   const digest = new Uint8Array(await crypto.subtle.sign('HMAC', key, bytes));
   const signature = Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('');
-  return new Request('http://leviathan.invalid/webhook', {
+  return new Request('http://ceirean.invalid/webhook', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -278,12 +278,12 @@ async function exactVariant(body: string) {
   expect(counts(file)).toEqual([{ n: 0 }, { n: 0 }]);
 }
 test.each([
-  ' /leviathan assess',
-  '/leviathan assess\n',
-  '/leviathan assess extra',
-  '/Leviathan assess',
-  '`/leviathan assess`',
-  '> /leviathan assess',
+  ' /ceirean assess',
+  '/ceirean assess\n',
+  '/ceirean assess extra',
+  '/Ceirean assess',
+  '`/ceirean assess`',
+  '> /ceirean assess',
   'private ordinary conversation',
 ])('exact command variant %s is ignored', exactVariant);
 

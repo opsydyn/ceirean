@@ -25,20 +25,21 @@ function assertValid<S extends Schema.Constraint>(schema: S, value: unknown, exp
 }
 
 test('exact command only', () => {
-  expect(parseAssessCommand('/leviathan assess')).toEqual({ _tag: 'Assess' });
+  expect(parseAssessCommand('/ceirean assess')).toEqual({ _tag: 'Assess' });
   for (const body of [
+    '/leviathan assess',
     '',
-    ' /leviathan assess',
-    '/leviathan assess ',
-    '/leviathan assess\n',
-    '\n/leviathan assess',
-    '> /leviathan assess',
-    '`/leviathan assess`',
-    '/leviathan assess now',
-    '/Leviathan assess',
-    '/leviathan Assess',
-    '/leviathan\tassess',
-    'please /leviathan assess',
+    ' /ceirean assess',
+    '/ceirean assess ',
+    '/ceirean assess\n',
+    '\n/ceirean assess',
+    '> /ceirean assess',
+    '`/ceirean assess`',
+    '/ceirean assess now',
+    '/Ceirean assess',
+    '/ceirean Assess',
+    '/ceirean\tassess',
+    'please /ceirean assess',
   ]) {
     expect(parseAssessCommand(body)).toEqual({ _tag: 'NotCommand' });
   }

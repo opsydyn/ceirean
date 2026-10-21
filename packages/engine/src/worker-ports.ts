@@ -5,9 +5,9 @@ import { makeWorkerJournal, makeWorkerMechanism } from './worker-service-factori
 export class WorkerJournal extends Context.Service<
   WorkerJournal,
   ReturnType<typeof makeWorkerJournal>
->()('@leviathan/engine/WorkerJournal') {}
+>()('@ceirean/engine/WorkerJournal') {}
 
 export class WorkerMechanism extends Context.Service<
   WorkerMechanism,
   ReturnType<typeof makeWorkerMechanism>
->()('@leviathan/engine/WorkerMechanism') {}
+>()('@ceirean/engine/WorkerMechanism') {}

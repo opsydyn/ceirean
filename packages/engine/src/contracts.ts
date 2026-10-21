@@ -5,7 +5,7 @@ import {
   RunId,
   UpgradeRun,
   VerificationContract,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Schema } from 'effect';
 
 export const RunSnapshot = Schema.Struct({

@@ -10,7 +10,7 @@ import {
   validateWorkerCustody,
   type WorkerIntent,
   type WorkerCleanup,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { createEffectActor, join } from '@xstate/effect';
 import { Arbitrary, Effect, Fiber, Match, Option, Queue, Ref, Result, Schema } from 'effect';
 import { TestClock } from 'effect/testing';

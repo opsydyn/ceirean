@@ -1,5 +1,5 @@
 {
-  "name": "@leviathan/github-ingress",
+  "name": "@ceirean/github-ingress",
   "private": true,
   "type": "module",
   "exports": {
@@ -10,10 +10,10 @@
     "cli": "bun --no-env-file --no-install src/main.ts"
   },
   "dependencies": {
+    "@ceirean/domain": "workspace:*",
+    "@ceirean/engine": "workspace:*",
+    "@ceirean/github-adapter": "workspace:*",
     "@effect/platform-bun": "4.0.5",
-    "@leviathan/domain": "workspace:*",
-    "@leviathan/engine": "workspace:*",
-    "@leviathan/github-adapter": "workspace:*",
     "effect": "4.0.5"
   }
 }

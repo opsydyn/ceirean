@@ -1,7 +1,7 @@
 import { Database } from 'bun:sqlite';
 import { afterEach, expect, jest, test } from 'bun:test';
 
-import { LiveAdmissionRecord, LivePermissionEvidence } from '@leviathan/domain';
+import { LiveAdmissionRecord, LivePermissionEvidence } from '@ceirean/domain';
 import { Effect } from 'effect';
 import { Match, Schema } from 'effect';
 
@@ -456,7 +456,7 @@ test('normal signal shutdown drains an acknowledged decision and exits cleanly',
   qualify(cleanShutdown));
 
 async function importSafety() {
-  const modules = ['@leviathan/github-ingress', './src/cli.ts', './src/main.ts'];
+  const modules = ['@ceirean/github-ingress', './src/cli.ts', './src/main.ts'];
   const jsonString = Schema.fromJsonString(Schema.String);
   const encodeModule = Schema.encodeSync(jsonString);
   const script = modules.map((module) => `await import(${encodeModule(module)});`).join('\n');

@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { AttemptId } from '@leviathan/domain';
+import { AttemptId } from '@ceirean/domain';
 import { Deferred, Effect, Fiber, Match, Option, Ref, Result } from 'effect';
 import { TestClock } from 'effect/testing';
 

@@ -1,4 +1,4 @@
-import { WorkerIntent, type WorkerCleanup } from '@leviathan/domain';
+import { WorkerIntent, type WorkerCleanup } from '@ceirean/domain';
 import { setupEffect } from '@xstate/effect';
 import { Array, Match, Option, Result, Schema } from 'effect';
 import type { OutputFrom } from 'xstate';

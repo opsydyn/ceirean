@@ -43,7 +43,7 @@ async function protectedScopedFile() {
   function* scenario() {
     const fs = yield* FileSystem.FileSystem;
     function* ownedFiles() {
-      const directory = yield* fs.makeTempDirectoryScoped({ prefix: 'leviathan-compatibility-' });
+      const directory = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-compatibility-' });
       yield* fs.chmod(directory, 0o500);
       expect((yield* fs.stat(directory)).mode & 0o777).toBe(0o500);
       yield* fs.chmod(directory, 0o700);
@@ -86,7 +86,7 @@ async function failedScopeCleanup() {
   function* scenario() {
     const fs = yield* FileSystem.FileSystem;
     function* ownedFiles() {
-      const directory = yield* fs.makeTempDirectoryScoped({ prefix: 'leviathan-compatibility-' });
+      const directory = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-compatibility-' });
       const file = yield* fs.open(`${directory}/synthetic-key`, { flag: 'wx', mode: 0o600 });
       yield* file.writeAll(new TextEncoder().encode('synthetic failure contents'));
       return yield* Effect.fail(new SyntheticScopeFailure({ directory }));

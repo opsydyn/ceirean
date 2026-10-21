@@ -6,7 +6,7 @@ import {
   WorkerContainerId,
   WorkerHostId,
   WorkerDaemonId,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import {
   Cause,
   Clock,
@@ -344,7 +344,7 @@ function siblingSnapshot(): WorkerJournalSnapshot {
     operationId,
     custody: {
       ...snapshot.operation.custody,
-      stagingDirectory: '/synthetic/leviathan/worker-2',
+      stagingDirectory: '/synthetic/ceirean/worker-2',
       containerSlot: 'slot-2',
       retainedArtifacts: ['/synthetic/evidence/worker-2.json'],
     },

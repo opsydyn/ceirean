@@ -5,7 +5,7 @@ import {
   LocalIngressPolicy,
   VerifiedCommand,
   commandKey,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Effect, FileSystem, Option } from 'effect';
 
 export function policyFixture() {
@@ -84,7 +84,7 @@ export function draftFixture(id = 55, policy = policyFixture(), operatorId = 66)
 export function ownedConfig() {
   function* acquire() {
     const fs = yield* FileSystem.FileSystem;
-    const temporary = yield* fs.makeTempDirectoryScoped({ prefix: 'leviathan-live-inbox-' });
+    const temporary = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-live-inbox-' });
     const root = yield* fs.realPath(temporary);
     yield* fs.chmod(root, 0o700);
     const ownerUid = Option.getOrThrow((yield* fs.stat(root)).uid);

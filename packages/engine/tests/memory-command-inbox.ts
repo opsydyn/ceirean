@@ -8,7 +8,7 @@ import {
   decideAssessment,
   type AdmissionReason,
   type AdmissionReply,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Match, Option, Result, Schema } from 'effect';
 
 import type { CommandInboxDriver } from '../src/command-inbox-contracts.ts';

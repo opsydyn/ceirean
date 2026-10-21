@@ -4,7 +4,7 @@ import {
   WorkerOperationId,
   WorkerRefusal,
   type WorkerIssuerId,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { createEffectActor, join, send, snapshots, type EffectActor } from '@xstate/effect';
 import {
   Clock,
@@ -907,7 +907,7 @@ export function makeWorkerLifecycle(issuerId: WorkerIssuerId) {
 export class WorkerLifecycle extends Context.Service<
   WorkerLifecycle,
   Effect.Success<ReturnType<typeof makeWorkerLifecycle>>
->()('@leviathan/engine/WorkerLifecycle') {}
+>()('@ceirean/engine/WorkerLifecycle') {}
 export function workerLifecycleLayer(issuerId: WorkerIssuerId) {
   return Layer.effect(WorkerLifecycle, makeWorkerLifecycle(issuerId));
 }

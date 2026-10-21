@@ -11,7 +11,7 @@ import {
   RecordedAssessmentDecision,
   VerifiedCommand,
   decideLiveAdmission,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Effect, Match, Option, Result, Schema } from 'effect';
 
 import { sameCommandFacts } from './command-inbox-factory.ts';

@@ -1,8 +1,8 @@
-import { AdmissionReply, type NonAdmittedDecision, type VerifiedCommand } from '@leviathan/domain';
-import { makeVerifiedGitHubIngress, type CapturedBody } from '@leviathan/github-adapter/protocol';
+import { AdmissionReply, type NonAdmittedDecision, type VerifiedCommand } from '@ceirean/domain';
+import { makeVerifiedGitHubIngress, type CapturedBody } from '@ceirean/github-adapter/protocol';
 import { Match, Schema } from 'effect';
 
-export { IngressFailure } from '@leviathan/github-adapter/protocol';
+export { IngressFailure } from '@ceirean/github-adapter/protocol';
 
 function decisionResponse(decision: NonAdmittedDecision) {
   const status = Match.value(decision.reason).pipe(

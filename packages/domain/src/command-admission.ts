@@ -104,7 +104,7 @@ export type AssessCommand = typeof AssessCommand.Type;
 
 export function parseAssessCommand(body: string): AssessCommand {
   return Match.value(body).pipe(
-    Match.when('/leviathan assess', () => ({ _tag: 'Assess' as const })),
+    Match.when('/ceirean assess', () => ({ _tag: 'Assess' as const })),
     Match.orElse(() => ({ _tag: 'NotCommand' as const })),
   );
 }

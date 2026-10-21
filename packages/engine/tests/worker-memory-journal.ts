@@ -13,7 +13,7 @@ import {
   type WorkerOperationId,
   type WorkerReadyReceipt,
   type WorkerRefusal,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Array, Effect, HashMap, Match, Option, Ref, Result, Schema } from 'effect';
 
 import {

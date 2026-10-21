@@ -4,7 +4,7 @@ import {
   VerifiedCommand,
   decideLiveAdmission,
   type LiveAdmissionReply,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Context, Effect, Match, Option, Result, Schema } from 'effect';
 
 import { LiveAuthority, LiveInbox } from './live-admission-ports.ts';
@@ -154,4 +154,4 @@ export function makeLiveAdmission() {
 export class LiveAdmission extends Context.Service<
   LiveAdmission,
   Effect.Success<ReturnType<typeof makeLiveAdmission>>
->()('@leviathan/engine/LiveAdmission') {}
+>()('@ceirean/engine/LiveAdmission') {}

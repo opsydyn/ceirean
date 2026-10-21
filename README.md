@@ -12,11 +12,28 @@ compatibility probe and pinned workspace configuration are scaffolded.
 
 ## Status
 
+The product and private workspace packages are now Ceirean (`@ceirean/*`).
+The local checkout may remain named `Leviathan`; directory names are not product
+identity. The repository remote is [opsydyn/ceirean](https://github.com/opsydyn/ceirean).
+Git publication is separate from live GitHub App/ingress approval.
+The exact GitHub command is `/ceirean assess`, without a legacy alias.
+The default state root is `$HOME/Library/Application Support/Ceirean`.
+Existing ledgers are never discovered, copied, initialized or migrated implicitly;
+an existing compatible ledger requires explicit configuration and operator approval.
+The on-disk format and ownership identifiers are unchanged.
+
+Historical assessments, source hashes and qualification artifacts retain the
+Leviathan name and qualify only their recorded revisions, not renamed source.
+The local ingress work was merged into main at `4877a8a`; older branch-status
+statements below describe historical checkpoints. Live GitHub acceptance remains
+unperformed. Use the [rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md)
+before selecting or changing any real target.
+
 The offline compatibility probe's 36 tests cover pure decisions, real Flue tools
 through Effect, process-kill recovery and distinct read/abort semantics. The
 canonical typecheck passes with strict source checking and the owner-approved
 probe-local vendor declaration policy. This does not qualify production use.
-There is no production application, GitHub remote, scheduled job or deployment.
+There is no deployed production application, scheduled job or deployment.
 
 The new private GitHub channel probe retains strict vendor declaration checking.
 Its owner-approved compatibility repair is tracked in
@@ -96,7 +113,7 @@ Fresh final-fix evidence is separate from historical `b7f5d4e` qualification.
 See the [local-only runbook](docs/runbooks/local-github-ingress.md),
 [assessment](docs/assessments/local-github-ingress.md) and
 [source-bound evidence](docs/evidence/local-github-ingress.json).
-Real credentials, GitHub API/tunnel rehearsal, push and merge remain unapproved.
+Real credentials and GitHub API/tunnel rehearsal remain unapproved.
 
 ## Proposed First Slice
 
@@ -145,7 +162,7 @@ stop conditions. Its budgets and later phases remain proposals, not authority to
 run paid jobs or change external systems.
 
 [Local delivery roadmap](docs/roadmap.md) tracks the next slices, including later
-organisation discovery and config-only self-PRs against Leviathan for new repos.
+organisation discovery and config-only self-PRs against Ceirean for new repos.
 Discovery does not automatically enable migrations or grant execution access.
 
 ## Offline GitHub Admission
@@ -264,7 +281,7 @@ docs/                       Decisions, specifications, plans and evidence
 
 The root Moon project owns quality tasks; domain, engine and probe are private workspaces.
 Do not scaffold empty production packages. Evidence tasks run uncached with no automatic retries;
-Moon is not Leviathan's durable run coordinator or container security boundary.
+Moon is not Ceirean's durable run coordinator or container security boundary.
 
 ## Quality Gates
 

@@ -7,7 +7,7 @@ import {
   Digest,
   RunId,
   type QualificationRefusal,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Effect, Match, Option, Result, Tracer } from 'effect';
 import { TestClock } from 'effect/testing';
 

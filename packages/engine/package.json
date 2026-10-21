@@ -1,5 +1,5 @@
 {
-  "name": "@leviathan/engine",
+  "name": "@ceirean/engine",
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@leviathan/domain": "workspace:*",
+    "@ceirean/domain": "workspace:*",
     "@xstate/effect": "0.1.0-alpha.6",
     "effect": "4.0.5",
     "xstate": "6.0.0-alpha.64"

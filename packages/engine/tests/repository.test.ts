@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { AttemptId, RunId, type UpgradeRun, type RunFact } from '@leviathan/domain';
+import { AttemptId, RunId, type UpgradeRun, type RunFact } from '@ceirean/domain';
 import { Effect, Match, Option, Result } from 'effect';
 
 import type { CommitResult } from '../src/contracts.ts';

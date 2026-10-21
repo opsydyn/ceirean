@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { Digest, type AdmissionDraft, type AdmissionReply } from '@leviathan/domain';
+import { Digest, type AdmissionDraft, type AdmissionReply } from '@ceirean/domain';
 import { Data, Effect, Match, Option, Result } from 'effect';
 
 import { makeCommandInbox } from '../src/index.ts';

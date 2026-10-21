@@ -12,7 +12,7 @@ import {
   validateWorkerReadiness,
   type WorkerMutationReply,
   type WorkerObservation,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { fromEffect } from '@xstate/effect';
 import { Array, Clock, Effect, Match, Option, Result, Schema } from 'effect';
 import { standardSchemaValidator } from 'xstate/validation';

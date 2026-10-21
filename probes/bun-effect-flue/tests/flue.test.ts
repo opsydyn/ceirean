@@ -12,7 +12,7 @@ import { openFlueProbe, ProbeError, type ProbeHandle } from '../src/flue-probe.t
 import { withStateDirectory } from './process.ts';
 
 function UnknownProviderProbe() {
-  useModel('leviathan-missing-provider/fixture');
+  useModel('ceirean-missing-provider/fixture');
   return 'Do not use any fallback provider.';
 }
 
@@ -20,7 +20,7 @@ async function withProbe(
   body: (probe: ProbeHandle, bridge: ReturnType<typeof createRecorderBridge>) => Promise<void>,
   record?: (token: string) => Promise<number>,
 ) {
-  const stateDir = await mkdtemp(join(tmpdir(), 'leviathan-flue-'));
+  const stateDir = await mkdtemp(join(tmpdir(), 'ceirean-flue-'));
   await chmod(stateDir, 0o700);
   const bridge = createRecorderBridge();
   let probe: ProbeHandle | undefined;
@@ -100,7 +100,7 @@ test('unknown provider fails closed', async () => {
     },
     { preconnect: previousFetch.preconnect },
   );
-  const faux = fauxProvider({ provider: 'leviathan-probe', models: [{ id: 'fixture' }] });
+  const faux = fauxProvider({ provider: 'ceirean-probe', models: [{ id: 'fixture' }] });
   let runtime: Awaited<ReturnType<typeof start>> | undefined;
   await Promise.resolve()
     .then(async () => {
@@ -127,7 +127,7 @@ test('unknown provider fails closed', async () => {
           .some(
             (value) =>
               value instanceof Error &&
-              value.message.includes('Unknown provider "leviathan-missing-provider"'),
+              value.message.includes('Unknown provider "ceirean-missing-provider"'),
           ),
       ).toBe(true);
       expect(fetches).toBe(0);

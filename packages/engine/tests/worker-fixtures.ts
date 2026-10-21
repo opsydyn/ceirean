@@ -1,4 +1,4 @@
-import { WorkerIntentId, WorkerIssuerId, type WorkerIntent } from '@leviathan/domain';
+import { WorkerIntentId, WorkerIssuerId, type WorkerIntent } from '@ceirean/domain';
 import { Match, Option } from 'effect';
 
 import { makeWorkerCase } from '../../domain/tests/worker-fixtures.ts';

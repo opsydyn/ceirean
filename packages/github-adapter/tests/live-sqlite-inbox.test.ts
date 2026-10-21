@@ -1,14 +1,14 @@
 import { Database, type SQLQueryBindings } from 'bun:sqlite';
 import { afterEach, expect, mock, spyOn, test } from 'bun:test';
 
-import { BunFileSystem, BunPath } from '@effect/platform-bun';
 import {
   Digest,
   LiveAdmissionDraft,
   LiveAdmissionRecord,
   commandKey,
   transportKey,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
+import { BunFileSystem, BunPath } from '@effect/platform-bun';
 import { Data, Effect, FileSystem, Layer, Match, Option, Result, Schema } from 'effect';
 
 import manifest from '../package.json';
@@ -41,7 +41,7 @@ test('storage is an explicit package boundary', () => {
 async function nativeOwnershipQualification() {
   function* scenario() {
     const fs = yield* FileSystem.FileSystem;
-    const root = yield* fs.makeTempDirectoryScoped({ prefix: 'leviathan-owner-' });
+    const root = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-owner-' });
     yield* fs.chmod(root, 0o700);
     const file = `${root}/owner.sqlite`;
     yield* fs.open(file, { flag: 'wx', mode: 0o600, noFollow: true });

@@ -15,8 +15,8 @@ import {
   type AdmissionReason,
   type LiveAdmissionReply,
   type ReplayResolution,
-} from '@leviathan/domain';
-import { LiveInboxError, sameCommandFacts, type LiveInboxDriver } from '@leviathan/engine';
+} from '@ceirean/domain';
+import { LiveInboxError, sameCommandFacts, type LiveInboxDriver } from '@ceirean/engine';
 import { Cause, Effect, Exit, Match, Option, Predicate, Result, Schema, Scope } from 'effect';
 
 import {

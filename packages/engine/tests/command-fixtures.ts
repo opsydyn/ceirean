@@ -4,7 +4,7 @@ import {
   VerifiedCommand,
   Digest,
   decideAssessment,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Effect, Layer, Match } from 'effect';
 
 import {

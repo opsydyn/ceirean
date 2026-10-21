@@ -19,7 +19,7 @@ function makeTestContainers() {
 class TestContainers extends Context.Service<
   TestContainers,
   ReturnType<typeof makeTestContainers>
->()('@leviathan/test/Containers') {}
+>()('@ceirean/test/Containers') {}
 
 const createContainer = fromEffect(TestContainers.use((service) => service.create()));
 
@@ -106,7 +106,7 @@ function makeTestResources(events: string[]) {
 }
 
 class TestResources extends Context.Service<TestResources, ReturnType<typeof makeTestResources>>()(
-  '@leviathan/test/Resources',
+  '@ceirean/test/Resources',
 ) {}
 
 const prepareResources = fromEffect(TestResources.use((service) => service.prepare));

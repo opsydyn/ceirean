@@ -1,4 +1,4 @@
-import type { WorkerOperationId } from '@leviathan/domain';
+import type { WorkerOperationId } from '@ceirean/domain';
 import { Data } from 'effect';
 
 export class WorkerJournalError extends Data.TaggedError('WorkerJournalError')<{

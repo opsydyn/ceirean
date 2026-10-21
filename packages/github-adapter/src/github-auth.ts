@@ -1,5 +1,5 @@
-import { GitHubId } from '@leviathan/domain';
-import { LiveAuthorityError } from '@leviathan/engine';
+import { GitHubId } from '@ceirean/domain';
+import { LiveAuthorityError } from '@ceirean/engine';
 import { Result, Schema } from 'effect';
 import { importPKCS8, SignJWT } from 'jose';
 

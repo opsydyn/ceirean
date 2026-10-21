@@ -1,5 +1,4 @@
-import { BunFileSystem, BunPath, BunStdio } from '@effect/platform-bun';
-import { LocalIngressPolicy, type ClockReading } from '@leviathan/domain';
+import { LocalIngressPolicy, type ClockReading } from '@ceirean/domain';
 import {
   LiveAdmission,
   LiveAuthority,
@@ -7,15 +6,16 @@ import {
   makeLiveAdmission,
   makeLiveAuthority,
   makeLiveInbox,
-} from '@leviathan/engine';
-import { makeGitHubAuthorityDriver } from '@leviathan/github-adapter/authority';
-import { captureRequestBody, makeVerifiedGitHubIngress } from '@leviathan/github-adapter/protocol';
+} from '@ceirean/engine';
+import { makeGitHubAuthorityDriver } from '@ceirean/github-adapter/authority';
+import { captureRequestBody, makeVerifiedGitHubIngress } from '@ceirean/github-adapter/protocol';
 import {
   initializeLiveInbox,
   openLiveInbox,
   readLiveInboxStatus,
   type LiveInboxConfig,
-} from '@leviathan/github-adapter/storage';
+} from '@ceirean/github-adapter/storage';
+import { BunFileSystem, BunPath, BunStdio } from '@effect/platform-bun';
 import {
   Config,
   Context,
@@ -201,7 +201,7 @@ function acquireStart({ config, host, storage, options }: Settings) {
 class StartResources extends Context.Service<
   StartResources,
   Effect.Success<ReturnType<typeof acquireStart>>
->()('@leviathan/github-ingress/StartResources') {}
+>()('@ceirean/github-ingress/StartResources') {}
 function startSession() {
   function* acquire() {
     const resources = yield* StartResources;
@@ -235,7 +235,7 @@ function adminSession({ args, config, storage }: Settings) {
 class Invocation extends Context.Service<
   Invocation,
   Effect.Success<ReturnType<typeof startSession> | ReturnType<typeof adminSession>>
->()('@leviathan/github-ingress/Invocation') {}
+>()('@ceirean/github-ingress/Invocation') {}
 function invocationLayer(settings: Settings) {
   function start() {
     const resources = Layer.effect(StartResources, acquireStart(settings));

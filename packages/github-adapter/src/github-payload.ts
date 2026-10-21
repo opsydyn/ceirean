@@ -3,7 +3,7 @@ import {
   GitHubId,
   VerifiedCommand,
   type NonAdmittedDecision,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Match, Result, Schema } from 'effect';
 
 const native = Schema.Struct({
@@ -59,7 +59,7 @@ export function normaliseGitHubDelivery(input: {
     });
     const isUser = Schema.is(Schema.Literal('User'));
     const isCreated = Schema.is(Schema.Literal('created'));
-    const exact = Schema.is(Schema.Literal('/leviathan assess'));
+    const exact = Schema.is(Schema.Literal('/ceirean assess'));
     return Match.value(true).pipe(
       Match.when(
         () =>

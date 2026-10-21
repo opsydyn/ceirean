@@ -44,7 +44,7 @@ export async function openFlueProbe(options: {
   mode: 'tool' | 'blocked';
   record: (token: string) => Promise<number>;
 }): Promise<ProbeHandle> {
-  const faux = fauxProvider({ provider: 'leviathan-probe', models: [{ id: 'fixture' }] });
+  const faux = fauxProvider({ provider: 'ceirean-probe', models: [{ id: 'fixture' }] });
   const entered = Promise.withResolvers<void>();
   const release = Promise.withResolvers<void>();
   let toolCalls = 0;
@@ -57,18 +57,18 @@ export async function openFlueProbe(options: {
       return { output: { count: await options.record(data.token) } };
     },
   });
-  function LeviathanProbe() {
-    useModel('leviathan-probe/fixture');
+  function CeireanProbe() {
+    useModel('ceirean-probe/fixture');
     useTool(recordToken);
     return 'Record the synthetic token once, then report completion.';
   }
   const runtime = await start({
-    agents: [LeviathanProbe],
+    agents: [CeireanProbe],
     db: sqlite(join(options.stateDir, 'flue.db')),
     env: {},
     providers: [faux.provider],
   }).catch(runtimeFailure);
-  const agent = init(LeviathanProbe, { id: options.instanceId });
+  const agent = init(CeireanProbe, { id: options.instanceId });
   let stopping: Promise<void> | undefined;
   return {
     async dispatch(message) {

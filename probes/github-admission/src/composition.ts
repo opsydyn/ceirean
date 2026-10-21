@@ -5,7 +5,7 @@ import {
   CommandInboxOperation,
   makeCommandAdmission,
   makeCommandInbox,
-} from '@leviathan/engine';
+} from '@ceirean/engine';
 import { Cause, Effect, Exit, Layer, ManagedRuntime, Match, Result, Schema } from 'effect';
 
 import { makeGitHubIngress } from './github-ingress.ts';

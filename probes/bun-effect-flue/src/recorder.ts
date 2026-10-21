@@ -11,4 +11,4 @@ export function makeRecorder() {
 export class ProbeRecorder extends Context.Service<
   ProbeRecorder,
   ReturnType<typeof makeRecorder>
->()('leviathan/probe/Recorder') {}
+>()('ceirean/probe/Recorder') {}

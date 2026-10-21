@@ -6,9 +6,17 @@ Only `POST /webhook` is served, on `127.0.0.1:8787`. No command creates a tunnel
 
 The explicit JSON configuration has only `policy`, optional `stateRoot`,
 `webhookSecretFile` and `privateKeyFile`. The default state root is
-`$HOME/Library/Application Support/Leviathan`; its database is
+`$HOME/Library/Application Support/Ceirean`; its database is
 `github-admission.sqlite`. `--database` selects an absolute contained descendant.
 Unknown JSON keys and undocumented or duplicate arguments are refused.
+
+The exact human comment is `/ceirean assess`; the old product spelling is not
+an alias. Existing ledgers are not auto-discovered or migrated. An explicit
+operator-approved path can retain a compatible old ledger; on-disk identifiers
+and replay history are unchanged. See the
+[rehearsal approval worksheet](../../docs/runbooks/ceirean-rehearsal-approval.md).
+Redelivered retired-command payloads are Ignored/NotCommand before admission,
+not Duplicate; their existing stored history is not rewritten.
 
 CLI forms, through `bun --no-env-file --no-install src/main.ts`:
 

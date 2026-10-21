@@ -1,10 +1,10 @@
-import { createGitHubChannel } from '@flue/github';
 import {
   DeliveryId,
   IngressScopeId,
   type VerifiedCommand,
   type NonAdmittedDecision,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
+import { createGitHubChannel } from '@flue/github';
 import { Match, Option, Result, Schema } from 'effect';
 
 import { normaliseGitHubDelivery } from './github-payload.ts';

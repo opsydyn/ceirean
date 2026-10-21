@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { AuthorityState, DecisionId } from '@leviathan/domain';
+import { AuthorityState, DecisionId } from '@ceirean/domain';
 import { Effect, Match, Result, Schema } from 'effect';
 
 import { authorityFixture } from '../src/fixture.ts';

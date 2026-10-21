@@ -1,5 +1,5 @@
-import { LiveAdmissionReply, NonAdmittedDecision } from '@leviathan/domain';
-import { IngressFailure } from '@leviathan/github-adapter/protocol';
+import { LiveAdmissionReply, NonAdmittedDecision } from '@ceirean/domain';
+import { IngressFailure } from '@ceirean/github-adapter/protocol';
 import { Match, Result, Schema } from 'effect';
 
 import { publicFailure } from './listener.ts';

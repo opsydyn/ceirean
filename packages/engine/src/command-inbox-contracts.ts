@@ -7,6 +7,6 @@ export {
   AuthorityObservation,
   CommitReply,
   VerifiedCommand,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 
 export type CommandInboxDriver = Parameters<typeof makeCommandInbox>[0];

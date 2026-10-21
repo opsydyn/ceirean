@@ -1,8 +1,8 @@
 import { Database } from 'bun:sqlite';
 import { afterEach, expect, mock, spyOn, test } from 'bun:test';
 
-import { AdmissionRecord, Digest, AdmissionDraft, type CommitReply } from '@leviathan/domain';
-import { CommandInboxError, type CommandInboxDriver } from '@leviathan/engine';
+import { AdmissionRecord, Digest, AdmissionDraft, type CommitReply } from '@ceirean/domain';
+import { CommandInboxError, type CommandInboxDriver } from '@ceirean/engine';
 import { Cause, Effect, Exit, Match, Option, Result, Schema } from 'effect';
 
 import { authorityFixture, draftFixture } from '../src/fixture.ts';

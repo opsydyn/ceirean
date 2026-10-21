@@ -190,7 +190,7 @@ async function statusHistory(fixture: Fixture) {
       'synthetic-webhook',
       'PRIVATE KEY',
       'rawBodyDigest',
-      '/leviathan assess',
+      '/ceirean assess',
       'ownerLogin',
       'repositoryName',
       'startedMonotonicMs',

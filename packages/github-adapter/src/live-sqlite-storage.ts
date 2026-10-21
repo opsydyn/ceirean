@@ -15,8 +15,8 @@ import {
   commandKey,
   decideLiveAdmission,
   transportKey,
-} from '@leviathan/domain';
-import { LiveInboxError, sameCommandFacts } from '@leviathan/engine';
+} from '@ceirean/domain';
+import { LiveInboxError, sameCommandFacts } from '@ceirean/engine';
 import { Match, Option, Result, Schema } from 'effect';
 
 export const ledgerTables = {

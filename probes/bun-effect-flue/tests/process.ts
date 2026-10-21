@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export async function withStateDirectory(body: (directory: string) => Promise<void>) {
-  const directory = await mkdtemp(join(tmpdir(), 'leviathan-process-'));
+  const directory = await mkdtemp(join(tmpdir(), 'ceirean-process-'));
   await chmod(directory, 0o700);
   await Promise.resolve()
     .then(() => body(directory))

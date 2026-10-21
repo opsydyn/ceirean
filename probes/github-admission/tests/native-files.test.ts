@@ -5,7 +5,7 @@ import { join } from 'node:path';
 const directories: string[] = [];
 export function fileFixture() {
   const root = tmpdir();
-  const prefix = join(root, 'leviathan-inbox-');
+  const prefix = join(root, 'ceirean-inbox-');
   const directory = mkdtempSync(prefix);
   directories.push(directory);
   return join(directory, 'inbox.sqlite');

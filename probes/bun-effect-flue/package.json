@@ -1,5 +1,5 @@
 {
-  "name": "@leviathan/compatibility-probe",
+  "name": "@ceirean/compatibility-probe",
   "private": true,
   "type": "module",
   "scripts": {

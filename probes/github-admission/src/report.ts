@@ -1,4 +1,4 @@
-import { DecisionId } from '@leviathan/domain';
+import { DecisionId } from '@ceirean/domain';
 import { Result, Schema } from 'effect';
 
 export const RestartResult = Schema.Struct({

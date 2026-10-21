@@ -10,7 +10,7 @@ import {
   WorkerOperationId,
   WorkerReadyReceipt,
   WorkerRefusal,
-} from '@leviathan/domain';
+} from '@ceirean/domain';
 import { Schema } from 'effect';
 
 export const WorkerJournalSnapshot = Schema.Struct({

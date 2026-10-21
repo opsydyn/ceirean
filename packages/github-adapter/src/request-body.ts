@@ -1,4 +1,4 @@
-import { Digest } from '@leviathan/domain';
+import { Digest } from '@ceirean/domain';
 import { Effect, Match, Option, Result, Schema } from 'effect';
 
 export class RequestBodyError extends Schema.TaggedError<RequestBodyError>()('RequestBodyError', {

@@ -1,4 +1,9 @@
-# Leviathan Roadmap
+# Ceirean Roadmap
+
+Ceirean is the current product name; the local `Leviathan` checkout name can
+remain unchanged. Historical evidence and source identities below are retained.
+The next live step is an explicitly approved, finite session using the
+[rehearsal worksheet](runbooks/ceirean-rehearsal-approval.md), not deployment.
 
 Local delivery map, updated 2026-10-20. Checkboxes describe delivered outcomes,
 not permission to implement unchecked items. The organisation-discovery direction

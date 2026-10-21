@@ -26,13 +26,13 @@ export function makeWorkerCase() {
     policyDigest: Digest.make('f'.repeat(64)),
     configDigest: Digest.make('b'.repeat(64)),
     configuration: {
-      mounts: [{ source: '/synthetic/leviathan/worker-1', target: '/workspace', readOnly: false }],
+      mounts: [{ source: '/synthetic/ceirean/worker-1', target: '/workspace', readOnly: false }],
       network: 'synthetic-isolated',
       security: { user: '1000:1000', droppedCapabilities: ['ALL'], noNewPrivileges: true },
     },
     custody: {
-      controllerRoot: '/synthetic/leviathan',
-      stagingDirectory: '/synthetic/leviathan/worker-1',
+      controllerRoot: '/synthetic/ceirean',
+      stagingDirectory: '/synthetic/ceirean/worker-1',
       containerSlot: 'slot-1',
       retainedArtifacts: ['/synthetic/evidence/worker-1.json'],
     },

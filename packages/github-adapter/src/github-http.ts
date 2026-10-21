@@ -1,4 +1,4 @@
-import { LiveAuthorityError } from '@leviathan/engine';
+import { LiveAuthorityError } from '@ceirean/engine';
 import { Match, Option, Result, Schema } from 'effect';
 
 export type GitHubFetch = (url: string, init: RequestInit) => Promise<Response>;
@@ -192,7 +192,7 @@ export async function githubRequest(
       headers: {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2026-03-10',
-        'User-Agent': 'Leviathan-Local-GitHub-Ingress',
+        'User-Agent': 'Ceirean-Local-GitHub-Ingress',
         Authorization: `Bearer ${request.token}`,
         'Content-Type': 'application/json',
       },

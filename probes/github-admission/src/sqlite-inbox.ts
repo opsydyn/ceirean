@@ -13,8 +13,8 @@ import {
   type AdmissionReason,
   type CommitReply,
   type VerifiedCommand,
-} from '@leviathan/domain';
-import { CommandInboxError, sameCommandFacts, type CommandInboxDriver } from '@leviathan/engine';
+} from '@ceirean/domain';
+import { CommandInboxError, sameCommandFacts, type CommandInboxDriver } from '@ceirean/engine';
 import { Cause, Effect, Exit, Match, Option, Result, Schema, Scope } from 'effect';
 
 import {
