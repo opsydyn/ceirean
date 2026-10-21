@@ -3,7 +3,8 @@
 Status: **restricted App setup approved and installed; live rehearsal unapproved**.
 The owner approved creation/installation with Issues and Metadata read-only on
 `opsydyn/fold-kit-experiments` only. No live ingress rehearsal has been performed.
-This worksheet is not permission to read credentials, broaden grants, start a real-key
+Beyond the explicitly approved local key conversion below, this worksheet is not
+permission to read credentials, broaden grants, start a real-key
 listener or open a tunnel. Fill every applicable field and obtain
 explicit owner approval for the exact targets and actions before execution.
 Use the [local ingress runbook](local-github-ingress.md) for operational limits.
@@ -41,26 +42,39 @@ Account/repository IDs were read from GitHub's metadata API; App and installatio
 IDs were read from the settings UI. These observations establish setup only,
 not runtime authentication or admission. The issue-comment subscription still
 needs verification before enabling delivery. Key custody/format has not been
-inspected; the agent has not generated or read a private key or webhook secret.
+inspected at that checkpoint; no private key or webhook secret was accessed then.
 No listener, tunnel, token minting or assessment was started.
+
+### Approved Local Key Preparation: 2026-10-21
+
+The owner supplied the downloaded PEM and explicitly requested local conversion.
+The key was converted to unencrypted PKCS#8 outside the repository at
+`/Users/alancurrie/Library/Application Support/Ceirean/credentials/github-app.pkcs8.pem`.
+OpenSSL reported `Key is valid`; metadata showed owner `alancurrie`, mode 0600 and
+one link. The Ceirean state root and credentials directory were set to 0700.
+The conversion refused an existing destination. No key contents were printed,
+uploaded or committed. The original remains locally ignored in the worktree,
+also mode 0600; its relocation/removal is not part of this conversion.
+This approval did not authorize token minting, runtime key acquisition, a
+listener, a tunnel or webhook activation. No webhook secret has been prepared.
 
 - [App settings](https://github.com/settings/apps/opsydyn-ceirean)
 - [Installation settings](https://github.com/settings/installations/173668921)
 
 ## Custody And Exposure
 
-| Field                                                      | Approved value                       |
-| ---------------------------------------------------------- | ------------------------------------ |
-| Absolute configuration path (owner-only 0600)              | Unselected                           |
-| Absolute webhook-secret file path (0600, no contents)      | Unselected                           |
-| Absolute PKCS#8 RSA key path (0600, no contents)           | Unselected                           |
-| Canonical local non-synced external state root (0700)      | Unselected                           |
-| Database path and bound ownership sidecar                  | Unselected                           |
-| New explicit init or approved existing ledger identity     | Unselected                           |
-| Stopped backup path and restoration owner                  | Unselected                           |
-| Tunnel provider, exact HTTPS URL and access controls       | Unselected                           |
-| Tunnel target                                              | `http://127.0.0.1:8787/webhook` only |
-| App webhook URL/secret setup and exact restoration actions | Unselected                           |
+| Field                                                      | Approved value                                                                           |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Absolute configuration path (owner-only 0600)              | Unselected                                                                               |
+| Absolute webhook-secret file path (0600, no contents)      | Unselected                                                                               |
+| Absolute PKCS#8 RSA key path (0600, no contents)           | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/github-app.pkcs8.pem` |
+| Canonical local non-synced external state root (0700)      | Unselected                                                                               |
+| Database path and bound ownership sidecar                  | Unselected                                                                               |
+| New explicit init or approved existing ledger identity     | Unselected                                                                               |
+| Stopped backup path and restoration owner                  | Unselected                                                                               |
+| Tunnel provider, exact HTTPS URL and access controls       | Unselected                                                                               |
+| Tunnel target                                              | `http://127.0.0.1:8787/webhook` only                                                     |
+| App webhook URL/secret setup and exact restoration actions | Unselected                                                                               |
 
 No repo/temp/synced database and no implicit legacy migration. Preserve old
 ledgers and their ownership/replay state. Inspect file metadata without printing
