@@ -1,30 +1,51 @@
 # Ceirean Rehearsal Approval
 
-Status: **unapproved; no live rehearsal performed**. This worksheet is not
-permission to create an App, read credentials, change grants, start a real-key
-listener, open a tunnel or call GitHub. Fill every applicable field and obtain
+Status: **restricted App setup approved and installed; live rehearsal unapproved**.
+The owner approved creation/installation with Issues and Metadata read-only on
+`opsydyn/fold-kit-experiments` only. No live ingress rehearsal has been performed.
+This worksheet is not permission to read credentials, broaden grants, start a real-key
+listener or open a tunnel. Fill every applicable field and obtain
 explicit owner approval for the exact targets and actions before execution.
 Use the [local ingress runbook](local-github-ingress.md) for operational limits.
 
 ## Exact Targets
 
-| Field                                                   | Approved value |
-| ------------------------------------------------------- | -------------- |
-| Owner and operator approving this session               | Unselected     |
-| Source commit, tree and lockfile hash                   | Unselected     |
-| Repository owner ID and repository ID                   | Unselected     |
-| Repository display name (informational only)            | Unselected     |
-| Dedicated GitHub App ID and ingress scope ID            | Unselected     |
-| Installation ID, selected repository restriction        | Unselected     |
-| Human operator ID, current base write/admin permission  | Unselected     |
-| Ordinary issue ID and number for comments               | Unselected     |
-| Profile ID/revision, policy revision and local revision | Unselected     |
-| Exact start time, maximum duration and stop time        | Unselected     |
+| Field                                                   | Approved value                                     |
+| ------------------------------------------------------- | -------------------------------------------------- |
+| Owner and operator approving this session               | Unselected                                         |
+| Source commit, tree and lockfile hash                   | Unselected                                         |
+| Repository owner ID and repository ID                   | `257329185` / `1247366304`                         |
+| Repository display name (informational only)            | `opsydyn/fold-kit-experiments`                     |
+| Dedicated GitHub App ID and ingress scope ID            | App `5407709`; ingress scope not yet selected      |
+| Installation ID, selected repository restriction        | `173668921`; selected repository `1247366304` only |
+| Human operator ID, current base write/admin permission  | Unselected                                         |
+| Ordinary issue ID and number for comments               | Unselected                                         |
+| Profile ID/revision, policy revision and local revision | Unselected                                         |
+| Exact start time, maximum duration and stop time        | Unselected                                         |
 
 Do not substitute test IDs or treat a login/name as immutable identity. Confirm
 the dedicated App has repository Metadata read and Issues read, `issue_comment`
 subscription, and no write grants. Runtime tokens remain metadata-only and
 restricted to the selected repository. Record inspected grants, not credentials.
+
+### Observed Setup: 2026-10-21
+
+The owner completed registration of `opsydyn-ceirean` and its installation.
+The GitHub installation UI reports it installed on `@opsydyn`, with Read access
+to issues and metadata, Only select repositories enabled, exactly one selected
+repository (`opsydyn/fold-kit-experiments`), and no pending Save changes.
+The App's General page reports App ID `5407709`, webhook Active unchecked, and
+an empty webhook URL. No settings were changed during this verification.
+
+Account/repository IDs were read from GitHub's metadata API; App and installation
+IDs were read from the settings UI. These observations establish setup only,
+not runtime authentication or admission. The issue-comment subscription still
+needs verification before enabling delivery. Key custody/format has not been
+inspected; the agent has not generated or read a private key or webhook secret.
+No listener, tunnel, token minting or assessment was started.
+
+- [App settings](https://github.com/settings/apps/opsydyn-ceirean)
+- [Installation settings](https://github.com/settings/installations/173668921)
 
 ## Custody And Exposure
 
@@ -49,7 +70,7 @@ Expose no status/configuration route or other local port.
 ## Approved Actions
 
 - [ ] Owner approves all exact targets, custody paths, grants and finite timebox.
-- [ ] Owner approves App creation/configuration and selected-repository installation.
+- [x] Owner approves App creation/configuration and selected-repository installation (restricted setup above).
 - [ ] Owner approves local init or explicit reuse, key reading, listener and tunnel.
 - [ ] Owner approves posting a fresh exact `/ceirean assess` comment on the selected issue.
 - [ ] Owner approves manual redelivery of its exact delivery and a stopped restart.
@@ -94,4 +115,4 @@ No assessment, worker, repository mutation or PR is executed by this ingress.
 
 Never archive secrets, tokens, authorization headers, environment dumps or private
 webhook/API payloads. Live outcome: **not run**. Remaining approval/evidence:
-**all live fields and observations above**.
+**all remaining unselected fields, rehearsal approvals and live observations above**.
