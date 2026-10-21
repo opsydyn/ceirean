@@ -7,12 +7,46 @@ for verified IDs, protected local paths and preparation evidence.
 
 ## Tunnel Recommendation
 
-For repeated rehearsals, prefer a dedicated remotely-managed Cloudflare Tunnel
-with a hostname such as `ceirean-hooks.<owner-selected-domain>`. The account,
-Cloudflare-managed zone, full hostname, tunnel identity and route still require
-selection and approval. Do not infer ownership from names in other projects.
-This replaces the proposed Quick Tunnel only after the owner selects the domain.
-Quick Tunnel remains a disposable alternative, not the long-term endpoint.
+The owner selected `ceirean-hooks.opsydyn.net` on 2026-10-21 and approved named
+tunnel preparation only, explicitly keeping the listener and webhooks disabled.
+The intended endpoint is `https://ceirean-hooks.opsydyn.net/webhook`; Cloudflare
+account ownership, zone ID, existing DNS and tunnel identity remain unverified.
+This replaces the Quick Tunnel recommendation for this setup. A Quick Tunnel
+remains a disposable alternative, not the selected endpoint.
+
+### Alchemy Assessment And Preparation Boundary
+
+Alchemy supports the required remotely-managed Tunnel, Configuration and DNS
+Record resources. Its published `2.0.0-beta.83` release declares Effect `^4.0.0`
+as a peer, which accepts Ceirean's pinned 4.0.5. This metadata is not installation,
+typecheck or deployment qualification. No Alchemy dependency has been added.
+
+Recommend an isolated infrastructure workspace, not a dependency of the ingress
+application or domain/engine packages. Keep all existing Effect lint rules and
+pins unchanged. Use Alchemy's local state initially, ignored by Git and protected
+as credential-bearing operational state. Do not bootstrap `Cloudflare.state()`:
+that would provision additional state-store Worker, Durable Object and Secrets
+Store resources outside this tunnel-only scope.
+
+The intended owned resource set is one dedicated tunnel named `ceirean-rehearsal`,
+one remote configuration matching hostname `ceirean-hooks.opsydyn.net` and exact
+path `^/webhook$` to `http://127.0.0.1:8787` with a 404 catch-all, and one proxied
+CNAME for that hostname pointing to the created tunnel. Inspect existing records
+and tunnels before applying; refuse conflicts instead of enabling adoption or
+replacement. Do not take over the zone or any other records.
+
+Use only the account/zone permissions needed for tunnel and DNS management;
+verify the provider's required read scopes before credential issuance. No global
+API key, account-wide connector certificate or secret stack outputs. Authentication
+setup and credential storage must not print token values or put them in Git.
+Provisioning must not run a connector, listener, OS service, GitHub update, profile
+enablement or assessment. The intended final tunnel state is disconnected with
+zero connectors, not an active origin behind the new hostname.
+
+Preparation is currently blocked at authentication: no Alchemy profile file or
+CLI was present, and the opened Cloudflare dashboard requires owner sign-in.
+No remote tunnel, ingress configuration or DNS record has been created. Account,
+zone and collision checks plus a reviewed Alchemy resource plan must precede apply.
 
 - Map only the selected hostname's `/webhook` path to `http://127.0.0.1:8787`;
   reject unmatched paths. The application still validates method, signature,
@@ -82,7 +116,8 @@ failed/incomplete result, not a successful rehearsal.
 
 ## Remaining Activation Gates
 
-- [ ] Select/approve Cloudflare account, zone, hostname, tunnel and exact HTTPS endpoint.
+- [x] Owner selects `https://ceirean-hooks.opsydyn.net/webhook` and authorizes named tunnel preparation only.
+- [ ] Verify/approve Cloudflare account, zone, existing DNS and exact tunnel identity.
 - [ ] Approve connector installation and protected credential custody.
 - [ ] Select/approve ordinary issue ID/number, Enabled profile ID/revision and fresh policy revisions.
 - [ ] Record exact session start/deadlines and who performs shutdown/restoration.
@@ -116,6 +151,8 @@ This is queued work, not an installation performed by this plan.
 ## Primary References
 
 - [Cloudflare Tunnel setup](https://developers.cloudflare.com/tunnel/get-started/)
+- [Alchemy tunnel resources](https://alchemy.run/cloudflare/networking/tunnel/)
+- [Alchemy local and remote state](https://alchemy.run/state-store/)
 - [Cloudflare Quick Tunnel tradeoffs](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
 - [GitHub webhook best practices](https://docs.github.com/en/webhooks/using-webhooks/best-practices-for-using-webhooks)
 - [Fallow quick start](https://fallow.tools/docs/quickstart/)

@@ -11,8 +11,10 @@ explicit owner approval for the exact targets and actions before execution.
 Use the [local ingress runbook](local-github-ingress.md) for operational limits.
 The owner approved the [bounded rehearsal design](ceirean-live-rehearsal-plan.md)
 (25 minutes total, at most 15 minutes public exposure, profile-disable negative
-test). Domain-backed tunnel selection and exact activation targets remain pending;
-that design approval does not enable anything.
+test). The owner selected `ceirean-hooks.opsydyn.net` and approved named tunnel
+preparation only. Cloudflare account/zone verification, provisioning and exact
+session activation remain pending; that approval does not start any connector,
+listener or webhook delivery.
 
 ## Exact Targets
 
@@ -112,18 +114,18 @@ bun --no-env-file --no-install src/main.ts status --config '/Users/alancurrie/Li
 
 ## Custody And Exposure
 
-| Field                                                      | Approved value                                                                           |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Absolute configuration path (owner-only 0600)              | `/Users/alancurrie/Library/Application Support/Ceirean/ingress.json`                     |
-| Absolute webhook-secret file path (0600, no contents)      | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/webhook-secret`       |
-| Absolute PKCS#8 RSA key path (0600, no contents)           | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/github-app.pkcs8.pem` |
-| Canonical local non-synced external state root (0700)      | `/Users/alancurrie/Library/Application Support/Ceirean`                                  |
-| Database path and bound ownership sidecar                  | State root + `github-admission.sqlite` and `github-admission.sqlite.owner.sqlite`        |
-| New explicit init or approved existing ledger identity     | New explicit init, zero recorded outcomes; no legacy ledger reused                       |
-| Stopped backup path and restoration owner                  | Unselected                                                                               |
-| Tunnel provider, exact HTTPS URL and access controls       | Unselected                                                                               |
-| Tunnel target                                              | `http://127.0.0.1:8787/webhook` only                                                     |
-| App webhook URL/secret setup and exact restoration actions | Unselected                                                                               |
+| Field                                                      | Approved value                                                                                              |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Absolute configuration path (owner-only 0600)              | `/Users/alancurrie/Library/Application Support/Ceirean/ingress.json`                                        |
+| Absolute webhook-secret file path (0600, no contents)      | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/webhook-secret`                          |
+| Absolute PKCS#8 RSA key path (0600, no contents)           | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/github-app.pkcs8.pem`                    |
+| Canonical local non-synced external state root (0700)      | `/Users/alancurrie/Library/Application Support/Ceirean`                                                     |
+| Database path and bound ownership sidecar                  | State root + `github-admission.sqlite` and `github-admission.sqlite.owner.sqlite`                           |
+| New explicit init or approved existing ledger identity     | New explicit init, zero recorded outcomes; no legacy ledger reused                                          |
+| Stopped backup path and restoration owner                  | Unselected                                                                                                  |
+| Tunnel provider, exact HTTPS URL and access controls       | Cloudflare named tunnel; `https://ceirean-hooks.opsydyn.net/webhook`; account/zone and provisioning pending |
+| Tunnel target                                              | `http://127.0.0.1:8787/webhook` only                                                                        |
+| App webhook URL/secret setup and exact restoration actions | Unselected                                                                                                  |
 
 No repo/temp/synced database and no implicit legacy migration. Preserve old
 ledgers and their ownership/replay state. Inspect file metadata without printing

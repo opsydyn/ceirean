@@ -3,6 +3,7 @@ node_modules/
 .env.*
 *.[pP][eE][mM]
 .local/
+.alchemy/
 *.db
 *.db-*
 *.sqlite
