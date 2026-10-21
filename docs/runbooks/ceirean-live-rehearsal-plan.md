@@ -1,10 +1,12 @@
 # Bounded FoldKit Live Rehearsal
 
-Status: rehearsal design approved on 2026-10-21; the separately approved named
-tunnel/configuration/DNS resources are provisioned with zero connectors. Live
-activation remains gated by the exact endpoint, session time and issue. No listener,
-connector or webhook has been enabled. See the [approval worksheet](ceirean-rehearsal-approval.md)
-for verified IDs, protected local paths and preparation evidence.
+Status: the first approved live attempt on 2026-10-21 stopped on HTTP 503 /
+`OperationalFailure`, before any admission was recorded. Connector and listener
+are stopped, webhook delivery is disabled, and the local profile is Disabled.
+See the [observed outcome](../evidence/local-github-ingress/live-rehearsal-20261021.md)
+for timings, preserved counts and missing acceptance evidence. A new live attempt
+requires a diagnosed fix and a fresh approved window. The design below remains
+the intended acceptance sequence, not a record that it passed.
 
 ## Tunnel Recommendation
 

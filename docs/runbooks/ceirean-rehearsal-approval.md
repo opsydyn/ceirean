@@ -203,5 +203,10 @@ No assessment, worker, repository mutation or PR is executed by this ingress.
 - [ ] Record teardown/restoration results and any missing acceptance evidence.
 
 Never archive secrets, tokens, authorization headers, environment dumps or private
-webhook/API payloads. Live outcome: **not run**. Remaining approval/evidence:
-**all remaining unselected fields, rehearsal approvals and live observations above**.
+webhook/API payloads. The preparation checkboxes above are historical, not the
+latest execution record. The owner subsequently approved the exact issue,
+19:10-19:35 UK window, two comments, local profile revocation and assistant-owned
+teardown. The first attempt stopped on operational failure before admission;
+see the [observed outcome](../evidence/local-github-ingress/live-rehearsal-20261021.md).
+Delivery, connector and listener are now off; the local profile is Disabled.
+The remaining acceptance scenarios were not run and require a new approved window.
