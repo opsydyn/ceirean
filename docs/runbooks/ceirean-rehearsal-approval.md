@@ -1,6 +1,6 @@
 # Ceirean Rehearsal Approval
 
-Status: **restricted App setup and local preparation complete; live rehearsal unapproved**.
+Status: **restricted App setup, local preparation and disconnected Cloudflare provisioning complete; test issue selected; live activation unapproved**.
 The owner approved creation/installation with Issues and Metadata read-only on
 `opsydyn/fold-kit-experiments` only. No live ingress rehearsal has been performed.
 Beyond the explicitly approved local key conversion, configuration, secret
@@ -13,14 +13,17 @@ The owner approved the [bounded rehearsal design](ceirean-live-rehearsal-plan.md
 (25 minutes total, at most 15 minutes public exposure, profile-disable negative
 test). The owner corrected the hostname to `ceirean-hooks.opsydyn.xyz` and approved named tunnel
 preparation with Alchemy only. Cloudflare account/zone and the absence of an explicit
-DNS record were verified in the dashboard. Dependency type qualification, CLI
-authentication, tunnel collision checks, provisioning and exact
-session activation remain pending; that approval does not start any connector,
+DNS record were verified in the dashboard. Dependency type qualification, scoped
+authentication, collision preflight and the separately approved three-resource
+apply are complete. Exact session activation remains pending; those approvals do not start any connector,
 listener or webhook delivery.
 
 Cloudflare preparation targets: account `d95812af050c2e549a3296899b7b43b3`, active
 zone `65de6815d54763e90ebf4e5df3a7030c`, tunnel name `ceirean-rehearsal-bcea4099a8934e32`, and endpoint
-`https://ceirean-hooks.opsydyn.xyz/webhook`. No remote resource has been created.
+`https://ceirean-hooks.opsydyn.xyz/webhook`. The created tunnel is
+`1df21420-1ba8-4797-a43b-8fcbab108ea7`, independently verified with zero connectors.
+The exact ingress and proxied CNAME match; the local listener is stopped and the
+assessment profile remains Disabled. See the infrastructure README for evidence.
 The earlier `.net` hostname was corrected before any provisioning.
 
 ## Exact Targets
@@ -34,14 +37,27 @@ The earlier `.net` hostname was corrected before any provisioning.
 | Dedicated GitHub App ID and ingress scope ID            | App `5407709`; scope `github-app-5407709`                               |
 | Installation ID, selected repository restriction        | `173668921`; selected repository `1247366304` only                      |
 | Human operator ID, current base write/admin permission  | Allowlisted ID `257329185`; fresh live permission not yet checked       |
-| Ordinary issue ID and number for comments               | Unselected                                                              |
+| Ordinary issue ID and number for comments               | ID `5965919353`; issue `57`; open ordinary issue, not a PR              |
 | Profile ID/revision, policy revision and local revision | Profile Disabled; revisions recorded below                              |
-| Exact start time, maximum duration and stop time        | Unselected                                                              |
+| Exact start time, maximum duration and stop time        | Start/stop unselected; 25 minutes total, at most 15 minutes public      |
 
 Do not substitute test IDs or treat a login/name as immutable identity. Confirm
 the dedicated App has repository Metadata read and Issues read, `issue_comment`
 subscription, and no write grants. Runtime tokens remain metadata-only and
 restricted to the selected repository. Record inspected grants, not credentials.
+
+### Selected Rehearsal Issue
+
+The owner approved the FoldKit upgrade assessment as the test subject. Created
+and verified [issue #57](https://github.com/opsydyn/fold-kit-experiments/issues/57),
+**Assess FoldKit 0.169.0 upgrade for Astro and Viz**, with numeric ID `5965919353`.
+Its scope separates required migrations from optional Transition/Lazy/SSR/input
+improvements, paired Vite/MCP tooling, verification and package-version advice.
+It does not authorize upgrade implementation, PR creation or publishing.
+
+This rehearsal exercises existing admission, deduplication and evidence, not an
+autonomous migration assessment. No assessment command/comment was posted. The
+exact UK start time, operator stop deadline and activation approvals remain open.
 
 ### Observed Setup: 2026-10-21
 
@@ -121,18 +137,18 @@ bun --no-env-file --no-install src/main.ts status --config '/Users/alancurrie/Li
 
 ## Custody And Exposure
 
-| Field                                                      | Approved value                                                                                              |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Absolute configuration path (owner-only 0600)              | `/Users/alancurrie/Library/Application Support/Ceirean/ingress.json`                                        |
-| Absolute webhook-secret file path (0600, no contents)      | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/webhook-secret`                          |
-| Absolute PKCS#8 RSA key path (0600, no contents)           | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/github-app.pkcs8.pem`                    |
-| Canonical local non-synced external state root (0700)      | `/Users/alancurrie/Library/Application Support/Ceirean`                                                     |
-| Database path and bound ownership sidecar                  | State root + `github-admission.sqlite` and `github-admission.sqlite.owner.sqlite`                           |
-| New explicit init or approved existing ledger identity     | New explicit init, zero recorded outcomes; no legacy ledger reused                                          |
-| Stopped backup path and restoration owner                  | Unselected                                                                                                  |
-| Tunnel provider, exact HTTPS URL and access controls       | Cloudflare named tunnel; `https://ceirean-hooks.opsydyn.net/webhook`; account/zone and provisioning pending |
-| Tunnel target                                              | `http://127.0.0.1:8787/webhook` only                                                                        |
-| App webhook URL/secret setup and exact restoration actions | Unselected                                                                                                  |
+| Field                                                      | Approved value                                                                                                       |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Absolute configuration path (owner-only 0600)              | `/Users/alancurrie/Library/Application Support/Ceirean/ingress.json`                                                 |
+| Absolute webhook-secret file path (0600, no contents)      | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/webhook-secret`                                   |
+| Absolute PKCS#8 RSA key path (0600, no contents)           | `/Users/alancurrie/Library/Application Support/Ceirean/credentials/github-app.pkcs8.pem`                             |
+| Canonical local non-synced external state root (0700)      | `/Users/alancurrie/Library/Application Support/Ceirean`                                                              |
+| Database path and bound ownership sidecar                  | State root + `github-admission.sqlite` and `github-admission.sqlite.owner.sqlite`                                    |
+| New explicit init or approved existing ledger identity     | New explicit init, zero recorded outcomes; no legacy ledger reused                                                   |
+| Stopped backup path and restoration owner                  | Unselected                                                                                                           |
+| Tunnel provider, exact HTTPS URL and access controls       | Cloudflare named tunnel; `https://ceirean-hooks.opsydyn.xyz/webhook`; provisioned, zero connectors; no active origin |
+| Tunnel target                                              | `http://127.0.0.1:8787/webhook` only                                                                                 |
+| App webhook URL/secret setup and exact restoration actions | Unselected                                                                                                           |
 
 No repo/temp/synced database and no implicit legacy migration. Preserve old
 ledgers and their ownership/replay state. Inspect file metadata without printing
@@ -144,7 +160,7 @@ Expose no status/configuration route or other local port.
 - [ ] Owner approves all exact targets, custody paths, grants and finite timebox.
 - [x] Owner approves App creation/configuration and selected-repository installation (restricted setup above).
 - [x] Owner approves local config, webhook-secret creation and new-ledger init (completed above).
-- [ ] Owner approves runtime key acquisition, listener and tunnel.
+- [ ] Owner approves GitHub runtime credential acquisition, listener and public connector exposure.
 - [ ] Owner approves posting a fresh exact `/ceirean assess` comment on the selected issue.
 - [ ] Owner approves manual redelivery of its exact delivery and a stopped restart.
 - [ ] Owner selects one precise revocation: permission downgrade or local allowlist removal.
