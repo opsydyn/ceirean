@@ -47,6 +47,9 @@ hosting and execution appetite still require review.
       guarantees remain separate. No merge or push is implied.
 - [ ] Approve worker isolation, repository profiles, execution caps and the manual
       dry-run architecture; qualify one real FoldKit migration before expanding.
+      Historical replay case and Colima host direction are conversationally
+      approved. The [written profile/worker spec](superpowers/specs/2026-10-21-foldkit-replay-profile-design.md)
+      awaits owner review; no native worker or real migration is qualified.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
       orchestrator or repository-specific service.
 - [ ] Separately approve GitHub publication and least-privilege App access, and
