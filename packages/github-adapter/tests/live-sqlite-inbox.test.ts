@@ -2,7 +2,13 @@ import { Database, type SQLQueryBindings } from 'bun:sqlite';
 import { afterEach, expect, mock, spyOn, test } from 'bun:test';
 
 import { BunFileSystem, BunPath } from '@effect/platform-bun';
-import { Digest, LiveAdmissionDraft } from '@leviathan/domain';
+import {
+  Digest,
+  LiveAdmissionDraft,
+  LiveAdmissionRecord,
+  commandKey,
+  transportKey,
+} from '@leviathan/domain';
 import { Data, Effect, FileSystem, Layer, Match, Option, Result, Schema } from 'effect';
 
 import manifest from '../package.json';
@@ -11,6 +17,12 @@ import {
   openLiveInbox,
   readLiveInboxStatus,
 } from '../src/live-sqlite-inbox.ts';
+import {
+  encodeEvidence,
+  encodePolicy,
+  encodeRecord,
+  encodeVerified,
+} from '../src/live-sqlite-storage.ts';
 import {
   draftFixture,
   ownedConfig,
@@ -605,6 +617,149 @@ async function nativeInterleaving() {
 test(
   'two native connections interleave one command, different operators, and local policy update',
   nativeInterleaving,
+);
+
+async function committedNativeWinners() {
+  function* scenario() {
+    const { config } = yield* ownedConfig();
+    yield* initializeLiveInbox(config);
+    const { driver } = yield* openLiveInbox(config);
+    const original = draftFixture(55);
+    const duplicate = Schema.decodeUnknownSync(LiveAdmissionDraft.members[1])({
+      ...original,
+      provenance: {
+        ...original.provenance,
+        evidence: { ...original.provenance.evidence, evidenceId: 'losing-duplicate-evidence' },
+      },
+      decision: { ...original.decision, evidenceRevision: 'losing-duplicate-evidence' },
+    });
+    const conflict = draftFixture(55, policyFixture(), 67);
+    const losing = {
+      ...conflict,
+      verified: {
+        ...conflict.verified,
+        receipt: { ...conflict.verified.receipt, deliveryId: 'native-loser' },
+      },
+    };
+    const winner = LiveAdmissionRecord.make({
+      decisionId: '1',
+      commandKey: commandKey(duplicate.verified.candidate),
+      candidate: duplicate.verified.candidate,
+      localPolicyRevision: duplicate.expectedLocalRevision,
+      provenance: original.provenance,
+      decision: original.decision,
+      evaluatedAtMs: duplicate.evaluatedAtMs,
+      committedAtMs: 1000,
+    });
+    // Deliberately bypass only the test's owner resource: a raw native ledger writer.
+    const native = new Database(config.file, { create: false, readwrite: true, strict: true });
+    native.run('PRAGMA foreign_keys=ON');
+    function win() {
+      native
+        .query('INSERT INTO decisions VALUES(?,?,?)')
+        .run(1, winner.commandKey, encodeRecord(winner));
+      native
+        .query('INSERT INTO evidence VALUES(?,?,?)')
+        .run(
+          original.provenance.evidence.evidenceId,
+          1,
+          encodeEvidence(original.provenance.evidence),
+        );
+      native
+        .query('INSERT INTO receipts VALUES(?,?,?)')
+        .run(
+          transportKey(
+            duplicate.verified.receipt.ingressScopeId,
+            duplicate.verified.receipt.deliveryId,
+          ),
+          1,
+          encodeVerified(duplicate.verified),
+        );
+    }
+    native.transaction(win).immediate();
+    expect(driver.commit(duplicate).pipe(Result.getOrThrow)).toEqual({
+      _tag: 'Duplicate',
+      record: winner,
+    });
+    expect(driver.commit(losing).pipe(Result.getOrThrow)).toMatchObject({
+      _tag: 'Unrecorded',
+      decision: { reason: 'CommandConflict' },
+    });
+    expect(native.query('SELECT record FROM decisions').all()).toEqual([
+      { record: encodeRecord(winner) },
+    ]);
+    expect(native.query('SELECT evidence_id, evidence FROM evidence').all()).toEqual([
+      {
+        evidence_id: original.provenance.evidence.evidenceId,
+        evidence: encodeEvidence(original.provenance.evidence),
+      },
+    ]);
+    expect(native.query('SELECT transport_key FROM receipts').all()).toEqual([
+      {
+        transport_key: transportKey(
+          duplicate.verified.receipt.ingressScopeId,
+          duplicate.verified.receipt.deliveryId,
+        ),
+      },
+    ]);
+    native.close(true);
+    expect(yield* readLiveInboxStatus(config)).toMatchObject({
+      decisions: 1,
+      evidence: 1,
+      receipts: 1,
+    });
+  }
+  const program = Effect.gen(scenario);
+  const scoped = Effect.scoped(program);
+  const provided = Effect.provide(scoped, platform);
+  await Effect.runPromise(provided);
+}
+test(
+  'independent native committed winner defeats evaluated duplicate and different-operator drafts',
+  committedNativeWinners,
+);
+
+async function committedNativePolicy() {
+  function* scenario() {
+    const { config } = yield* ownedConfig();
+    yield* initializeLiveInbox(config);
+    const fault = mock((point: string) => point);
+    const { driver } = yield* openLiveInbox({ ...config, testFault: fault });
+    const stale = draftFixture(56);
+    const native = new Database(config.file, { create: false, readwrite: true, strict: true });
+    native.run('PRAGMA foreign_keys=ON');
+    const next = { ...policyFixture(), revision: 'local-2' };
+    function revise() {
+      native
+        .query('INSERT INTO policy_revisions VALUES(?,?)')
+        .run(next.revision, encodePolicy(next));
+      native.query('UPDATE policy SET revision=? WHERE id=1').run(next.revision);
+    }
+    native.transaction(revise).immediate();
+    expect(driver.commit(stale).pipe(Result.getOrThrow)).toMatchObject({
+      _tag: 'Unrecorded',
+      decision: { reason: 'AuthorityChanged' },
+    });
+    expect(fault.mock.calls).not.toContainEqual(['AfterDecision']);
+    expect(native.query('SELECT command_key FROM decisions').all()).toEqual([]);
+    expect(native.query('SELECT evidence_id FROM evidence').all()).toEqual([]);
+    expect(native.query('SELECT transport_key FROM receipts').all()).toEqual([]);
+    native.close(true);
+    expect(yield* readLiveInboxStatus(config)).toMatchObject({
+      decisions: 0,
+      evidence: 0,
+      receipts: 0,
+      authorityRevisions: 2,
+    });
+  }
+  const program = Effect.gen(scenario);
+  const scoped = Effect.scoped(program);
+  const provided = Effect.provide(scoped, platform);
+  await Effect.runPromise(provided);
+}
+test(
+  'independent native committed policy revision defeats an already evaluated draft',
+  committedNativePolicy,
 );
 
 async function constructionAndLimits() {

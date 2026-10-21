@@ -303,8 +303,12 @@ function makeDriver(db: Database, config: Config) {
     }
     return Option.match(receipt, { onSome: known, onNone: command });
   }
-  function recordFresh(draft: LiveAdmissionDraft): LiveAdmissionReply {
-    const { policy, floor } = readPolicy(db, config.ingressScopeId);
+  function validateFresh(
+    draft: LiveAdmissionDraft,
+    policy: LocalIngressPolicy,
+    floor: number,
+    accepted: (now: ClockReading) => LiveAdmissionReply,
+  ): LiveAdmissionReply {
     const at = Schema.decodeUnknownResult(ClockReading)(config.clock());
     function evaluate(now: ClockReading): LiveAdmissionReply {
       const evidence = Match.value(draft).pipe(
@@ -317,38 +321,6 @@ function makeDriver(db: Database, config: Config) {
         Match.orElse(() => Option.none()),
       );
       const decision = decideLiveAdmission({ verified: draft.verified, policy, evidence, now });
-      function insert(): LiveAdmissionReply {
-        const next = found(
-          db.query<{ id: number }, []>('SELECT coalesce(max(id),0)+1 AS id FROM decisions').get(),
-        ).id;
-        const record = Schema.decodeUnknownSync(LiveAdmissionRecord)({
-          decisionId: String(next),
-          commandKey: commandKey(draft.verified.candidate),
-          candidate: draft.verified.candidate,
-          localPolicyRevision: policy.revision,
-          provenance: draft.provenance,
-          decision: draft.decision,
-          evaluatedAtMs: draft.evaluatedAtMs,
-          committedAtMs: now.wallMs,
-        });
-        db.query('INSERT INTO decisions VALUES(?,?,?)').run(
-          next,
-          record.commandKey,
-          encodeRecord(record),
-        );
-        config.testFault?.('AfterDecision');
-        const liveEvidence = Match.value(draft.provenance).pipe(
-          Match.tag('LiveChecked', (live) => Option.some(live.evidence)),
-          Match.orElse(() => Option.none()),
-        );
-        Option.map(liveEvidence, (e) =>
-          db.query('INSERT INTO evidence VALUES(?,?,?)').run(e.evidenceId, next, encodeEvidence(e)),
-        );
-        config.testFault?.('AfterEvidence');
-        insertReceipt(draft.verified, record);
-        db.query('UPDATE policy SET clock_floor=? WHERE id=1').run(now.wallMs);
-        return { _tag: 'Recorded', record };
-      }
       function changed(): LiveAdmissionReply {
         return Match.value(decision).pipe(
           Match.tag('Rejected', (refusal) => ({ _tag: 'Unrecorded' as const, decision: refusal })),
@@ -376,10 +348,46 @@ function makeDriver(db: Database, config: Config) {
           () => unrecorded('AuthorityChanged'),
         ),
         Match.when(() => !sameDecision(decision, draft.decision), changed),
-        Match.orElse(insert),
+        Match.orElse(() => accepted(now)),
       );
     }
     return Result.match(at, { onSuccess: evaluate, onFailure: () => unrecorded('InvalidClock') });
+  }
+  function recordFresh(draft: LiveAdmissionDraft): LiveAdmissionReply {
+    const { policy, floor } = readPolicy(db, config.ingressScopeId);
+    function insert(now: ClockReading): LiveAdmissionReply {
+      const next = found(
+        db.query<{ id: number }, []>('SELECT coalesce(max(id),0)+1 AS id FROM decisions').get(),
+      ).id;
+      const record = Schema.decodeUnknownSync(LiveAdmissionRecord)({
+        decisionId: String(next),
+        commandKey: commandKey(draft.verified.candidate),
+        candidate: draft.verified.candidate,
+        localPolicyRevision: policy.revision,
+        provenance: draft.provenance,
+        decision: draft.decision,
+        evaluatedAtMs: draft.evaluatedAtMs,
+        committedAtMs: now.wallMs,
+      });
+      db.query('INSERT INTO decisions VALUES(?,?,?)').run(
+        next,
+        record.commandKey,
+        encodeRecord(record),
+      );
+      config.testFault?.('AfterDecision');
+      const liveEvidence = Match.value(draft.provenance).pipe(
+        Match.tag('LiveChecked', (live) => Option.some(live.evidence)),
+        Match.orElse(() => Option.none()),
+      );
+      Option.map(liveEvidence, (e) =>
+        db.query('INSERT INTO evidence VALUES(?,?,?)').run(e.evidenceId, next, encodeEvidence(e)),
+      );
+      config.testFault?.('AfterEvidence');
+      insertReceipt(draft.verified, record);
+      db.query('UPDATE policy SET clock_floor=? WHERE id=1').run(now.wallMs);
+      return { _tag: 'Recorded', record };
+    }
+    return validateFresh(draft, policy, floor, insert);
   }
   function resolveReplay(input: VerifiedCommand) {
     function replay() {
@@ -393,64 +401,19 @@ function makeDriver(db: Database, config: Config) {
     record: LiveAdmissionRecord,
   ): LiveAdmissionReply {
     const { policy } = readPolicy(db, config.ingressScopeId);
-    const reading = Schema.decodeUnknownResult(ClockReading)(config.clock());
-    function evaluate(now: ClockReading): LiveAdmissionReply {
-      const invalidClock = [
-        now.wallMs < record.committedAtMs,
-        now.wallMs < draft.evaluatedAtMs,
-        now.monotonicMs < draft.evaluatedMonotonicMs,
-      ].some(Boolean);
-      const evidence = Match.value(draft).pipe(
-        Match.when({ provenance: { _tag: 'LiveChecked' } }, (live) =>
-          Option.some({
-            evidence: live.provenance.evidence,
-            startedMonotonicMs: live.startedMonotonicMs,
-          }),
-        ),
-        Match.orElse(() => Option.none()),
+    function finish(now: ClockReading): LiveAdmissionReply {
+      const finalized = Schema.decodeUnknownSync(LiveAdmissionRecord)({
+        ...record,
+        committedAtMs: now.wallMs,
+      });
+      db.query('UPDATE decisions SET record=? WHERE id=?').run(
+        encodeRecord(finalized),
+        Number(record.decisionId),
       );
-      const decision = decideLiveAdmission({ verified: draft.verified, policy, evidence, now });
-      const sameDecision = Schema.toEquivalence(AdmissionDecision);
-      const boundProvenance = eligibleProvenance(draft.verified, policy, draft.provenance, now);
-      function changed(): LiveAdmissionReply {
-        return Match.value(decision).pipe(
-          Match.tag('Rejected', (refusal) => ({ _tag: 'Unrecorded' as const, decision: refusal })),
-          Match.orElse(() => unrecorded('AuthorityChanged')),
-        );
-      }
-      function finish(): LiveAdmissionReply {
-        const finalized = Schema.decodeUnknownSync(LiveAdmissionRecord)({
-          ...record,
-          committedAtMs: now.wallMs,
-        });
-        db.query('UPDATE decisions SET record=? WHERE id=?').run(
-          encodeRecord(finalized),
-          Number(record.decisionId),
-        );
-        db.query('UPDATE policy SET clock_floor=? WHERE id=1').run(now.wallMs);
-        return { _tag: 'Recorded', record: finalized };
-      }
-      return Match.value(true).pipe(
-        Match.when(
-          () => policy.revision !== draft.expectedLocalRevision,
-          () => unrecorded('AuthorityChanged'),
-        ),
-        Match.when(
-          () => invalidClock,
-          () => unrecorded('InvalidClock'),
-        ),
-        Match.when(
-          () => !boundProvenance,
-          () => unrecorded('AuthorityChanged'),
-        ),
-        Match.when(() => !sameDecision(decision, draft.decision), changed),
-        Match.orElse(finish),
-      );
+      db.query('UPDATE policy SET clock_floor=? WHERE id=1').run(now.wallMs);
+      return { _tag: 'Recorded', record: finalized };
     }
-    return Result.match(reading, {
-      onSuccess: evaluate,
-      onFailure: () => unrecorded('InvalidClock'),
-    });
+    return validateFresh(draft, policy, record.committedAtMs, finish);
   }
   function commit(input: LiveAdmissionDraft) {
     function call() {
