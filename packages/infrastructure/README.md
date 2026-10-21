@@ -106,7 +106,8 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [x] Pass the canonical infrastructure typecheck with that approved policy.
 - [x] Owner accepts bounded unique-name mitigation; keep the SDK defect documented.
 - [x] Owner supplies scoped token privately; Effect Config adapter qualified offline.
-- [ ] Verify live credential permissions without printing credentials or starting resources.
+- [x] Verify active credential and live tunnel/DNS/zone read access without printing credentials.
+- [ ] Review write grants separately; successful GETs do not prove write permissions.
 - [x] Inspect all four existing tunnels: no `ceirean-rehearsal-bcea4099a8934e32` collision; repeat immediately before apply.
 - [x] Create owner-only operational/auth directories outside Git; no credential entered.
 - [ ] Review a remote plan: exactly three creates, no replacements/deletions/adoption.
@@ -186,3 +187,23 @@ token or making a network request. File metadata confirms the root `.env` is
 owner-only (0600) and Git-ignored. Live permissions have not been verified.
 Do not read the token screen, clipboard or credential file into agent output;
 do not use broad OAuth or a global key.
+
+Read-only API preflight on 2026-10-21 subsequently passed using the root token
+through Effect's dotenv provider. All requests used GET with redirects disabled;
+only HTTP status and selected non-secret evidence were displayed:
+
+- Account-owned token verification: HTTP 200, active, expires
+  `2026-10-28T23:59:59Z` (token ID/value not displayed).
+- Exact zone lookup: HTTP 200; zone name, zone ID and account ID match the pins.
+- Complete live tunnel inventory: HTTP 200, four rows, one page; zero exact
+  matches for `ceirean-rehearsal-bcea4099a8934e32`.
+- Complete deleted tunnel inventory: HTTP 200, zero rows; zero matching names.
+- Exact-hostname DNS query: HTTP 200, zero rows for `ceirean-hooks.opsydyn.xyz`.
+
+The disposable helper initially refused to claim completeness because tunnel
+responses use `total_count`/`per_page` rather than `total_pages`. After adapting
+to the documented metadata, the complete preflight passed. No resources were
+written, connector tokens retrieved, auth profile stored or services started.
+These reads prove live read access only, not write grants or deployment readiness.
+Repeat collision checks immediately before any approved apply. The actual stack
+entrypoint remains unconditionally closed pending protected-state/plan review.

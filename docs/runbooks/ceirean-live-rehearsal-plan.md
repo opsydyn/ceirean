@@ -56,8 +56,12 @@ Effect Config now validates `CF_TOKEN` as a redacted non-empty value without
 whitespace and maps it to Alchemy's environment contract at the exported provider
 boundary. No auth profile is persisted. Local validation does not establish live
 permissions; use the absolute `--env-file` path described in the infrastructure
-README. Preparation still requires live authentication verification, fresh
-collision preflight and review of the remote plan. In the pinned provider, an existing
+README. Read-only API verification on 2026-10-21 confirmed an active token
+(expiry `2026-10-28T23:59:59Z`), the pinned zone/account, and zero exact-name
+collisions in complete live/deleted tunnel inventories and exact-hostname DNS.
+Write grants remain separate from this read-access proof. Preparation still
+requires protected-state qualification and review of the remote plan, with
+another collision check immediately before apply. In the pinned provider, an existing
 same-name tunnel can be reused despite `adopt: false`; preflight alone does not
 close a race. The owner accepted the stable random-suffixed name and supervised
 preflight as a bounded mitigation, not a provider fix. All three resources pin
