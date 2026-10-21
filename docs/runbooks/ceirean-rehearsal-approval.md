@@ -11,10 +11,17 @@ explicit owner approval for the exact targets and actions before execution.
 Use the [local ingress runbook](local-github-ingress.md) for operational limits.
 The owner approved the [bounded rehearsal design](ceirean-live-rehearsal-plan.md)
 (25 minutes total, at most 15 minutes public exposure, profile-disable negative
-test). The owner selected `ceirean-hooks.opsydyn.net` and approved named tunnel
-preparation only. Cloudflare account/zone verification, provisioning and exact
+test). The owner corrected the hostname to `ceirean-hooks.opsydyn.xyz` and approved named tunnel
+preparation with Alchemy only. Cloudflare account/zone and the absence of an explicit
+DNS record were verified in the dashboard. Dependency type qualification, CLI
+authentication, tunnel collision checks, provisioning and exact
 session activation remain pending; that approval does not start any connector,
 listener or webhook delivery.
+
+Cloudflare preparation targets: account `d95812af050c2e549a3296899b7b43b3`, active
+zone `65de6815d54763e90ebf4e5df3a7030c`, tunnel name `ceirean-rehearsal`, and endpoint
+`https://ceirean-hooks.opsydyn.xyz/webhook`. No remote resource has been created.
+The earlier `.net` hostname was corrected before any provisioning.
 
 ## Exact Targets
 

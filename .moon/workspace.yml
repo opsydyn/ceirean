@@ -6,3 +6,4 @@ projects:
   github-admission: probes/github-admission
   github-adapter: packages/github-adapter
   github-ingress: apps/github-ingress
+  infrastructure: packages/infrastructure

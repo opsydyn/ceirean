@@ -7,10 +7,13 @@ for verified IDs, protected local paths and preparation evidence.
 
 ## Tunnel Recommendation
 
-The owner selected `ceirean-hooks.opsydyn.net` on 2026-10-21 and approved named
+The owner corrected the hostname to `ceirean-hooks.opsydyn.xyz` on 2026-10-21 and approved named
 tunnel preparation only, explicitly keeping the listener and webhooks disabled.
-The intended endpoint is `https://ceirean-hooks.opsydyn.net/webhook`; Cloudflare
-account ownership, zone ID, existing DNS and tunnel identity remain unverified.
+The intended endpoint is `https://ceirean-hooks.opsydyn.xyz/webhook`. The signed-in
+dashboard verified account `d95812af050c2e549a3296899b7b43b3` and active zone
+`65de6815d54763e90ebf4e5df3a7030c`. The seven-record DNS inventory had no explicit
+`ceirean-hooks` record; its existing wildcard and all other records remain untouched.
+The dedicated tunnel identity remains unverified; no resources have been created.
 This replaces the Quick Tunnel recommendation for this setup. A Quick Tunnel
 remains a disposable alternative, not the selected endpoint.
 
@@ -19,7 +22,11 @@ remains a disposable alternative, not the selected endpoint.
 Alchemy supports the required remotely-managed Tunnel, Configuration and DNS
 Record resources. Its published `2.0.0-beta.83` release declares Effect `^4.0.0`
 as a peer, which accepts Ceirean's pinned 4.0.5. This metadata is not installation,
-typecheck or deployment qualification. No Alchemy dependency has been added.
+typecheck or deployment qualification. The isolated `@ceirean/infrastructure`
+workspace now pins this release and 4.0.5. Its offline tests exercise real Alchemy
+resource registration and output resolution, without cloud providers or network.
+Dependency declaration qualification remains blocked by incompatible Workers and
+Bun/Node globals; no type suppression or lint exception has been introduced.
 
 Recommend an isolated infrastructure workspace, not a dependency of the ingress
 application or domain/engine packages. Keep all existing Effect lint rules and
@@ -29,7 +36,7 @@ that would provision additional state-store Worker, Durable Object and Secrets
 Store resources outside this tunnel-only scope.
 
 The intended owned resource set is one dedicated tunnel named `ceirean-rehearsal`,
-one remote configuration matching hostname `ceirean-hooks.opsydyn.net` and exact
+one remote configuration matching hostname `ceirean-hooks.opsydyn.xyz` and exact
 path `^/webhook$` to `http://127.0.0.1:8787` with a 404 catch-all, and one proxied
 CNAME for that hostname pointing to the created tunnel. Inspect existing records
 and tunnels before applying; refuse conflicts instead of enabling adoption or
@@ -43,10 +50,17 @@ Provisioning must not run a connector, listener, OS service, GitHub update, prof
 enablement or assessment. The intended final tunnel state is disconnected with
 zero connectors, not an active origin behind the new hostname.
 
-Preparation is currently blocked at authentication: no Alchemy profile file or
-CLI was present, and the opened Cloudflare dashboard requires owner sign-in.
-No remote tunnel, ingress configuration or DNS record has been created. Account,
-zone and collision checks plus a reviewed Alchemy resource plan must precede apply.
+Preparation is blocked at dependency type qualification, Tunnel provider ownership
+and dedicated Alchemy authentication. In the pinned provider, an existing
+same-name tunnel can be reused despite `adopt: false`; preflight alone does not
+close a race. The stack entrypoint therefore fails before registering resources,
+and direct package deploy scripts were removed. Browser sign-in does not grant CLI access. The CLI help was
+checked with isolated temporary auth storage and telemetry disabled; no credential
+was entered or acquired. Alchemy's default OAuth scope selection is broad, so do
+not accept All/Basic scopes for this tunnel-only task. See the infrastructure
+[README](../../packages/infrastructure/README.md) for custody and permission gates.
+No remote tunnel, ingress configuration or DNS record has been created. Tunnel
+collision checks and a reviewed remote plan must precede apply.
 
 - Map only the selected hostname's `/webhook` path to `http://127.0.0.1:8787`;
   reject unmatched paths. The application still validates method, signature,
@@ -116,7 +130,7 @@ failed/incomplete result, not a successful rehearsal.
 
 ## Remaining Activation Gates
 
-- [x] Owner selects `https://ceirean-hooks.opsydyn.net/webhook` and authorizes named tunnel preparation only.
+- [x] Owner selects `https://ceirean-hooks.opsydyn.xyz/webhook` and authorizes named tunnel preparation only.
 - [ ] Verify/approve Cloudflare account, zone, existing DNS and exact tunnel identity.
 - [ ] Approve connector installation and protected credential custody.
 - [ ] Select/approve ordinary issue ID/number, Enabled profile ID/revision and fresh policy revisions.

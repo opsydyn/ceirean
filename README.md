@@ -29,6 +29,13 @@ statements below describe historical checkpoints. Live GitHub acceptance remains
 unperformed. Use the [rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md)
 before selecting or changing any real target.
 
+Named-tunnel preparation is isolated in
+[`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a blocked
+qualification probe, not a deployed tunnel: the entrypoint refuses registration
+while Alchemy ownership and dependency types remain unqualified. The
+[offline ownership report](docs/runbooks/alchemy-tunnel-ownership-report.md)
+records the reproduced failures; no connector, listener or webhook was activated.
+
 The offline compatibility probe's 36 tests cover pure decisions, real Flue tools
 through Effect, process-kill recovery and distinct read/abort semantics. The
 canonical typecheck passes with strict source checking and the owner-approved
@@ -273,6 +280,7 @@ bun.lock                    One root dependency lockfile
 apps/cli/                   Future CLI and live dependency composition
 packages/domain/            Pure qualification evidence and run decisions
 packages/engine/            Qualification coordinator and inferred ports
+packages/infrastructure/    Gated Alchemy tunnel qualification (not deployable)
 probes/bun-effect-flue/      Private compatibility fixture
 probes/github-admission/     Offline signed-command admission and native recovery probe
 patches/                    Version-scoped declaration-only dependency repairs
