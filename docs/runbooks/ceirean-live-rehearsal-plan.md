@@ -1,13 +1,12 @@
 # Bounded FoldKit Live Rehearsal
 
-Status: the first approved live attempt on 2026-10-21 stopped on HTTP 503 /
-`OperationalFailure`, before any admission was recorded. Connector and listener
-are stopped, webhook delivery is disabled, and the local profile is Disabled.
-See the [observed outcome](../evidence/local-github-ingress/live-rehearsal-20261021.md)
-for timings, preserved counts and missing acceptance evidence. A new live attempt
-requires a fresh approved window. The repaired authority-only probe passed all
-five real API stages, but did not exercise signed admission or replay. The design
-below remains the intended acceptance sequence, not a record that it passed.
+Status: the second approved bounded rehearsal passed all five admission/replay/
+local-profile-revocation scenarios on 2026-10-21. See the
+[live evidence and verified teardown](../evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
+Connector and listener are stopped, webhook delivery is disabled, and the local
+profile is Disabled. The [first attempt and repair history](../evidence/local-github-ingress/live-rehearsal-20261021.md)
+remain preserved. Resuming ingress requires a fresh approved window; this result
+does not authorize always-on hosting, assessment execution or publication.
 
 ## Tunnel Recommendation
 
@@ -89,7 +88,8 @@ The later separately approved apply created only the reviewed tunnel, ingress
 configuration and DNS record. Fresh collision checks preceded interactive plan
 confirmation. Protected state files are 0600 under 0700 directories, and a fresh
 CLI plan reports no changes. See the infrastructure README's provisioned checkpoint
-for exact non-secret IDs and evidence; no live rehearsal has occurred.
+for exact non-secret IDs and preparation evidence. That checkpoint preceded the
+later separately approved live rehearsal recorded at the top of this runbook.
 
 After the owner unlocked the Mac, the complete four-tunnel dashboard inventory
 showed no match for the pinned Ceirean name. Repeat this check just before apply.
@@ -153,7 +153,9 @@ This tests local profile-policy revocation, not live GitHub permission revocatio
 The sole-operator allowlist cannot be empty, and downgrading the personal repository
 owner is unsuitable. Leave real permission-negative qualification explicitly open.
 Under this exact isolated sequence, expect two decisions, two receipts, one live
-evidence record and three policy revisions including the prepared initial revision.
+evidence record and two additional policy revisions beyond the preflight baseline
+(three total on a fresh ledger). The second rehearsal preserved three historical
+revisions and correctly ended with five; never replace that history.
 Unexpected outcomes require investigation, not rewriting expected counts.
 Unchanged evidence alone does not independently measure outbound API-call count;
 do not claim a live no-reauthorization trace without appropriate secret-safe telemetry.
@@ -167,14 +169,14 @@ failed/incomplete result, not a successful rehearsal.
 ## Remaining Activation Gates
 
 - [x] Owner selects `https://ceirean-hooks.opsydyn.xyz/webhook` and authorizes named tunnel preparation only.
-- [ ] Verify/approve Cloudflare account, zone, existing DNS and exact tunnel identity.
-- [ ] Approve connector installation and protected credential custody.
-- [ ] Select/approve ordinary issue ID/number, Enabled profile ID/revision and fresh policy revisions.
-- [ ] Record exact session start/deadlines and who performs shutdown/restoration.
-- [ ] Verify issue_comment subscription and least-privilege installation grants.
-- [ ] Approve runtime credential acquisition, network authority checks, connector exposure,
+- [x] Verify/approve Cloudflare account, zone, existing DNS and exact tunnel identity.
+- [x] Approve reuse of the existing connector executable and protected credential custody.
+- [x] Select/approve ordinary issue ID/number, Enabled profile ID/revision and fresh policy revisions.
+- [x] Record exact session start/deadlines and who performs shutdown/restoration.
+- [x] Verify issue_comment subscription and least-privilege installation grants.
+- [x] Approve runtime credential acquisition, network authority checks, connector exposure,
       webhook-secret submission to GitHub, activation, two comments and manual redeliveries.
-- [ ] At teardown, disable delivery, stop public connector/listener, leave the profile
+- [x] At teardown, disable delivery, stop public connector/listener, leave the profile
       Disabled, and verify closed local port plus retained status/evidence. Retaining
       a stable DNS route or the read-only App is not permission to resume service.
 

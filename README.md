@@ -25,9 +25,12 @@ The on-disk format and ownership identifiers are unchanged.
 Historical assessments, source hashes and qualification artifacts retain the
 Leviathan name and qualify only their recorded revisions, not renamed source.
 The local ingress work was merged into main at `4877a8a`; older branch-status
-statements below describe historical checkpoints. Live GitHub acceptance remains
-unperformed. Use the [rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md)
-before selecting or changing any real target.
+statements below describe historical checkpoints. A separately approved bounded
+live rehearsal passed admission, replay, restart and local-profile rejection;
+see the [live evidence](docs/evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
+All live controls are now off. Use the
+[rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md) before
+resuming ingress or selecting/changing any real target.
 
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
@@ -126,8 +129,9 @@ See the [local-only runbook](docs/runbooks/local-github-ingress.md),
 [assessment](docs/assessments/local-github-ingress.md) and
 [source-bound evidence](docs/evidence/local-github-ingress.json).
 Named Cloudflare tunnel infrastructure has been provisioned under separate
-approval. GitHub runtime credential acquisition, real webhook delivery and the
-live rehearsal remain unapproved; the local assessment profile remains Disabled.
+approval. The bounded live rehearsal passed its five approved scenarios; this
+does not qualify worker execution, PRs, always-on operation or production durability.
+Webhook delivery, connector and listener are off; the local profile remains Disabled.
 
 ## Proposed First Slice
 

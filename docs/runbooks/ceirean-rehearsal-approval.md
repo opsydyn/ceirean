@@ -1,8 +1,18 @@
 # Ceirean Rehearsal Approval
 
-Status: **restricted App setup, local preparation and disconnected Cloudflare provisioning complete; test issue selected; live activation unapproved**.
+Status: **the separately approved R2 bounded rehearsal passed; webhook delivery,
+connector and listener are off, and the profile is Disabled**. See the
+[acceptance and teardown record](../evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
+Fresh owner approval is required before resuming any live ingress. The preparation
+fields and checkboxes below preserve historical decisions, not current activation authority.
+
+## Preparation History
+
+Historical checkpoint: restricted App setup, local preparation and disconnected
+Cloudflare provisioning were complete and the test issue was selected, but live
+activation was not yet approved at that stage.
 The owner approved creation/installation with Issues and Metadata read-only on
-`opsydyn/fold-kit-experiments` only. No live ingress rehearsal has been performed.
+`opsydyn/fold-kit-experiments` only. No live rehearsal had been performed at that checkpoint.
 Beyond the explicitly approved local key conversion, configuration, secret
 creation and new-ledger initialization below, this worksheet is not
 permission to acquire runtime credentials, broaden grants, start a real-key
@@ -15,7 +25,7 @@ test). The owner corrected the hostname to `ceirean-hooks.opsydyn.xyz` and appro
 preparation with Alchemy only. Cloudflare account/zone and the absence of an explicit
 DNS record were verified in the dashboard. Dependency type qualification, scoped
 authentication, collision preflight and the separately approved three-resource
-apply are complete. Exact session activation remains pending; those approvals do not start any connector,
+apply were complete. Exact session activation was still pending at that checkpoint; those approvals did not start any connector,
 listener or webhook delivery.
 
 Cloudflare preparation targets: account `d95812af050c2e549a3296899b7b43b3`, active
@@ -209,4 +219,7 @@ latest execution record. The owner subsequently approved the exact issue,
 teardown. The first attempt stopped on operational failure before admission;
 see the [observed outcome](../evidence/local-github-ingress/live-rehearsal-20261021.md).
 Delivery, connector and listener are now off; the local profile is Disabled.
-The remaining acceptance scenarios were not run and require a new approved window.
+The separately approved second 20:54-21:19 UK window subsequently passed all five
+scenarios; see its [acceptance and teardown record](../evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
+This historical worksheet is not authorization to resume ingress. All activation
+controls are off and the profile remains Disabled after that completed session.

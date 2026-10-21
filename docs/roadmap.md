@@ -120,12 +120,16 @@ separately gated even if a future offline probe passes.
       and select its execution method.
 - [x] Qualify local adapters, listener, immutable live evidence and replay-first
       admission with synthetic credentials and independent review.
-- [ ] Separately approve the exact live target, App grants, credentials, tunnel
+- [x] Separately approve the exact live target, App grants, credentials, tunnel
       and finite rehearsal session before any live access or listener starts.
+- [x] Complete the bounded admission/replay/restart/local-profile-revocation
+      rehearsal and verify teardown. See the
+      [live evidence](evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
 
-This is local implementation/qualification work only. No deployment, GitHub
-writes, worker execution or cloud storage is authorised. Local test persistence
-is not production durability.
+The separately approved live scope was exactly two test comments and three
+manual redeliveries on one issue, with supervised temporary exposure. It is now
+closed. No always-on deployment, worker execution, broader GitHub writes or cloud
+storage is authorized. Local test persistence is not production durability.
 
 Tasks 1-7, whole-branch review, final-fix scoped review and fresh controller
 verification are complete through tested source `5e531ae`: 935 tests, six
@@ -135,8 +139,8 @@ records the review dispositions and independent final run.
 The [measured manifest](evidence/local-github-ingress.json) distinguishes final
 tested source from later evidence-only commits. Task 3 M1/M2 and Task 7's
 readiness/archive findings are fixed. Moon notices and historical test-first
-evidence limitations remain disclosed. Integration and live rehearsal need
-separate owner choices; no broader execution/publication scope is authorized.
+evidence limitations remain disclosed. The later bounded live result is recorded
+separately; no broader execution/publication scope is authorized.
 
 ## Organisation Discovery And Configuration Self-PRs
 

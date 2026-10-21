@@ -15,6 +15,9 @@ an alias. Existing ledgers are not auto-discovered or migrated. An explicit
 operator-approved path can retain a compatible old ledger; on-disk identifiers
 and replay history are unchanged. See the
 [rehearsal approval worksheet](../../docs/runbooks/ceirean-rehearsal-approval.md).
+The [bounded live rehearsal](../../docs/evidence/local-github-ingress/live-rehearsal-20261021-r2.md)
+passed admission, replay across restart and fresh Disabled-profile rejection.
+All activation controls are off afterward; this does not authorize resuming them.
 Redelivered retired-command payloads are Ignored/NotCommand before admission,
 not Duplicate; their existing stored history is not rewritten.
 
