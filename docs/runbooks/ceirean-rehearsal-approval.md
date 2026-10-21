@@ -9,6 +9,10 @@ permission to acquire runtime credentials, broaden grants, start a real-key
 listener or open a tunnel. Fill every applicable field and obtain
 explicit owner approval for the exact targets and actions before execution.
 Use the [local ingress runbook](local-github-ingress.md) for operational limits.
+The owner approved the [bounded rehearsal design](ceirean-live-rehearsal-plan.md)
+(25 minutes total, at most 15 minutes public exposure, profile-disable negative
+test). Domain-backed tunnel selection and exact activation targets remain pending;
+that design approval does not enable anything.
 
 ## Exact Targets
 
