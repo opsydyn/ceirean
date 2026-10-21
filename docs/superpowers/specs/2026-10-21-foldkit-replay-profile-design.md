@@ -1,9 +1,11 @@
 # FoldKit Replay Profile And Local Worker Boundary
 
-Status: written spec for owner review. The owner approved the historical case,
-controller-managed Docker boundary and Colima on this Mac conversationally.
-Written-spec approval, an implementation plan and explicit execution approval
-are still required. This document starts no VM, worker, model call or migration.
+Status: written spec approved by the owner on 2026-10-21, including the historical
+case, controller-managed Docker boundary and Colima on this Mac. The
+[first implementation plan](../plans/2026-10-21-foldkit-replay-profile.md) covers
+offline profile inspection only and awaits plan review/execution-method selection.
+Explicit implementation and native-execution approvals are still required.
+This document starts no VM, worker, model call or migration.
 Independent read-only design review found no material issues; that is not native
 feasibility or isolation evidence. Repository lint/format validation passed for
 this documentation-only slice; runtime tests were not rerun or newly qualified.
