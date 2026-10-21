@@ -1,7 +1,8 @@
 # Ceirean Tunnel Preparation
 
-Status: the owner approved the infrastructure-only declaration exception;
-operational preflight remains pending. The stack entrypoint still fails closed.
+Status: the owner approved the infrastructure-only declaration exception and
+guarded operational entrypoint. Protected plan-only review passed; apply remains
+unapproved. The entrypoint fails closed outside its required local context.
 No Cloudflare resources have been applied. The owner supplied a scoped token in
 the ignored root `.env`; no stored Alchemy auth profile has been created.
 
@@ -25,9 +26,10 @@ preparation: use the pinned random-suffixed name, check for collisions immediate
 before creation, preserve its exact ID and state, and review exactly three creates.
 This reduces collision risk; it does not repair the SDK or eliminate races.
 No provider source patch or custom replacement provider has been introduced.
-The real stack body is a deliberate configuration failure until qualification;
-the proposed graph is exercised separately offline. There is no environment
-switch or package deploy shortcut to bypass the gate.
+The real stack body verifies the operational context before registering the
+approved graph. There is no environment switch or package deploy shortcut to
+bypass those checks. Passing them makes the declaration available; it does not
+execute or authorize apply.
 
 ## Qualification
 
@@ -53,8 +55,10 @@ The tests compile the actual resource graph with an in-memory state store and
 offline credentials, resolve references against a synthetic tunnel ID, assert
 the complete resource set and secret-free outputs, and reject a wrong account.
 They do not call Cloudflare, validate a live plan or prove deployment.
-An additional test proves the actual entrypoint body fails without registering
-any resources, even with the approved account fixture.
+Operational tests prove the actual entrypoint exposes the three declarations
+only in its protected context and registers nothing for unsafe stage/mode/path,
+permission, ownership, credential and filesystem scenarios. A permission property
+runs 100 generated Unix modes for each of seeds 0, 1 and 163.
 
 ## Authentication And State
 
@@ -111,7 +115,9 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [x] Inspect all four existing tunnels: no `ceirean-rehearsal-bcea4099a8934e32` collision; repeat immediately before apply.
 - [x] Create owner-only operational/auth directories outside Git; no credential entered.
 - [x] Review a plan-only run: exactly three creates, no updates/replacements/deletions/adoption.
-- [ ] Apply only that plan; verify remote route/DNS and zero connectors.
+- [x] Guard the operational entrypoint and test rejected contexts before registration.
+- [ ] Obtain separate apply approval, repeat collision checks and verify the new plan.
+- [ ] Apply only that approved plan; verify remote route/DNS and zero connectors.
 
 Do not use `alchemy dev`, `--adopt`, automatic approval, or start cloudflared.
 The [bounded rehearsal plan](../../docs/runbooks/ceirean-live-rehearsal-plan.md)
@@ -248,3 +254,56 @@ activated. Successful planning does not independently prove write grants. Before
 provisioning, review a guarded operational entrypoint, obtain separate apply
 approval and repeat the collision check. Do not simply remove the real gate or
 apply the deleted temporary config. Main and origin were not changed by this run.
+
+## Guarded Operational Entry
+
+After the plan-only checkpoint above, the owner approved a bounded replacement
+for the unconditional failure. `src/operational.ts` now checks the following,
+before `prepareRehearsal` invokes the existing resource declaration:
+
+- Stage is `rehearsal`; Alchemy dev mode and global adoption are disabled.
+- The canonical working directory is the exact protected operational root.
+- `AlchemyContext.dotAlchemy` selects the pinned state root. Effect Config's
+  `ALCHEMY_HOME` and Alchemy's own `Auth/Paths.rootDir()` must both equal the
+  pinned auth root. This explicitly rejects dotenv/process-environment mismatch.
+- Operational root, `.alchemy`, `.alchemy/state` and `auth` resolve to their exact
+  paths, are directories with permission bits exactly 0700, and have matching,
+  available numeric owner IDs. Only metadata is read, not credential/state contents.
+- `CF_TOKEN` passes the existing redacted local validation. The declaration still
+  refuses any Cloudflare account other than the pinned account before registration.
+
+Filesystem failures are mapped to a static configuration error without their raw
+cause. Invalid configuration produces no resources. Test dependencies are assembled
+at one exported Effect boundary; no lint exception or manual Effect channel
+annotation was added. The existing three resource definitions are unchanged.
+
+The guard protects against operator configuration mistakes, not hostile local
+filesystem races or SDK ownership defects. It does not verify remote write grants,
+lock the directory tree, implement a per-user authorization system, or substitute
+for a fresh collision check. Keep the state on this host; no cloud state backend
+has been provisioned and no resource-state write/recovery claim is made yet.
+Alchemy initializes its services and logging before running this guard, so this
+is a pre-registration boundary, not a pre-CLI filesystem-write boundary. Launch
+with the protected shell environment even when testing a rejected context.
+
+Run only the explicitly approved CLI operation from the protected root with umask
+077, protected `ALCHEMY_HOME`, telemetry disabled, explicit profile/stage and
+absolute `--env-file` and `--config` paths. The real `alchemy.run.ts` is now the
+guarded entrypoint; a temporary configuration is no longer needed. Do not invoke
+deploy/apply, merge or push until separately approved. A passing guard permits
+declaration for both planning and provisioning; it is not an apply authorization
+mechanism. Connector, listener, GitHub webhook and assessment activation retain
+their separate approval gates.
+
+Qualification for this change: all seven workspace typechecks pass, universal
+lint and formatting pass, and the full synthetic cohort passed 947 tests. After
+the auth-source mismatch found in independent review was fixed, all 11 affected
+infrastructure tests and all typechecks were rerun successfully. The new mismatch
+regression was observed failing before the fix. Independent re-review reported
+no blocking findings. No lint config, dependency pin or declaration policy changed.
+
+The final detailed `plan` through the real guarded entrypoint exited 0 on
+2026-10-21 at 17:35 UTC, again reporting only the same three creates with the
+reviewed properties. The protected resource state remained empty and port 8787
+remained closed. No apply, connector, real listener, webhook activation, merge
+or push was performed. Plan/read proof still does not establish write grants.

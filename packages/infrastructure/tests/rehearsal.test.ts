@@ -7,7 +7,7 @@ import { Stack } from 'alchemy/Stack';
 import { defaultState } from 'alchemy/Test/TestState';
 import { Effect, Layer, Redacted } from 'effect';
 
-import { declareRehearsal, prepareRehearsal } from '../src/rehearsal.ts';
+import { declareRehearsal } from '../src/rehearsal.ts';
 
 function makeGraph() {
   return Stack.of({
@@ -61,24 +61,6 @@ const unapprovedLayer = Layer.merge(
 export const compiled = Effect.provide(declaration, approvedLayer);
 export const unapproved = Effect.provide(declaration, unapprovedLayer);
 const rejected = Effect.result(unapproved);
-
-function* blockedPreparationGraph() {
-  const result = yield* Effect.result(prepareRehearsal);
-  const graph = yield* Stack;
-  return { result, resources: Object.keys(graph.resources) };
-}
-const preparation = Effect.gen(blockedPreparationGraph);
-export const blockedPreparation = Effect.provide(preparation, approvedLayer);
-
-async function refusesPendingPreparation() {
-  const result = await Effect.runPromise(blockedPreparation);
-  strictEqual(result.result._tag, 'Failure');
-  deepStrictEqual(result.resources, []);
-}
-test(
-  'entrypoint refuses resource registration while operational preparation is pending',
-  refusesPendingPreparation,
-);
 
 async function restrictedResources() {
   const result = await Effect.runPromise(compiled);

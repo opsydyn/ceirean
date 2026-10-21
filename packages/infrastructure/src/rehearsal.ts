@@ -3,6 +3,8 @@ import { CloudflareEnvironment, DNS, Tunnel } from 'alchemy/Cloudflare';
 import { interpolate } from 'alchemy/Output';
 import { Config, ConfigProvider, Effect, Match } from 'effect';
 
+import { operationalContext } from './operational.ts';
+
 const approved = { accountId: 'd95812af050c2e549a3296899b7b43b3' };
 function* declareRehearsalInfrastructure() {
   const { accountId } = yield* yield* CloudflareEnvironment;
@@ -43,10 +45,4 @@ function* declareRehearsalInfrastructure() {
 }
 export const declareRehearsal = Effect.gen(declareRehearsalInfrastructure);
 
-const operationalPreparationPending = new ConfigProvider.SourceError({
-  message:
-    'Remote preparation awaits fresh protected-state/collision preflight and dedicated authentication. No resources may be registered yet.',
-});
-
-// Keep deployment closed until the approved operational preparation is verified.
-export const prepareRehearsal = Config.fail(operationalPreparationPending);
+export const prepareRehearsal = operationalContext.pipe(Effect.andThen(declareRehearsal));

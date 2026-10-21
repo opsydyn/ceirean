@@ -63,13 +63,18 @@ Write grants remain separate from this read-access proof. The owner-approved
 temporary plan-only config subsequently produced exactly three creates in both
 ordinary and detailed CLI plan runs, from owner-only protected local storage.
 The state directory remained empty; this is not write-durability/recovery proof.
-The temporary config was removed and the real entrypoint gate is unchanged.
-Provisioning requires a guarded operational entrypoint, separate apply approval
-and another collision check immediately before apply. In the pinned provider, an existing
+The temporary config was removed. The subsequently approved operational guard now
+requires the exact protected working/state/auth directories, canonical paths,
+0700 permissions, consistent ownership, valid redacted config, rehearsal stage
+and disabled dev/adoption before resource registration. The real entrypoint has
+also produced the same three-create plan. Provisioning still requires separate
+apply approval and another collision check immediately before apply. The guard
+does not itself authorize apply or prevent hostile local filesystem races.
+In the pinned provider, an existing
 same-name tunnel can be reused despite `adopt: false`; preflight alone does not
 close a race. The owner accepted the stable random-suffixed name and supervised
 preflight as a bounded mitigation, not a provider fix. All three resources pin
-engine adoption off. The stack entrypoint still fails before registering resources,
+engine adoption off. Unsafe operational contexts fail before registering resources,
 and direct package deploy scripts were removed. Browser sign-in does not grant CLI access. The CLI help was
 checked with isolated temporary auth storage and telemetry disabled; no credential
 was entered through that CLI flow. Alchemy's default OAuth scope selection is broad, so do

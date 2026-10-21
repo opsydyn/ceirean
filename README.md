@@ -30,9 +30,11 @@ unperformed. Use the [rehearsal approval worksheet](docs/runbooks/ceirean-rehear
 before selecting or changing any real target.
 
 Named-tunnel preparation is isolated in
-[`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a blocked
-qualification probe, not a deployed tunnel: the entrypoint refuses registration
-while fresh operational checks are pending. Its infrastructure-only third-party
+[`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
+preparation workspace, not a deployed tunnel: the entrypoint refuses registration
+outside the verified stage, mode and protected local directories. Its plan contains
+exactly three creates; apply requires separate approval and a fresh collision check.
+Its infrastructure-only third-party
 declaration exception is owner-approved; source remains strict. The
 [offline ownership report](docs/runbooks/alchemy-tunnel-ownership-report.md)
 records the reproduced failures; no connector, listener or webhook was activated.
