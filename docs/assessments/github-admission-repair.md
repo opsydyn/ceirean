@@ -1,5 +1,9 @@
 # GitHub Channel Compatibility Repair
 
+The original 1.25.2 peer below is historical. The later
+[security repair](dependabot-security-20261021.md) retains its purpose and strict
+checking while upgrading it to 1.32.0. The removal criteria remain unchanged.
+
 This is the owner-approved follow-up to the
 [rejected unmodified dependency gate](github-admission.md). Keep Bun and Flue;
 repair the declarations rather than replace the agent framework or disable checks.

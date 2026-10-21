@@ -42,6 +42,9 @@ compatibility dependencies; the remaining declarations are not suppressed.
 The subsequent [unused-declaration cleanup](docs/assessments/unused-declaration-cleanup-20261021.md)
 removes those four dead declarations. The current audit exits 0 with only the
 required MCP compatibility-peer warning retained, without suppressions.
+The [security repair](docs/assessments/dependabot-security-20261021.md) updates
+that peer to 1.32.0 for five GitHub alerts and records the additional transitive
+registry findings separately; it does not claim the full graph is vulnerability-free.
 
 Named-tunnel preparation is isolated in
 [`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
