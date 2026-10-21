@@ -188,3 +188,39 @@ Final verification for this repair: all 962 workspace tests passed, including
 207 adapter tests; all seven workspace typechecks and `bun run check` passed.
 The seven new property/boundary tests made 6,774 assertions in a focused run.
 The local profile remained Disabled and port 8787 remained closed.
+
+## Approved Repaired Authority-only Probe
+
+The owner separately approved a repeat probe of the repaired adapter at clean
+source `e0dc960`. The one-shot helper retained a 30-second hard cap, existing
+driver deadlines and original scope pins. It used the same in-memory
+authority-only scenario described above: no genuine webhook receipt, real
+profile enablement, ledger handle or persistence.
+
+All five real GitHub requests succeeded, without retries:
+
+| Phase        | HTTP | Time To Response Headers |
+| ------------ | ---- | ------------------------ |
+| Installation | 200  | 352ms                    |
+| Token        | 201  | 388ms                    |
+| Repository   | 200  | 522ms                    |
+| User         | 200  | 306ms                    |
+| Permission   | 200  | 337ms                    |
+
+Safe token contract checks confirmed selected-repository mode, exactly the
+expected repository and metadata read as the sole grant. The real driver
+returned Success with base permission `admin`, after normal identity, scope,
+expiry and permission validation. The probe-created installation token was then
+revoked successfully (HTTP 204). No token, private key or JWT contents were
+printed or persisted. The temporary helper was removed afterward.
+
+The persisted revision remained `ceirean-rehearsal-20261021-disabled-1`, profile
+Disabled, and port 8787 remained closed. No connector or webhook was activated,
+no issue comment was posted and no delivery was redelivered. The production
+ledger was not opened or changed. This proves the repaired authority path
+against current GitHub responses, not signed ingress, durable admission,
+duplicate/restart or Disabled-profile acceptance scenarios.
+
+Next recommended separately approved work: a fresh bounded signed-ingress
+rehearsal window, preserving the existing ledger and stop conditions. Do not
+reuse the expired first window or infer activation approval from probe success.

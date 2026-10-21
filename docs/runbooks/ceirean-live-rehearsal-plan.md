@@ -5,8 +5,9 @@ Status: the first approved live attempt on 2026-10-21 stopped on HTTP 503 /
 are stopped, webhook delivery is disabled, and the local profile is Disabled.
 See the [observed outcome](../evidence/local-github-ingress/live-rehearsal-20261021.md)
 for timings, preserved counts and missing acceptance evidence. A new live attempt
-requires a diagnosed fix and a fresh approved window. The design below remains
-the intended acceptance sequence, not a record that it passed.
+requires a fresh approved window. The repaired authority-only probe passed all
+five real API stages, but did not exercise signed admission or replay. The design
+below remains the intended acceptance sequence, not a record that it passed.
 
 ## Tunnel Recommendation
 
