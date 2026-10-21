@@ -112,3 +112,46 @@ rules; `moon run :typecheck --force --no-actions` passed all seven workspaces;
 Independent review cleared the bounded diagnostic sink after reproducing both
 backpressure and caller abort without retained stderr listeners. The real local
 configuration remained Disabled and port 8787 had no listener.
+
+## Approved Authority-only Probe
+
+The owner separately approved one bounded authority-only probe after the offline
+repair. The helper used a 30-second hard cap, the existing adapter deadlines and
+the protected App key. No listener, connector, webhook or ledger was opened or
+changed. To exercise the authority driver without enabling the real profile,
+the query used an in-memory Enabled scenario and synthetic receipt digest.
+It is not a verified webhook, admitted command or durable authority record.
+
+Observed, with no retries:
+
+- Installation lookup: HTTP 200, approximately 352ms to response headers.
+- Metadata-only, repository-restricted token creation: HTTP 201, approximately
+  460ms to response headers.
+- Safe token response facts: selected repository mode, one repository, only the
+  metadata grant, and metadata read. No token value was printed or persisted.
+- Driver result: `Failure`, phase `token`, code `InvalidResponse`. Repository,
+  user and permission reads were not reached.
+- The probe-created installation token was revoked afterward: HTTP 204. No
+  original credentials or App permissions were changed.
+- Port 8787 remained closed. All real activation controls remained disabled.
+
+The investigation found a concrete compatibility defect: `tokenSchema` accepts
+only `[A-Za-z0-9_-]`, rejecting dots. GitHub's
+[May format guidance](https://github.blog/changelog/2026-05-15-github-app-installation-tokens-per-request-override-header/)
+documents two dots in the new installation-token format; its
+[October rollout notice](https://github.blog/changelog/2026-10-02-stateless-github-app-installation-tokens-rolled-out/)
+says the new format is now the default. A synthetic 494-character example of
+that documented shape is rejected by the current regex while a legacy example
+passes. No JWT contents were decoded or trusted.
+
+This defect is the leading explanation for the observed token decode failure,
+but the probe did not retain a field-level decode reason or classify the actual
+secret's characters. Do not present that inference as direct token inspection.
+The first rehearsal's complete success path is still unqualified.
+
+Recommended next approved slice: accept the documented dot-bearing opaque token
+format within the existing 4096-character/header-safe bound, add offline legacy
+and stateless-token regression tests plus invalid/control-character cases, and
+retain every scope, permission, identity, expiry and deadline check. Do not add
+JWT introspection or opt out of GitHub's rollout. No product source was changed
+by this probe; any repeat probe or live rehearsal requires separate approval.
