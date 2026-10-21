@@ -51,15 +51,20 @@ Provisioning must not run a connector, listener, OS service, GitHub update, prof
 enablement or assessment. The intended final tunnel state is disconnected with
 zero connectors, not an active origin behind the new hostname.
 
-Preparation is pending fresh collision preflight and dedicated Alchemy
-authentication. In the pinned provider, an existing
+The owner supplied the scoped token privately in the ignored root `.env`.
+Effect Config now validates `CF_TOKEN` as a redacted non-empty value without
+whitespace and maps it to Alchemy's environment contract at the exported provider
+boundary. No auth profile is persisted. Local validation does not establish live
+permissions; use the absolute `--env-file` path described in the infrastructure
+README. Preparation still requires live authentication verification, fresh
+collision preflight and review of the remote plan. In the pinned provider, an existing
 same-name tunnel can be reused despite `adopt: false`; preflight alone does not
 close a race. The owner accepted the stable random-suffixed name and supervised
 preflight as a bounded mitigation, not a provider fix. All three resources pin
 engine adoption off. The stack entrypoint still fails before registering resources,
 and direct package deploy scripts were removed. Browser sign-in does not grant CLI access. The CLI help was
 checked with isolated temporary auth storage and telemetry disabled; no credential
-was entered or acquired. Alchemy's default OAuth scope selection is broad, so do
+was entered through that CLI flow. Alchemy's default OAuth scope selection is broad, so do
 not accept All/Basic scopes for this tunnel-only task. See the infrastructure
 [README](../../packages/infrastructure/README.md) for custody and permission gates.
 No remote tunnel, ingress configuration or DNS record has been created. Tunnel

@@ -2,7 +2,8 @@
 
 Status: the owner approved the infrastructure-only declaration exception;
 operational preflight remains pending. The stack entrypoint still fails closed.
-No Cloudflare resources have been applied. No CLI credential has been configured.
+No Cloudflare resources have been applied. The owner supplied a scoped token in
+the ignored root `.env`; no stored Alchemy auth profile has been created.
 
 This private workspace declares the proposed `CeireanHooks` / `rehearsal` stack:
 
@@ -67,10 +68,25 @@ Confirm those scopes against the actual provider reads before issuing it.
 Do not use a global API key. Alchemy's OAuth flow defaults to All Scopes;
 neither All nor Basic is appropriate for this tunnel-only preparation.
 
-Use a dedicated `ceirean-rehearsal` Alchemy profile. Keep auth under protected
-`ALCHEMY_HOME` outside the checkout. Never inspect or print profile JSON or tunnel
-tokens. Set `ALCHEMY_TELEMETRY_DISABLED=1` for every CLI invocation. There are
-deliberately no package scripts for remote plan/deploy or authentication.
+The stack reads `CF_TOKEN` with Effect `Config.Redacted`, rejecting missing,
+empty or whitespace-containing values without including the value in errors.
+It adapts that value to Alchemy's `CLOUDFLARE_API_TOKEN` config key and pins
+`CLOUDFLARE_ACCOUNT_ID` to the verified account at one exported provider boundary.
+This does not mutate `process.env`, persist an auth profile or verify remote
+permissions. A missing `CF_TOKEN` fails closed rather than selecting another
+token or falling back to a stored profile. Tokens stay redacted in application
+config; the adapter unwraps only into the in-memory Alchemy config provider.
+
+Keep the root `.env` ignored and owner-only (0600); never print it or pass token
+values as CLI arguments. For the operational invocation, pass the absolute file
+path with `--env-file /Users/alancurrie/Projects/Leviathan/.env` and use Bun's
+`--no-env-file` flag to disable implicit Bun dotenv loading. Alchemy loads the
+explicit file through its Effect Config provider. Do not copy it into a worktree.
+Keep the explicit `ceirean-rehearsal` profile and protected `ALCHEMY_HOME` outside
+the checkout for isolation even though credentials now come from configuration.
+Never inspect or print profile JSON or tunnel tokens. Set
+`ALCHEMY_TELEMETRY_DISABLED=1` for every CLI invocation. There are deliberately
+no package scripts for remote plan/deploy or authentication.
 
 Local Alchemy state contains credentials and must survive worktree removal.
 Do not deploy from this temporary worktree. After qualification and integration,
@@ -89,7 +105,8 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [x] Owner approves infrastructure-only declaration exception; strict source checking retained.
 - [x] Pass the canonical infrastructure typecheck with that approved policy.
 - [x] Owner accepts bounded unique-name mitigation; keep the SDK defect documented.
-- [ ] Approve and configure scoped Alchemy authentication with protected custody.
+- [x] Owner supplies scoped token privately; Effect Config adapter qualified offline.
+- [ ] Verify live credential permissions without printing credentials or starting resources.
 - [x] Inspect all four existing tunnels: no `ceirean-rehearsal-bcea4099a8934e32` collision; repeat immediately before apply.
 - [x] Create owner-only operational/auth directories outside Git; no credential entered.
 - [ ] Review a remote plan: exactly three creates, no replacements/deletions/adoption.
@@ -160,7 +177,12 @@ review for `ceirean-rehearsal-setup`, expiring 28 October 2026. Proposed policie
 - Only `opsydyn.xyz`: `DNS Write` and `Zone Read`. Alchemy's DNS lookup calls
   `getZone` when checking an absent record, so the metadata read is required.
 
-The owner must review/create the token and keep its value private. Do not read
-the token screen, clipboard or credential file. After the owner leaves that
-screen, configure the dedicated Alchemy profile using its masked stored-token
-prompt and protected `ALCHEMY_HOME`; do not use broad OAuth or a global key.
+The owner subsequently created the reviewed token, stored it privately and left
+the token screen. They chose the ignored root `.env` (`CF_TOKEN`) instead of the
+interactive stored-profile flow. The exported Effect Config adapter now supplies
+Alchemy's environment credential contract; the deployment gate remains closed.
+Local validation through Effect's dotenv provider passed without displaying the
+token or making a network request. File metadata confirms the root `.env` is
+owner-only (0600) and Git-ignored. Live permissions have not been verified.
+Do not read the token screen, clipboard or credential file into agent output;
+do not use broad OAuth or a global key.
