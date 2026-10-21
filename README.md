@@ -1,4 +1,8 @@
-# Leviathan
+# Ceirean
+
+![Ceirean: autonomous repository maintenance, monitoring, updates, improvements and pull requests.](docs/assets/ceirean-banner.jpg)
+
+Guardian of the deep. Autonomous repository repair and PRs.
 
 An internal dependency migration service, built to dogfood across Opsydyn
 repositories before considering a broader product.
