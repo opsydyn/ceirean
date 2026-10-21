@@ -19,7 +19,7 @@ session activation remain pending; that approval does not start any connector,
 listener or webhook delivery.
 
 Cloudflare preparation targets: account `d95812af050c2e549a3296899b7b43b3`, active
-zone `65de6815d54763e90ebf4e5df3a7030c`, tunnel name `ceirean-rehearsal`, and endpoint
+zone `65de6815d54763e90ebf4e5df3a7030c`, tunnel name `ceirean-rehearsal-bcea4099a8934e32`, and endpoint
 `https://ceirean-hooks.opsydyn.xyz/webhook`. No remote resource has been created.
 The earlier `.net` hostname was corrected before any provisioning.
 

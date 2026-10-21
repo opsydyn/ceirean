@@ -1,12 +1,12 @@
 # Ceirean Tunnel Preparation
 
-Status: offline declaration tests pass; type and provider ownership qualification
-are blocked. The stack entrypoint fails closed before registering any resources.
+Status: offline declaration tests pass; the declaration-policy decision and fresh
+operational preflight remain pending. The stack entrypoint still fails closed.
 No Cloudflare resources have been applied. No CLI credential has been configured.
 
 This private workspace declares the proposed `CeireanHooks` / `rehearsal` stack:
 
-- A remotely managed tunnel named `ceirean-rehearsal`, without adoption.
+- A remotely managed tunnel named `ceirean-rehearsal-bcea4099a8934e32`, without adoption.
 - An exact `ceirean-hooks.opsydyn.xyz` + `^/webhook$` route to
   `http://127.0.0.1:8787`, with a final 404 catch-all.
 - A proxied CNAME in zone `65de6815d54763e90ebf4e5df3a7030c` pointing to that tunnel.
@@ -19,7 +19,10 @@ listeners, Worker deployments, GitHub mutations or assessment activation.
 The pinned Tunnel provider can reuse a same-name tunnel even with `adopt: false`:
 its `read` returns an existing tunnel without an `Unowned` marker, and its
 reconciler looks up/reuses names before checking adoption. A preflight check does
-not close that race. This must be fixed and tested before any remote plan/apply.
+not close that race. The owner accepted a bounded mitigation for this supervised
+preparation: use the pinned random-suffixed name, check for collisions immediately
+before creation, preserve its exact ID and state, and review exactly three creates.
+This reduces collision risk; it does not repair the SDK or eliminate races.
 No provider source patch or custom replacement provider has been introduced.
 The real stack body is a deliberate configuration failure until qualification;
 the proposed graph is exercised separately offline. There is no environment
@@ -82,9 +85,9 @@ Worker, Durable Object and Secrets Store resources outside this scope.
 - [x] Inspect the full DNS inventory: no explicit hostname conflict; preserve wildcard.
 - [x] Test exact routing, the proposed resource set and secret-free outputs offline.
 - [ ] Pass dependency type qualification without an unapproved exception.
-- [ ] Qualify fail-closed Tunnel ownership, including same-name collision/race tests.
+- [x] Owner accepts bounded unique-name mitigation; keep the SDK defect documented.
 - [ ] Approve and configure scoped Alchemy authentication with protected custody.
-- [ ] Inspect tunnels for a `ceirean-rehearsal` name collision; never adopt one.
+- [ ] Inspect tunnels for a `ceirean-rehearsal-bcea4099a8934e32` name collision; never adopt one.
 - [ ] Review a remote plan: exactly three creates, no replacements/deletions/adoption.
 - [ ] Apply only that plan; verify remote route/DNS and zero connectors.
 
@@ -120,3 +123,11 @@ published provider with a synthetic, non-network HTTP transport. See the
 for the request traces, pinned upstream source, prior hardening PR search and
 acceptance criteria. The two characterization tests confirm a blocker, not
 deployment safety. No issue/PR has been posted and no vendor source changed.
+
+The owner instructed that the report must remain local and approved continuing
+with Alchemy using the bounded mitigation above. The 64-bit random suffix was
+generated once and pinned in source, not regenerated on each plan. All three
+resources now explicitly set engine adoption off as well as the Tunnel provider
+property. A diagnostic `tsc --noEmit --skipLibCheck` passes; no persistent
+declaration-check exception has been approved or applied. Browser preflight was
+attempted but the Mac was locked; no unlock bypass or Cloudflare mutation occurred.

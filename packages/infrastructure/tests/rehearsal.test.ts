@@ -70,14 +70,14 @@ function* blockedPreparationGraph() {
 const preparation = Effect.gen(blockedPreparationGraph);
 export const blockedPreparation = Effect.provide(preparation, approvedLayer);
 
-async function refusesUnqualifiedDeployment() {
+async function refusesPendingPreparation() {
   const result = await Effect.runPromise(blockedPreparation);
   strictEqual(result.result._tag, 'Failure');
   deepStrictEqual(result.resources, []);
 }
 test(
-  'entrypoint refuses all resource registration until provider ownership is qualified',
-  refusesUnqualifiedDeployment,
+  'entrypoint refuses resource registration while operational preparation is pending',
+  refusesPendingPreparation,
 );
 
 async function restrictedResources() {
@@ -85,8 +85,8 @@ async function restrictedResources() {
   deepStrictEqual(result.resources, [
     {
       type: 'Cloudflare.Tunnel.Tunnel',
-      props: { name: 'ceirean-rehearsal', configSrc: 'cloudflare', adopt: false },
-      adopt: undefined,
+      props: { name: 'ceirean-rehearsal-bcea4099a8934e32', configSrc: 'cloudflare', adopt: false },
+      adopt: false,
     },
     {
       type: 'Cloudflare.Tunnel.Configuration',
@@ -101,7 +101,7 @@ async function restrictedResources() {
         ],
         catchAllService: 'http_status:404',
       },
-      adopt: undefined,
+      adopt: false,
     },
     {
       type: 'Cloudflare.DNS.Record',
@@ -112,7 +112,7 @@ async function restrictedResources() {
         content: 'test-tunnel-id.cfargotunnel.com',
         proxied: true,
       },
-      adopt: undefined,
+      adopt: false,
     },
   ]);
   deepStrictEqual(result.actions, {});

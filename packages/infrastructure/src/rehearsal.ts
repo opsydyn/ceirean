@@ -1,3 +1,4 @@
+import { adopt } from 'alchemy/AdoptPolicy';
 import { CloudflareEnvironment, DNS, Tunnel } from 'alchemy/Cloudflare';
 import { interpolate } from 'alchemy/Output';
 import { Config, ConfigProvider, Effect, Match } from 'effect';
@@ -13,10 +14,10 @@ function* declareRehearsalInfrastructure() {
     Match.orElse(() => Config.fail(wrongAccount)),
   );
   const tunnel = yield* Tunnel.Tunnel('RehearsalTunnel', {
-    name: 'ceirean-rehearsal',
+    name: 'ceirean-rehearsal-bcea4099a8934e32',
     configSrc: 'cloudflare',
     adopt: false,
-  });
+  }).pipe(adopt(false));
   yield* Tunnel.Configuration('RehearsalIngress', {
     tunnelId: tunnel.tunnelId,
     ingress: [
@@ -27,14 +28,14 @@ function* declareRehearsalInfrastructure() {
       },
     ],
     catchAllService: 'http_status:404',
-  });
+  }).pipe(adopt(false));
   yield* DNS.Record('RehearsalHostname', {
     zoneId: '65de6815d54763e90ebf4e5df3a7030c',
     name: 'ceirean-hooks.opsydyn.xyz',
     type: 'CNAME',
     content: interpolate`${tunnel.tunnelId}.cfargotunnel.com`,
     proxied: true,
-  });
+  }).pipe(adopt(false));
   return {
     tunnelId: tunnel.tunnelId,
     endpoint: 'https://ceirean-hooks.opsydyn.xyz/webhook',
@@ -42,10 +43,10 @@ function* declareRehearsalInfrastructure() {
 }
 export const declareRehearsal = Effect.gen(declareRehearsalInfrastructure);
 
-const providerOwnershipUnqualified = new ConfigProvider.SourceError({
+const operationalPreparationPending = new ConfigProvider.SourceError({
   message:
-    'Remote preparation is blocked: Alchemy Tunnel ownership and dependency types are not qualified. No resources may be registered.',
+    'Remote preparation awaits the declaration-policy decision and fresh protected-state/collision preflight. No resources may be registered yet.',
 });
 
-// No environment toggle: removing this gate requires a reviewed qualification fix.
-export const prepareRehearsal = Config.fail(providerOwnershipUnqualified);
+// Keep deployment closed until the approved operational preparation is verified.
+export const prepareRehearsal = Config.fail(operationalPreparationPending);

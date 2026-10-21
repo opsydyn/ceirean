@@ -2,6 +2,7 @@
 
 Status: reproduced offline; remote preparation remains blocked. This is a local
 upstream report draft, not a filed issue or an applied provider fix.
+The owner instructed that this report must stay local; do not submit it.
 
 ## Proposed Issue
 
@@ -94,9 +95,13 @@ No fixed published release was found; no preview package or vendor patch was ins
 
 ## Disposition
 
-Keep the Alchemy stack blocked and preserve all existing lint rules and full
-dependency checking. Publishing this report, opening an upstream PR, changing
+Preserve all existing lint rules and the current dependency-checking policy.
+The owner accepted a stable random-suffixed name, fresh collision preflight,
+reviewed creates and preserved state as a bounded mitigation for supervised
+preparation. This does not fix the provider or eliminate race risk. The entrypoint
+remains gated while type-policy and operational preparation are pending.
+Publishing this report is explicitly disallowed. Opening an upstream PR, changing
 SDK adoption semantics locally, installing a preview or accepting a typecheck
 exception are separate next actions, not implied by this diagnostic result.
 Do not configure credentials, deploy, start a connector/listener, enable webhooks
-or run the live rehearsal until both ownership and type qualification pass.
+or run the live rehearsal without the separately required approvals.

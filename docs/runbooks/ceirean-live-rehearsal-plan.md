@@ -35,7 +35,7 @@ as credential-bearing operational state. Do not bootstrap `Cloudflare.state()`:
 that would provision additional state-store Worker, Durable Object and Secrets
 Store resources outside this tunnel-only scope.
 
-The intended owned resource set is one dedicated tunnel named `ceirean-rehearsal`,
+The intended owned resource set is one dedicated tunnel named `ceirean-rehearsal-bcea4099a8934e32`,
 one remote configuration matching hostname `ceirean-hooks.opsydyn.xyz` and exact
 path `^/webhook$` to `http://127.0.0.1:8787` with a 404 catch-all, and one proxied
 CNAME for that hostname pointing to the created tunnel. Inspect existing records
@@ -50,10 +50,12 @@ Provisioning must not run a connector, listener, OS service, GitHub update, prof
 enablement or assessment. The intended final tunnel state is disconnected with
 zero connectors, not an active origin behind the new hostname.
 
-Preparation is blocked at dependency type qualification, Tunnel provider ownership
-and dedicated Alchemy authentication. In the pinned provider, an existing
+Preparation is pending the dependency declaration-policy decision, fresh collision
+preflight and dedicated Alchemy authentication. In the pinned provider, an existing
 same-name tunnel can be reused despite `adopt: false`; preflight alone does not
-close a race. The stack entrypoint therefore fails before registering resources,
+close a race. The owner accepted the stable random-suffixed name and supervised
+preflight as a bounded mitigation, not a provider fix. All three resources pin
+engine adoption off. The stack entrypoint still fails before registering resources,
 and direct package deploy scripts were removed. Browser sign-in does not grant CLI access. The CLI help was
 checked with isolated temporary auth storage and telemetry disabled; no credential
 was entered or acquired. Alchemy's default OAuth scope selection is broad, so do
