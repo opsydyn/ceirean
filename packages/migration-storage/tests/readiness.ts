@@ -2,7 +2,7 @@ import { Effect, Match, Option, Result, Schema } from 'effect';
 import { TestClock } from 'effect/testing';
 
 import { childInput, ChildFixtureFailure, type ChildInput } from './fixtures.ts';
-type Child = ReturnType<typeof Bun.spawn<'ignore', 'pipe', 'ignore'>>;
+type Child = Pick<ReturnType<typeof Bun.spawn<'ignore', 'pipe', 'ignore'>>, 'kill' | 'exited'>;
 const codec = Schema.fromJsonString(childInput);
 
 export function ownChild(input: ChildInput) {

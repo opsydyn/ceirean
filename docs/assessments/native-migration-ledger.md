@@ -3,8 +3,11 @@
 Plan B implements private native run/worker persistence and local recovery only.
 Source base is `56c123e` on `codex/native-migration-ledger-plan`, in the isolated
 `/private/tmp/ceirean-replay-profile` worktree. Tasks 1-4 already passed their
-independent reviews. Task 5 author qualification is recorded below; fresh Task 5
-and final whole-branch reviews belong to the controller and remain pending.
+independent reviews. Independent Task 5 review of `56c123e..a94f945` was Approved
+with one Minor; fresh whole-branch review of `03828ae..a94f945` returned
+ReadyToMergeYes, no Critical/Important, and the same Minor. Both reviews are
+complete for `a94f945`, not for a later head. The focused fixture follow-up below
+requires the controller's scoped re-review; that review has not happened yet.
 No merge, push, operational initialization or native mechanism is implied.
 
 ## Boundary And Storage
@@ -55,8 +58,10 @@ in `tests/readiness.ts`, and the exact child entry in `tests/restart-child.ts`.
 Only strict allowlisted synthetic modes, fault points and owned temporary roots
 are accepted. Empty environment, no shell, `--no-env-file --no-install`, 64-byte
 readiness cap, three-second live-clock parent waits, bounded child fallback
-watchdog, scope-owned SIGKILL and awaited exit limit the fixture. Child errors
-emit only fixed refusal output, never raw storage contents.
+watchdog, scope-owned SIGKILL and awaited exit limit the fixture. Child errors,
+including direct malformed argv, are decoded inside the guarded Effect and emit
+only fixed refusal output, never raw storage contents or schema diagnostics.
+The direct-input regression bypasses the parent's validation.
 
 The first positive Create/Start controls exposed the existing lifecycle's full
 operation spread into `WorkerMutationReply`. Qualification stopped. After
@@ -116,8 +121,8 @@ Author self-review checked both production field projections, real native
 port/SQLite use, unchanged strict codecs and pure validator budgets, new issuer
 reconstruction, original intent/resource/time bindings, evidence retention,
 child ownership/watchdogs, restored negative mutations, and documentation proof
-limits. No unresolved material author finding remains. This is self-review and
-author verification, not independent acceptance.
+limits. These are original author results, not a claim of independent acceptance
+for the follow-up. The completed independent review dispositions are below.
 
 Fallow 3.34.1 ran separately from its already-cached native binary with
 `FALLOW_TELEMETRY_DISABLED=1 DO_NOT_TRACK=1`, isolated credential-free HOME,
@@ -129,12 +134,39 @@ cycles; exactly one warning remains for `@modelcontextprotocol/sdk` in
 `probes/github-admission/package.json`. Its compatibility dependency is retained.
 Unconfigured architecture/rule-pack diagnostics are not proof of those checks.
 
+## Independent Review And Focused Follow-Up
+
+- Task 5: Rawls, `56c123e..a94f945`, spec compliant / quality Approved with one
+  Minor, no Critical or Important findings.
+- Whole branch: Meitner, `03828ae..a94f945`, ReadyToMergeYes, no Critical or
+  Important findings; confirmed the same Minor.
+- Minor: synchronous argv decoding preceded the guarded Effect, so a direct
+  malformed child invocation could expose a raw SchemaError despite parent
+  validation protecting the exercised path. The blanket refusal-output claim
+  was too broad at that reviewed head.
+- The bounded follow-up moves decoding inside that same guarded Effect, before
+  constructing storage config or selecting a scenario. It adds a direct child
+  black-box RED/GREEN test for malformed JSON and excess schema fields. Empty
+  allowlisted environment, bounded stdout/stderr, fixed REFUSED/exit 1, no raw
+  input/schema diagnostics and unchanged empty temporary-directory inventory
+  are checked. No production workflow, decoder permissiveness, native property
+  budget, 180-second bound or existing qualification proof is changed.
+- Follow-up qualification and commit identity are recorded in the appended
+  `task-5-report.md` handoff. Controller scoped re-review of this follow-up is
+  pending. Neither completed review is represented as reviewing future code.
+
 ## Proof Limits
 
 All databases/children/evidence are test-owned temporary state. No Application
 Support path, operational config, credentials, .env, consumer command, registry,
 model, GitHub or external network access was used. No Docker/Colima or native
 worker was started. Local SIGKILL/reopen is not host-loss, power-loss, filesystem
-quota, live cleanup, isolation or successful migration proof. Plan A remains
-Draft, publication Disabled, with seven blockers unchanged. Plans C-D and
-controller-owned independent reviews remain separate, uncompleted gates.
+quota, live cleanup, isolation or successful migration proof. The reviewers'
+declined judgments remain explicit nonclaims: Docker/Colima/native workers,
+models/real migration; host/power loss; hostile filesystem, same-UID adversaries
+or tamper-proof authenticity; disk quota or maximum throughput; forensic
+execution confinement; broad dependency/security qualification; operational
+initialization, deployment or publication. They were not silently dropped or
+treated as qualified. Plan A remains Draft, publication Disabled, with seven
+blockers unchanged. Plans C-D and the follow-up scoped review remain separate,
+uncompleted gates; reviews at `a94f945` are completed as recorded above.

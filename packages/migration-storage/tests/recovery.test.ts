@@ -15,11 +15,137 @@ import { WorkerMechanism } from '../../engine/src/worker-ports.ts';
 import { makeCancelledChange, makeSnapshot } from '../../engine/tests/fixtures.ts';
 import { makeWorkerCase } from '../../engine/tests/worker-fixtures.ts';
 import * as Ledger from '../src/index.ts';
-import { ownedConfig, platform, childInput, type ChildInput } from './fixtures.ts';
+import {
+  ownedConfig,
+  platform,
+  childInput,
+  ChildFixtureFailure,
+  type ChildInput,
+} from './fixtures.ts';
 import { ownChild, waitReady, awaitChild } from './readiness.ts';
 import { reconstructController } from './recovery-controller.ts';
 
 type Fixture = Effect.Success<ReturnType<typeof ownedConfig>>;
+
+function boundedChildOutput(stream: ReadableStream<Uint8Array>) {
+  function* capture() {
+    const reader = stream.getReader();
+    async function closeReader() {
+      await reader.cancel();
+      reader.releaseLock();
+    }
+    yield* Effect.addFinalizer(() => Effect.promise(closeReader));
+    const bytes = new Uint8Array(64);
+    let used = 0;
+    let completed = false;
+    const captured = { overflow: false };
+    while (!completed) {
+      const chunk = yield* Effect.promise(() => reader.read());
+      function append(value: Uint8Array) {
+        const fits = used + value.byteLength <= bytes.byteLength;
+        function retain() {
+          bytes.set(value, used);
+          used += value.byteLength;
+        }
+        function capped() {
+          completed = true;
+          captured.overflow = true;
+        }
+        const appended = Match.value(fits).pipe(Match.when(true, retain), Match.orElse(capped));
+        void appended;
+        return fits;
+      }
+      function finished() {
+        completed = true;
+        return true;
+      }
+      const retained = Match.value(chunk).pipe(
+        Match.when({ done: true }, finished),
+        Match.when({ done: false }, ({ value }) => append(value)),
+        Match.exhaustive,
+      );
+      const capped = Effect.sync(() => !retained);
+      yield* Effect.promise(() => reader.cancel()).pipe(Effect.when(capped));
+    }
+    const text = new TextDecoder().decode(bytes.subarray(0, used));
+    return Match.value(captured.overflow).pipe(
+      Match.when(true, () => '<OUTPUT_LIMIT>'),
+      Match.orElse(() => text),
+    );
+  }
+  const capturing = Effect.gen(capture);
+  return capturing.pipe(Effect.scoped, Effect.timeout('3 seconds'), TestClock.withLive);
+}
+
+async function malformedChildArguments() {
+  function* scenario() {
+    const fixture = yield* ownedConfig();
+    const privateInput = crypto.randomUUID();
+    const excessInput = Schema.Struct({ ...childInput.fields, unexpected: Schema.String });
+    const encode = Schema.encodeSync(Schema.fromJsonString(excessInput));
+    const cases = [
+      `{${privateInput}`,
+      encode({
+        root: fixture.root,
+        ownerUid: fixture.config.pathPolicy.ownerUid,
+        mode: 'Probe',
+        point: 'AfterCommit',
+        unexpected: privateInput,
+      }),
+    ];
+    const before = yield* fixture.fs.readDirectory(fixture.root);
+    expect(before).toEqual([]);
+    for (const raw of cases) {
+      function spawn() {
+        return Bun.spawn(
+          [
+            process.execPath,
+            '--no-env-file',
+            '--no-install',
+            new URL('./restart-child.ts', import.meta.url).pathname,
+            raw,
+          ],
+          { cwd: fixture.root, env: {}, stdin: 'ignore', stdout: 'pipe', stderr: 'pipe' },
+        );
+      }
+      const spawning = Effect.try({
+        try: spawn,
+        catch: () => new ChildFixtureFailure({ phase: 'Spawn' }),
+      });
+      function stop(child: Effect.Success<typeof spawning>) {
+        child.kill('SIGKILL');
+        return awaitChild(child).pipe(
+          Effect.catchCause(() => Effect.die(new ChildFixtureFailure({ phase: 'Exit' }))),
+        );
+      }
+      const child = yield* Effect.acquireRelease(spawning, stop);
+      const results = [
+        boundedChildOutput(child.stdout),
+        boundedChildOutput(child.stderr),
+        awaitChild(child),
+      ] as const;
+      const [stdout, stderr, code] = yield* Effect.all(results, { concurrency: 'unbounded' });
+      expect(code).toBe(1);
+      expect(stdout).toBe('REFUSED\n');
+      expect(stderr).toBe('');
+      expect(`${stdout}${stderr}`).not.toContain(privateInput);
+      expect(`${stdout}${stderr}`).not.toContain('SchemaError');
+      expect(`${stdout}${stderr}`).not.toContain(fixture.root);
+      expect(yield* fixture.fs.readDirectory(fixture.root)).toEqual(before);
+    }
+  }
+  const program = Effect.gen(scenario);
+  const scoped = Effect.scoped(program);
+  const provided = Effect.provide(scoped, platform);
+  const withClock = Effect.provide(provided, TestClock.layer());
+  await Effect.runPromise(withClock);
+}
+test(
+  'direct malformed child argv is REFUSED without raw errors or storage files',
+  malformedChildArguments,
+  30000,
+);
+
 function seedLedger(config: Ledger.MigrationLedgerConfig, operations: readonly WorkerOperation[]) {
   function* seed() {
     const ledger = yield* Ledger.openMigrationLedger(config);

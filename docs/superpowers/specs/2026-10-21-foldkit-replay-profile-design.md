@@ -120,8 +120,10 @@ initialization, single-owner SQLite scope and local recovery qualification.
 Its written plan execution is owner-approved. Native persistence and author
 local restart qualification are implemented; see the
 [measured assessment](../../assessments/native-migration-ledger.md). Tasks 1-4
-have independent review; Task 5 and final whole-branch controller reviews remain
-pending. The owner-approved repair projects only declared mutation reply binding
+have independent review; Task 5 and whole-branch reviews are complete through
+`a94f945` (Approved with one Minor / ReadyToMergeYes, no Critical/Important).
+Scoped re-review of the bounded guarded-argv follow-up remains pending; this is
+not approval of a later head. The owner-approved repair projects only declared mutation reply binding
 fields in two existing lifecycle paths, without relaxing native decoding or
 adding a workflow. This initializes no operational storage and starts no native
 worker. Plan A stays Draft, publication Disabled, with all seven blockers intact;

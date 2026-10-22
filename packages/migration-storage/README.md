@@ -76,7 +76,8 @@ Every native test uses an explicitly owned temporary directory under
 
 ## Local Restart Qualification
 
-`tests/recovery.test.ts` has 37 deterministic controls. The fixed
+`tests/recovery.test.ts` has 38 deterministic controls: the original 37 plus the
+direct malformed-argv follow-up regression. The fixed
 `tests/restart-child.ts` accepts only the strict synthetic protocol in
 `tests/fixtures.ts`; `tests/readiness.ts` spawns that exact entry with an empty
 environment, `--no-env-file --no-install`, no shell and no consumer commands.
@@ -124,7 +125,9 @@ moon run :test --force --no-actions
 
 See the [measured assessment](../../docs/assessments/native-migration-ledger.md)
 for full gates and the separate cached, telemetry-off, credential-free Fallow
-run. Controller-owned independent Task 5 and whole-branch reviews remain pending.
+run. Independent Task 5 and whole-branch reviews are complete through `a94f945`
+with the same Minor. The guarded-argv follow-up addresses it; controller scoped
+re-review of that follow-up remains pending, not implied by the older reviews.
 Local SIGKILL/reopen is not host-loss, power-loss, native worker, Colima/Docker,
 SQLite-filesystem quota or real migration proof. Plan A remains Draft,
 publication Disabled, with all seven blockers unchanged. No operational storage

@@ -63,8 +63,11 @@ hosting and execution appetite still require review.
       [measured evidence](assessments/native-migration-ledger.md), five SIGKILL
       boundaries, 37 recovery controls and 3000 native refinement cases under the
       unchanged 180-second law bound. Tasks 1-4 independently reviewed.
-- [ ] Obtain controller-owned fresh Task 5 and whole-branch reviews before final
-      Plan B acceptance. Author qualification is not independent approval.
+- [x] Obtain controller-owned Task 5 and whole-branch reviews through `a94f945`:
+      Approved with one Minor / ReadyToMergeYes, no Critical/Important. Both
+      identified the same unguarded direct-child argv error path.
+- [ ] Obtain scoped review of the bounded guarded-argv follow-up before final
+      Plan B disposition. The earlier reviews do not approve the new head.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
