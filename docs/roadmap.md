@@ -74,9 +74,11 @@ hosting and execution appetite still require review.
       reviewed ranges or authorize merge/push/operational activation.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
-      Plan C's conversational design is approved; the
+      Plan C's conversational design and
       [written readiness spec](superpowers/specs/2026-10-22-colima-readiness-design.md)
-      awaits owner review before implementation planning. Read-only preflight and
+      are owner-approved. The [C1 foundation plan](superpowers/plans/2026-10-22-colima-readiness.md)
+      awaits review and execution-method selection; native C2 implementation
+      requires measured preflight facts and a separate plan. Read-only preflight and
       separately approved native diagnostics have distinct activation boundaries;
       nothing has been started by this design work.
 - [ ] Prove profile reuse with the postcode client rather than adding a second

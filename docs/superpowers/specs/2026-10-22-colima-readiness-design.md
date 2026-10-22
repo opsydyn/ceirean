@@ -10,10 +10,9 @@ It is not a migration run, production adapter or deployment.
 
 The owner approved the conversational design on 2026-10-22: two stages, an
 explicit activation gate, diagnostic limits, seven individual checks, and the
-report/test strategy. This written spec still requires owner review. Approval
-of this design does not authorize implementation or activation. After written
-spec approval, prepare a separate implementation plan for review and execution
-method selection.
+report/test strategy. The owner approved this written spec on 2026-10-22.
+Approval of this design does not authorize implementation or activation.
+The separate implementation plan requires review and execution-method selection.
 
 Success means producing trustworthy, bounded evidence about specific native
 controls, or precise blockers. A partial result is useful but is not readiness.
