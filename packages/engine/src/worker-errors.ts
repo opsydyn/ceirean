@@ -3,7 +3,14 @@ import { Data } from 'effect';
 
 export class WorkerJournalError extends Data.TaggedError('WorkerJournalError')<{
   readonly operation: 'load' | 'commit';
-  readonly code: 'ReadFailed' | 'CommitFailed' | 'InvalidData' | 'RevisionExhausted';
+  readonly code:
+    | 'ReadFailed'
+    | 'CommitFailed'
+    | 'InvalidData'
+    | 'RevisionExhausted'
+    | 'Busy'
+    | 'CapacityExceeded'
+    | 'Closed';
 }> {}
 
 export class WorkerMechanismError extends Data.TaggedError('WorkerMechanismError')<{

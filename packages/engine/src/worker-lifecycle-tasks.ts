@@ -39,7 +39,15 @@ export const LifecycleIssue = Schema.Union([
   WorkerRefusal,
   Schema.TaggedStruct('WorkerJournalError', {
     operation: Schema.Literals(['load', 'commit']),
-    code: Schema.Literals(['ReadFailed', 'CommitFailed', 'InvalidData', 'RevisionExhausted']),
+    code: Schema.Literals([
+      'ReadFailed',
+      'CommitFailed',
+      'InvalidData',
+      'RevisionExhausted',
+      'Busy',
+      'CapacityExceeded',
+      'Closed',
+    ]),
   }),
   Schema.TaggedStruct('WorkerMechanismError', {
     operation: Schema.Literals(['mutate', 'observe', 'execute']),

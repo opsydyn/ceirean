@@ -1,7 +1,7 @@
 import { Data, Match, Result, Schema } from 'effect';
 
 export class MigrationStorageError extends Data.TaggedError('MigrationStorageError')<{
-  readonly operation: 'initialize' | 'open' | 'status' | 'close';
+  readonly operation: 'initialize' | 'open' | 'status' | 'close' | 'register' | 'read' | 'commit';
   readonly code:
     | 'InvalidConfig'
     | 'UnsafePath'
@@ -10,7 +10,12 @@ export class MigrationStorageError extends Data.TaggedError('MigrationStorageErr
     | 'OwnershipBusy'
     | 'IncompatibleSchema'
     | 'InvalidData'
-    | 'CloseFailed';
+    | 'CloseFailed'
+    | 'Busy'
+    | 'CapacityExceeded'
+    | 'Closed'
+    | 'RevisionExhausted'
+    | 'CommitFailed';
 }> {}
 
 const native = Schema.Struct({ code: Schema.String });

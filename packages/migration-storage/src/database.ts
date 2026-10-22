@@ -3,7 +3,7 @@ import { Database } from 'bun:sqlite';
 import { migrationLedgerBounds } from '@ceirean/engine/journal-policy';
 import { Effect, Exit, FileSystem, Match, Option, Result, Scope, Schema } from 'effect';
 
-import { validateEmptyLedger } from './codec.ts';
+import { validateLedger } from './codec.ts';
 import { MigrationLedgerConfig } from './config.ts';
 import { MigrationStorageError, requireStorage, sanitized } from './errors.ts';
 import { lockOwnership, seedOwnership, validateOwnershipIdentity } from './ownership.ts';
@@ -109,6 +109,15 @@ function acquire(input: MigrationLedgerConfig, intent: 'initialize' | 'open' | '
         () => new MigrationStorageError({ operation: intent, code: 'InvalidConfig' }),
       ),
     );
+    const isTest = Schema.is(Schema.Literal('TestOwnedTemporary'));
+    yield* Effect.try({
+      try: () =>
+        requireStorage(
+          config.testFault === undefined || isTest(config.pathPolicy._tag),
+          'InvalidConfig',
+        ),
+      catch: (error) => sanitized(error, intent, 'InvalidConfig'),
+    });
     const paths = yield* prepareMigrationPaths(config, isInitialize(intent));
     function* validateExistingSidecars() {
       const fs = yield* FileSystem.FileSystem;
@@ -150,7 +159,7 @@ function acquire(input: MigrationLedgerConfig, intent: 'initialize' | 'open' | '
         Match.exhaustive,
       );
       action();
-      validateEmptyLedger(db, config, paths.identity);
+      db.transaction(() => validateLedger(db, config, paths.identity)).deferred();
     }
     yield* Effect.try({ try: validate, catch: (error) => sanitized(error, intent, 'InvalidData') });
     const readback = yield* prepareMigrationPaths(config, false);
@@ -186,7 +195,12 @@ export function initializeDatabase(config: MigrationLedgerConfig) {
 }
 export function readDatabaseStatus(config: MigrationLedgerConfig) {
   return acquire(config, 'status').pipe(
-    Effect.map(({ db, config: valid, identity }) => validateEmptyLedger(db, valid, identity)),
+    Effect.flatMap(({ db, config: valid, identity }) =>
+      Effect.try({
+        try: () => db.transaction(() => validateLedger(db, valid, identity)).deferred(),
+        catch: (error) => sanitized(error, 'status', 'InvalidData'),
+      }),
+    ),
     Effect.scoped,
   );
 }
