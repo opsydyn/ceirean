@@ -4,7 +4,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./journal-policy": "./src/worker-journal-policy.ts"
+    "./journal-policy": "./src/worker-journal-policy.ts",
+    "./migration-ledger": "./src/migration-ledger-policy.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
