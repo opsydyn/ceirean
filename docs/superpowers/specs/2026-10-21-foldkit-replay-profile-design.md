@@ -252,7 +252,7 @@ direct ledger/actor access, qualification tool or publishing capability.
 
 - [x] Owner reviews and approves this written spec.
 - [x] Owner reviews the implementation plan, execution method and effort cap.
-- [ ] Offline profile validation and property tests cover identity/scope/budgets,
+- [x] Offline profile validation and property tests cover identity/scope/budgets,
       traversal, instruction injection and immutable acceptance configuration.
 - [ ] Native ledger/ownership/recovery and Docker mechanism pass focused tests,
       preserving the existing actor and pure qualification contracts.

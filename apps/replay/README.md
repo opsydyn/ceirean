@@ -36,9 +36,12 @@ are rejected. Domain inspection compares repository, base and targets exactly.
 
 Reading uses one scoped regular-file descriptor with final-component
 `noFollow`, strict UTF-8 and at most 262145 bytes read, accepting at most 262144.
-Short reads are accumulated. The controller-owned parent directory is trusted;
+An initial metadata check rejects known special files before a potentially
+blocking open; the opened descriptor is independently checked. Short reads are
+accumulated. The controller-owned parent directory is trusted;
 `noFollow` does not protect against symlinked parent directories or a hostile
-local filesystem. Reports are schema-validated and capped at 16384 bytes;
+local filesystem, including replacement races between metadata and open.
+Reports are schema-validated and capped at 16384 bytes;
 failure never emits a partial report or raw path/exception/file contents.
 
 ## Capabilities Absent

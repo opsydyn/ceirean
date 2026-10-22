@@ -49,6 +49,11 @@ function boundedBytes(bytes: Uint8Array) {
 export function readDraftProfile(path: string) {
   function* read() {
     const fs = yield* FileSystem.FileSystem;
+    // Avoid blocking on known special files; descriptor checks remain authoritative.
+    const before = yield* fs
+      .stat(path)
+      .pipe(Effect.mapError(() => new ProfileReadError({ code: 'ReadFailed' })));
+    yield* Effect.fromResult(regularFile(before.type));
     const file = yield* fs
       .open(path, { flag: 'r', noFollow: true })
       .pipe(Effect.mapError(() => new ProfileReadError({ code: 'ReadFailed' })));

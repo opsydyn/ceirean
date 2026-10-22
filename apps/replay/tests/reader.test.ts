@@ -165,3 +165,33 @@ async function partialReads() {
   await Effect.runPromise(provided);
 }
 test('short descriptor reads are accumulated until EOF', partialReads);
+
+async function fifoBeforeOpen() {
+  function* scenario() {
+    const { fs, path } = yield* fixture();
+    const wire = encode(validDraft());
+    yield* fs.writeFileString(path, wire);
+    const info = yield* fs.stat(path);
+    let opens = 0;
+    const fifoInfo = Effect.succeed({ ...info, type: 'FIFO' as const });
+    function stat() {
+      return fifoInfo;
+    }
+    function open(...args: Parameters<typeof fs.open>) {
+      opens += 1;
+      const delayed = fs.open(...args).pipe(Effect.delay('1 second'));
+      return delayed;
+    }
+    const observed = { ...fs, stat, open };
+    const reading = readDraftProfile(path).pipe(Effect.timeout('100 millis'), Effect.result);
+    const provided = Effect.provideService(reading, FileSystem.FileSystem, observed);
+    const result = yield* provided;
+    expect(result).toMatchObject({ _tag: 'Failure', failure: { code: 'NotRegular' } });
+    expect(opens).toBe(0);
+  }
+  const workflow = Effect.gen(scenario);
+  const program = Effect.scoped(workflow);
+  const provided = Effect.provide(program, BunFileSystem.layer);
+  await Effect.runPromise(provided);
+}
+test('FIFO metadata rejects before a blocking open, within a bounded deadline', fifoBeforeOpen);

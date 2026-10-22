@@ -35,8 +35,28 @@ not native worker readiness or a migrated consumer repository.
 Task 3 full gates passed: root `bun --no-env-file run check`, all eight workspace
 typechecks and all eight workspace test tasks (`moon run :typecheck --force
 --no-actions` / `moon run :test --force --no-actions`). The complete suite passed
-988 tests with zero failures. Final independent review and its fresh verification
-are recorded after review; these task gates are not a native qualification.
+988 tests with zero failures. These task gates are not a native qualification.
+
+## Independent Review
+
+Fresh whole-implementation review of `9def8d1..adeea1a` found one P2: a known
+FIFO could block on read-only open before descriptor validation. The repair
+adds a regular-file metadata precheck, retaining no-follow and descriptor checks.
+Its timeout-bounded synthetic FIFO regression failed with TimeoutError when the
+precheck was removed, then passed with `NotRegular` and zero opens after
+restoration. No new spawned utility was added to the committed tests.
+
+Independent re-review cleared the finding with no other material findings.
+All 13 focused replay tests passed; the reviewer's real-FIFO probe returned
+sanitized `NotRegular` without timeout or stderr. This does not establish
+protection from hostile filesystem replacement races; the parent-directory
+trust boundary remains explicit.
+
+Final post-repair verification passed root lint/format, all eight workspace
+typechecks and all eight workspace test tasks: **989 tests, zero failures**.
+The replay app contributes 13 tests / 60 assertions; five domain laws retain
+15000 primary generated cases. The direct CLI still exits 2 with the same raw
+stdout digest above. No material review findings or deferred minors remain.
 
 Fallow's report-only scan with an empty inherited environment, temporary HOME,
 both telemetry kill switches, no cache and no type-aware analysis exited 0.
