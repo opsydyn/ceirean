@@ -110,7 +110,7 @@ function acquire(input: MigrationLedgerConfig, intent: 'initialize' | 'open' | '
       ),
     );
     const paths = yield* prepareMigrationPaths(config, isInitialize(intent));
-    function* validateStatusGuard() {
+    function* validateExistingSidecars() {
       const fs = yield* FileSystem.FileSystem;
       const wal = yield* fs.exists(`${paths.file}-wal`);
       const shm = yield* fs.exists(`${paths.file}-shm`);
@@ -118,9 +118,11 @@ function acquire(input: MigrationLedgerConfig, intent: 'initialize' | 'open' | '
         try: () => requireStorage(wal && shm, 'UnsafePath'),
         catch: (error) => sanitized(error, intent, 'UnsafePath'),
       });
-      yield* validateGuardImage(paths.guardFile, paths.identity);
     }
-    const guardValidation = Effect.gen(validateStatusGuard);
+    const sidecarValidation = Effect.gen(validateExistingSidecars);
+    const existing = Effect.succeed(!isInitialize(intent));
+    yield* sidecarValidation.pipe(Effect.when(existing));
+    const guardValidation = validateGuardImage(paths.guardFile, paths.identity);
     const status = Effect.succeed(isStatus(intent));
     yield* guardValidation.pipe(Effect.when(status));
     function* own() {

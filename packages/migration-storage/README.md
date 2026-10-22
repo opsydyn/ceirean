@@ -28,7 +28,8 @@ network-filesystem, arbitrary-sync-client or power-loss durability guarantee.
 Status uses the real read-only WAL-aware ledger connection. It may update only
 existing main-ledger SHM read bookkeeping; it is not a zero-write forensic reader.
 File inventory, main/guard/WAL bytes, schema and business rows remain unchanged.
-Missing WAL/SHM refuses rather than creating sidecars. No immutable-WAL bypass,
+Existing owner opens and status both require WAL/SHM before native acquisition;
+missing sidecars refuse rather than being recreated. No immutable-WAL bypass,
 business mutation, initialization or writer-authority receipt is involved.
 
 Under a live owner, status validates the immutable guard schema/identity through

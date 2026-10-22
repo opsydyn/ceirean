@@ -12,8 +12,11 @@ import { ownedConfig, platform } from './fixtures.ts';
 
 async function exclusiveOwner() {
   function* scenario() {
-    const { config } = yield* ownedConfig();
+    const { config, fs, root, file } = yield* ownedConfig();
     yield* initializeMigrationLedger(config);
+    const names = (yield* fs.readDirectory(root)).sort();
+    expect(yield* fs.exists(`${file}-wal`)).toBe(true);
+    expect(yield* fs.exists(`${file}-shm`)).toBe(true);
     function* held() {
       yield* openOwnedMigrationDatabase(config);
       expect(
@@ -22,6 +25,9 @@ async function exclusiveOwner() {
     }
     const holding = Effect.gen(held);
     yield* Effect.scoped(holding);
+    expect((yield* fs.readDirectory(root)).sort()).toEqual(names);
+    expect(yield* fs.exists(`${file}-wal`)).toBe(true);
+    expect(yield* fs.exists(`${file}-shm`)).toBe(true);
     yield* Effect.scoped(openOwnedMigrationDatabase(config));
   }
   const program = Effect.gen(scenario);
@@ -33,6 +39,36 @@ test(
   'exclusive native ownership refuses a second owner and scope exit releases the lock',
   exclusiveOwner,
 );
+
+for (const suffix of ['-wal', '-shm']) {
+  async function missingOwnerSidecar() {
+    function* scenario() {
+      const { config, fs, root, file } = yield* ownedConfig();
+      yield* initializeMigrationLedger(config);
+      expect(yield* fs.exists(`${file}-wal`)).toBe(true);
+      expect(yield* fs.exists(`${file}-shm`)).toBe(true);
+      yield* fs.remove(`${file}${suffix}`);
+      const names = (yield* fs.readDirectory(root)).sort();
+      const bytes = yield* Effect.forEach(names, (name) => fs.readFile(`${root}/${name}`));
+      const opening = openOwnedMigrationDatabase(config);
+      const result = yield* Effect.scoped(opening).pipe(Effect.result);
+      expect((yield* fs.readDirectory(root)).sort()).toEqual(names);
+      expect(yield* Effect.forEach(names, (name) => fs.readFile(`${root}/${name}`))).toEqual(bytes);
+      expect(result).toMatchObject({
+        _tag: 'Failure',
+        failure: { operation: 'open', code: 'UnsafePath' },
+      });
+    }
+    const program = Effect.gen(scenario);
+    const scoped = Effect.scoped(program);
+    const provided = Effect.provide(scoped, platform);
+    await Effect.runPromise(provided);
+  }
+  test(
+    `owner open refuses missing ${suffix} without recreating files or changing remaining bytes`,
+    missingOwnerSidecar,
+  );
+}
 
 class ChildFailure extends Data.TaggedError('ChildFailure')<{
   readonly phase: 'Spawn' | 'Ready';
