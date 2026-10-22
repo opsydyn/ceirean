@@ -7,3 +7,4 @@ projects:
   github-adapter: packages/github-adapter
   github-ingress: apps/github-ingress
   infrastructure: packages/infrastructure
+  replay: apps/replay

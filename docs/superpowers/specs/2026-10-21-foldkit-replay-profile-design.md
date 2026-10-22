@@ -3,8 +3,8 @@
 Status: written spec approved by the owner on 2026-10-21, including the historical
 case, controller-managed Docker boundary and Colima on this Mac. The
 [first implementation plan](../plans/2026-10-21-foldkit-replay-profile.md) covers
-offline profile inspection only and awaits plan review/execution-method selection.
-Explicit implementation and native-execution approvals are still required.
+offline profile inspection only and was approved for inline implementation on
+2026-10-22. Native-execution approvals are still separately required.
 This document starts no VM, worker, model call or migration.
 Independent read-only design review found no material issues; that is not native
 feasibility or isolation evidence. Repository lint/format validation passed for
@@ -250,8 +250,8 @@ direct ledger/actor access, qualification tool or publishing capability.
 
 ## Implementation And Qualification Gates
 
-- [ ] Owner reviews and approves this written spec.
-- [ ] Owner reviews the implementation plan, execution method and effort cap.
+- [x] Owner reviews and approves this written spec.
+- [x] Owner reviews the implementation plan, execution method and effort cap.
 - [ ] Offline profile validation and property tests cover identity/scope/budgets,
       traversal, instruction injection and immutable acceptance configuration.
 - [ ] Native ledger/ownership/recovery and Docker mechanism pass focused tests,

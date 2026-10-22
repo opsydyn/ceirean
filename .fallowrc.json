@@ -4,6 +4,7 @@
   "entry": [
     "oxlint.config.ts",
     "apps/github-ingress/src/main.ts",
+    "apps/replay/src/main.ts",
     "packages/infrastructure/alchemy.run.ts",
     "**/tests/**/*.test.ts",
     "apps/github-ingress/tests/*-child.ts",

@@ -5,7 +5,7 @@ remain unchanged. Historical evidence and source identities below are retained.
 The next live step is an explicitly approved, finite session using the
 [rehearsal worksheet](runbooks/ceirean-rehearsal-approval.md), not deployment.
 
-Local delivery map, updated 2026-10-20. Checkboxes describe delivered outcomes,
+Local delivery map, updated 2026-10-22. Checkboxes describe delivered outcomes,
 not permission to implement unchecked items. The organisation-discovery direction
 is requested by the owner; its architecture, implementation plan, permissions,
 hosting and execution appetite still require review.
@@ -50,8 +50,14 @@ hosting and execution appetite still require review.
       Historical replay case and Colima host direction are conversationally
       approved. The [written profile/worker spec](superpowers/specs/2026-10-21-foldkit-replay-profile-design.md)
       is owner-approved; its [first plan](superpowers/plans/2026-10-21-foldkit-replay-profile.md)
-      covers offline profile inspection and awaits execution approval. No native
+      covers offline profile inspection, approved for inline execution. No native
       worker or real migration is qualified.
+- [x] Deliver Plan A's strict Draft replay profile, fail-closed pure inspector and
+      bounded offline CLI with property/process tests. See the
+      [inspection evidence](assessments/foldkit-replay-profile.md). Publication
+      remains Disabled and all seven execution blockers remain present.
+- [ ] Separately plan native migration journal, ownership and recovery (Plan B),
+      then measured Colima/Docker readiness and acceptance/manual replay (C-D).
 - [ ] Prove profile reuse with the postcode client rather than adding a second
       orchestrator or repository-specific service.
 - [ ] Separately approve GitHub publication and least-privilege App access, and

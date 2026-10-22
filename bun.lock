@@ -23,6 +23,14 @@
         "effect": "4.0.5",
       },
     },
+    "apps/replay": {
+      "name": "@ceirean/replay",
+      "dependencies": {
+        "@ceirean/domain": "workspace:*",
+        "@effect/platform-bun": "4.0.5",
+        "effect": "4.0.5",
+      },
+    },
     "packages/domain": {
       "name": "@ceirean/domain",
       "dependencies": {
@@ -156,6 +164,8 @@
     "@ceirean/github-ingress": ["@ceirean/github-ingress@workspace:apps/github-ingress"],
 
     "@ceirean/infrastructure": ["@ceirean/infrastructure@workspace:packages/infrastructure"],
+
+    "@ceirean/replay": ["@ceirean/replay@workspace:apps/replay"],
 
     "@chevrotain/cst-dts-gen": ["@chevrotain/cst-dts-gen@10.5.0", "", { "dependencies": { "@chevrotain/gast": "10.5.0", "@chevrotain/types": "10.5.0", "lodash": "4.17.21" } }, "sha512-lhmC/FyqQ2o7pGK4Om+hzuDrm9rhFYIJ/AXoQBeongmn870Xeb0L6oGEiuR8nohFNL5sMaQEJWCxr1oIVIVXrw=="],
 

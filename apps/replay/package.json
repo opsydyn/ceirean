@@ -1,0 +1,14 @@
+{
+  "name": "@ceirean/replay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "cli": "bun --no-env-file --no-install src/main.ts"
+  },
+  "dependencies": {
+    "@ceirean/domain": "workspace:*",
+    "@effect/platform-bun": "4.0.5",
+    "effect": "4.0.5"
+  }
+}
