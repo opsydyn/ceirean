@@ -1,0 +1,19 @@
+{
+  "name": "@ceirean/migration-storage",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ceirean/domain": "workspace:*",
+    "@ceirean/engine": "workspace:*",
+    "effect": "4.0.5"
+  },
+  "devDependencies": {
+    "@effect/platform-bun": "4.0.5"
+  }
+}

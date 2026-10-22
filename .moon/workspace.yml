@@ -8,3 +8,4 @@ projects:
   github-ingress: apps/github-ingress
   infrastructure: packages/infrastructure
   replay: apps/replay
+  migration-storage: packages/migration-storage

@@ -69,6 +69,17 @@
         "effect": "4.0.5",
       },
     },
+    "packages/migration-storage": {
+      "name": "@ceirean/migration-storage",
+      "dependencies": {
+        "@ceirean/domain": "workspace:*",
+        "@ceirean/engine": "workspace:*",
+        "effect": "4.0.5",
+      },
+      "devDependencies": {
+        "@effect/platform-bun": "4.0.5",
+      },
+    },
     "probes/bun-effect-flue": {
       "name": "@ceirean/compatibility-probe",
       "dependencies": {
@@ -164,6 +175,8 @@
     "@ceirean/github-ingress": ["@ceirean/github-ingress@workspace:apps/github-ingress"],
 
     "@ceirean/infrastructure": ["@ceirean/infrastructure@workspace:packages/infrastructure"],
+
+    "@ceirean/migration-storage": ["@ceirean/migration-storage@workspace:packages/migration-storage"],
 
     "@ceirean/replay": ["@ceirean/replay@workspace:apps/replay"],
 
