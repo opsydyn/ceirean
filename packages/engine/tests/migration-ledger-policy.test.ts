@@ -13,7 +13,7 @@ import {
   migrationPayloadBytes,
   recoverMigrationLedger,
   decideMigrationLedger,
-} from '@ceirean/engine/migration-ledger';
+} from '@ceirean/engine/journal-policy';
 import { Match, Option, Result, Schema } from 'effect';
 
 import { makeSnapshot, makeCancelledChange, makeQualifiedChange } from './fixtures.ts';
@@ -756,4 +756,230 @@ function moreAtomicControls() {
 test(
   'worker peer exhaustion is atomic; terminal registration and full-ledger CAS preserve refusal distinctions',
   moreAtomicControls,
+);
+
+function authorizedLedger() {
+  const current = ledgerFixture();
+  const worker = makeStartedWorkerSnapshot();
+  const c = makeWorkerCase();
+  const receipt = {
+    operationId: c.operation.operationId,
+    identity: c.operation.identity,
+    hostId: c.operation.hostId,
+    daemonId: c.operation.daemonId,
+    containerId: c.containerId,
+    imageDigest: c.operation.imageDigest,
+    sourceDigest: c.operation.sourceDigest,
+    policyDigest: c.operation.policyDigest,
+    configDigest: c.operation.configDigest,
+    configuration: c.operation.configuration,
+    observedAtMs: 950,
+  };
+  const ready = decide(
+    { ...current, workers: [worker] },
+    {
+      _tag: 'EditWorker',
+      edit: {
+        _tag: 'RecordReadiness',
+        operationId: worker.operation.operationId,
+        expectedRevision: worker.revision,
+        atMs: 951,
+        receipt,
+      },
+    },
+  );
+  return decide(ready.next, {
+    _tag: 'EditWorker',
+    edit: {
+      _tag: 'AuthorizeExecution',
+      operationId: worker.operation.operationId,
+      expectedRevision: 12,
+      atMs: 960,
+    },
+  }).next;
+}
+
+function authorizationCorruption() {
+  const current = authorizedLedger();
+  const worker = current.workers[0];
+  const recoveredControl = recoverMigrationLedger(current);
+  expect(Result.isSuccess(recoveredControl)).toBe(true);
+  for (const corrupt of [
+    {
+      ...worker,
+      readiness: Option.none(),
+      executionAuthorizedAtMs: Option.some(worker.createdAtMs),
+    },
+    { ...worker, readiness: Option.none() },
+    {
+      ...worker,
+      readiness: Option.none(),
+      cleanup: Option.some({
+        _tag: 'CleanupPending' as const,
+        requestedAtMs: 970,
+        deadlineMs: 1070,
+      }),
+      editTimeFloorMs: 970,
+    },
+    { ...worker, executionAuthorizedAtMs: Option.some(899) },
+    { ...worker, executionAuthorizedAtMs: Option.some(949) },
+    { ...worker, editTimeFloorMs: 1000, executionAuthorizedAtMs: Option.some(1000) },
+    { ...worker, editTimeFloorMs: 1001, executionAuthorizedAtMs: Option.some(1001) },
+  ]) {
+    const state = { ...current, workers: [corrupt] };
+    const recovery = recoverMigrationLedger(state);
+    expect(Result.isFailure(recovery)).toBe(true);
+    const cleanup = decideMigrationLedger(state, {
+      _tag: 'EditWorker',
+      edit: cleanupEdit(corrupt, 1002),
+    });
+    expect(Result.isFailure(cleanup)).toBe(true);
+  }
+}
+test(
+  'persisted authorization rejects missing evidence, pre-materialization and expired times',
+  authorizationCorruption,
+);
+
+function stopClaimedLedger() {
+  const current = authorizedLedger();
+  const cleanup = decide(current, {
+    _tag: 'EditWorker',
+    edit: cleanupEdit(current.workers[0], 970),
+  });
+  const worker = cleanup.next.workers[0];
+  const stopped = decide(cleanup.next, {
+    _tag: 'EditWorker',
+    edit: claimEdit(worker, { ...makeWorkerIntent('Stop'), claimedAtMs: 971 }),
+  });
+  return stopped;
+}
+
+function authorizedCleanupControl() {
+  const stopped = stopClaimedLedger();
+  expect(stopped.reply).toMatchObject({ result: { _tag: 'Committed' } });
+  expect(stopped.next.workers[0].readiness).toEqual(Option.none());
+  expect(stopped.next.workers[0].executionAuthorizedAtMs).toEqual(Option.some(960));
+  const recovered = recoverMigrationLedger(stopped.next);
+  expect(Result.isSuccess(recovered)).toBe(true);
+}
+test(
+  'existing cleanup claims clear readiness but preserve issued authorization',
+  authorizedCleanupControl,
+);
+
+function readinessAfterAuthorization() {
+  const current = authorizedLedger();
+  const worker = current.workers[0];
+  const receipt = Option.getOrThrow(worker.readiness);
+  const refreshed = decide(current, {
+    _tag: 'EditWorker',
+    edit: {
+      _tag: 'RecordReadiness',
+      operationId: worker.operation.operationId,
+      expectedRevision: worker.revision,
+      atMs: 971,
+      receipt: { ...receipt, observedAtMs: 970 },
+    },
+  });
+  expect(refreshed.reply).toMatchObject({ result: { _tag: 'Committed' } });
+  expect(refreshed.next.workers[0].executionAuthorizedAtMs).toEqual(Option.some(960));
+  expect(Option.getOrThrow(refreshed.next.workers[0].readiness).observedAtMs).toBe(970);
+  const recovered = recoverMigrationLedger(refreshed.next);
+  expect(Result.isSuccess(recovered)).toBe(true);
+  const cleanup = decide(refreshed.next, {
+    _tag: 'EditWorker',
+    edit: cleanupEdit(refreshed.next.workers[0], 972),
+  });
+  expect(cleanup.reply).toMatchObject({ result: { _tag: 'Committed' } });
+}
+test(
+  'readiness can refresh after authorization without renewing the original authorization',
+  readinessAfterAuthorization,
+);
+
+function cleanupAuthorizationEvidence() {
+  const stopped = stopClaimedLedger();
+  const worker = stopped.next.workers[0];
+  function replaceClaim(claimedAtMs: number, resource: string) {
+    return worker.intents.map((intent) =>
+      Match.value(intent.kind).pipe(
+        Match.when('Stop', () => ({ ...intent, claimedAtMs, resource })),
+        Match.orElse(() => intent),
+      ),
+    );
+  }
+  const receipt = Option.getOrThrow(authorizedLedger().workers[0].readiness);
+  for (const corrupt of [
+    { ...worker, cleanup: Option.none() },
+    { ...worker, intents: replaceClaim(959, 'container-1') },
+    { ...worker, intents: replaceClaim(971, 'foreign') },
+    { ...worker, intents: replaceClaim(1071, 'container-1'), editTimeFloorMs: 1071 },
+    {
+      ...worker,
+      cleanup: Option.some({
+        _tag: 'CleanupPending' as const,
+        requestedAtMs: 959,
+        deadlineMs: 1070,
+      }),
+    },
+    { ...worker, readiness: Option.some(receipt) },
+  ]) {
+    const current = { ...stopped.next, workers: [corrupt] };
+    const result = recoverMigrationLedger(current);
+    const invalid = Option.some(
+      expect.objectContaining({ _tag: 'MigrationLedgerPolicyError', code: 'InvalidData' }),
+    );
+    expect(Result.getFailure(result)).toEqual(invalid);
+  }
+  const c = makeWorkerCase();
+  const stopIntent = makeWorkerIntent('Stop');
+  const outcome = decide(stopped.next, {
+    _tag: 'EditWorker',
+    edit: {
+      _tag: 'RecordOutcome',
+      operationId: worker.operation.operationId,
+      expectedRevision: worker.revision,
+      atMs: 972,
+      reply: {
+        ...c.reply,
+        intentId: stopIntent.intentId,
+        atMs: 972,
+        outcome: {
+          _tag: 'Completed',
+          observation: {
+            ...c.observation,
+            atMs: 972,
+            resources: [{ ...c.resource, running: false }],
+          },
+        },
+      },
+    },
+  });
+  const removed = decide(outcome.next, {
+    _tag: 'EditWorker',
+    edit: claimEdit(outcome.next.workers[0], { ...makeWorkerIntent('Remove'), claimedAtMs: 973 }),
+  });
+  expect(removed.reply).toMatchObject({ result: { _tag: 'Committed' } });
+  const recovered = recoverMigrationLedger(removed.next);
+  expect(Result.isSuccess(recovered)).toBe(true);
+  const shortened = decide(removed.next, {
+    _tag: 'EditWorker',
+    edit: { ...cleanupEdit(removed.next.workers[0], 973), cleanupWindowMs: 0 },
+  });
+  expect(shortened.reply).toMatchObject({ result: { _tag: 'Committed' } });
+  const shortest = recoverMigrationLedger(shortened.next);
+  expect(Result.isSuccess(shortest)).toBe(true);
+}
+test(
+  'cleanup-cleared authorization needs later bounded Stop/Remove custody and survives deadline shortening',
+  cleanupAuthorizationEvidence,
+);
+
+function removedSubpath() {
+  expect(() => import.meta.resolve('@ceirean/engine/migration-ledger')).toThrow();
+}
+test(
+  'ledger API uses the journal-policy entry point without a separate migration-ledger subpath',
+  removedSubpath,
 );

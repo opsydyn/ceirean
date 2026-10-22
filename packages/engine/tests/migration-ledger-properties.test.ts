@@ -6,7 +6,7 @@ import {
   decideMigrationLedger,
   migrationLedgerCodecs,
   recoverMigrationLedger,
-} from '@ceirean/engine/migration-ledger';
+} from '@ceirean/engine/journal-policy';
 import { Arbitrary, Effect, Match, Option, Result, Schema } from 'effect';
 
 import { makeEvidenceCase } from '../../domain/tests/fixtures.ts';

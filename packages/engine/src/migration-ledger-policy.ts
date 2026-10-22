@@ -251,6 +251,71 @@ function validWorkerEvidence(worker: WorkerJournalSnapshot) {
   );
 }
 
+function validAuthorizationSnapshot(worker: WorkerJournalSnapshot) {
+  function authorized(atMs: number) {
+    function* validate() {
+      yield* requirePolicy(atMs >= worker.createdAtMs && atMs < worker.operation.limits.deadlineMs);
+      yield* requirePolicy(Option.isSome(worker.containerId));
+      yield* requirePolicy(
+        !Option.exists(worker.authority.cancelledAtMs, (cancelledAtMs) => cancelledAtMs < atMs),
+      );
+      yield* requirePolicy(
+        !Option.exists(worker.cleanup, (cleanup) => cleanup.requestedAtMs < atMs),
+      );
+      const materializing = worker.intents.filter(canMaterialize);
+      for (const intent of materializing) {
+        yield* requirePolicy(intent.claimedAtMs <= atMs && !unresolved(intent));
+        const completedBeforeAuthorization = Match.value(intent.outcome).pipe(
+          Match.tag('Completed', ({ observation }) => observation.atMs <= atMs),
+          Match.orElse(() => true),
+        );
+        yield* requirePolicy(completedBeforeAuthorization);
+      }
+      function createdContainer(intent: WorkerJournalSnapshot['intents'][number]) {
+        const completed = Match.value(intent.outcome).pipe(
+          Match.tag('Completed', ({ observation }) =>
+            observation.resources.some((resource) =>
+              Option.contains(worker.containerId, resource.containerId),
+            ),
+          ),
+          Match.orElse(() => false),
+        );
+        return Match.value(intent.kind).pipe(
+          Match.when('Create', () => completed),
+          Match.orElse(() => false),
+        );
+      }
+      yield* requirePolicy(materializing.some(createdContainer));
+      const cleanupClaims = worker.intents.filter((intent) => !canMaterialize(intent));
+      function invalidatingClaim(intent: WorkerJournalSnapshot['intents'][number]) {
+        function withinCleanup(cleanup: WorkerCleanup) {
+          // A later cleanup request may shorten the stored deadline to the old claim time.
+          // Its original strict claim-time deadline is historical evidence for Task 4 replay.
+          return (
+            intent.claimedAtMs >= cleanup.requestedAtMs && intent.claimedAtMs <= cleanup.deadlineMs
+          );
+        }
+        const boundedCleanup = Option.exists(worker.cleanup, withinCleanup);
+        const originalCustody = Option.contains(worker.containerId, intent.resource);
+        return intent.claimedAtMs >= atMs && originalCustody && boundedCleanup;
+      }
+      // Claims clear readiness; refreshes can replace it after authorization. Neither
+      // lossy snapshot proves the original receipt: Task 4 must replay retained commands
+      // from empty state and compare both records and events to prove that history.
+      const readinessConsistent = Option.match(worker.readiness, {
+        onNone: () => cleanupClaims.length > 0 && cleanupClaims.every(invalidatingClaim),
+        onSome: () => cleanupClaims.length === 0,
+      });
+      yield* requirePolicy(readinessConsistent);
+    }
+    return Result.gen(validate);
+  }
+  return Option.match(worker.executionAuthorizedAtMs, {
+    onNone: () => Result.succeed(undefined),
+    onSome: authorized,
+  });
+}
+
 function validateState(current: MigrationLedgerState) {
   function* validate() {
     const state = yield* Schema.decodeUnknownResult(MigrationLedgerState, {
@@ -298,6 +363,7 @@ function validateState(current: MigrationLedgerState) {
       );
       yield* requirePolicy(validWorker(worker, parent));
       yield* validWorkerEvidence(worker);
+      yield* validAuthorizationSnapshot(worker);
     }
     yield* payloadSize(state);
     return state;
