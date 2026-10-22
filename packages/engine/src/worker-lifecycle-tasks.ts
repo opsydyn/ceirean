@@ -297,7 +297,10 @@ function mutate(input: MutationInput) {
       onSuccess: decodeWorkerMutationReply,
       onFailure: () =>
         Result.succeed<WorkerMutationReply>({
-          ...snapshot.operation,
+          operationId: snapshot.operation.operationId,
+          identity: snapshot.operation.identity,
+          hostId: snapshot.operation.hostId,
+          daemonId: snapshot.operation.daemonId,
           intentId: input.intent.intentId,
           issuerId: input.issuerId,
           atMs,
@@ -541,7 +544,10 @@ function reconcileOutcome(
   function* persistEvidence() {
     const atMs = yield* Clock.currentTimeMillis;
     const reply: WorkerMutationReply = {
-      ...snapshot.operation,
+      operationId: snapshot.operation.operationId,
+      identity: snapshot.operation.identity,
+      hostId: snapshot.operation.hostId,
+      daemonId: snapshot.operation.daemonId,
       intentId: intent.intentId,
       issuerId: intent.issuerId,
       atMs,

@@ -115,10 +115,17 @@ processes cannot read either database or the controller's credentials.
 On 2026-10-22 the owner approved one atomic migration ledger boundary for run
 state and worker authority: cancellation and generation changes must update the
 run and all affected worker records together. The
-[Plan B draft](../plans/2026-10-22-native-migration-ledger.md) details explicit
+[Plan B](../plans/2026-10-22-native-migration-ledger.md) details explicit
 initialization, single-owner SQLite scope and local recovery qualification.
-Its written plan/bounds/appetite and execution method still require review.
-Planning approval initializes no operational storage and starts no worker.
+Its written plan execution is owner-approved. Native persistence and author
+local restart qualification are implemented; see the
+[measured assessment](../../assessments/native-migration-ledger.md). Tasks 1-4
+have independent review; Task 5 and final whole-branch controller reviews remain
+pending. The owner-approved repair projects only declared mutation reply binding
+fields in two existing lifecycle paths, without relaxing native decoding or
+adding a workflow. This initializes no operational storage and starts no native
+worker. Plan A stays Draft, publication Disabled, with all seven blockers intact;
+Plans C-D still require their separate planning and execution approvals.
 
 Keep current actor intent-before-mutation, immutable container binding,
 revision/current-generation checks and ambiguity handling. Docker names/labels

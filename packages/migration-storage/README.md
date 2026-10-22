@@ -23,7 +23,8 @@ pure policy and compares exact resulting records **and** events. Current snapsho
 alone cannot prove overwritten readiness or shortened cleanup-window evidence.
 Replay never executes effects. Recovery is one bounded consistent read transaction
 returning detached records and unresolved intent IDs, not an actor or lifecycle
-recovery controller. Native-worker/restart execution qualification is separate.
+recovery controller. The test-only reconstruction boundary below qualifies local
+restart behavior; native-worker execution qualification remains separate.
 
 Application limits are 32 runs, 256 workers total/64 per run, 4096 audit events,
 1 MiB UTF-8 per record/command/event and 64 MiB aggregate application payloads.
@@ -72,3 +73,59 @@ acquisition paths retain descriptor/inode checks and refuse partial guard state.
 
 Every native test uses an explicitly owned temporary directory under
 `/private/tmp`. Tests never initialize operational Application Support storage.
+
+## Local Restart Qualification
+
+`tests/recovery.test.ts` has 37 deterministic controls. The fixed
+`tests/restart-child.ts` accepts only the strict synthetic protocol in
+`tests/fixtures.ts`; `tests/readiness.ts` spawns that exact entry with an empty
+environment, `--no-env-file --no-install`, no shell and no consumer commands.
+Readiness is capped at 64 bytes with a three-second live-clock watchdog. Owned
+children are killed and awaited on scope exit. Transaction barriers block only
+inside the fixed child, so SIGKILL interrupts real uncommitted SQLite writes.
+
+All five points (before transaction, after run write, after worker write, after
+event write, after commit before acknowledgement) reacquire the released native
+lock in a fresh process. Live ownership is never displaced. Recovery exposes
+whole pre/post state; replay after lost acknowledgement conflicts without a
+second audit event. Deliberately skipped peer writes and replayed claimed actions
+both failed their controls, then passed after restoration.
+
+`tests/recovery-controller.ts` explicitly reconstructs the existing WorkerLifecycle
+from `readRecovery()` with a new issuer and fake mechanism. Claimed/Unknown
+Create/Start and authorized execution are not replayed. Missing/ambiguous
+materialization evidence remains blocked. Matching immutable evidence resolves
+intents and permits cleanup within the original 960..1000 window, but not at its
+expiry. Persisted retained-evidence paths retain bytes and file identity; fake
+cleanup requests never target them. This is not live filesystem/container cleanup
+acceptance. The owner-approved lifecycle repair only projects declared mutation
+reply binding fields in reconciliation and the unknown-outcome fallback; native
+strict decoding and the single machine are unchanged.
+
+`tests/properties.test.ts` contains one native refinement law: seeds 0/1/163,
+1000 runs each, size 50, maxShrinks 1000, maxDiscards 10000, one 180-second total
+test bound. Each of 3000 primary cases owns fresh storage, executes eight valid
+or refused commands with committed controls, compares real replies/readback to
+the pure policy, mutates returned objects and closes/reopens SQLite. The focused
+final run passed in 110.669 seconds (87003 assertions). It covers cancellation,
+replacement, canonical Options and original consumed limits/cleanup windows.
+The domain validator is unchanged; Effect-native `Arbitrary.checkEffect` owns I/O.
+
+Run qualification from the workspace root with credential-free isolated HOME and
+network denied, except established loopback fixtures in the full suite:
+
+```sh
+bun --no-env-file --no-install test ./packages/migration-storage/tests/recovery.test.ts --timeout 30000
+bun --no-env-file --no-install test ./packages/migration-storage/tests/properties.test.ts
+bun --no-env-file run check
+moon run :typecheck --force --no-actions
+moon run :test --force --no-actions
+```
+
+See the [measured assessment](../../docs/assessments/native-migration-ledger.md)
+for full gates and the separate cached, telemetry-off, credential-free Fallow
+run. Controller-owned independent Task 5 and whole-branch reviews remain pending.
+Local SIGKILL/reopen is not host-loss, power-loss, native worker, Colima/Docker,
+SQLite-filesystem quota or real migration proof. Plan A remains Draft,
+publication Disabled, with all seven blockers unchanged. No operational storage
+has been initialized and Plans C-D are not activated.

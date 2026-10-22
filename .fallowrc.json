@@ -8,6 +8,7 @@
     "packages/infrastructure/alchemy.run.ts",
     "**/tests/**/*.test.ts",
     "apps/github-ingress/tests/*-child.ts",
+    "packages/migration-storage/tests/restart-child.ts",
     "probes/*/src/*-child.ts"
   ],
   "ignorePatterns": ["docs/evidence/**"],

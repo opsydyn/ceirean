@@ -57,10 +57,16 @@ hosting and execution appetite still require review.
       [inspection evidence](assessments/foldkit-replay-profile.md). Publication
       remains Disabled and all seven execution blockers remain present.
 - [x] Draft the [native migration ledger plan](superpowers/plans/2026-10-22-native-migration-ledger.md)
-      after owner approval of one atomic run/worker-authority boundary. Written
-      plan review, proposed bounds/appetite and execution method remain pending.
-- [ ] Approve and execute Plan B, then separately plan measured Colima/Docker
-      readiness and acceptance/manual replay (C-D). No operational storage is initialized.
+      after owner approval of one atomic run/worker-authority boundary; written
+      plan execution and the narrow lifecycle reply repair are now owner-approved.
+- [x] Implement Plan B's native storage and author local restart qualification:
+      [measured evidence](assessments/native-migration-ledger.md), five SIGKILL
+      boundaries, 37 recovery controls and 3000 native refinement cases under the
+      unchanged 180-second law bound. Tasks 1-4 independently reviewed.
+- [ ] Obtain controller-owned fresh Task 5 and whole-branch reviews before final
+      Plan B acceptance. Author qualification is not independent approval.
+- [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
+      replay (C-D). No operational storage is initialized or native worker qualified.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
       orchestrator or repository-specific service.
 - [ ] Separately approve GitHub publication and least-privilege App access, and
