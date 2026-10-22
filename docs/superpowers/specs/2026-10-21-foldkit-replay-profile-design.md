@@ -122,8 +122,11 @@ local restart qualification are implemented; see the
 [measured assessment](../../assessments/native-migration-ledger.md). Tasks 1-4
 have independent review; Task 5 and whole-branch reviews are complete through
 `a94f945` (Approved with one Minor / ReadyToMergeYes, no Critical/Important).
-Scoped re-review of the bounded guarded-argv follow-up remains pending; this is
-not approval of a later head. The owner-approved repair projects only declared mutation reply binding
+Meitner's scoped `a94f945..c3bc287` review is Approved/ReadyToMergeYes, Minor
+closed with no new breakage; controller committed-head gates at `c3bc287` pass
+root check, 9 typechecks and 1161 tests, including the 3000-case native law in
+133730.20ms under 180000ms. These exact-head outcomes are not a review of later
+documentation closure. The owner-approved repair projects only declared mutation reply binding
 fields in two existing lifecycle paths, without relaxing native decoding or
 adding a workflow. This initializes no operational storage and starts no native
 worker. Plan A stays Draft, publication Disabled, with all seven blockers intact;

@@ -125,9 +125,11 @@ moon run :test --force --no-actions
 
 See the [measured assessment](../../docs/assessments/native-migration-ledger.md)
 for full gates and the separate cached, telemetry-off, credential-free Fallow
-run. Independent Task 5 and whole-branch reviews are complete through `a94f945`
-with the same Minor. The guarded-argv follow-up addresses it; controller scoped
-re-review of that follow-up remains pending, not implied by the older reviews.
+run. Independent Task 5 and whole-branch reviews are complete through `a94f945`;
+Meitner's scoped `a94f945..c3bc287` review is Approved/ReadyToMergeYes, Minor
+closed with no new breakage. Controller committed-head gates at `c3bc287` pass
+root check, 9 typechecks and 1161 tests; the native law takes 133730.20ms within
+180000ms. This documentation closure does not claim review of its own commit.
 Local SIGKILL/reopen is not host-loss, power-loss, native worker, Colima/Docker,
 SQLite-filesystem quota or real migration proof. Plan A remains Draft,
 publication Disabled, with all seven blockers unchanged. No operational storage

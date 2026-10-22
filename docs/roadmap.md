@@ -66,8 +66,12 @@ hosting and execution appetite still require review.
 - [x] Obtain controller-owned Task 5 and whole-branch reviews through `a94f945`:
       Approved with one Minor / ReadyToMergeYes, no Critical/Important. Both
       identified the same unguarded direct-child argv error path.
-- [ ] Obtain scoped review of the bounded guarded-argv follow-up before final
-      Plan B disposition. The earlier reviews do not approve the new head.
+- [x] Complete scoped review of `a94f945..c3bc287`: Meitner Approved/ReadyToMergeYes,
+      Minor closed, no new breakage. Controller own gates at `c3bc287` pass root
+      check, 9 typechecks and 9 test tasks / 1161 tests. Native law: all 3000 cases
+      in 133730.20ms within 180000ms. Broad review remains `03828ae..a94f945`,
+      complemented by the scoped review; Markdown closure does not extend those
+      reviewed ranges or authorize merge/push/operational activation.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
 - [ ] Prove profile reuse with the postcode client rather than adding a second

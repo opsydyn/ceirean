@@ -6,8 +6,10 @@ Source base is `56c123e` on `codex/native-migration-ledger-plan`, in the isolate
 independent reviews. Independent Task 5 review of `56c123e..a94f945` was Approved
 with one Minor; fresh whole-branch review of `03828ae..a94f945` returned
 ReadyToMergeYes, no Critical/Important, and the same Minor. Both reviews are
-complete for `a94f945`, not for a later head. The focused fixture follow-up below
-requires the controller's scoped re-review; that review has not happened yet.
+complete for `a94f945`. Meitner's scoped review of `a94f945..c3bc287` is also
+complete: Approved/ReadyToMergeYes, Minor closed, no new breakage. Controller's
+own committed-head gates passed at `c3bc287`, as recorded below. These exact
+reviewed ranges do not imply a new whole-branch review of this bookkeeping commit.
 No merge, push, operational initialization or native mechanism is implied.
 
 ## Boundary And Storage
@@ -152,8 +154,35 @@ Unconfigured architecture/rule-pack diagnostics are not proof of those checks.
   are checked. No production workflow, decoder permissiveness, native property
   budget, 180-second bound or existing qualification proof is changed.
 - Follow-up qualification and commit identity are recorded in the appended
-  `task-5-report.md` handoff. Controller scoped re-review of this follow-up is
-  pending. Neither completed review is represented as reviewing future code.
+  `task-5-report.md` handoff. Meitner's controller-owned scoped review of
+  `a94f945..c3bc287` is Approved/ReadyToMergeYes: Minor closed, no new breakage.
+  Broad review remains `03828ae..a94f945`; neither review is relabelled as a
+  review of future code or this documentation-only closure.
+
+## Controller Committed-Head Closeout
+
+At `c3bc287`, the controller independently completed root check (exit 0,
+zero lint warnings/errors, formatting clean), all 9 typecheck tasks (exit 0,
+4.438s) and all 9 test tasks (exit 0, **1161 pass / 0 fail**, **244.299s**).
+The native package passed **139 tests / 88995 expect calls**, 154.56s.
+Its complete 3000-case native refinement law took **133730.20ms**, with cumulative
+seed times **44535 / 88808 / 133729ms**, within the unchanged single 180000ms
+bound. Seeds, runs, size, shrink/discard budgets and all property sources remain
+unchanged. The known SDK compatibility dependency/warning remains retained.
+
+Raw `controller-final-check.log`, `controller-final-types.log` and
+`controller-final-tests.log` remain under
+`.superpowers/sdd/2026-10-22-native-migration-ledger/`, alongside prior raw
+qualification/failure records; no logs or plan scratch were deleted. The
+controller ledger's verified commits/reviews close the Task 1-4 step checkboxes,
+and its completed scoped review closes Task 5 Step 5c. No remaining local
+qualification/review finding is recorded for the reviewed code through `c3bc287`.
+
+This final closure edits Markdown only. Per controller ruling, unchanged non-Markdown
+source hashes and byte identity to `c3bc287`, those fresh controller check/types/
+tests, plus post-edit root check and diff check qualify the bookkeeping commit.
+Types/tests are not repeated solely for checkboxes. No review of the closure
+commit itself is claimed, and no merge, push or operational activation occurred.
 
 ## Proof Limits
 
@@ -168,5 +197,6 @@ or tamper-proof authenticity; disk quota or maximum throughput; forensic
 execution confinement; broad dependency/security qualification; operational
 initialization, deployment or publication. They were not silently dropped or
 treated as qualified. Plan A remains Draft, publication Disabled, with seven
-blockers unchanged. Plans C-D and the follow-up scoped review remain separate,
-uncompleted gates; reviews at `a94f945` are completed as recorded above.
+blockers unchanged. Plans C-D remain separate, uncompleted gates. Broad review at
+`a94f945`, scoped approval through `c3bc287` and controller verification at
+`c3bc287` are completed only for the explicitly recorded code/ranges above.
