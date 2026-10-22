@@ -56,8 +56,11 @@ hosting and execution appetite still require review.
       bounded offline CLI with property/process tests. See the
       [inspection evidence](assessments/foldkit-replay-profile.md). Publication
       remains Disabled and all seven execution blockers remain present.
-- [ ] Separately plan native migration journal, ownership and recovery (Plan B),
-      then measured Colima/Docker readiness and acceptance/manual replay (C-D).
+- [x] Draft the [native migration ledger plan](superpowers/plans/2026-10-22-native-migration-ledger.md)
+      after owner approval of one atomic run/worker-authority boundary. Written
+      plan review, proposed bounds/appetite and execution method remain pending.
+- [ ] Approve and execute Plan B, then separately plan measured Colima/Docker
+      readiness and acceptance/manual replay (C-D). No operational storage is initialized.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
       orchestrator or repository-specific service.
 - [ ] Separately approve GitHub publication and least-privilege App access, and

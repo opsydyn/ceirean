@@ -112,6 +112,14 @@ the current memory-journal tests are not usable production adapters. Keep Flue
 conversation tables separate from authoritative application records. Worker
 processes cannot read either database or the controller's credentials.
 
+On 2026-10-22 the owner approved one atomic migration ledger boundary for run
+state and worker authority: cancellation and generation changes must update the
+run and all affected worker records together. The
+[Plan B draft](../plans/2026-10-22-native-migration-ledger.md) details explicit
+initialization, single-owner SQLite scope and local recovery qualification.
+Its written plan/bounds/appetite and execution method still require review.
+Planning approval initializes no operational storage and starts no worker.
+
 Keep current actor intent-before-mutation, immutable container binding,
 revision/current-generation checks and ambiguity handling. Docker names/labels
 only aid discovery. No blind retries after a claimed or uncertain mutation.
