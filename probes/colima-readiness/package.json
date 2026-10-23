@@ -1,0 +1,11 @@
+{
+  "name": "@ceirean/colima-readiness-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "effect": "4.0.5"
+  }
+}

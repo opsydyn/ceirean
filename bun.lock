@@ -89,6 +89,12 @@
         "valibot": "1.5.0",
       },
     },
+    "probes/colima-readiness": {
+      "name": "@ceirean/colima-readiness-probe",
+      "dependencies": {
+        "effect": "4.0.5",
+      },
+    },
     "probes/github-admission": {
       "name": "@ceirean/github-admission-probe",
       "dependencies": {
