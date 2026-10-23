@@ -111,7 +111,7 @@ are controller-owned, not claimed here. The original five laws retain seeds
 The bounds law rehashes its mutations to test ceilings independently of digest
 validation. No full repository test/type suite is rerun by the fixer.
 
-## Post-Fix Controller Verification And Open Review Finding
+## Historical Post-Fix Verification And Review Finding
 
 Controller verification on code head `a2c1287` passed root lint/format, all ten
 workspace typechecks and all ten test tasks: **1236 tests, zero failures** in
@@ -122,17 +122,44 @@ logs and explicit successful process exits are retained in the plan scratch.
 
 Whole-branch review covered `0f1b432..8a2a4a7`; scoped fix review covered
 `8a2a4a7..a2c1287`. The latter cleared manifest-content binding, interpreter
-portability and export narrowing, but **ReadyToMerge remains No**: direct typed
+portability and export narrowing, but at that point **ReadyToMerge was No**: direct typed
 `diagnosticOutcome` accepts fractional execution/check timestamps as Pass even
 though the unknown-input summarizer rejects them. Interval ordering checks do
 not substitute for safe-integer schema validation at that entrypoint.
 
-This is a real remaining private-contract defect, not a native execution exploit
-or a passing acceptance gate. The single final fix wave is exhausted; retain the
-counterexample and require a bounded follow-up with execution/check interval
-schema guards and direct typed regression tests before merge. No finding was
-waived because a C2 executor is absent. These closure notes do not extend the
-reviewed code ranges; only Markdown changes follow the measured code head.
+This was a real private-contract defect, not a native execution exploit or a
+passing acceptance gate. The single final fix wave was exhausted, so the
+counterexample was retained for the separately approved bounded follow-up below.
+No finding was waived because a C2 executor is absent. Those historical closure
+notes did not extend the reviewed code ranges; only Markdown followed that code head.
+
+## Typed Interval Follow-Up: Review Closed
+
+The owner approved this bounded follow-up on 2026-10-23, keeping Alchemy parked.
+Code commit `ed98a19` adds the existing ObservationInterval schema check to the
+shared interval predicate. Direct execution and individual check intervals now
+reject fractional, negative, nonfinite and unsafe-integer values as Blocked;
+the unknown-input boundary continues rejecting the same values. Valid zero and
+maximum-safe-integer timeline controls remain accepted, with cleanup-only
+behavior unchanged. No new API, dependency, lint exception or timeout change.
+
+RED recorded 16 fractional typed-path failures; GREEN passed all 97 new numeric
+regression cases. Independent review of `2758ded..ed98a19` cleared remaining I2
+with no Critical, Important or Minor findings. This complements the earlier
+broad/scoped reviews; it does not claim a new broad review of unchanged code.
+
+Controller gates on `ed98a19` passed root lint/format, all ten workspace
+typechecks and all ten test tasks: **1333 tests, zero failures**, 4m24.630s.
+The probe contributes 172 tests / 794 assertions. Existing 21000 probe property
+cases retain their budgets; native ledger refinement retains 3000 cases,
+139703.35ms within 180000ms. Raw RED/GREEN, review and full gate evidence live in
+`.superpowers/sdd/2026-10-23-typed-interval-guard/` in the isolated worktree.
+Initial default-five-second property timeouts and a superseded longer command
+are disclosed there; final verification uses the unchanged 30000ms task budget.
+
+C1 has no remaining review blocker and is ready for the owner's integration
+choice. It is not merged or pushed, and no actual host preflight or native
+activation is authorized. Only closure Markdown follows the verified code head.
 
 ## Fallow Report-Only
 
@@ -178,7 +205,7 @@ semantics are absent. Conservative canonical YAML is a documented acceptance
 limitation, not an instruction to alter real config. Parent-directory and
 executable trust are composition prerequisites, not properties proved by the CLI.
 
-First close the typed-timing review finding above. After C1 acceptance,
+The typed-timing review finding is closed. After the owner's integration choice,
 separately authorize host preflight, then plan/review/implement
 C2 with exact image/browser, daemon, storage/quota, security, network, resource,
 argv/budget and cleanup identities. A further explicit manifest/window approval

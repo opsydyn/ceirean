@@ -248,9 +248,12 @@ authorized host observation, and absent native evidence.
       property budgets. Root check, all ten typechecks and all ten test tasks
       passed on `1b59157`: 1227 tests / zero failures in 4m24.248s. Existing
       migration-storage refinement: 3000 cases, 148083.89ms within 180000ms.
-- [ ] Obtain controller-owned Task 5 and independent whole-branch reviews;
-      fix approved findings with focused
-      RED/GREEN regression tests and rerun affected/full gates before committing.
+- [x] Obtain controller-owned Task 5 and independent whole-branch reviews;
+      findings repaired through `a2c1287`, with the final typed-interval gap
+      closed by owner-approved `ed98a19`. Independent bounded review clears I2
+      with no findings. Controller full gates at `ed98a19`: root check, ten
+      typechecks and ten test tasks / 1333 tests, zero failures, 4m24.630s.
+      Existing property budgets unchanged; actual host/native work not approved.
 - [x] Run Fallow report-only under existing no-network/no-secret/no-telemetry
       conventions; distinguish retained compatibility dependencies from new findings.
       Exit 1: nine new probe static findings plus one retained compatibility

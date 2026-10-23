@@ -84,14 +84,15 @@ hosting and execution appetite still require review.
       root check, all ten workspace typechecks and all ten test tasks pass,
       1227 tests / zero failures in 4m24.248s. Existing migration-storage refinement
       retains 3000 cases / 148083.89ms within 180000ms; no Colima native proof.
-- [ ] Obtain controller-owned Task 5 and independent whole-branch review of C1.
-      Task 5 is approved. Broad review `0f1b432..8a2a4a7` and scoped fix review
-      `8a2a4a7..a2c1287` leave one Important typed-timestamp validation defect;
-      ReadyToMerge remains No. Post-fix controller gates at `a2c1287` pass root
-      check, ten typechecks and ten test tasks / 1236 tests, zero failures.
+- [x] Obtain controller-owned Task 5 and independent whole-branch review of C1.
+      Broad review `0f1b432..8a2a4a7`, scoped fix review `8a2a4a7..a2c1287`
+      and bounded follow-up review `2758ded..ed98a19` now have no open findings.
+      The follow-up closes the typed-timestamp guard gap. Controller gates at
+      `ed98a19` pass root check, ten typechecks and ten test tasks / 1333 tests,
+      zero failures. C1 is ready for owner integration choice, not merged/pushed.
       Fallow report-only exits 1 for two live runtime fixture files plus the
       retained compatibility warning; unused-export findings are resolved.
-      Close the bounded timing guard gap before merge or actual preflight.
+      Actual host preflight and C2 still need separate approval.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
       Plan C's conversational design and
