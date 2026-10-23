@@ -157,9 +157,22 @@ cases retain their budgets; native ledger refinement retains 3000 cases,
 Initial default-five-second property timeouts and a superseded longer command
 are disclosed there; final verification uses the unchanged 30000ms task budget.
 
-C1 has no remaining review blocker and is ready for the owner's integration
-choice. It is not merged or pushed, and no actual host preflight or native
-activation is authorized. Only closure Markdown follows the verified code head.
+C1 has no remaining review blocker. The owner selected local integration;
+main fast-forwarded from `0f1b432` to `2b8811f` on 2026-10-23. Fresh merged-main
+verification passed root lint/format, all ten typechecks and all ten test tasks:
+1333 tests, zero failures, 4m12.276s. Native ledger refinement retained 3000
+cases, 139614.43ms within 180000ms. These are merged-main results, not merely
+the earlier isolated-worktree gates.
+
+The frozen offline package-manager setup attempt failed EPERM under the strict
+credential-denying harness. Verification instead restored only the probe's two
+ignored dependency links to main's already-installed exact Effect/platform-bun
+4.0.5 packages. No dependency bytes, versions, scripts, source or lockfile changed;
+this is not fresh-install qualification. Raw `main-*` logs and `run-main.sh`
+remain in the follow-up scratch. Network and real env-file read denial remained.
+
+Nothing is pushed, and no actual host preflight or native activation is
+authorized. Only closure Markdown follows the verified merged-main tree.
 
 ## Fallow Report-Only
 
@@ -205,8 +218,8 @@ semantics are absent. Conservative canonical YAML is a documented acceptance
 limitation, not an instruction to alter real config. Parent-directory and
 executable trust are composition prerequisites, not properties proved by the CLI.
 
-The typed-timing review finding is closed. After the owner's integration choice,
-separately authorize host preflight, then plan/review/implement
+The typed-timing review finding is closed and C1 is merged locally. Separately
+authorize host preflight, then plan/review/implement
 C2 with exact image/browser, daemon, storage/quota, security, network, resource,
 argv/budget and cleanup identities. A further explicit manifest/window approval
 is required for activation. No actual host preflight, Colima/Docker client,

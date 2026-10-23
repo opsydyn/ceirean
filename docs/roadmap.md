@@ -89,7 +89,9 @@ hosting and execution appetite still require review.
       and bounded follow-up review `2758ded..ed98a19` now have no open findings.
       The follow-up closes the typed-timestamp guard gap. Controller gates at
       `ed98a19` pass root check, ten typechecks and ten test tasks / 1333 tests,
-      zero failures. C1 is ready for owner integration choice, not merged/pushed.
+      zero failures. Owner-approved local main fast-forward to `2b8811f` is
+      complete; merged-main gates pass root check, ten typechecks and ten test
+      tasks / 1333 tests, zero failures, 4m12.276s. No push or native activation.
       Fallow report-only exits 1 for two live runtime fixture files plus the
       retained compatibility warning; unused-export findings are resolved.
       Actual host preflight and C2 still need separate approval.
