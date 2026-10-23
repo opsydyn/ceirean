@@ -94,7 +94,12 @@ hosting and execution appetite still require review.
       tasks / 1333 tests, zero failures, 4m12.276s. No push or native activation.
       Fallow report-only exits 1 for two live runtime fixture files plus the
       retained compatibility warning; unused-export findings are resolved.
-      Actual host preflight and C2 still need separate approval.
+      Actual host preflight was subsequently owner-approved and run against
+      local main `65c1616`: arm64, 24 GiB physical memory, 12 logical CPUs;
+      blocked report / exit 2, dedicated profile absent, clients unverified.
+      See the assessment's first actual host preflight section. No VM/daemon
+      activation or download occurred; C2 implementation and activation remain
+      separate gates.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
       Plan C's conversational design and

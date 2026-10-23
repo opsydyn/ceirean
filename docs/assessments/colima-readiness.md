@@ -226,3 +226,53 @@ is required for activation. No actual host preflight, Colima/Docker client,
 daemon, VM/container, Chromium, consumer repository, operational ledger, model,
 secret, ingress, registry/download or publication was exercised by this task.
 Plan C native readiness and replay acceptance remain incomplete.
+
+## First Actual Host Preflight — 2026-10-23
+
+Following owner approval of the next real-worker milestone, the controller ran
+the existing read-only preflight against the intended dedicated config path.
+This supersedes earlier statements that no actual host preflight has run; those
+statements remain accurate descriptions of C1 implementation qualification.
+
+- Source: local main `65c16169fdbbb21d7da53b6f873ef0e50df37357`.
+- Runner: retained C1 `run.sh`, isolated temporary HOME, empty inherited
+  environment, network denied and real `.env` reads denied; no loopback exception.
+- Invocation: `bun --no-env-file --no-install probes/colima-readiness/src/main.ts
+  preflight --config /Users/alancurrie/.colima/ceirean/colima.yaml`.
+- Result: exit 2, valid blocked report, `nativeReadiness: Unqualified` and
+  `canExecuteReplay: false`.
+
+| Observation                          | Result                                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------------ |
+| Host architecture                    | `arm64`                                                                        |
+| Physical memory                      | 25769803776 bytes (24 GiB)                                                     |
+| Free-page memory snapshot            | 2884190208 bytes (about 2.69 GiB)                                              |
+| Logical CPUs                         | 12                                                                             |
+| Dedicated config                     | Unreadable; separate path inspection found no `ceirean` directory              |
+| Colima / Docker versions             | Both `Invalid`; production candidates remain Unsupported and were not executed |
+| Mounts / agent forwarding / endpoint | Unknown                                                                        |
+
+The free-page snapshot is neither reclaimable memory nor proof of VM headroom.
+Read-only path inspection found Homebrew symlinks targeting Colima `0.8.1` and
+Docker `27.5.1`; target names do not establish executable identity or verified
+runtime versions. No client command or Docker daemon was invoked.
+
+Reported blockers were `CheckBlocked`, `MissingEvidence`, `ActivationUnresolved`
+and `PrerequisiteUnavailable`. The activation draft still lacks Image,
+DaemonIdentity, Commands, Security, Storage, Network, VmAllocation, Budgets,
+Cleanup and Approval. Missing config was not rewritten or manufactured.
+
+### Next Bounded Outcome
+
+Prepare the concrete C2 worker setup and diagnostic implementation plan using
+these observations: a dedicated profile without host sharing, a pinned native
+image/browser, reviewed client commands, enforceable writable-storage and
+network limits, and identity-bound cancellation/cleanup. Resolve VM allocation
+from measured headroom rather than assigning the 8 GiB container ceiling by
+default. Preserve all seven checks in the runbook; do not introduce another
+orchestrator or upgrade Alchemy.
+
+The next execution gate remains approval of exact provisioning/retrieval and,
+after implementation review, a manifest-bound finite activation window. This
+preflight did not start a VM, create a container, initialize operational storage,
+read credentials, call a model, download anything, enable ingress or publish.
