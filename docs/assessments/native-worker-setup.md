@@ -89,3 +89,29 @@ approval. Retrieval, preparation, diagnostics and replay retain separate authori
 gates. No image retrieval, install, upgrade, client/daemon/VM/model use,
 credentials/operational reads or activation occurred in this task. No native
 worker is qualified and replay remains blocked.
+
+## Controller Verification And Independent Closure
+
+The mount fix is `044c0c2`; the compatibility assessment and status documents are
+`fec8ed6`. Controller verification on code head `044c0c2` passed root lint/format
+with zero lint warnings/errors, all ten workspace typecheck tasks, and all ten
+workspace test tasks: **1,338 tests, zero failures, 4m39.990s**. The probe contributes
+177 tests, including 12,000 new primary property cases (four laws, seeds 0/1/163,
+1,000 runs each). Existing native SQLite refinement retained all 3,000 cases in
+157804.68ms under its unchanged 180000ms bound. That SQLite evidence is not VM
+or worker-isolation evidence.
+
+Task 1's independent scoped review approved `a2150bf..044c0c2` without findings.
+The final independent review approved `a2150bf..fec8ed6`, including Task 2's
+explicit blocked/STOP outcome, with no Critical, Important or Minor findings.
+Its recommendation is ReadyToMerge for Tasks 1-2 only, not native readiness or
+activation authority. Task 2 also passed its documentation root check and diff
+check. This closure section follows those reviewed commits and does not extend
+the independently reviewed code range.
+
+The adjacent CLI process test was included to correct the same stale Disabled
+expectation and assert UnknownConfiguration; existing isolation/cleanup assertions
+remain. Review left installed identities, native provisioning/recovery, browser
+and enforcement controls unqualified, direct Lima unselected, and replay/model/
+operational/ingress/publication work outside scope. The consequence is deliberate:
+no live worker or end-to-end repair result is claimed. No merge or push occurred.
