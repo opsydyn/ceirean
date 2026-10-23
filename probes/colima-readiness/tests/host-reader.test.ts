@@ -15,7 +15,7 @@ import {
 } from 'effect';
 import { ChildProcessSpawner } from 'effect/process';
 
-import { makeHostReader } from '../src/host-reader.ts';
+import { makeHostReader, type ReadId, type ToolId } from '../src/host-reader.ts';
 
 const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
 
@@ -236,6 +236,109 @@ async function blockedInputs() {
 test(
   'untrusted parents, unsupported semantics and missing candidates block without fallback',
   blockedInputs,
+);
+
+async function preIoGuards() {
+  function* scenario() {
+    const fs = yield* FileSystem.FileSystem;
+    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+    const base = {
+      colimaRoot: '/private/tmp/synthetic-colima',
+      home: '/private/tmp/synthetic-home',
+      parentDirectoriesTrusted: true,
+      executableCandidates: {
+        Colima: { path: '/synthetic/colima', semantics: 'ClientOnlyVersion' as const },
+        Docker: { path: '/synthetic/docker', semantics: 'ClientOnlyVersion' as const },
+      },
+      now: () => 123,
+    };
+    const cases: ReadonlyArray<{
+      method: 'read' | 'version';
+      request: string;
+      code: string;
+      root?: string;
+      home?: string;
+      trusted?: boolean;
+      executable?: string;
+    }> = [
+      // Unknown IDs must be rejected before any candidate lookup or file access.
+      { method: 'read', request: 'Unknown', code: 'InvalidRequest' },
+      { method: 'read', request: '__proto__', code: 'InvalidRequest' },
+      { method: 'version', request: 'Unknown', code: 'InvalidRequest' },
+      { method: 'version', request: '__proto__', code: 'InvalidRequest' },
+      { method: 'read', request: 'ColimaConfig', root: 'relative', code: 'InvalidConfiguration' },
+      { method: 'read', request: 'ColimaConfig', trusted: false, code: 'UntrustedParents' },
+      { method: 'version', request: 'Colima', trusted: false, code: 'UntrustedParents' },
+      { method: 'version', request: 'Docker', trusted: false, code: 'UntrustedParents' },
+      {
+        method: 'version',
+        request: 'Colima',
+        executable: 'relative',
+        code: 'InvalidConfiguration',
+      },
+      {
+        method: 'version',
+        request: 'Docker',
+        executable: 'relative',
+        code: 'InvalidConfiguration',
+      },
+      { method: 'version', request: 'Colima', home: 'relative', code: 'InvalidConfiguration' },
+      { method: 'version', request: 'Docker', home: 'relative', code: 'InvalidConfiguration' },
+    ];
+    for (const c of cases) {
+      let ioCalls = 0;
+      function unexpectedIo() {
+        ioCalls += 1;
+        const program = Effect.die('Unexpected guard I/O');
+        return program;
+      }
+      const config = {
+        ...base,
+        colimaRoot: c.root ?? base.colimaRoot,
+        home: c.home ?? base.home,
+        parentDirectoriesTrusted: c.trusted ?? true,
+        executableCandidates: {
+          Colima: {
+            ...base.executableCandidates.Colima,
+            path: c.executable ?? base.executableCandidates.Colima.path,
+          },
+          Docker: {
+            ...base.executableCandidates.Docker,
+            path: c.executable ?? base.executableCandidates.Docker.path,
+          },
+        },
+      };
+      const reader = makeHostReader(config);
+      // Deliberate casts exercise the runtime boundary, not TypeScript's finite IDs.
+      const reading = Match.value(c.method).pipe(
+        Match.when('read', () => reader.readRegular(c.request as ReadId)),
+        Match.orElse(() => reader.runVersion(c.request as ToolId)),
+      );
+      const result = yield* reading.pipe(
+        Effect.result,
+        Effect.provideService(FileSystem.FileSystem, {
+          ...fs,
+          stat: unexpectedIo,
+          open: unexpectedIo,
+        }),
+        Effect.provideService(ChildProcessSpawner.ChildProcessSpawner, {
+          ...spawner,
+          spawn: unexpectedIo,
+        }),
+      );
+      expect(result).toMatchObject({
+        failure: { _tag: 'HostReadError', code: c.code, truncated: false },
+      });
+      expect(ioCalls).toBe(0);
+    }
+  }
+  const workflow = Effect.gen(scenario);
+  const provided = Effect.provide(workflow, BunServices.layer);
+  await Effect.runPromise(provided);
+}
+test(
+  'pre-I/O guards reject runtime IDs, relative paths and untrusted version parents',
+  preIoGuards,
 );
 
 async function versionEnvironment() {
