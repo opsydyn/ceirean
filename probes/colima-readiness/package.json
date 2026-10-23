@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "cli": "bun --no-env-file --no-install src/main.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
