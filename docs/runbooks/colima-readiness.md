@@ -57,6 +57,14 @@ finite architecture and `autoActivate` fields only. Input must round-trip throug
 Bun's YAML serializer after whitespace removal. Comments, alternate quoting or
 syntax, directives, duplicate keys, anchors, aliases, tags, merge forms and
 unknown fields are unsupported. Absent mounts/forwarding are Unknown, not disabled.
+An explicit nonempty mounts array is Enabled and blocks as UnsafeConfiguration.
+An empty mounts array is Unknown and blocks as UnknownConfiguration: `mounts: []`
+does not establish that installed Colima defaults disable sharing. Omitted mounts
+also remain Unknown; `mounts: null` is outside this narrow accepted dialect and
+is Invalid. No input mounts array can produce Disabled without a separately
+reviewed, version-specific effective configuration. Client version text alone
+does not qualify those semantics. Explicit `forwardAgent: false` continues to
+project forwarding as Disabled, without granting native readiness or replay.
 Do not rewrite real config merely to satisfy this dialect. Unsupported or
 unreadable config blocks evidence; successful parsing is not installed-version
 semantic qualification or proof that restrictions are effective.

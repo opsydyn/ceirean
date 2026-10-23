@@ -183,9 +183,9 @@ function safeConfig(
   host: PreflightReport['host'],
   blockers: Set<Reason>,
 ): PreflightReport['config'] {
-  const incomplete = [config.mounts, config.forwardAgent, config.runtime].some(
-    (v) => v === undefined,
-  );
+  const incomplete =
+    (config.mounts?.length ?? 0) === 0 ||
+    [config.forwardAgent, config.runtime].some((v) => v === undefined);
   const unsafe = [
     (config.mounts?.length ?? 0) > 0,
     config.forwardAgent === true,
@@ -199,7 +199,7 @@ function safeConfig(
     Match.when(undefined, () => 'Unknown' as const),
     Match.when(
       (m) => m.length === 0,
-      () => 'Disabled' as const,
+      () => 'Unknown' as const,
     ),
     Match.orElse(() => 'Enabled' as const),
   );

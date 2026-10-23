@@ -1,14 +1,15 @@
 import { expect, test } from 'bun:test';
 
 import { BunServices } from '@effect/platform-bun';
-import { Effect, Match, Schema } from 'effect';
+import { YAML } from 'bun';
+import { Arbitrary, Effect, Match, Schema } from 'effect';
 
 import { PreflightReport } from '../src/contracts.ts';
 import { HostReadError, makeHostReader } from '../src/host-reader.ts';
 import { inspectHost } from '../src/preflight.ts';
 import type { InspectRequest } from '../src/preflight.ts';
 
-const safeYaml = [
+const conservativeYaml = [
   'runtime: docker',
   'mounts: []',
   'forwardAgent: false',
@@ -39,7 +40,7 @@ function observation(text: string) {
     observedAtMs: 123,
   };
 }
-function reader(text = safeYaml) {
+function reader(text = conservativeYaml) {
   function version(tool: 'Colima' | 'Docker') {
     const text = Match.value(tool).pipe(
       Match.when('Colima', () => 'colima version 0.9.1\n'),
@@ -61,7 +62,7 @@ async function inspect(r = reader(), input: InspectRequest = request) {
   return report;
 }
 
-async function safeProjection() {
+async function conservativeProjection() {
   const report = await inspect();
   expect(report.host).toEqual({
     architecture: { _tag: 'Known', value: 'arm64' },
@@ -75,7 +76,7 @@ async function safeProjection() {
   ]);
   expect(report.config).toEqual({
     status: 'Read',
-    mounts: 'Disabled',
+    mounts: 'Unknown',
     forwardAgent: 'Disabled',
     proposedEndpoint: {
       _tag: 'Proposed',
@@ -100,18 +101,120 @@ async function safeProjection() {
     ],
   });
   expect(report.blockers).toContain('CheckBlocked');
+  expect(report.blockers).toContain('UnknownConfiguration');
   expect(report).not.toHaveProperty('activationManifest');
 }
-test('projects safe observations without granting native or activation authority', safeProjection);
+test(
+  'projects conservative observations without granting native or activation authority',
+  conservativeProjection,
+);
+
+async function emptyMountDefaults() {
+  const report = await inspect(reader(conservativeYaml));
+  expect(report.config.mounts).not.toBe('Disabled');
+  expect(
+    report.blockers.some((reason) =>
+      ['UnknownConfiguration', 'UnsafeConfiguration'].includes(reason),
+    ),
+  ).toBe(true);
+  expect(report.nativeReadiness).toBe('Unqualified');
+  expect(report.canExecuteReplay).toBe(false);
+}
+test('empty mounts cannot disable installed Colima defaults', emptyMountDefaults);
+
+const mountCases = Arbitrary.schema(
+  Schema.Struct({
+    count: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 64 })),
+    writable: Schema.Boolean,
+    colima: Schema.Literals([
+      'colima version 0.9.1\n',
+      'colima version 0.0.0\n',
+      'colima version 99.0.0\n',
+      'Docker version 28.0.1, build abc123\n',
+      'SYNTHETIC_PRIVATE_VERSION',
+    ]),
+    docker: Schema.Literals([
+      'Docker version 28.0.1, build abc123\n',
+      'Docker version 0.0.0, build abc123\n',
+      'colima version 0.9.1\n',
+      'SYNTHETIC_PRIVATE_VERSION',
+    ]),
+  }),
+);
+
+type MountCase = typeof mountCases extends Arbitrary.Arbitrary<infer A> ? A : never;
+const projections = {
+  empty: { status: 'Read', mounts: 'Unknown', forwardAgent: 'Disabled' },
+  absent: { status: 'Read', mounts: 'Unknown', forwardAgent: 'Disabled' },
+  null: { status: 'Invalid', mounts: 'Unknown', forwardAgent: 'Unknown' },
+  nonempty: { status: 'Read', mounts: 'Enabled', forwardAgent: 'Disabled' },
+} as const;
+const mountBlockers = {
+  empty: 'UnknownConfiguration',
+  absent: 'UnknownConfiguration',
+  null: 'InvalidConfiguration',
+  nonempty: 'UnsafeConfiguration',
+} as const;
+
+for (const kind of ['empty', 'absent', 'null', 'nonempty'] as const) {
+  async function checkCase({ count, writable, colima, docker }: MountCase) {
+    const mounts = Match.value(kind).pipe(
+      Match.when('absent', () => ({})),
+      Match.when('empty', () => ({ mounts: [] })),
+      Match.when('null', () => ({ mounts: null })),
+      Match.when('nonempty', () => ({
+        mounts: Array.from({ length: count }, (_, index) => ({
+          location: `/SYNTHETIC_PRIVATE_HOME/${index}`,
+          mountPoint: `/SYNTHETIC_PRIVATE_MOUNT/${index}`,
+          writable,
+        })),
+      })),
+      Match.exhaustive,
+    );
+    const yaml = YAML.stringify({ runtime: 'docker', ...mounts, forwardAgent: false }, null, 2);
+    function version(tool: 'Colima' | 'Docker') {
+      const text = Match.value(tool).pipe(
+        Match.when('Colima', () => colima),
+        Match.when('Docker', () => docker),
+        Match.exhaustive,
+      );
+      const program = Effect.succeed(observation(text));
+      return program;
+    }
+    const report = await inspect({ ...reader(yaml), runVersion: version });
+    expect(report.config).toMatchObject(projections[kind]);
+    expect(report.config.mounts).not.toBe('Disabled');
+    expect(report.blockers).toContain(mountBlockers[kind]);
+    expect(report.nativeReadiness).toBe('Unqualified');
+    expect(report.canExecuteReplay).toBe(false);
+    expect(encode(report)).not.toContain('SYNTHETIC_PRIVATE');
+    return true;
+  }
+  async function runLaw() {
+    function* checkSeeds() {
+      for (const seed of [0, 1, 163]) {
+        const result = yield* Arbitrary.checkEffect(
+          mountCases,
+          (input) => Effect.promise(() => checkCase(input)),
+          { seed, runs: 1000, size: 50, maxShrinks: 1000, maxDiscards: 10000 },
+        );
+        expect(result).toMatchObject({ _tag: 'Passed', runs: 1000 });
+      }
+    }
+    const program = Effect.gen(checkSeeds);
+    await Effect.runPromise(program);
+  }
+  test(`law: ${kind} mounts cannot prove disabled sharing (seeds 0/1/163, 1000 runs each)`, runLaw);
+}
 
 async function hostileConfig() {
   for (const yaml of [
-    `${safeYaml}provision:\n  - script: SYNTHETIC_PRIVATE_HOOK\n`,
-    `${safeYaml}env:\n  TOKEN: SYNTHETIC_PRIVATE_SECRET\n`,
-    `${safeYaml}dockerHost: tcp://SYNTHETIC_PRIVATE_ENDPOINT\n`,
-    `${safeYaml}version: SYNTHETIC_PRIVATE_VERSION\n`,
-    safeYaml.replace('docker', 'containerd'),
-    `${safeYaml}mounts: []\n`,
+    `${conservativeYaml}provision:\n  - script: SYNTHETIC_PRIVATE_HOOK\n`,
+    `${conservativeYaml}env:\n  TOKEN: SYNTHETIC_PRIVATE_SECRET\n`,
+    `${conservativeYaml}dockerHost: tcp://SYNTHETIC_PRIVATE_ENDPOINT\n`,
+    `${conservativeYaml}version: SYNTHETIC_PRIVATE_VERSION\n`,
+    conservativeYaml.replace('docker', 'containerd'),
+    `${conservativeYaml}mounts: []\n`,
     'runtime: docker\nmounts: &mounts []\nforwardAgent: false\n',
     'runtime: docker\nmounts: []\nforwardAgent: "false"\n',
     '[]',
@@ -133,7 +236,7 @@ test(
 );
 
 async function unsafeConfig() {
-  const mounted = safeYaml.replace(
+  const mounted = conservativeYaml.replace(
     'mounts: []',
     'mounts:\n  - location: /SYNTHETIC_PRIVATE_HOME\n    writable: true',
   );
@@ -221,7 +324,7 @@ async function requestGuards() {
   let calls = 0;
   function read() {
     calls += 1;
-    const program = Effect.succeed(observation(safeYaml));
+    const program = Effect.succeed(observation(conservativeYaml));
     return program;
   }
   const r = { readRegular: read, runVersion: read };
@@ -286,7 +389,7 @@ async function unresolvedResources() {
   expect(report.blockers).toContain('LimitExceeded');
   expect(report.activationDraft.missing).toContain('VmAllocation');
   expect(report.activationDraft.missing).toContain('Storage');
-  const storage = await inspect(reader(`${safeYaml}storage: { quota: 20 }\n`));
+  const storage = await inspect(reader(`${conservativeYaml}storage: { quota: 20 }\n`));
   expect(storage.config.status).toBe('Unsupported');
 }
 test(
@@ -306,13 +409,13 @@ test('zero available memory is measured exhaustion, not an unknown snapshot', ze
 
 async function observationIntegrity() {
   for (const text of [
-    `${safeYaml}mounts:\n  - location: /SYNTHETIC_PRIVATE\n    writable: true\n    writable: false\n`,
-    `${safeYaml}mounts:\n  - location: /SYNTHETIC_PRIVATE\n    hook: SYNTHETIC_PRIVATE\n`,
-    `${safeYaml}mounts: null\n`,
-    `${safeYaml}forwardAgent: true\nforwardAgent: false\n`,
-    `${safeYaml}runtime: docker\n`,
+    `${conservativeYaml}mounts:\n  - location: /SYNTHETIC_PRIVATE\n    writable: true\n    writable: false\n`,
+    `${conservativeYaml}mounts:\n  - location: /SYNTHETIC_PRIVATE\n    hook: SYNTHETIC_PRIVATE\n`,
+    `${conservativeYaml}mounts: null\n`,
+    `${conservativeYaml}forwardAgent: true\nforwardAgent: false\n`,
+    `${conservativeYaml}runtime: docker\n`,
     'runtime: docker\nmounts: &a [*a]\nforwardAgent: false\n',
-    `${safeYaml}# SYNTHETIC_PRIVATE_COMMENT\n`,
+    `${conservativeYaml}# SYNTHETIC_PRIVATE_COMMENT\n`,
   ]) {
     const report = await inspect(reader(text));
     expect(['Invalid', 'Unsupported']).toContain(report.config.status);
@@ -321,7 +424,8 @@ async function observationIntegrity() {
   }
   const mismatch = {
     ...reader(),
-    readRegular: () => Effect.succeed({ ...observation(safeYaml), bytes: new Uint8Array() }),
+    readRegular: () =>
+      Effect.succeed({ ...observation(conservativeYaml), bytes: new Uint8Array() }),
   };
   const report = await inspect(mismatch);
   expect(report.config.status).not.toBe('Read');
@@ -340,7 +444,7 @@ async function requestSnapshot() {
   const input = { ...request };
   function mutate() {
     input.colimaRoot = '/SYNTHETIC_PRIVATE_CHANGED';
-    return observation(safeYaml);
+    return observation(conservativeYaml);
   }
   const r = { ...reader(), readRegular: () => Effect.sync(mutate) };
   const report = await inspect(r, input);

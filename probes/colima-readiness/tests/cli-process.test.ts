@@ -104,7 +104,7 @@ async function syntheticProcess() {
     nativeReadiness: 'Unqualified',
     canExecuteReplay: false,
     config: {
-      mounts: 'Disabled',
+      mounts: 'Unknown',
       proposedEndpoint: { endpoint: `unix://${root}/ceirean/docker.sock` },
     },
     versions: [
@@ -112,6 +112,7 @@ async function syntheticProcess() {
       { tool: 'Docker', status: 'Invalid' },
     ],
   });
+  expect(decodeReport(result.stdout).blockers).toContain('UnknownConfiguration');
   expect(result.stdout).not.toContain('PRIVATE_SENTINEL');
   expect(await Effect.runPromise(fs.readFileString(`${root}/ceirean/colima.yaml`))).toBe(before);
   const home = await Effect.runPromise(fs.readFileString(`${root}/home-proof`));
