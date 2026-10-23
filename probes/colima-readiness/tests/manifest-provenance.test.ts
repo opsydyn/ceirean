@@ -59,6 +59,109 @@ function missingWindow() {
 test('diagnostics without approval and actual observation timing fail closed', missingWindow);
 
 type Fixture = ReturnType<typeof diagnosticFixture>;
+function typedOutcome(f: Fixture) {
+  return diagnosticOutcome(
+    f.manifest,
+    f.invocationId,
+    f.evidence,
+    f.cleanup,
+    f.approval,
+    f.execution,
+  );
+}
+
+function safeIntegerIntervals() {
+  const original = diagnosticFixture();
+  for (const offset of [-100, 0, Number.MAX_SAFE_INTEGER - original.approval.deadlineMs]) {
+    const approval = {
+      ...original.approval,
+      startMs: original.approval.startMs + offset,
+      deadlineMs: original.approval.deadlineMs + offset,
+    };
+    const f = {
+      ...original,
+      approval,
+      execution: {
+        startedAtMs: original.execution.startedAtMs + offset,
+        completedAtMs: original.execution.completedAtMs + offset,
+      },
+      evidence: original.evidence.map((e) => ({
+        ...e,
+        approval,
+        observed: {
+          startedAtMs: e.observed.startedAtMs + offset,
+          completedAtMs: e.observed.completedAtMs + offset,
+        },
+      })),
+      cleanup: {
+        ...original.cleanup,
+        approval,
+        observed: {
+          startedAtMs: original.cleanup.observed.startedAtMs + offset,
+          completedAtMs: approval.deadlineMs,
+        },
+      },
+    };
+    expect(typedOutcome(f)).toBe('Pass');
+    expect(summarize(f).pipe(Result.getOrThrow).outcome).toBe('Pass');
+  }
+}
+test(
+  'typed intervals accept nonnegative safe-integer bounds including zero and maximum',
+  safeIntegerIntervals,
+);
+
+for (const [field, fractional] of [
+  ['startedAtMs', 200.5],
+  ['completedAtMs', 1099.5],
+] as const) {
+  for (const [label, value] of [
+    ['fractional', fractional],
+    ['negative', -1],
+    ['NaN', Number.NaN],
+    ['positive infinity', Number.POSITIVE_INFINITY],
+    ['negative infinity', Number.NEGATIVE_INFINITY],
+    ['unsafe integer', Number.MAX_SAFE_INTEGER + 1],
+  ] as const) {
+    function invalidExecutionInterval() {
+      const original = diagnosticFixture();
+      const f = {
+        ...original,
+        execution: { ...original.execution, [field]: value },
+        evidence: original.evidence.map((e) => ({
+          ...e,
+          observed: { startedAtMs: 300, completedAtMs: 1000 },
+        })),
+      };
+      rejects(summarize(f));
+      expect(typedOutcome(f)).toBe('Blocked');
+    }
+    test(
+      `typed execution ${field} rejects ${label} and agrees with unknown input`,
+      invalidExecutionInterval,
+    );
+
+    for (let index = 0; index < 7; index++) {
+      function invalidCheckInterval() {
+        const original = diagnosticFixture();
+        const f = {
+          ...original,
+          evidence: original.evidence.map((e, i) => ({
+            ...e,
+            observed: { ...e.observed, ...(i === index && { [field]: value }) },
+          })),
+        };
+        rejects(summarize(f));
+        expect(typedOutcome(f)).toBe('Blocked');
+      }
+      test(
+        `typed check ${index} ${field} rejects ${label} and agrees with unknown input`,
+        invalidCheckInterval,
+      );
+    }
+  }
+}
+
 function reversedTypedEvidence() {
   const f = diagnosticFixture();
   const evidence = f.evidence.map((e) => ({

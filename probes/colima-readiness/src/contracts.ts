@@ -361,6 +361,7 @@ const sameIdentity = Schema.toEquivalence(DiagnosticIdentity);
 const sameApproval = Schema.toEquivalence(ActivationApproval);
 function within(observed: ObservationInterval, startMs: number, deadlineMs: number) {
   return [
+    Schema.is(ObservationInterval)(observed),
     observed.startedAtMs >= startMs,
     observed.startedAtMs <= observed.completedAtMs,
     observed.completedAtMs <= deadlineMs,
