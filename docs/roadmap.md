@@ -102,6 +102,12 @@ hosting and execution appetite still require review.
       separate gates.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
+      The [native worker readiness plan](superpowers/plans/2026-10-23-native-worker-readiness.md)
+      now records the actual host facts and a zero-sharing compatibility gate:
+      installed Colima 0.8.1 interprets empty mounts as default host sharing,
+      unlike C1's current projection. The plan proposes a regression fix first,
+      then resolves the setup before an executor is built. No installation,
+      provisioning, isolation-policy change or diagnostic activation is approved.
       Plan C's conversational design and
       [written readiness spec](superpowers/specs/2026-10-22-colima-readiness-design.md)
       are owner-approved. The [C1 foundation plan](superpowers/plans/2026-10-22-colima-readiness.md)
