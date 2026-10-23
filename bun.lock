@@ -92,6 +92,7 @@
     "probes/colima-readiness": {
       "name": "@ceirean/colima-readiness-probe",
       "dependencies": {
+        "@effect/platform-bun": "4.0.5",
         "effect": "4.0.5",
       },
     },
@@ -167,6 +168,8 @@
     "@aws/lambda-invoke-store": ["@aws/lambda-invoke-store@0.3.0", "", {}, "sha512-sl4Bm6yiMNYrZKkqqDFWN0UfnWhlS8ivKxrYl+6t0gCLrqr8y3B2IqZZbFRkfaVVp7C/baApyh71P+LeE1A2sQ=="],
 
     "@babel/runtime": ["@babel/runtime@7.29.10", "", {}, "sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA=="],
+
+    "@ceirean/colima-readiness-probe": ["@ceirean/colima-readiness-probe@workspace:probes/colima-readiness"],
 
     "@ceirean/compatibility-probe": ["@ceirean/compatibility-probe@workspace:probes/bun-effect-flue"],
 
