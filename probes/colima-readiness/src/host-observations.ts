@@ -74,14 +74,24 @@ function integer(text: string | undefined, minimum = 1) {
 }
 
 function freeMemory(text: string | undefined) {
-  const page = /^Mach Virtual Memory Statistics: \(page size of (\d+) bytes\)\r?\n/.exec(
-    text ?? '',
+  const lines = (text ?? '').split(/\r?\n/);
+  // Count record-shaped lines before parsing, so even a malformed duplicate
+  // cannot be hidden by an earlier valid match.
+  const headers = lines.filter((line) =>
+    /^Mach\s+Virtual\s+Memory\s+Statistics\b/.test(line.trimStart()),
+  );
+  const records = lines.filter((line) => /^Pages\s+free\b/.test(line.trimStart()));
+  const page = /^Mach Virtual Memory Statistics: \(page size of (\d+) bytes\)$/.exec(
+    headers[0] ?? '',
   )?.[1];
-  const free = /^Pages free:\s+(\d+)\.\r?$/m.exec(text ?? '')?.[1];
+  const free = /^Pages free:[ \t]+(\d+)\.$/.exec(records[0] ?? '')?.[1];
   const count = integer(free ?? '', 0);
   const size = integer(page ?? '');
   const bytes = (count ?? NaN) * (size ?? NaN);
-  return Match.value(Number.isSafeInteger(bytes) && bytes >= 0).pipe(
+  const unambiguous = [headers.length === 1, records.length === 1, lines[0] === headers[0]].every(
+    Boolean,
+  );
+  return Match.value(unambiguous && Number.isSafeInteger(bytes) && bytes >= 0).pipe(
     Match.when(true, () => bytes),
     Match.orElse(() => undefined),
   );

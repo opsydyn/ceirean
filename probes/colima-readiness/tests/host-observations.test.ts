@@ -114,6 +114,72 @@ test(
   unavailableObservations,
 );
 
+async function freePageRecords(text: string, expected: number | undefined) {
+  function* scenario() {
+    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+    const outputs = ['Darwin\n', 'arm64\n', '17179869184\n', '8\n', text];
+    function spawn() {
+      const program = Effect.succeed({
+        all: Stream.make(new TextEncoder().encode(outputs.shift() ?? '')),
+        exitCode: Effect.succeed(0),
+      } as unknown as ChildProcessSpawner.ChildProcessHandle);
+      return program;
+    }
+    const collecting = collectHostObservations('/private/tmp/synthetic-home');
+    const host = yield* Effect.provideService(collecting, ChildProcessSpawner.ChildProcessSpawner, {
+      ...spawner,
+      spawn,
+    });
+    expect(host).toEqual({
+      architecture: 'arm64',
+      totalMemoryBytes: 17179869184,
+      cpuCount: 8,
+      freeMemoryBytes: expected,
+    });
+  }
+  const program = Effect.gen(scenario);
+  const provided = Effect.provide(program, BunServices.layer);
+  await Effect.runPromise(provided);
+}
+
+const vmHeader = ['Mach Virtual Memory Statistics:', '(page size of 16384 bytes)'].join(' ');
+const vmCases: ReadonlyArray<readonly [string, string, number | undefined]> = [
+  ['single record', `${vmHeader}\nPages free: 100.\nPages active: 200.\n`, 1638400],
+  ['zero free pages with CRLF', `${vmHeader}\r\nPages free: 0.\r\n`, 0],
+  ['conflicting free records', `${vmHeader}\nPages free: 100.\nPages free: 200.\n`, undefined],
+  ['identical free records', `${vmHeader}\nPages free: 100.\nPages free: 100.\n`, undefined],
+  [
+    'conflicting headers',
+    `${vmHeader}\nMach Virtual Memory Statistics: (page size of 4096 bytes)\nPages free: 100.\n`,
+    undefined,
+  ],
+  ['identical headers', `${vmHeader}\n${vmHeader}\nPages free: 100.\n`, undefined],
+  [
+    'malformed extra header',
+    `${vmHeader}\nMach Virtual Memory Statistics: broken\nPages free: 100.\n`,
+    undefined,
+  ],
+  ['malformed extra free record', `${vmHeader}\nPages free: 100.\nPages free: broken\n`, undefined],
+  ['indented extra free record', `${vmHeader}\nPages free: 100.\n Pages free: 200.\n`, undefined],
+  ['missing header', 'Pages free: 100.\n', undefined],
+  ['missing free record', `${vmHeader}\nPages active: 100.\n`, undefined],
+  [
+    'malformed header',
+    'Mach Virtual Memory Statistics: (page size of nope bytes)\nPages free: 100.\n',
+    undefined,
+  ],
+  ['malformed free record', `${vmHeader}\nPages free: 1.5.\n`, undefined],
+  ['split free record', `${vmHeader}\nPages free:\n100.\n`, undefined],
+  [
+    'unsupported zero page size',
+    'Mach Virtual Memory Statistics: (page size of 0 bytes)\nPages free: 100.\n',
+    undefined,
+  ],
+  ['overflowing free count', `${vmHeader}\nPages free: 999999999999999999999.\n`, undefined],
+];
+for (const [name, text, expected] of vmCases)
+  test(`vm_stat requires unambiguous evidence: ${name}`, () => freePageRecords(text, expected));
+
 async function boundedObservationLifetime() {
   function* scenario() {
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
