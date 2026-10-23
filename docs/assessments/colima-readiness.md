@@ -111,6 +111,29 @@ are controller-owned, not claimed here. The original five laws retain seeds
 The bounds law rehashes its mutations to test ceilings independently of digest
 validation. No full repository test/type suite is rerun by the fixer.
 
+## Post-Fix Controller Verification And Open Review Finding
+
+Controller verification on code head `a2c1287` passed root lint/format, all ten
+workspace typechecks and all ten test tasks: **1236 tests, zero failures** in
+4m49.151s. The private probe contributes 75 tests / 596 assertions and 21000
+primary property cases. Existing native ledger refinement retained 3000 cases,
+155003.26ms within the unchanged 180000ms bound. Raw `controller-postfix-*`
+logs and explicit successful process exits are retained in the plan scratch.
+
+Whole-branch review covered `0f1b432..8a2a4a7`; scoped fix review covered
+`8a2a4a7..a2c1287`. The latter cleared manifest-content binding, interpreter
+portability and export narrowing, but **ReadyToMerge remains No**: direct typed
+`diagnosticOutcome` accepts fractional execution/check timestamps as Pass even
+though the unknown-input summarizer rejects them. Interval ordering checks do
+not substitute for safe-integer schema validation at that entrypoint.
+
+This is a real remaining private-contract defect, not a native execution exploit
+or a passing acceptance gate. The single final fix wave is exhausted; retain the
+counterexample and require a bounded follow-up with execution/check interval
+schema guards and direct typed regression tests before merge. No finding was
+waived because a C2 executor is absent. These closure notes do not extend the
+reviewed code ranges; only Markdown changes follow the measured code head.
+
 ## Fallow Report-Only
 
 The existing cached Fallow 3.34.1 native binary ran under the same restricted
@@ -155,7 +178,8 @@ semantics are absent. Conservative canonical YAML is a documented acceptance
 limitation, not an instruction to alter real config. Parent-directory and
 executable trust are composition prerequisites, not properties proved by the CLI.
 
-After C1 review, separately authorize host preflight, then plan/review/implement
+First close the typed-timing review finding above. After C1 acceptance,
+separately authorize host preflight, then plan/review/implement
 C2 with exact image/browser, daemon, storage/quota, security, network, resource,
 argv/budget and cleanup identities. A further explicit manifest/window approval
 is required for activation. No actual host preflight, Colima/Docker client,
