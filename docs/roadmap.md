@@ -72,15 +72,32 @@ hosting and execution appetite still require review.
       in 133730.20ms within 180000ms. Broad review remains `03828ae..a94f945`,
       complemented by the scoped review; Markdown closure does not extend those
       reviewed ranges or authorize merge/push/operational activation.
+- [x] Implement the owner-approved C1 offline Colima readiness foundation
+      (implementation/subagent method approved 2026-10-23), including strict private
+      contracts, bounded readers, safe projection and preflight-only CLI.
+      Tasks 1-4 independently reviewed through `2e99143`; deferred pre-I/O guard
+      coverage committed as `1b59157`, with 66 focused tests / 525 assertions,
+      focused types and root check passing. See the
+      [assessment](assessments/colima-readiness.md) and
+      [runbook](runbooks/colima-readiness.md). No real host preflight was run.
+- [x] Complete controller final repository gates on C1 code head `1b59157`:
+      root check, all ten workspace typechecks and all ten test tasks pass,
+      1227 tests / zero failures in 4m24.248s. Existing migration-storage refinement
+      retains 3000 cases / 148083.89ms within 180000ms; no Colima native proof.
+- [ ] Obtain controller-owned Task 5 and independent whole-branch review of C1.
+      Fallow report-only
+      exits 1 with nine new probe static findings plus the retained compatibility
+      dependency warning; no automatic cleanup is approved.
 - [ ] Separately plan measured Colima/Docker readiness and acceptance/manual
       replay (C-D). No operational storage is initialized or native worker qualified.
       Plan C's conversational design and
       [written readiness spec](superpowers/specs/2026-10-22-colima-readiness-design.md)
       are owner-approved. The [C1 foundation plan](superpowers/plans/2026-10-22-colima-readiness.md)
-      awaits review and execution-method selection; native C2 implementation
-      requires measured preflight facts and a separate plan. Read-only preflight and
-      separately approved native diagnostics have distinct activation boundaries;
-      nothing has been started by this design work.
+      is implementation-approved and delivered offline; native C2 implementation
+      requires separately authorized measured preflight facts and a separate plan.
+      Read-only preflight and separately approved native diagnostics have distinct
+      activation boundaries;
+      no native diagnostics have been started or qualified by C1.
 - [ ] Prove profile reuse with the postcode client rather than adding a second
       orchestrator or repository-specific service.
 - [ ] Separately approve GitHub publication and least-privilege App access, and

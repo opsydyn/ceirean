@@ -10,6 +10,14 @@
 
 **Spec:** [Approved readiness design](../specs/2026-10-22-colima-readiness-design.md), written-spec approval received 2026-10-22.
 
+**Implementation approval:** Owner separately approved C1 on 2026-10-23 and
+selected subagent execution. Tasks 1-4 are independently reviewed through
+`2e99143`; Task 5 guard tests are committed at `1b59157`. Controller full gates
+passed on that code head (1227 tests, zero failures; ten typecheck/test tasks).
+Task 5 review and whole-branch review remain pending and are not implied by
+checked delivery items.
+See the [assessment](../../assessments/colima-readiness.md) for measured results.
+
 ## Scope And Handoff
 
 This is Plan C1, a standalone first tranche of Plan C. It implements Stage 1 and
@@ -106,18 +114,18 @@ Export pure `decodeManifest(input: unknown)`,
 `summarizeDiagnostics(manifest, invocationId, evidence, cleanup)`; use inferred
 Effect Result types, strict decoding and no native effects.
 
-- [ ] Write failing examples: reject unknown fields/duplicate IDs/cross-invocation
+- [x] Write failing examples: reject unknown fields/duplicate IDs/cross-invocation
       evidence, deadline beyond 1200000ms, negative/nonfinite budgets, missing cleanup
       reserve, output above 10485760 bytes, retained total above 134217728 bytes,
       CPU/memory/PID/storage ceilings above 2/8589934592/256/21474836480.
-- [ ] Run focused tests; confirm failures identify absent contracts/policy.
-- [ ] Implement schema/policy. Preflight always carries `canExecuteReplay: false`;
+- [x] Run focused tests; confirm failures identify absent contracts/policy.
+- [x] Implement schema/policy. Preflight always carries `canExecuteReplay: false`;
       diagnostic pass requires every exact check once, matching identities, complete
       artifacts and confirmed cleanup. Manifest validity is not operator approval.
-- [ ] Add Effect Arbitrary properties: downgrade/remove any check or cleanup,
+- [x] Add Effect Arbitrary properties: downgrade/remove any check or cleanup,
       substitute invocation/digest, truncate required evidence or exceed any bound;
       never obtain Pass. Three seeds 0/1/163, 1000 runs per law, no reduced budgets.
-- [ ] Run focused types/tests and root check, record outcomes, review and commit
+- [x] Run focused types/tests and root check, record outcomes, review and commit
       `feat: define private readiness evidence contracts`.
 
 ### Task 2: Bounded Credential-Free Host Reader
@@ -132,20 +140,20 @@ not arbitrary argv/path strings. Results contain bounded bytes/projected values,
 finite errors and truncation flags, never raw exception/environment dumps.
 Export no general shell/process runner.
 
-- [ ] Write failing synthetic tests for directories/FIFOs/symlinks, 256 KiB file
+- [x] Write failing synthetic tests for directories/FIFOs/symlinks, 256 KiB file
       cap, invalid UTF-8, replacement between metadata/read, oversized output,
       nonzero exit, stalled child, cancellation and sentinel environment leakage.
-- [ ] Run tests and confirm the intended RED failures.
-- [ ] Implement bounded metadata/no-follow/descriptor reads using existing replay
+- [x] Run tests and confirm the intended RED failures.
+- [x] Implement bounded metadata/no-follow/descriptor reads using existing replay
       reader conventions, plus scoped Effect subprocesses using the pinned Bun
       platform APIs. Use fixed executable candidates and exact version argv only,
       5-second per-command ceiling and 64 KiB combined version output cap; inherited
       environment is empty. No PATH search, shell, Docker server-info/version queries,
       executable config hooks or fallback command execution.
-- [ ] Prove timeout/cancellation reaps synthetic owned children and limits output
+- [x] Prove timeout/cancellation reaps synthetic owned children and limits output
       during collection, not merely after buffering. Record parent-directory trust;
       refuse changed/nonregular descriptors rather than retrying arbitrary paths.
-- [ ] Run focused types/tests and root check, review and commit
+- [x] Run focused types/tests and root check, review and commit
       `feat: add bounded host preflight reader`.
 
 ### Task 3: Safe Read-Only Preflight Observations
@@ -158,22 +166,26 @@ Colima config path within an approved root. Report projects architecture,
 resource snapshot, client versions, relevant config fields and finite missing
 prerequisites; endpoint is a proposed address, never verified daemon identity.
 
-- [ ] Add RED fixtures for absent tools/config, unsafe mounts, agent forwarding,
+- [x] Add RED fixtures for absent tools/config, unsafe mounts, agent forwarding,
       unknown config version, embedded credentials/hooks, inherited Docker endpoint,
       symlinked profile, insufficient headroom and unsupported storage information.
       Assert no daemon/start/download method exists on the reader interface.
-- [ ] Run tests to establish RED.
-- [ ] Implement host observations via Node/Bun standard host APIs and Task 2's
-      version-only commands: `colima version` and `docker --version`, only after
+- [x] Run tests to establish RED.
+- [x] Implement host observations via the bounded Effect-platform adapter
+      transferred to Task 4 and Task 2's version-only commands: `colima --version`
+      and `docker --version`, only after
       verifying installed-version semantics against official docs. Parse YAML with
       Bun's structured parser; strictly project an allowlist of fields and reject
       ambiguous/unsupported forms. Never evaluate provisioning scripts or templates.
       Collect no user identity, process inventory or credential-bearing paths.
-- [ ] Report absent configuration and unverified native controls as Blocked.
+      Per ledger ruling, `colima version` is not client-only. Both production
+      executable candidates remain Unsupported; no installed client was executed.
+      Synthetic observations qualify the adapter, not actual host facts.
+- [x] Report absent configuration and unverified native controls as Blocked.
       Do not propose automatic host modifications or infer quota/browser feasibility
       from config alone. A sanitized manifest draft lists unresolved identities as
       blockers; it is not a valid ActivationManifest until all exact fields resolve.
-- [ ] Verify fixtures include hostile synthetic fields but reports contain none
+- [x] Verify fixtures include hostile synthetic fields but reports contain none
       of their marker values. Run focused gates/root check, review and commit
       `feat: inspect dedicated Colima profile without daemon access`.
 
@@ -186,19 +198,19 @@ prerequisites; endpoint is a proposed address, never verified daemon identity.
 boundary. Only `preflight --config <absolute-path>` is supported; importing
 modules performs no work. No activation, run, cleanup or arbitrary command mode.
 
-- [ ] Add failing tests for unknown flags/subcommands, relative config paths,
+- [x] Add failing tests for unknown flags/subcommands, relative config paths,
       import-only execution, hostile cwd/environment, serialized output excess and
       an attempted `activate` invocation. Assert zero host calls on usage errors.
-- [ ] Run process tests and confirm RED without installed Colima/Docker or daemon.
-- [ ] Implement one strict JSON stdout report, at most 256 KiB, using Task 3.
+- [x] Run process tests and confirm RED without installed Colima/Docker or daemon.
+- [x] Implement one strict JSON stdout report, at most 256 KiB, using Task 3.
       Exit 2 for a valid preflight report (native readiness unqualified), 1 for finite
       sanitized collection/encoding failure, 64 for usage. Never emit raw config,
       subprocess output or exception stacks. Oversized report fails, never truncates
       into valid-looking JSON. Preserve no-import-effects behavior from replay CLI.
-- [ ] Verify real subprocess entrypoint with injected synthetic executable/config
+- [x] Verify real subprocess entrypoint with injected synthetic executable/config
       fixtures in owned temp roots. Package remains private, with explicit CLI script
       using `bun --no-env-file --no-install`; no install/start hooks.
-- [ ] Run focused gates/root check, review and commit
+- [x] Run focused gates/root check, review and commit
       `feat: expose read-only readiness preflight CLI`.
 
 ### Task 5: Closure, Independent Review And Native Handoff
@@ -210,17 +222,26 @@ approval state. Modify implementation only to repair reviewed findings.
 C2 prerequisites. Assessment separates synthetic proof, optional explicitly
 authorized host observation, and absent native evidence.
 
-- [ ] Write runbook mapping all seven native checks to required evidence and
+- [x] Write runbook mapping all seven native checks to required evidence and
       explicit C2 follow-on work; no executable activation recipe is implied.
       Capture unresolved image/storage/security/network identities as blockers.
-- [ ] Record written-spec approval and C1 implementation approval independently.
+- [x] Record written-spec approval and C1 implementation approval independently.
       Do not mark Plan C native readiness or replay qualification complete.
-- [ ] Run full verification convention with raw logs and unchanged property
-      budgets. Obtain independent whole-branch review; fix findings with focused
+- [x] Close deferred Task 2 minor with runtime-invalid IDs, relative root/executable/
+      HOME paths and untrusted runVersion parents, finite errors and zero I/O.
+      Verified test-only commit `1b59157`; production/test code frozen for controller.
+- [x] Complete controller-owned full verification with raw logs and unchanged
+      property budgets. Root check, all ten typechecks and all ten test tasks
+      passed on `1b59157`: 1227 tests / zero failures in 4m24.248s. Existing
+      migration-storage refinement: 3000 cases, 148083.89ms within 180000ms.
+- [ ] Obtain controller-owned Task 5 and independent whole-branch reviews;
+      fix approved findings with focused
       RED/GREEN regression tests and rerun affected/full gates before committing.
-- [ ] Run Fallow report-only under existing no-network/no-secret/no-telemetry
+- [x] Run Fallow report-only under existing no-network/no-secret/no-telemetry
       conventions; distinguish retained compatibility dependencies from new findings.
-- [ ] Commit verified documentation/fixes as
+      Exit 1: nine new probe static findings plus one retained compatibility
+      dependency warning; disclosed in assessment, not suppressed or auto-fixed.
+- [x] Commit verified documentation/fixes as
       `docs: record offline readiness foundation evidence`. Stop for owner review:
       no merge/push, host preflight execution, VM startup, download or native activation
       is implied by fixture tests or this implementation plan.

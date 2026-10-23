@@ -11,8 +11,12 @@ It is not a migration run, production adapter or deployment.
 The owner approved the conversational design on 2026-10-22: two stages, an
 explicit activation gate, diagnostic limits, seven individual checks, and the
 report/test strategy. The owner approved this written spec on 2026-10-22.
-Approval of this design does not authorize implementation or activation.
-The separate implementation plan requires review and execution-method selection.
+Approval of this design did not itself authorize implementation or activation.
+Separately, on 2026-10-23 the owner approved the C1 offline foundation
+implementation plan and selected subagent execution. C1 implementation and
+synthetic qualification do not authorize actual host preflight, C2 implementation
+or native activation. Controller final verification and independent closure
+reviews are tracked in the [C1 assessment](../../assessments/colima-readiness.md).
 
 Success means producing trustworthy, bounded evidence about specific native
 controls, or precise blockers. A partial result is useful but is not readiness.
@@ -171,6 +175,10 @@ adapter, operational ledger initialization, publication or ingress activation.
 No claim of hostile-tenant isolation, VM/kernel escape protection, power-loss
 durability or qualification of the full replay acceptance contract.
 
-After owner review of this spec, write the implementation plan. After plan and
-execution-method approval, implement/verify the offline probe and commit verified
-tasks. Only a further explicit activation approval may start native diagnostics.
+The written spec and C1 plan/execution-method approvals have been received
+independently. C1 delivers the offline probe; it does not complete Plan C native
+readiness or replay qualification. After controller-owned closure review,
+separately authorize actual host preflight and use measured findings to plan C2.
+Only a further explicit manifest/window activation approval may start native
+diagnostics. The [runbook](../../runbooks/colima-readiness.md) records the seven
+C2 evidence prerequisites without an executable activation recipe.
