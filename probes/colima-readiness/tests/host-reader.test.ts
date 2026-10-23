@@ -16,8 +16,29 @@ import {
 import { ChildProcessSpawner } from 'effect/process';
 
 import { makeHostReader, type ReadId, type ToolId } from '../src/host-reader.ts';
+import { writeFixtureLauncher } from './fixture-launcher.ts';
 
 const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
+
+async function portableLauncher() {
+  function* scenario() {
+    const fs = yield* FileSystem.FileSystem;
+    const root = yield* fs.makeTempDirectoryScoped({ directory: '/private/tmp' });
+    const path = `${root}/client`;
+    yield* writeFixtureLauncher(path, '/synthetic/other-bun');
+    const source = yield* fs.readFileString(path);
+    expect(source.split('\n')[0]).toBe('#!/synthetic/other-bun --no-env-file');
+    expect(source).not.toContain('/Users/alancurrie/');
+  }
+  const workflow = Effect.gen(scenario);
+  const scoped = Effect.scoped(workflow);
+  const provided = Effect.provide(scoped, BunServices.layer);
+  await Effect.runPromise(provided);
+}
+test(
+  'owned fixture launcher uses the supplied absolute running-interpreter identity',
+  portableLauncher,
+);
 
 function* fixture() {
   const fs = yield* FileSystem.FileSystem;
@@ -39,8 +60,7 @@ function* fixture() {
   function* executable(mode: string) {
     const dir = `${root}/${mode}`;
     yield* fs.makeDirectory(dir);
-    yield* fs.copyFile(`${import.meta.dir}/child.ts`, `${dir}/client`);
-    yield* fs.chmod(`${dir}/client`, 0o700);
+    yield* writeFixtureLauncher(`${dir}/client`, process.execPath);
     return makeHostReader({
       ...config,
       executableCandidates: {
@@ -352,6 +372,8 @@ async function versionEnvironment() {
     yield* Effect.acquireRelease(sentinel, () => removeSentinel);
     const f = yield* Effect.gen(fixture);
     const reader = yield* f.executable('success');
+    const launcher = yield* f.fs.readFileString(`${f.root}/success/client`);
+    expect(launcher.split('\n')[0]).toBe(`#!${process.execPath} --no-env-file`);
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
     const commands: unknown[] = [];
     function spawn(command: Parameters<typeof spawner.spawn>[0]) {

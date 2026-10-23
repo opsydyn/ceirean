@@ -1,4 +1,4 @@
-import type { ActivationManifest } from '../src/contracts.ts';
+import { deriveManifestDigest, type ActivationManifest } from '../src/contracts.ts';
 
 export const checkIds = [
   'EndpointOwnership',
@@ -11,7 +11,7 @@ export const checkIds = [
 ] as const;
 
 export function manifestFixture(): ActivationManifest {
-  return {
+  const manifest: ActivationManifest = {
     _tag: 'ActivationManifest',
     manifestDigest: 'a'.repeat(64),
     profile: 'ceirean',
@@ -75,15 +75,25 @@ export function manifestFixture(): ActivationManifest {
       },
     ],
   };
+  return { ...manifest, manifestDigest: deriveManifestDigest(manifest) };
 }
 
 export function diagnosticFixture() {
   const manifest = manifestFixture();
   const invocationId = ['synthetic', 'invocation'].join('-');
+  const approval = {
+    _tag: 'ActivationApproval' as const,
+    manifestDigest: manifest.manifestDigest,
+    startMs: 100,
+    deadlineMs: 1200100,
+  };
+  const execution = { startedAtMs: 100, completedAtMs: 7100 };
   const evidence = checkIds.map((checkId) => ({
     invocationId,
     manifestDigest: manifest.manifestDigest,
     identity: { ...manifest.identity },
+    approval: { ...approval },
+    observed: { startedAtMs: 100, completedAtMs: 1100 },
     checkId,
     outcome: 'Pass' as const,
     reasons: [],
@@ -94,13 +104,16 @@ export function diagnosticFixture() {
     invocationId,
     manifestDigest: manifest.manifestDigest,
     identity: { ...manifest.identity },
-    containersAbsent: true,
-    volumesAbsent: true,
-    vmStopped: true,
+    approval: { ...approval },
+    observed: { startedAtMs: 7100, completedAtMs: 37100 },
+    phase: 'WithinWindow' as const,
+    containersAbsent: true as const,
+    volumesAbsent: true as const,
+    vmStopped: true as const,
     unresolvedResourceIds: [],
     artifacts: [{ id: 'cleanup-proof', digest: 'f'.repeat(64), bytes: 1024, complete: true }],
   };
-  return { manifest, invocationId, evidence, cleanup };
+  return { manifest, invocationId, evidence, cleanup, approval, execution };
 }
 
 export function preflightFixture() {

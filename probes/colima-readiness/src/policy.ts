@@ -18,6 +18,8 @@ const SummaryInput = Schema.Struct({
   invocationId: DiagnosticReport.fields.invocationId,
   evidence: DiagnosticReport.fields.evidence,
   cleanup: DiagnosticReport.fields.cleanup,
+  approval: DiagnosticReport.fields.approval,
+  execution: DiagnosticReport.fields.execution,
 });
 
 function requireFact(condition: boolean, code: typeof ReadinessProblem.Type.code) {
@@ -67,20 +69,31 @@ export function summarizeDiagnostics(
   invocationId: unknown,
   evidence: unknown,
   cleanup: unknown,
+  approval: unknown,
+  execution: unknown,
 ) {
   function* summarize() {
     const m = yield* decodeManifest(manifest);
     const input = yield* Schema.decodeUnknownResult(
       SummaryInput,
       strict,
-    )({ invocationId, evidence, cleanup }).pipe(Result.mapError(() => problem('InvalidEvidence')));
+    )({ invocationId, evidence, cleanup, approval, execution }).pipe(
+      Result.mapError(() => problem('InvalidEvidence')),
+    );
     const report = {
       _tag: 'DiagnosticReport' as const,
       canExecuteReplay: false as const,
       evidenceBoundary: 'DiagnosticOnly' as const,
       manifest: m,
       ...input,
-      outcome: diagnosticOutcome(m, input.invocationId, input.evidence, input.cleanup),
+      outcome: diagnosticOutcome(
+        m,
+        input.invocationId,
+        input.evidence,
+        input.cleanup,
+        input.approval,
+        input.execution,
+      ),
     };
     return yield* Schema.decodeUnknownResult(
       DiagnosticReport,

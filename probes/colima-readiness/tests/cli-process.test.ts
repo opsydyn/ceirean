@@ -4,6 +4,7 @@ import { BunServices } from '@effect/platform-bun';
 import { Effect, FileSystem, Schema } from 'effect';
 
 import { PreflightReport } from '../src/contracts.ts';
+import { writeFixtureLauncher } from './fixture-launcher.ts';
 
 const roots: string[] = [];
 async function filesystem() {
@@ -28,8 +29,9 @@ async function ownedRoot() {
       'runtime: docker\nmounts: []\nforwardAgent: false\n',
     ),
   );
-  await Effect.runPromise(fs.copyFile(`${import.meta.dir}/child.ts`, `${root}/client`));
-  await Effect.runPromise(fs.chmod(`${root}/client`, 0o700));
+  const launcher = Effect.gen(() => writeFixtureLauncher(`${root}/client`, process.execPath));
+  const providedLauncher = Effect.provide(launcher, BunServices.layer);
+  await Effect.runPromise(providedLauncher);
   await Effect.runPromise(
     fs.writeFileString(
       `${root}/.env`,

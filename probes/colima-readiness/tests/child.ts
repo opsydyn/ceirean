@@ -1,4 +1,3 @@
-#!/Users/alancurrie/.bun/bin/bun
 const mode = import.meta.dir.split('/').at(-1);
 if (Bun.argv.slice(2).join(',') !== '--version') throw new Error('Unexpected fixture argv');
 if (mode === 'stall' || mode === 'flood') {

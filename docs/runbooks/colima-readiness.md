@@ -108,6 +108,34 @@ daemon identity. `activationDraft: Unresolved` is not an ActivationManifest or
 approval. Pure diagnostic schemas/policy cannot execute diagnostics or issue a
 production readiness receipt; reports never clear replay blockers automatically.
 
+### Offline Diagnostic Provenance
+
+The private manifest contract verifies Bun SHA-256 over compact, schema-encoded
+UTF-8 JSON without a trailing newline: omit only top-level `manifestDigest`,
+recursively sort object keys lexically, and preserve array order and every value.
+Changing argv, resource configuration, destinations or cleanup invalidates an old
+digest. `deriveManifestDigest` constructs a new content identity, not an approval;
+the strict decoder must accept the complete manifest before approval comparison.
+Changed content needs newly matching approval and evidence.
+
+The private summarizer takes `(manifest, invocationId, evidence, cleanup,
+approval, execution)`. Reports retain the exact approval start/absolute deadline
+and actual diagnostic execution interval. Each check/cleanup record has its own
+`observed` start/completion and matching approval. All timestamps are finite,
+nonnegative safe integers; intervals cannot be reversed. Diagnostics must fit
+the approved window and preserve cleanup reserve; the complete activation budget
+must fit at actual diagnostic start. Check observations must fit that interval.
+Timely cleanup follows diagnostics and completes by the approved deadline.
+
+Missing or malformed provenance rejects; mismatched/out-of-window records cannot
+produce Pass. Late cleanup, including cleanup crossing the deadline, must carry
+`phase: CleanupOnly`; it is retained as a distinct cleanup-only record and never
+qualifies timely success or extends diagnostic authority. `WithinWindow` cannot
+label late cleanup, and `CleanupOnly` cannot label timely cleanup. No timestamps
+are synthesized, no freshness TTL exists, and these schemas add no C2 scheduler
+or native execution path. The focused fixtures are synthetic provenance evidence,
+not proof that a host clock or native cleanup observation is authentic.
+
 ## C2 Entry Gate
 
 After C1's controller-owned review, separately authorize actual host preflight.

@@ -1,7 +1,7 @@
-import { Match, Schema } from 'effect';
+import { Match, Record, Schema } from 'effect';
 
 const strict = { parseOptions: { onExcessProperty: 'error' } } as const;
-export const readinessBounds = {
+const readinessBounds = {
   durationMs: 1200000,
   cpuCores: 2,
   memoryBytes: 8589934592,
@@ -53,8 +53,7 @@ export const CheckId = Schema.Literals([
   'BrowserSandbox',
   'CancellationCleanup',
 ]);
-export type CheckId = typeof CheckId.Type;
-export const Reason = Schema.Literals([
+const Reason = Schema.Literals([
   'PrerequisiteUnavailable',
   'InvalidConfiguration',
   'UnknownConfiguration',
@@ -73,7 +72,7 @@ export const Reason = Schema.Literals([
 export type Reason = typeof Reason.Type;
 const Reasons = Schema.Array(Reason).check(Schema.isUnique(), Schema.isMaxLength(14));
 
-export const DiagnosticIdentity = Schema.Struct({
+const DiagnosticIdentity = Schema.Struct({
   endpoint: Endpoint,
   daemonId: Identifier,
   imageDigest: Schema.String.check(Schema.isPattern(/^sha256:[a-f0-9]{64}$/)),
@@ -174,8 +173,37 @@ function coherentManifest(m: typeof ManifestFields.Type) {
     m.storage.temporaryBytes + m.storage.volumeBytes <= m.storage.quotaBytes,
   ].every(Boolean);
 }
+const encodeJson = Schema.encodeSync(Schema.fromJsonString(Schema.Json));
+const isJsonArray = Schema.is(Schema.Array(Schema.Json));
+const isJsonObject = Schema.is(Schema.JsonObject);
+function canonicalJson(value: Schema.Json): Schema.Json {
+  return Match.value(value).pipe(
+    Match.when(isJsonArray, (items) => items.map(canonicalJson)),
+    Match.when(isJsonObject, (item) =>
+      Record.fromEntries(
+        Object.keys(item)
+          .sort()
+          .map((key) => [key, canonicalJson(item[key])] as const),
+      ),
+    ),
+    Match.orElse((item) => item),
+  );
+}
+
+// Only the top-level digest is excluded. Object keys sort lexically; array order is significant.
+export function deriveManifestDigest(
+  manifest: Omit<typeof ManifestFields.Type, 'manifestDigest'> & {
+    readonly manifestDigest?: string;
+  },
+) {
+  const { manifestDigest: _digest, ...content } = manifest;
+  const canonicalContent = canonicalJson(content);
+  const bytes = encodeJson(canonicalContent);
+  return new Bun.CryptoHasher('sha256').update(bytes).digest('hex');
+}
 export const ActivationManifest = ManifestFields.check(
   Schema.makeFilter(coherentManifest),
+  Schema.makeFilter((manifest) => manifest.manifestDigest === deriveManifestDigest(manifest)),
 ).annotate(strict);
 export type ActivationManifest = typeof ActivationManifest.Type;
 
@@ -190,8 +218,17 @@ export const ActivationApproval = Schema.TaggedStruct('ActivationApproval', {
     ),
   )
   .annotate(strict);
+type ActivationApproval = typeof ActivationApproval.Type;
 
-export const Artifact = Schema.Struct({
+const ObservationInterval = Schema.Struct({
+  startedAtMs: NonNegative,
+  completedAtMs: NonNegative,
+})
+  .check(Schema.makeFilter((o) => o.startedAtMs <= o.completedAtMs))
+  .annotate(strict);
+type ObservationInterval = typeof ObservationInterval.Type;
+
+const Artifact = Schema.Struct({
   id: Identifier,
   digest: Digest,
   bytes: NonNegative.check(Schema.isLessThanOrEqualTo(readinessBounds.retainedEvidenceBytes)),
@@ -205,8 +242,10 @@ const bindingFields = {
   invocationId: Identifier,
   manifestDigest: Digest,
   identity: DiagnosticIdentity,
+  approval: ActivationApproval,
+  observed: ObservationInterval,
 };
-export const CheckEvidence = Schema.Struct({
+const CheckEvidence = Schema.Struct({
   ...bindingFields,
   checkId: CheckId,
   outcome: Schema.Literals(['Pass', 'Fail', 'Blocked']),
@@ -224,9 +263,13 @@ export const CheckEvidence = Schema.Struct({
   .annotate(strict);
 export type CheckEvidence = typeof CheckEvidence.Type;
 
-export const CleanupEvidence = Schema.Union([
+const cleanupFields = {
+  ...bindingFields,
+  phase: Schema.Literals(['WithinWindow', 'CleanupOnly']),
+};
+const CleanupEvidence = Schema.Union([
   Schema.TaggedStruct('Confirmed', {
-    ...bindingFields,
+    ...cleanupFields,
     containersAbsent: Schema.Literal(true),
     volumesAbsent: Schema.Literal(true),
     vmStopped: Schema.Literal(true),
@@ -234,11 +277,27 @@ export const CleanupEvidence = Schema.Union([
     artifacts: Artifacts,
   }),
   Schema.TaggedStruct('Unresolved', {
-    ...bindingFields,
+    ...cleanupFields,
     unresolvedResourceIds: Ids,
     artifacts: Artifacts,
   }),
-]).annotate(strict);
+])
+  .check(
+    Schema.makeFilter((cleanup) =>
+      Match.value(cleanup.phase).pipe(
+        Match.when(
+          'CleanupOnly',
+          () => cleanup.observed.completedAtMs > cleanup.approval.deadlineMs,
+        ),
+        Match.orElse(
+          () =>
+            cleanup.observed.startedAtMs >= cleanup.approval.startMs &&
+            cleanup.observed.completedAtMs <= cleanup.approval.deadlineMs,
+        ),
+      ),
+    ),
+  )
+  .annotate(strict);
 export type CleanupEvidence = typeof CleanupEvidence.Type;
 
 const unknown = Schema.TaggedStruct('Unknown', {});
@@ -299,6 +358,14 @@ export const PreflightReport = Schema.TaggedStruct('PreflightReport', {
 export type PreflightReport = typeof PreflightReport.Type;
 
 const sameIdentity = Schema.toEquivalence(DiagnosticIdentity);
+const sameApproval = Schema.toEquivalence(ActivationApproval);
+function within(observed: ObservationInterval, startMs: number, deadlineMs: number) {
+  return [
+    observed.startedAtMs >= startMs,
+    observed.startedAtMs <= observed.completedAtMs,
+    observed.completedAtMs <= deadlineMs,
+  ].every(Boolean);
+}
 function completeArtifacts(artifacts: ReadonlyArray<typeof Artifact.Type>) {
   return artifacts.length > 0 && artifacts.every((a) => a.complete && a.bytes > 0);
 }
@@ -321,11 +388,33 @@ export function diagnosticOutcome(
   invocationId: string,
   evidence: ReadonlyArray<CheckEvidence>,
   cleanup: CleanupEvidence,
+  approval: ActivationApproval,
+  execution: ObservationInterval,
 ) {
   const bound = (e: CheckEvidence | CleanupEvidence) =>
     e.invocationId === invocationId &&
     e.manifestDigest === m.manifestDigest &&
-    sameIdentity(e.identity, m.identity);
+    sameIdentity(e.identity, m.identity) &&
+    sameApproval(e.approval, approval);
+  const budget = m.commands.reduce((sum, c) => sum + c.timeoutMs, 0) + m.cleanupReserveMs;
+  const timelyCleanup = Match.value(cleanup.phase).pipe(
+    Match.when('WithinWindow', () =>
+      within(cleanup.observed, execution.completedAtMs, approval.deadlineMs),
+    ),
+    Match.orElse(() => false),
+  );
+  const timingComplete = [
+    approval.manifestDigest === m.manifestDigest,
+    approval.deadlineMs - approval.startMs <= m.durationMs,
+    approval.deadlineMs - execution.startedAtMs >= budget,
+    within(execution, approval.startMs, approval.deadlineMs - m.cleanupReserveMs),
+    evidence.every((e) => within(e.observed, execution.startedAtMs, execution.completedAtMs)),
+    timelyCleanup,
+  ].every(Boolean);
+  const confirmedCleanup = Match.value(cleanup).pipe(
+    Match.tag('Confirmed', () => true),
+    Match.orElse(() => false),
+  );
   const checksComplete =
     evidence.length === 7 &&
     new Set(evidence.map((e) => e.checkId)).size === 7 &&
@@ -340,10 +429,13 @@ export function diagnosticOutcome(
     );
   const artifacts = [...evidence.flatMap((e) => e.artifacts), ...cleanup.artifacts];
   const complete =
+    m.manifestDigest === deriveManifestDigest(m) &&
+    timingComplete &&
     checksComplete &&
     evidence.every((e) => bound(e) && completeArtifacts(e.artifacts)) &&
     bound(cleanup) &&
-    Schema.is(CleanupEvidence.members[0])(cleanup) &&
+    Schema.is(CleanupEvidence)(cleanup) &&
+    confirmedCleanup &&
     completeArtifacts(cleanup.artifacts) &&
     artifacts.reduce((sum, a) => sum + a.bytes, 0) <= m.limits.retainedEvidenceBytes;
   return Match.value({
@@ -362,6 +454,8 @@ export const DiagnosticReport = Schema.TaggedStruct('DiagnosticReport', {
   canExecuteReplay: Schema.Literal(false),
   evidenceBoundary: Schema.Literal('DiagnosticOnly'),
   manifest: ActivationManifest,
+  approval: ActivationApproval,
+  execution: ObservationInterval,
   invocationId: Identifier,
   evidence: Schema.Array(CheckEvidence).check(Schema.isMaxLength(7)),
   cleanup: CleanupEvidence,
@@ -369,7 +463,16 @@ export const DiagnosticReport = Schema.TaggedStruct('DiagnosticReport', {
 })
   .check(
     Schema.makeFilter(
-      (r) => r.outcome === diagnosticOutcome(r.manifest, r.invocationId, r.evidence, r.cleanup),
+      (r) =>
+        r.outcome ===
+        diagnosticOutcome(
+          r.manifest,
+          r.invocationId,
+          r.evidence,
+          r.cleanup,
+          r.approval,
+          r.execution,
+        ),
     ),
   )
   .annotate(strict);

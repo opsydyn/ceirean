@@ -14,8 +14,10 @@
 selected subagent execution. Tasks 1-4 are independently reviewed through
 `2e99143`; Task 5 guard tests are committed at `1b59157`. Controller full gates
 passed on that code head (1227 tests, zero failures; ten typecheck/test tasks).
-Task 5 review and whole-branch review remain pending and are not implied by
-checked delivery items.
+Task 5 review completed. Whole-branch review through `8a2a4a7` returned With
+fixes; the owner authorized one fixwave for I1/I2/M1/M2. Historical full-gate
+counts above are superseded by those code changes: fresh fixed-head full gates
+and scoped rereview remain pending the controller, not implied by delivery items.
 See the [assessment](../../assessments/colima-readiness.md) for measured results.
 
 ## Scope And Handoff
@@ -111,8 +113,20 @@ configuration, VM allocation, per-command budgets and cleanup reserve.
 `PreflightReport` and `DiagnosticReport` are separate tagged schemas.
 Export pure `decodeManifest(input: unknown)`,
 `validateActivation(manifest, approval, nowMs)`, and
-`summarizeDiagnostics(manifest, invocationId, evidence, cleanup)`; use inferred
+`summarizeDiagnostics(manifest, invocationId, evidence, cleanup, approval, execution)`; use inferred
 Effect Result types, strict decoding and no native effects.
+
+Final-review fixes bind the digest to canonical manifest content (top-level
+digest excluded, recursive lexical object keys, ordered arrays, compact
+schema-encoded UTF-8 JSON, Bun SHA-256). Reports retain strict exact approval and
+actual diagnostic execution times; every check/cleanup has approval and observed
+interval provenance. Timing must preserve command budget/cleanup reserve.
+Explicit post-deadline `CleanupOnly` records are retained but cannot qualify
+timely Pass. No scheduler, native executor or freshness TTL is introduced.
+Fixture launchers use absolute `process.execPath`; production execution policy
+is unchanged. Only the seven approved unused export declarations are narrowed.
+Existing property seeds/counts remain unchanged; two new provenance laws use
+0/1/163 x 1000. See assessment and retained `final-fix-report.md` for fixwave proof.
 
 - [x] Write failing examples: reject unknown fields/duplicate IDs/cross-invocation
       evidence, deadline beyond 1200000ms, negative/nonfinite budgets, missing cleanup

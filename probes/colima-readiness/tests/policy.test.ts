@@ -2,7 +2,12 @@ import { expect, test } from 'bun:test';
 
 import { Arbitrary, Effect, Match, Result, Schema } from 'effect';
 
-import type { CheckEvidence, DiagnosticReport } from '../src/contracts.ts';
+import {
+  deriveManifestDigest,
+  type ActivationManifest,
+  type CheckEvidence,
+  type DiagnosticReport,
+} from '../src/contracts.ts';
 import { decodeManifest, summarizeDiagnostics, validateActivation } from '../src/policy.ts';
 import { diagnosticFixture, manifestFixture } from './fixtures.ts';
 
@@ -50,7 +55,15 @@ function passes(
   manifest: unknown = manifestFixture(),
   invocationId: unknown = 'synthetic-invocation',
 ) {
-  return summarizeDiagnostics(manifest, invocationId, evidence, cleanup).pipe(
+  const f = diagnosticFixture();
+  return summarizeDiagnostics(
+    manifest,
+    invocationId,
+    evidence,
+    cleanup,
+    f.approval,
+    f.execution,
+  ).pipe(
     Result.match({
       onFailure: () => false,
       onSuccess: diagnosticPass,
@@ -182,6 +195,10 @@ function boundsLaw({ nonce }: Case) {
   };
   function exceeds([key, cap]: [string, number]) {
     const m = { ...f.manifest, limits: { ...f.manifest.limits, [key]: cap + nonce } };
+    return invalidManifest(m);
+  }
+  function invalidManifest(manifest: ActivationManifest) {
+    const m = { ...manifest, manifestDigest: deriveManifestDigest(manifest) };
     const decoded = decodeManifest(m);
     return Result.isFailure(decoded) && !passes(f.evidence, f.cleanup, m);
   }
@@ -206,7 +223,7 @@ function boundsLaw({ nonce }: Case) {
   return (
     passes(f.evidence, f.cleanup) &&
     Object.entries(caps).every(exceeds) &&
-    otherBounds.every((m) => !passes(f.evidence, f.cleanup, m)) &&
+    otherBounds.every(invalidManifest) &&
     !passes(
       f.evidence.map((e) => ({
         ...e,
@@ -240,14 +257,24 @@ function aggregateCap() {
   }));
   expect(passes(missingArtifact, f.cleanup)).toBe(false);
   const failed = retained.map((e) => ({ ...e, outcome: 'Fail', reasons: ['CheckFailed'] }));
-  const report = summarizeDiagnostics(f.manifest, f.invocationId, failed, f.cleanup).pipe(
-    Result.getOrThrow,
-  );
+  const report = summarizeDiagnostics(
+    f.manifest,
+    f.invocationId,
+    failed,
+    f.cleanup,
+    f.approval,
+    f.execution,
+  ).pipe(Result.getOrThrow);
   expect(report.outcome).toBe('Fail');
   const blocked = retained.map((e) => ({ ...e, outcome: 'Blocked', reasons: ['CheckBlocked'] }));
-  const blockedReport = summarizeDiagnostics(f.manifest, f.invocationId, blocked, f.cleanup).pipe(
-    Result.getOrThrow,
-  );
+  const blockedReport = summarizeDiagnostics(
+    f.manifest,
+    f.invocationId,
+    blocked,
+    f.cleanup,
+    f.approval,
+    f.execution,
+  ).pipe(Result.getOrThrow);
   expect(blockedReport.outcome).toBe('Blocked');
 }
 test(

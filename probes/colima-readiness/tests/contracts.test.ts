@@ -115,9 +115,14 @@ test(
 
 function diagnosticBoundary() {
   const f = diagnosticFixture();
-  const report = summarizeDiagnostics(f.manifest, f.invocationId, f.evidence, f.cleanup).pipe(
-    Result.getOrThrow,
-  );
+  const report = summarizeDiagnostics(
+    f.manifest,
+    f.invocationId,
+    f.evidence,
+    f.cleanup,
+    f.approval,
+    f.execution,
+  ).pipe(Result.getOrThrow);
   const decode = Schema.decodeUnknownResult(DiagnosticReport, strict);
   const valid = decode(report);
   expect(Result.isSuccess(valid)).toBe(true);

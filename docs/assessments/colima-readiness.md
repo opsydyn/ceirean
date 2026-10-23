@@ -52,8 +52,8 @@ network through the existing restricted runner. No dependency installation or
 upgrade was performed in Task 5. Owned synthetic loopback sockets are permitted
 only for established full-suite fixtures, not operational listeners.
 
-The controller froze production/test code at `1b59157` and owns the final full
-repository runs. Controller results were checked against retained raw logs:
+The controller's historical full-gate run covered code at `1b59157`. Results
+were checked against retained raw logs:
 
 - `bun --no-env-file run check`: exit 0, zero lint warnings/errors, all files formatted.
 - `moon run :typecheck --force --no-actions`: exit 0, all ten workspace tasks,
@@ -66,12 +66,50 @@ repository runs. Controller results were checked against retained raw logs:
 
 Raw logs are `controller-final-check.log`, `controller-final-types.log` and
 `controller-final-tests.log` in the retained plan scratch. These gates bind code
-head `1b59157`; only closure Markdown changes follow. The implementer did not
-rerun the unchanged full suite. Property seeds/run counts/timeouts were not reduced.
+head `1b59157` (closure Markdown only through `8a2a4a7`). The authorized final
+fixwave below supersedes that code head. New full-gate counts on the stable fix
+head are pending the controller; 1227 is historical, not the fixed-head total.
+Property seeds/run counts/timeouts were not reduced.
 
-Task 5 self-review is not independent acceptance. Controller-owned Task 5 review
-and final whole-branch review remain pending. Passing synthetic gates does not
-qualify native readiness or authorize merge/push.
+Task 5 review completed. Whole-branch review of `0f1b432..8a2a4a7` returned
+With fixes (I1, I2, M1, M2). Fixer self-review is not acceptance; fresh scoped
+rereview and controller full gates remain pending. Passing synthetic gates does
+not qualify native readiness or authorize merge/push.
+
+## Final Fixwave Contracts
+
+The authorized single fixwave starts at `8a2a4a7`. Manifest decoding now verifies
+SHA-256 using Bun's cryptographic hasher over canonical JSON: exclude only the
+top-level `manifestDigest`, recursively sort object keys lexically, retain array
+order and values, and schema-encode compact JSON as UTF-8 without a newline.
+Approval validation and both aggregation entrypoints verify this content binding.
+Old digests cannot approve or aggregate changed argv, resource configuration,
+destinations or cleanup. Rehashing changed content still requires newly matching
+approval and evidence; this is content identity, not operator-authentication proof.
+
+Diagnostic reports require exact approval (`manifestDigest`, `startMs`,
+`deadlineMs`) and actual diagnostic `execution` (`startedAtMs`, `completedAtMs`).
+Each check and cleanup record carries that approval and its own `observed`
+interval. Missing/malformed/reversed records reject; mismatched or out-of-window
+observations cannot Pass. The diagnostic interval must preserve the manifest's
+cleanup reserve, and activation's complete command budget must fit at its start.
+Timely cleanup follows diagnostics and completes no later than the absolute
+deadline. Cleanup completing after the deadline must be explicitly `CleanupOnly`,
+including an interval crossing the deadline; it remains retained diagnostic
+evidence but always prevents overall Pass. No TTL, scheduler or executor is added.
+
+Owned test launchers use the absolute running `process.execPath` and disable
+environment-file loading. Production PATH-disabled execution is unchanged.
+Only six unused value exports and the unused `CheckId` type export are narrowed;
+their implementations, needed types and runtime fixtures remain.
+
+Focused RED/GREEN, types, root-check and report-only scanner evidence are retained
+as `final-fix-*` in the same scratch directory. The complete command/results
+handoff is `final-fix-report.md`; fresh scoped rereview and fixed-head full gates
+are controller-owned, not claimed here. The original five laws retain seeds
+0/1/163 and 1000 runs each; two additional provenance laws use the same budgets.
+The bounds law rehashes its mutations to test ceilings independently of digest
+validation. No full repository test/type suite is rerun by the fixer.
 
 ## Fallow Report-Only
 
@@ -85,19 +123,21 @@ bash .superpowers/sdd/2026-10-22-colima-readiness/run.sh \
   --no-cache --no-type-aware --format json dead-code
 ```
 
-Raw output: `task-5-fallow.json`; stderr: `task-5-fallow.stderr.log`, in the plan
-scratch. **Exit 1: ten findings, nine error-severity and one warning.** This is
-not a clean Fallow gate. No fix, suppression, policy/config change or installation
-was performed. Findings are separated from the retained compatibility warning:
+Historical raw output: `task-5-fallow.json`; stderr: `task-5-fallow.stderr.log`,
+in the plan scratch. **Exit 1: ten findings, nine error-severity and one warning.**
+The authorized fixwave rerun is `final-fix-fallow.json` and
+`final-fix-fallow.stderr.log`: **exit 1, three findings, two error-severity runtime
+fixtures and one retained warning; zero unused exports/types.** Neither run is a
+clean Fallow gate. No suppression, policy/config change or installation occurred.
+Findings and dispositions:
 
 - Two unused-file findings: `tests/child.ts` and `tests/cli-child.ts` in the probe.
   These are runtime-loaded synthetic process fixtures, referenced by paths/copies
   in tests rather than ordinary import edges; they were exercised by focused tests.
-- Six unused value exports in `src/contracts.ts`: `readinessBounds`, `Reason`,
-  `DiagnosticIdentity`, `Artifact`, `CheckEvidence`, `CleanupEvidence`.
-- One unused type export in `src/contracts.ts`: `CheckId`. The value exports and
-  type export are new private-probe surface findings, not compatibility warnings;
-  any export narrowing requires separately scoped review, not automatic deletion.
+- Six formerly unused value exports in `src/contracts.ts`: `readinessBounds`,
+  `Reason`, `DiagnosticIdentity`, `Artifact`, `CheckEvidence`, `CleanupEvidence`,
+  plus the unused `CheckId` type export, are now private. Implementations and
+  needed type exports are retained; all seven scanner findings are absent on rerun.
 - One existing warning for retained `@modelcontextprotocol/sdk` in
   `probes/github-admission/package.json`, preserved for compatibility/security work.
 
