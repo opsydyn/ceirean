@@ -146,6 +146,27 @@ not proof that a host clock or native cleanup observation is authentic.
 
 ## C2 Entry Gate
 
+### Current STOP Outcome
+
+The [native setup assessment](../assessments/native-worker-setup.md) records
+Task 2's evaluated research gate as **Blocked**: no supported zero-sharing Colima
+path was established in the inspected v0.8.1/v0.10.1 sources under the approved
+socket endpoint design. This does not assert impossibility in future releases.
+Task 1 is verified at `044c0c2` (regression/property/process tests and independent
+review approved); empty mounts remain Unknown with UnknownConfiguration.
+Neither this correction nor source research qualifies installed/native isolation.
+
+Stop the [readiness plan](../superpowers/plans/2026-10-23-native-worker-readiness.md)
+after Task 1. Tasks 3-4 are not executable; exact lock fields remain unresolved.
+Empty/null/none spellings, global overlays, plain mode and manual generated-YAML
+edits are not approved solutions; the assessment explains the source limitations.
+Recommend separately assessing direct Lima + Docker with zero sharing and the
+existing engine/ledger/XState preserved. That architecture is not selected or
+implemented. No installation, retrieval, host inspection, provisioning or
+activation is authorized by this outcome.
+
+### Requirements If Separately Reopened
+
 After C1's controller-owned review, separately authorize actual host preflight.
 Use its measured facts to write and review a concrete C2 implementation plan.
 Resolve exact native image digest/architecture/toolchain and browser identities,

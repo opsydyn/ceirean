@@ -10,11 +10,14 @@
 
 **Spec:** [Approved readiness design](../specs/2026-10-22-colima-readiness-design.md), [replay architecture](../specs/2026-10-21-foldkit-replay-profile-design.md), [actual host preflight](../../assessments/colima-readiness.md).
 
-**Status:** Planning authorized after `e5a5ad1`. Implementation, retrieval,
-provisioning and activation are not authorized by this document. Task 1 is
-implementation-ready. Task 2 is a bounded feasibility gate. Tasks 3-4 are an
-explicit downstream blueprint, not implementation-ready task briefs: they must
-not execute until Task 2's concrete lock and updated briefs are reviewed.
+**Status:** STOP after Task 1. Task 1 is verified at `044c0c2` and independently
+reviewed/approved. Task 2's bounded research gate is evaluated: **Blocked**, with
+no supported zero-sharing Colima path established in the inspected versions.
+See the [actual setup outcome](../../assessments/native-worker-setup.md).
+Setup is not qualified; no concrete lock exists. Tasks 3-4 remain non-executable
+blueprints. Retrieval, provisioning and activation are not authorized by this
+document. Controller full-repository verification is separate from Task 1's
+reported task-level checks and is not claimed complete here.
 
 ## Global Constraints
 
@@ -39,10 +42,11 @@ suggest Colima 0.8.1 and Docker 27.5.1, but neither executable/version is qualif
 
 ### Blocking Discovery: Empty Mounts Are Not Disabled Mounts
 
-Installed-version [Colima 0.8.1 generation](https://github.com/abiosoft/colima/blob/v0.8.1/environment/vm/lima/yaml.go)
+[Colima 0.8.1 source generation](https://github.com/abiosoft/colima/blob/v0.8.1/environment/vm/lima/yaml.go)
 maps empty mounts to default home/temp sharing and adds a cache mount for custom
-mounts. C1 currently projects an empty list as `Disabled`, which is incorrect
-for that version. All replay blockers remain present, and no VM was started.
+mounts. Task 1 corrected C1's former empty-list `Disabled` projection to Unknown
+with UnknownConfiguration. Installed executable/configuration semantics and native
+isolation remain unqualified. All replay blockers remain present; no VM was started.
 
 [Colima 0.10.1](https://github.com/abiosoft/colima/blob/v0.10.1/environment/vm/lima/yaml.go)
 distinguishes null from empty mounts, but its generation still adds a cache
@@ -53,8 +57,9 @@ Retain Colima if a reviewed, version-pinned mechanism produces zero effective
 host shares without breaking startup or socket forwarding. Otherwise report
 Blocked and bring back one explicit architecture decision. Do not patch generated
 VM configuration after startup, invent a `mount-none` flag on 0.8.1, introduce a
-fork, or relax isolation silently. Direct Lima or revised sharing policy would
-change the approved design and require separate owner approval.
+fork, or relax isolation silently. A separate direct Lima + Docker assessment is
+recommended, not selected or implemented; preserve zero sharing and the existing
+engine/ledger/XState. No sharing-policy relaxation is recommended or approved.
 
 ## Review Focus
 
@@ -76,22 +81,26 @@ compatible. `config.mounts` remains a conservative observation, not native proof
 Without a reviewed version-specific effective configuration, no value of the
 input mounts array may produce `Disabled`.
 
-- [ ] Write `empty mounts cannot disable installed Colima defaults`: use the
+- [x] Write `empty mounts cannot disable installed Colima defaults`: use the
       existing `safeYaml` fixture; require `config.mounts !== 'Disabled'`, a finite
       unsafe/unknown blocker, `nativeReadiness === 'Unqualified'`, and replay false.
-- [ ] Run focused tests and observe the empty-list regression fail before editing.
-- [ ] Correct `safeConfig`: nonempty explicit mounts are Enabled; empty mounts
+- [x] Run focused tests and observe the empty-list regression fail before editing.
+- [x] Correct `safeConfig`: nonempty explicit mounts are Enabled; empty mounts
       remain Unknown with `UnknownConfiguration`; omitted mounts remain Unknown.
       Keep null outside the current narrow accepted dialect; do not infer installed
       semantics from fixture version text. Update the misleading safe fixture name
       and existing assertions rather than weakening unrelated controls.
-- [ ] Add property cases covering empty, absent, null and bounded nonempty arrays
+- [x] Add property cases covering empty, absent, null and bounded nonempty arrays
       plus contradictory version observations: no unreviewed combination yields
       Disabled. Keep secrets out of reports. Use Effect Arbitrary with explicit seeds
       0, 1 and 163, 1000 runs per law per seed.
-- [ ] Run restricted root check, probe typecheck and all probe tests. Expected:
+- [x] Run restricted root check, probe typecheck and all probe tests. Expected:
       exit 0, no warnings; preflight-only CLI remains unchanged.
-- [ ] Commit `fix: stop treating empty Colima mounts as disabled sharing`.
+- [x] Commit `fix: stop treating empty Colima mounts as disabled sharing`.
+
+Task-level evidence: root check passed; probe typecheck passed; 177 probe tests
+passed, including process controls and 12000 seeded property cases. Independent
+review approved the four-file change. No installed/native qualification follows.
 
 ## Task 2: Resolve The Native Setup Lock Before Building An Executor
 
@@ -105,12 +114,19 @@ build and Playwright version, seccomp bytes/digest, and preparation commands wit
 download/build/disk/time bounds. A missing field produces a finite blocker, not
 a placeholder activation manifest.
 
-- [ ] Review the complete installed-version startup/config generation and Lima
+- [x] Evaluate the bounded primary-source compatibility gate using the supplied
+      controller research: Colima v0.8.1 startup/resume, mounts/cache and socket
+      forwarding; v0.10.1 comparison; Lima v1.0.0 overlay documentation and plain
+      mode. See the assessment's exact source links and limitations. No supported
+      zero-sharing path was established; actual installed config, overlays, agent
+      and credential inheritance remain unverified. The full successful-path
+      review requirement below is not claimed complete.
+- [ ] **Blocked, not performed:** Review the complete installed-version startup/config generation and Lima
       integration path against primary source. Establish whether zero host shares
       can coexist with Docker socket forwarding under the approved design. Check
       effective generated config, global/default overlays, cache sharing, agent and
       credential inheritance; do not inspect actual secrets or start the VM.
-- [ ] If no supported path is established, record the blocker and stop this plan
+- [x] If no supported path is established, record the blocker and stop this plan
       after Task 1. Do not spend on image retrieval or executor implementation yet.
 - [ ] If supported, resolve reviewed executable identities and matching client-only
       version argv. `colima version` remains disallowed as a client-only command:
@@ -133,7 +149,14 @@ a placeholder activation manifest.
       the resolved setup. Obtain review and owner approval of the setup and briefs.
       Commit the verified decision record; no live execution or download.
 
+All unchecked Task 2 lock-resolution/success-path items above are blocked by STOP,
+not queued for execution. Missing identities, images, policy, headroom and bounds
+are recorded explicitly in the assessment; no placeholder manifest was created.
+
 ## Task 3 Blueprint: Bounded Diagnostic Mechanism And Evidence
+
+**Not executable:** Task 2 is compatibility-gate Blocked; setup lock and approved
+exact briefs do not exist. The following is retained design context only.
 
 **Proposed files:** private probe `src/setup-contracts.ts`, `src/native-commands.ts`,
 `src/native-runner.ts`, `src/native-checks.ts`, `src/evidence-store.ts`,
@@ -192,6 +215,9 @@ and strict `DiagnosticReport` decoding as the final reporting boundary.
 
 ## Task 4 Blueprint: Native Acceptance And Closure
 
+**Not executable:** Task 2 stopped this plan. No preparation or activation follows
+from retaining this blueprint.
+
 - [ ] Finish implementation review and root check, all workspace typechecks and
       all workspace tests under the existing credential-free runner. Add negative
       controls for the five Review Focus cases. Native test commands remain opt-in.
@@ -213,9 +239,11 @@ and strict `DiagnosticReport` decoding as the final reporting boundary.
 
 ## Handoff And Stop Condition
 
-The next implementable change is Task 1. The next product-enabling decision is
-Task 2's zero-sharing compatibility result. Do not claim this is an executable
-activation plan until its concrete lock and downstream briefs exist.
+Task 1 is verified; Task 2's research gate is evaluated and Blocked. Stop here.
+The recommended next bounded work is a separately approved direct Lima + Docker
+assessment, not executor implementation. This does not select that architecture
+or authorize host observations. Do not claim an executable activation plan until
+a supported zero-sharing design, concrete lock and reviewed downstream briefs exist.
 
 Self-review: the seven spec checks and ceilings are mapped above; live mechanisms
 are deliberately unresolved where evidence is absent. The strict zero-sharing
