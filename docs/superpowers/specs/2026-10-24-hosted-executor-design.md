@@ -1,6 +1,8 @@
 # Hosted Executor Feasibility Proof
 
-Status: Draft for owner approval. Executor-only approach selected 2026-10-24.
+Status: Owner-approved 2026-10-24, including the proposed isolation difference.
+Executor-only approach selected 2026-10-24. Implementation and activation remain
+separate gates.
 
 ## Intent
 
@@ -179,7 +181,7 @@ production ingress, persistence migration, repair, or publication.
 ## Approval And Delivery Gates
 
 - [x] Owner selected executor-only scope.
-- [ ] Owner approves this design, including the proposed isolation difference.
+- [x] Owner approves this design, including the proposed isolation difference.
 - [ ] Write and approve the implementation plan; use a separate worktree.
 - [ ] Resolve pinned SDK/Alchemy/image compatibility without deploying.
 - [ ] Implement and verify the private harness with universal lint rules.
