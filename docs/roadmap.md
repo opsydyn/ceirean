@@ -22,7 +22,9 @@ worktree has been removed without deleting any source or evidence.
 
 The next bounded slice is **Linux cache-consumer/layout qualification**, including
 missing-artifact refusal and the still-missing Bun/browser metadata requirements.
-Its design and execution need separate approval. Consumer installs/scripts,
+The owner approved drafting the [standalone Linux qualification design](superpowers/specs/2026-10-24-linux-cache-consumer-design.md).
+The written design awaits owner acceptance; implementation planning and execution
+remain separate gates. Consumer installs/scripts,
 extraction, browser execution, image build, private hosted invocation, final image
 digest and hosted activation remain gated; Alchemy migration remains paused.
 
