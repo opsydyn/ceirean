@@ -44,23 +44,23 @@ encoded validated recovery. Test-only fault selection is explicit, scoped to one
 commit and absent from production packages. The harness returns a typed local
 client and owns temporary state, startup and teardown.
 
-- [ ] Write failing integration tests for registration, valid transition,
+- [x] Write failing integration tests for registration, valid transition,
       repeated registration, stale revision, concurrent CAS and run/worker
       cancellation coherence. Compare responses and persisted events to the pure
       policy, not invented success expectations.
-- [ ] Verify the resource graph contains only the isolated Worker/DO and the
+- [x] Verify the resource graph contains only the isolated Worker/DO and the
       pinned Alchemy local test API uses local providers. Run with no credentials,
       no environment files and a non-production stage. Stop if auth is requested.
-- [ ] Run `moon run cloudflare-ledger:test`; capture a meaningful red result
+- [x] Run `moon run cloudflare-ledger:test`; capture a meaningful red result
       before implementing storage, distinguishing test failures from runner errors.
-- [ ] Implement strict wire decoding and snapshot/event persistence in one
+- [x] Implement strict wire decoding and snapshot/event persistence in one
       synchronous DO SQLite transaction. Preserve bounds before commit; validate
       decoded persisted state with existing recovery policy. Assemble dependencies
       once at the owning boundary, using Alchemy's native Effect wrapper.
-- [ ] Add failing tests for fault after snapshot write, malformed JSON, excess
+- [x] Add failing tests for fault after snapshot write, malformed JSON, excess
       fields, oversized payload and corrupt stored state; implement typed failure
       handling and assert no mutation or event append on failed transactions.
-- [ ] Run focused tests, `moon run cloudflare-ledger:typecheck` and
+- [x] Run focused tests, `moon run cloudflare-ledger:typecheck` and
       `bun --no-env-file run check`; inspect diff and commit the verified task.
 
 ## Task 2: Persistent Restart and Generated Parity

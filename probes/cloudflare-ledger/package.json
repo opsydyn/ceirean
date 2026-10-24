@@ -1,0 +1,15 @@
+{
+  "name": "@ceirean/cloudflare-ledger-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ceirean/domain": "workspace:*",
+    "@ceirean/engine": "workspace:*",
+    "@effect/platform-bun": "4.0.5",
+    "alchemy": "2.0.0-beta.83",
+    "effect": "4.0.5"
+  }
+}
