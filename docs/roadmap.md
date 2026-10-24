@@ -24,6 +24,10 @@ hosting and execution appetite still require review.
       scope-owned cancellation/deadline and fail-closed simulated cleanup. See
       [Task 3A evidence](assessments/hosted-executor-lifecycle.md). No provider
       process, private invocation or final executor image is qualified by this.
+- [x] Prepare the signed Queue private-invocation design and bounded offline
+      approval runner. [Evidence and limits](assessments/hosted-executor-invocation.md)
+      retain unconfigured operator trust, hosted-unverified delivery and no
+      Worker/SDK actuation; this does not authorize any hosted activation.
 
 ## Delivery Order
 
