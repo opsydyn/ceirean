@@ -3,10 +3,22 @@ import { expect, test } from 'bun:test';
 import { Effect, Option, Schema } from 'effect';
 
 import { dryRun } from '../src/offline-runner.ts';
-import { inspectPrivateMessage } from '../src/private-invocation.ts';
+import { authenticatePrivateMessage, inspectPrivateMessage } from '../src/private-invocation.ts';
 import { fixture } from './approval-fixtures.ts';
 
 const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
+async function authenticatedReceipt() {
+  const { f, input } = await signedMessage();
+  const checked = authenticatePrivateMessage(input, f.policy, 0);
+  expect(await Effect.runPromise(checked)).toMatchObject({
+    receipt: { sessionId: 'session-1', operationId: 'operation-1' },
+    report: { activation: 'Blocked', approval: 'Matched' },
+  });
+}
+test(
+  'storage routing receives only metadata bound to the verified immutable worksheet',
+  authenticatedReceipt,
+);
 async function signedMessage() {
   const f = await fixture();
   const signed = await f.sign(f.original);

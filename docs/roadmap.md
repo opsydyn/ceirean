@@ -28,6 +28,10 @@ hosting and execution appetite still require review.
       approval runner. [Evidence and limits](assessments/hosted-executor-invocation.md)
       retain unconfigured operator trust, hosted-unverified delivery and no
       Worker/SDK actuation; this does not authorize any hosted activation.
+- [x] Wire local-only Queue inspection through a private Worker and SQLite DO
+      replay receipt, including lost-ack redelivery and separate-process recovery.
+      [Local proof and limits](assessments/local-executor-invocation.md) do not
+      establish hosted authentication, execution admission or activation readiness.
 
 ## Delivery Order
 

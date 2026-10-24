@@ -3,6 +3,10 @@
 Status: **offline contract only; hosted activation blocked**.
 Base: `aa757ab`; date: 2026-10-24.
 
+Follow-up: the [local Queue/replay proof](local-executor-invocation.md) adds
+guarded runtime emulation. The measurements below retain this earlier slice's
+offline scope; neither slice qualifies hosted invocation or executor actuation.
+
 The owner approved the private-invocation/offline-runner slice and selected the
 signed Queue design. See [the design](../superpowers/specs/2026-10-24-private-executor-invocation-design.md)
 for the concrete operator-to-private-Worker transport, alternatives, trust boundary,

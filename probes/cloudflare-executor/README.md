@@ -184,9 +184,11 @@ approval inspection, not a live SDK/private binding or deployable Worker stack.
 
 The owner-selected design is authenticated Cloudflare Queue publication to a
 private Worker, with independently verified signed, session-bound approvals.
-The ingress and dead-letter queues are **proposed, not created**. Installed
-Alchemy beta.83 has the needed Queue APIs, but no queue stack has been compiled,
-emulated or deployed here. Public routes, workers.dev and previews stay disabled.
+The hosted ingress and dead-letter queues remain **proposed, not created**.
+A separate guarded local-runtime stack now exercises Queue delivery and durable
+inspection replay; it has no executor capability. See the
+[local evidence and limits](../../docs/assessments/local-executor-invocation.md).
+Public routes, workers.dev and previews stay disabled.
 See [the design](../../docs/superpowers/specs/2026-10-24-private-executor-invocation-design.md).
 
 The current message accepts only `InspectOfflineApproval` and calls the same

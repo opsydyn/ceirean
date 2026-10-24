@@ -2,9 +2,14 @@
   "name": "@ceirean/cloudflare-executor-probe",
   "private": true,
   "type": "module",
+  "exports": {
+    "./invocation": "./src/private-invocation.ts",
+    "./replay": "./src/replay.ts",
+    "./contract": "./src/contract.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts tests/approval.test.ts tests/private-invocation.test.ts tests/runner-cli.test.ts tests/runner-input.test.ts",
+    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts tests/approval.test.ts tests/private-invocation.test.ts tests/runner-cli.test.ts tests/runner-input.test.ts tests/replay.test.ts",
     "prepare:check": "bun --no-env-file scripts/prepare.ts --check"
   },
   "dependencies": {

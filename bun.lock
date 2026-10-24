@@ -99,6 +99,7 @@
     "probes/cloudflare-ledger": {
       "name": "@ceirean/cloudflare-ledger-probe",
       "dependencies": {
+        "@ceirean/cloudflare-executor-probe": "workspace:*",
         "@ceirean/domain": "workspace:*",
         "@ceirean/engine": "workspace:*",
         "@effect/platform-bun": "4.0.5",

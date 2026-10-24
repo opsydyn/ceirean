@@ -96,9 +96,11 @@ for JSON refusal rather than silently stripped before signature verification.
 
 ## Remaining Gates
 
-No Worker/Queue stack, token, signing-key enrollment, real Queue delivery,
-container adapter, durable execution admission, status/export path or final image
-exists from this slice. Private invocation remains **hosted-unverified**. Final
+A subsequent [local-only proof](../../assessments/local-executor-invocation.md)
+now exercises a guarded Worker/Queue stack and durable inspection replay. No
+hosted stack, token, signing-key enrollment, remote Queue delivery, container
+adapter, durable execution admission, status/export path or final image exists
+from this work. Private invocation remains **hosted-unverified**. Final
 image/payloads, Chromium sandbox safety, provider limits, current cost/entitlement,
 separate build approval and a filled session worksheet remain blockers. Preparing
 this design and validator does not check off the live SDK integration task.

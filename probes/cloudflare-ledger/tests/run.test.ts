@@ -1,16 +1,19 @@
 import { dirname } from 'node:path';
 
 import { BunFileSystem, BunRuntime } from '@effect/platform-bun';
-import { Data, Effect, FileSystem, Match, Result, Schedule } from 'effect';
+import { Data, Effect, FileSystem, Match, Result, Schedule, Schema } from 'effect';
 
+import { prepareInvocation } from './invocation-fixtures.ts';
 import { decodeProcessIds, processIsAlive } from './process-tree.test.ts';
+const invocationArguments = Schema.Tuple([Schema.Literal('--invocation-only')]);
+const isInvocationOnly = Schema.is(invocationArguments);
 
 class ProbeProcessError extends Data.TaggedError('ProbeProcessError')<{
   readonly code: 'SpawnFailed' | 'ExitFailed' | 'StopFailed' | 'ProcessLeak';
   readonly livePids?: ReadonlyArray<number>;
 }> {}
 
-function spawnChild(root: string, suite: string, phase: string) {
+function spawnChild(root: string, suite: string, phase: string, policy: string) {
   const executable = process.execPath;
   const output = Match.value(phase).pipe(
     Match.whenOr('FailStartup', 'FailAssertion', () => 'ignore' as const),
@@ -29,6 +32,7 @@ function spawnChild(root: string, suite: string, phase: string) {
         ALCHEMY_TELEMETRY_DISABLED: '1',
         CEIREAN_LOCAL_DO: '1',
         CEIREAN_DO_PHASE: phase,
+        CEIREAN_INVOCATION_POLICY: policy,
       },
       stdin: 'ignore',
       stdout: output,
@@ -77,7 +81,7 @@ function awaitReaped(recorded: ReadonlyArray<number>) {
   const absence = Effect.suspend(checkAbsence);
   return absence.pipe(Effect.retry({ times: 50, schedule: Schedule.spaced('100 millis') }));
 }
-function runSuite(root: string, file: string, phase: string) {
+function runSuite(root: string, file: string, phase: string, policy = '') {
   function* runGeneration() {
     const fs = yield* FileSystem.FileSystem;
     const evidence = `${root}/owned-processes.json`;
@@ -86,7 +90,7 @@ function runSuite(root: string, file: string, phase: string) {
     yield* fs.remove(failureMarker, { force: true });
     const suite = new URL(file, import.meta.url).pathname;
     const spawning = Effect.try({
-      try: () => spawnChild(root, suite, phase),
+      try: () => spawnChild(root, suite, phase, policy),
       catch: () => new ProbeProcessError({ code: 'SpawnFailed' }),
     });
     const child = yield* Effect.acquireRelease(spawning, stopChild);
@@ -128,13 +132,25 @@ function* runProbe() {
     prefix: 'ceirean-do-',
   });
   yield* fs.chmod(root, 0o700);
-  yield* runSuite(root, './ledger.test.ts', 'Ledger');
-  yield* runSuite(root, './local-only.test.ts', 'Guard');
-  yield* runSuite(root, './properties.test.ts', 'Properties');
-  yield* runSuite(root, './restart.test.ts', 'Seed');
-  yield* runSuite(root, './restart.test.ts', 'Verify');
-  yield* runSuite(root, './failure.test.ts', 'FailStartup');
-  yield* runSuite(root, './failure.test.ts', 'FailAssertion');
+  yield* runSuite(root, './invocation-guard.test.ts', 'InvocationGuard');
+  const first = yield* prepareInvocation(root, 'invocation-main');
+  yield* runSuite(root, './invocation.test.ts', 'Invocation', first);
+  const restarted = yield* prepareInvocation(root, 'invocation-restart');
+  yield* runSuite(root, './invocation.test.ts', 'InvocationSeed', restarted);
+  yield* runSuite(root, './invocation.test.ts', 'InvocationVerify', restarted);
+  const onlyInvocation = isInvocationOnly(Bun.argv.slice(2));
+  const continueLedger = Effect.gen(runLedger);
+  const shouldContinue = Effect.sync(() => !onlyInvocation);
+  yield* continueLedger.pipe(Effect.when(shouldContinue));
+  function* runLedger() {
+    yield* runSuite(root, './ledger.test.ts', 'Ledger');
+    yield* runSuite(root, './local-only.test.ts', 'Guard');
+    yield* runSuite(root, './properties.test.ts', 'Properties');
+    yield* runSuite(root, './restart.test.ts', 'Seed');
+    yield* runSuite(root, './restart.test.ts', 'Verify');
+    yield* runSuite(root, './failure.test.ts', 'FailStartup');
+    yield* runSuite(root, './failure.test.ts', 'FailAssertion');
+  }
 }
 export function main() {
   const program = Effect.gen(runProbe);

@@ -41,3 +41,21 @@ stack refuses non-local mode before resource assembly.
 The response-loss scenario discards the response body without interpreting it;
 it is an application-level lost acknowledgement, not simulated packet loss.
 See [the measured assessment](../../docs/assessments/local-effect-do.md).
+
+## Local Queue Inspection Probe
+
+The full runner also exercises the separate `CeireanLocalInvocation` stack:
+local ingress/dead-letter queues, an inert inspection Worker and SQLite replay
+storage. Run only those four phases with:
+
+```sh
+cd probes/cloudflare-ledger
+bun --no-env-file tests/run.test.ts --invocation-only
+```
+
+The stack refuses non-dev assembly and requires the isolated-test flag. Its
+loopback HTTP bridge and fault hooks are test instrumentation, not production
+endpoints. Every result remains activation `Blocked`; no Sandbox is invoked.
+Synthetic signed approval, post-commit Queue retry, rollback, corruption and
+separate-process recovery are covered. The original ledger tests are unchanged.
+See [the measured scope and remaining gaps](../../docs/assessments/local-executor-invocation.md).
