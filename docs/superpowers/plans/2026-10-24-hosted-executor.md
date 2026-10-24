@@ -108,12 +108,21 @@ executor digest has been qualified. These remain visible activation blockers in
 
 ### Task 3: Own Remote Execution And Cleanup
 
+**Bounded execution split:** Task 3A implements only the simulated-driver
+lifecycle and its offline tests. Task 3B retains the actual SDK/Worker/Alchemy
+stack and approval-validating runner; it is not authorized or completed by 3A.
+The private factory is refined to `makeExecutor(simulationDriver, sessionConfig)`:
+`start(rawRequest)` owns admission internally rather than trusting a serialized
+`Accepted` decision. No public package API changes. See the lifecycle assessment
+for measured evidence and remaining integration work.
+
 **Files:** Create `src/{control,worker}.ts`, `alchemy.run.ts`, `tests/control.test.ts` and `scripts/run-hosted.ts`.
 
-**Interfaces:** `makeExecutor(driver)` exposes inferred Effect operations `start(admittedOperation)`, `inspect(operationId)`, `cancel(operationId)` and `close(sessionId)`. The driver interface is inferred from the concrete adapter implementation, not manually annotated Effect channels. `inspect` distinguishes known-running, known-exited and unknown outcome. `close` returns evidence with `Confirmed | CleanupUnconfirmed`.
+**Interfaces (refined in Task 3A):** `makeExecutor(simulationDriver, sessionConfig)` exposes inferred Effect operations `start(rawRequest)`, `inspect(operationId)`, `cancel(operationId)` and `close(sessionId)`. Admission is internal. The driver interface is inferred from the concrete adapter implementation, not manually annotated Effect channels. One driver claims one non-releasable rehearsal owner; trusted assembly must not create independent drivers for the same authority. This is not distributed admission. `inspect` distinguishes known-running, known-exited and unknown outcome. `close` returns evidence with `Confirmed | CleanupUnconfirmed`.
 
-- [ ] Write failing fake-driver tests for concurrent start, duplicate request, authentication refusal before allocation, start response loss, cancellation with descendants, kill timeout, client disconnect and cleanup response/readback disagreement. Assert an unknown outcome is reconciled against the same operation, never blindly retried as a new execution.
-- [ ] Run focused tests red. Implement the smallest owning Effect service with live dependencies declared once at its boundary. Explicitly separate cancelling a local wait from terminating the remote process and its descendants.
+- [x] Task 3A: Write failing fake-driver tests for concurrent start, duplicate request, authentication refusal before allocation, start response loss, cancellation with descendants, kill timeout, client disconnect and cleanup response/readback disagreement. Assert an unknown outcome is reconciled against the same operation, never blindly retried as a new execution. These are simulated states, not actual process/provider evidence.
+- [x] Task 3A: Run focused tests red. Implement the smallest scope-owned Effect controller with its simulation driver supplied once at construction. Explicitly separate cancelling a local wait from terminating a remote process and its descendants; keep actual termination unqualified.
+- [x] Task 3A: Verify simulated lifecycle, universal lint/format, all 12 workspace typechecks and the full serial test suite; address independent-review findings with failing regressions before fixes. See [measured evidence](../../assessments/hosted-executor-lifecycle.md). This does not complete Task 3B's negative hosted-runner dry-run or live integration.
 - [ ] Integrate the exact Task 1 SDK APIs and private binding in a separate Alchemy stack. Public routes, workers.dev and preview URLs stay disabled. No arbitrary shell HTTP API. Separate credential-free runtime configuration from trusted deployment credentials using Effect Config.
 - [ ] Make the hosted runner refuse absent/mismatched approval worksheet, identity pins, session deadline or cost allowance. Sanitize its environment; never auto-load operational root `.env`. A dry-run validates inputs and prints only a redacted operation plan, performing no cloud calls.
 - [ ] Run fake-driver tests, strict typecheck, root check and a negative dry-run proving missing approval cannot allocate resources. Commit `feat: add private executor lifecycle and fail-closed cleanup`.

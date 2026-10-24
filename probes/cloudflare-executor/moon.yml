@@ -5,7 +5,7 @@ tasks:
     command: bun --bun --no-env-file --no-install run typecheck
     options: { cache: false, retryCount: 0, envFile: false }
   test:
-    command: bun --no-env-file --no-install test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts
+    command: bun --no-env-file --no-install test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts
     options: { cache: false, retryCount: 0, envFile: false }
   prepare-check:
     command: bun --no-env-file --no-install scripts/prepare.ts --check

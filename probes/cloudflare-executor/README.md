@@ -1,6 +1,6 @@
 # Cloudflare Executor Preparation Probe
 
-Private, offline preparation only. No Worker, container, remote SDK adapter or
+Private, offline preparation and simulated lifecycle only. No Worker, container, remote SDK adapter or
 deployment entrypoint exists in this workspace yet. Operational ingress, Flue,
 the application ledger and the Draft Colima replay profile are unchanged.
 
@@ -118,7 +118,8 @@ must fit the execution deadline and the full 15-minute cleanup reserve; recorded
 clock regression cannot reopen a refused expired session. The owning controller
 supplies time, never a request field. This is not distributed admission or a
 replacement for the authoritative ledger. There is deliberately no release/reset
-API before Task 3 can couple it to confirmed lifecycle cleanup.
+API. The simulated controller below also retires the session permanently after
+cleanup; a synthetic confirmation cannot authorize a second hosted allocation.
 
 `makeEvidenceCollector` binds a snapshot of the request, lower-or-equal budgets
 and nonempty required artifact names. It meters chunks without storing their
@@ -136,6 +137,48 @@ not verified content integrity. Finalization seals the collector and emits only
 `Blocked`, `Unverified`, `CleanupUnconfirmed`, activation `Blocked`, with the
 constructor-bound identity. No caller-supplied final identity or cleanup claim
 is accepted by the collector.
+
+## Simulated Lifecycle Ownership
+
+`makeExecutor(simulationDriver, sessionConfig)` is a private Effect scope-owned
+service. `start(rawRequest)` performs admission internally using Effect Clock;
+it never trusts caller-authored admission decisions or resource IDs. The resource
+identity is derived from validated session and operation IDs. `inspect`, `cancel`
+and `close` select only that owned identity. The short reservation lock contains
+no transport waits. Duplicate starts replay a reference without dispatching.
+The driver holds an atomic, non-releasable owner claim, so a second factory call
+with that same driver is refused before any I/O, including after closure. The
+trusted composition root must supply one driver for the rehearsal. This is not
+a global registry across independently constructed drivers or processes; the
+future real adapter still needs authoritative durable/session admission.
+Caller input is decoded and snapshotted once before admission and dispatch.
+
+An owner fiber races the admitted absolute deadline and explicit cancellation,
+including while Start is pending. Interrupting the initial client waiter requests
+owner cleanup; it is not proof that an external process stopped. Scope exit also
+owns teardown. Close is coalesced, and escaped handles cannot reopen a retired
+owner. There is no session reset, concurrent provider owner or durable recovery.
+
+The simulation protocol separates physical state (`Absent`, `Running`, `Exited`)
+from attempt history (`NeverIssued`, `Issued`, `Unknown`) and mutation settlement
+(`Quiescent`, `Uncertain`). Only an absent, never-issued, quiescent identity can
+start. Lost acknowledgement is reconciled by inspection of the same identity,
+never another Start. Cleanup issues Terminate then Destroy, followed by readback.
+Acknowledgements alone are insufficient: confirmation requires successful calls
+and an absent, quiescent observation. Unknown settlement remains
+`CleanupUnconfirmed` even when physical state is absent. Driver replies must match
+the expected action and all three identity fields; malformed replies fail closed.
+
+Each local transport wait is capped at one second; the sequential cleanup path
+has three such waits. These are simulation-controller wait bounds, **not** remote
+termination enforcement or provider latency promises. The driver fixture ignores
+AbortSignal deliberately in hanging cases. No real Linux process descendants,
+Cloudflare cancellation or network disconnect have been qualified by these tests.
+Every public result retains activation `Blocked`. A future real adapter must
+prove attempt/settlement semantics; a `running: false` field cannot invent them.
+
+Task 3A covers this offline contract only. Task 3B's SDK/private binding, Worker,
+Alchemy stack and approval-validating hosted runner do not exist yet.
 
 ## Activation Gates
 

@@ -20,6 +20,10 @@ hosting and execution appetite still require review.
 - [ ] Approve and run a bounded hosted-executor feasibility test with the real
       toolchain, browser evidence, restricted networking and cancellation/cleanup.
       No hosting deployment, webhook activation or Flue migration is implied.
+- [x] Prepare the offline executor lifecycle contract: process-local admission,
+      scope-owned cancellation/deadline and fail-closed simulated cleanup. See
+      [Task 3A evidence](assessments/hosted-executor-lifecycle.md). No provider
+      process, private invocation or final executor image is qualified by this.
 
 ## Delivery Order
 

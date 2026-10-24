@@ -9,13 +9,13 @@ import {
   Timestamp,
 } from './contract.ts';
 
-const SessionConfig = Schema.Struct({
+export const SessionConfig = Schema.Struct({
   sessionId: Identity,
   startsAtMs: Timestamp,
   executionDeadlineMs: Timestamp,
   endsAtMs: Timestamp,
 });
-type SessionConfig = typeof SessionConfig.Type;
+export type SessionConfig = typeof SessionConfig.Type;
 type Refusal =
   | 'InvalidRequest'
   | 'InvalidClock'

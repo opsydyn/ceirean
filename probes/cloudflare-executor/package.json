@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts",
+    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts",
     "prepare:check": "bun --no-env-file scripts/prepare.ts --check"
   },
   "dependencies": {
