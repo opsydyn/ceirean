@@ -10,6 +10,22 @@ not permission to implement unchecked items. The organisation-discovery directio
 is requested by the owner; its architecture, implementation plan, permissions,
 hosting and execution appetite still require review.
 
+## Current Handoff
+
+Local main consolidates the executor preparation chain through `5699d40`, including
+the signed local invocation, trusted source/harness candidates, frozen dependency
+inventory and integrity-checked cache candidates. All other existing local branch
+tips are already contained in that history; remote publication remains separate.
+Existing worktrees with ignored notes or local evidence are intentionally retained,
+not unmerged delivery work. The stale registration for the missing compatibility
+worktree has been removed without deleting any source or evidence.
+
+The next bounded slice is **Linux cache-consumer/layout qualification**, including
+missing-artifact refusal and the still-missing Bun/browser metadata requirements.
+Its design and execution need separate approval. Consumer installs/scripts,
+extraction, browser execution, image build, private hosted invocation, final image
+digest and hosted activation remain gated; Alchemy migration remains paused.
+
 ## Cloudflare Hosting Proof
 
 - [x] Prove the existing Effect ledger policy against local DO SQLite using the
