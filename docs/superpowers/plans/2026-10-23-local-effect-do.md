@@ -74,22 +74,22 @@ owned runtime, confirms its exit, then starts a second process against the same
 temporary persistence root and same DO identity. Expose no reset endpoint that
 could silently invalidate the restart claim.
 
-- [ ] Write a failing restart test that commits run and worker state, stops the
+- [x] Write a failing restart test that commits run and worker state, stops the
       first runtime, restarts and compares recovery, sequence and event records.
       Record distinct process identities; a hot reload is insufficient.
-- [ ] Add a committed-but-unacknowledged response-loss test: retry after restart
+- [x] Add a committed-but-unacknowledged response-loss test: retry after restart
       and assert the existing refusal/conflict outcome with no duplicate event.
-- [ ] Implement the bounded process harness using existing Effect/process
+- [x] Implement the bounded process harness using existing Effect/process
       conventions. Verify failed startup and failed assertions terminate owned
       children; use separate test roots to establish isolation.
-- [ ] Add Effect Arbitrary-based generated valid and stale command sequences:
+- [x] Add Effect Arbitrary-based generated valid and stale command sequences:
       three fixed seeds, 50 sequences per seed, at most 12 commands per sequence.
       Compare replies, canonical state and event sequences after every command.
       Include failure seed and shrunk input in diagnostics; do not replace actual
       workerd assertions with a mocked SQLite implementation.
-- [ ] Run focused tests and typecheck, then repository gates:
+- [x] Run focused tests and typecheck, then repository gates:
       `bun --no-env-file run check`, `moon run :typecheck`, `moon run :test`.
-- [ ] Document exact versions, commands, results and local-only evidence limits.
+- [x] Document exact versions, commands, results and local-only evidence limits.
       Mark any blocked acceptance criterion explicitly. Review the whole diff and
       commit the verified task; do not push or deploy as part of this slice.
 

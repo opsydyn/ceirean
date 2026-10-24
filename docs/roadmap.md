@@ -5,10 +5,21 @@ remain unchanged. Historical evidence and source identities below are retained.
 The next live step is an explicitly approved, finite session using the
 [rehearsal worksheet](runbooks/ceirean-rehearsal-approval.md), not deployment.
 
-Local delivery map, updated 2026-10-22. Checkboxes describe delivered outcomes,
+Local delivery map, updated 2026-10-24. Checkboxes describe delivered outcomes,
 not permission to implement unchecked items. The organisation-discovery direction
 is requested by the owner; its architecture, implementation plan, permissions,
 hosting and execution appetite still require review.
+
+## Cloudflare Hosting Proof
+
+- [x] Prove the existing Effect ledger policy against local DO SQLite using the
+      pinned Alchemy runtime: atomic transitions, 150 generated command sequences,
+      separate-process restart recovery and supervised failure cleanup. See
+      [the measured local assessment](assessments/local-effect-do.md). This is not
+      native filesystem/WAL parity or production storage qualification.
+- [ ] Approve and run a bounded hosted-executor feasibility test with the real
+      toolchain, browser evidence, restricted networking and cancellation/cleanup.
+      No hosting deployment, webhook activation or Flue migration is implied.
 
 ## Delivery Order
 

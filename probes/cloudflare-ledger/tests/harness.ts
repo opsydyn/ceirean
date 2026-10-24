@@ -7,6 +7,7 @@ import * as Test from 'alchemy/Test/Bun';
 import { Config, Effect, Match, Result, Schema } from 'effect';
 
 import Stack from '../alchemy.run.ts';
+import { recordOwnedProcesses } from './process-tree.test.ts';
 
 export const local = Test.make({
   providers: Cloudflare.providers(),
@@ -19,10 +20,23 @@ function* startLocal() {
     Match.when('1', () => Effect.void),
     Match.orElse(() => Effect.die('Use the isolated test runner')),
   );
-  return yield* local.deploy(Stack);
+  const deployed = yield* local.deploy(Stack);
+  yield* recordOwnedProcesses();
+  return deployed;
 }
 export const deployed = local.beforeAll(Effect.gen(startLocal));
-local.afterAll(local.destroy(Stack));
+function* closeLocal() {
+  const phase = yield* Config.String('CEIREAN_DO_PHASE');
+  const teardown = Match.value(phase).pipe(
+    Match.when('Seed', () =>
+      Effect.logInfo('Preserving local deployment metadata for restart; test scopes still close'),
+    ),
+    Match.orElse(() => local.destroy(Stack)),
+  );
+  yield* teardown;
+}
+local.afterAll(Effect.gen(closeLocal));
+local.afterEach(Effect.gen(recordOwnedProcesses));
 
 export function request(path: string, name: string, body?: string) {
   function* sendRequest() {
