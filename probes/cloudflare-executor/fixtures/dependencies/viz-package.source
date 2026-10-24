@@ -1,0 +1,324 @@
+{
+  "name": "@opsydyn/foldkit-viz",
+  "version": "0.10.0",
+  "description": "D3-quality visualisation primitives for FoldKit — no D3 dependency.",
+  "keywords": [
+    "charts",
+    "d3",
+    "effect",
+    "elm-architecture",
+    "foldkit",
+    "svg",
+    "visualisation"
+  ],
+  "bugs": {
+    "url": "https://github.com/opsydyn/fold-kit-experiments/issues"
+  },
+  "license": "MIT",
+  "author": "Alan P Currie",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opsydyn/fold-kit-experiments.git",
+    "directory": "packages/foldkit-viz"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "typesVersions": {
+    "*": {
+      "interaction/selection": [
+        "./dist/interaction/selection.d.mts"
+      ],
+      "math/scale": [
+        "./dist/math/scale.d.mts"
+      ],
+      "shape/path": [
+        "./dist/shape/path.d.mts"
+      ],
+      "shape/arc": [
+        "./dist/shape/arc.d.mts"
+      ],
+      "shape/area": [
+        "./dist/shape/area.d.mts"
+      ],
+      "shape/line": [
+        "./dist/shape/line.d.mts"
+      ],
+      "shape/pie": [
+        "./dist/shape/pie.d.mts"
+      ],
+      "shape/lineRadial": [
+        "./dist/shape/lineRadial.d.mts"
+      ],
+      "shape/stack": [
+        "./dist/shape/stack.d.mts"
+      ],
+      "shape/chord": [
+        "./dist/shape/chord.d.mts"
+      ],
+      "shape/sankey": [
+        "./dist/shape/sankey.d.mts"
+      ],
+      "math/color": [
+        "./dist/math/color.d.mts"
+      ],
+      "math/stats": [
+        "./dist/math/stats.d.mts"
+      ],
+      "hierarchy": [
+        "./dist/hierarchy.d.mts"
+      ],
+      "simulation": [
+        "./dist/simulation.d.mts"
+      ],
+      "stateflow": [
+        "./dist/stateflow.d.mts"
+      ],
+      "math/zoom": [
+        "./dist/math/zoom.d.mts"
+      ],
+      "math/bin": [
+        "./dist/math/bin.d.mts"
+      ],
+      "shape/symbol": [
+        "./dist/shape/symbol.d.mts"
+      ],
+      "shape/link": [
+        "./dist/shape/link.d.mts"
+      ],
+      "math/time": [
+        "./dist/math/time.d.mts"
+      ],
+      "math/format": [
+        "./dist/math/format.d.mts"
+      ],
+      "math/schemes": [
+        "./dist/math/schemes.d.mts"
+      ],
+      "math/random": [
+        "./dist/math/random.d.mts"
+      ],
+      "math/ease": [
+        "./dist/math/ease.d.mts"
+      ],
+      "math/contour": [
+        "./dist/math/contour.d.mts"
+      ],
+      "math/delaunay": [
+        "./dist/math/delaunay.d.mts"
+      ],
+      "shape/geo": [
+        "./dist/shape/geo.d.mts"
+      ],
+      "math/array": [
+        "./dist/math/array.d.mts"
+      ],
+      "math/brush": [
+        "./dist/math/brush.d.mts"
+      ],
+      "shape/areaRadial": [
+        "./dist/shape/areaRadial.d.mts"
+      ],
+      "math/tween": [
+        "./dist/math/tween.d.mts"
+      ],
+      "chart/cartesian": [
+        "./dist/chart/cartesian.d.mts"
+      ],
+      "chart/theme": [
+        "./dist/chart/theme.d.mts"
+      ],
+      "foldkit/cartesian": [
+        "./dist/foldkit/cartesian.d.mts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./interaction/selection": {
+      "types": "./dist/interaction/selection.d.mts",
+      "import": "./dist/interaction/selection.mjs"
+    },
+    "./math/scale": {
+      "types": "./dist/math/scale.d.mts",
+      "import": "./dist/math/scale.mjs"
+    },
+    "./shape/path": {
+      "types": "./dist/shape/path.d.mts",
+      "import": "./dist/shape/path.mjs"
+    },
+    "./shape/arc": {
+      "types": "./dist/shape/arc.d.mts",
+      "import": "./dist/shape/arc.mjs"
+    },
+    "./shape/area": {
+      "types": "./dist/shape/area.d.mts",
+      "import": "./dist/shape/area.mjs"
+    },
+    "./shape/line": {
+      "types": "./dist/shape/line.d.mts",
+      "import": "./dist/shape/line.mjs"
+    },
+    "./shape/pie": {
+      "types": "./dist/shape/pie.d.mts",
+      "import": "./dist/shape/pie.mjs"
+    },
+    "./shape/lineRadial": {
+      "types": "./dist/shape/lineRadial.d.mts",
+      "import": "./dist/shape/lineRadial.mjs"
+    },
+    "./shape/stack": {
+      "types": "./dist/shape/stack.d.mts",
+      "import": "./dist/shape/stack.mjs"
+    },
+    "./shape/chord": {
+      "types": "./dist/shape/chord.d.mts",
+      "import": "./dist/shape/chord.mjs"
+    },
+    "./shape/sankey": {
+      "types": "./dist/shape/sankey.d.mts",
+      "import": "./dist/shape/sankey.mjs"
+    },
+    "./math/color": {
+      "types": "./dist/math/color.d.mts",
+      "import": "./dist/math/color.mjs"
+    },
+    "./math/stats": {
+      "types": "./dist/math/stats.d.mts",
+      "import": "./dist/math/stats.mjs"
+    },
+    "./hierarchy": {
+      "types": "./dist/hierarchy.d.mts",
+      "import": "./dist/hierarchy.mjs"
+    },
+    "./simulation": {
+      "types": "./dist/simulation.d.mts",
+      "import": "./dist/simulation.mjs"
+    },
+    "./stateflow": {
+      "types": "./dist/stateflow.d.mts",
+      "import": "./dist/stateflow.mjs"
+    },
+    "./math/zoom": {
+      "types": "./dist/math/zoom.d.mts",
+      "import": "./dist/math/zoom.mjs"
+    },
+    "./math/bin": {
+      "types": "./dist/math/bin.d.mts",
+      "import": "./dist/math/bin.mjs"
+    },
+    "./shape/symbol": {
+      "types": "./dist/shape/symbol.d.mts",
+      "import": "./dist/shape/symbol.mjs"
+    },
+    "./shape/link": {
+      "types": "./dist/shape/link.d.mts",
+      "import": "./dist/shape/link.mjs"
+    },
+    "./math/time": {
+      "types": "./dist/math/time.d.mts",
+      "import": "./dist/math/time.mjs"
+    },
+    "./math/format": {
+      "types": "./dist/math/format.d.mts",
+      "import": "./dist/math/format.mjs"
+    },
+    "./math/schemes": {
+      "types": "./dist/math/schemes.d.mts",
+      "import": "./dist/math/schemes.mjs"
+    },
+    "./math/random": {
+      "types": "./dist/math/random.d.mts",
+      "import": "./dist/math/random.mjs"
+    },
+    "./math/ease": {
+      "types": "./dist/math/ease.d.mts",
+      "import": "./dist/math/ease.mjs"
+    },
+    "./math/contour": {
+      "types": "./dist/math/contour.d.mts",
+      "import": "./dist/math/contour.mjs"
+    },
+    "./math/delaunay": {
+      "types": "./dist/math/delaunay.d.mts",
+      "import": "./dist/math/delaunay.mjs"
+    },
+    "./shape/geo": {
+      "types": "./dist/shape/geo.d.mts",
+      "import": "./dist/shape/geo.mjs"
+    },
+    "./math/array": {
+      "types": "./dist/math/array.d.mts",
+      "import": "./dist/math/array.mjs"
+    },
+    "./math/brush": {
+      "types": "./dist/math/brush.d.mts",
+      "import": "./dist/math/brush.mjs"
+    },
+    "./shape/areaRadial": {
+      "types": "./dist/shape/areaRadial.d.mts",
+      "import": "./dist/shape/areaRadial.mjs"
+    },
+    "./math/tween": {
+      "types": "./dist/math/tween.d.mts",
+      "import": "./dist/math/tween.mjs"
+    },
+    "./chart/cartesian": {
+      "types": "./dist/chart/cartesian.d.mts",
+      "import": "./dist/chart/cartesian.mjs"
+    },
+    "./chart/theme": {
+      "types": "./dist/chart/theme.d.mts",
+      "import": "./dist/chart/theme.mjs"
+    },
+    "./foldkit/cartesian": {
+      "types": "./dist/foldkit/cartesian.d.mts",
+      "import": "./dist/foldkit/cartesian.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "check": "NODE_OPTIONS=\"--experimental-strip-types\" oxlint . && oxfmt --check .",
+    "check:fix": "oxfmt . && NODE_OPTIONS=\"--experimental-strip-types\" oxlint --fix .",
+    "docs": "typedoc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "bun-types": "^1.3.14",
+    "effect": "4.0.0",
+    "fast-check": "^4.8.0",
+    "foldkit": "0.165.0",
+    "tsdown": "^0.21.8",
+    "typedoc": "^0.28.19",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "effect": ">=4.0.0 <5.0.0",
+    "foldkit": ">=0.165.0 <0.166.0"
+  },
+  "peerDependenciesMeta": {
+    "effect": {
+      "optional": true
+    },
+    "foldkit": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

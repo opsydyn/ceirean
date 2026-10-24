@@ -40,6 +40,10 @@ hosting and execution appetite still require review.
       preserving all tracked files/modes and requiring explicit blocked browser
       startup. [Evidence and gaps](assessments/offline-executor-inputs.md) retain
       pending caches, dependency closure, image build and all hosted acceptance.
+- [x] Freeze the Linux-targeted Bun/npm/browser metadata inventory, including
+      nested versions, exact URL/integrity pairs, generated-template resolution
+      and explicit unqualified runtime/cache gates.
+      [Evidence and limits](assessments/frozen-linux-dependencies.md).
 
 ## Delivery Order
 

@@ -231,6 +231,12 @@ of verified payloads. [Measured scope](../../docs/assessments/hosted-executor-in
 
 ## Activation Gates
 
+The [Linux dependency inventory](../../docs/assessments/frozen-linux-dependencies.md)
+freezes 661 unique registry URL/integrity pairs from independently hash-pinned
+Bun/npm/browser snapshots. Its read-only `check-dependencies.ts --check` exits 2
+with activation blocked. Registry artifacts, cache materialization, native and
+packed-consumer acceptance remain separate; no resolver runs in that check.
+
 Offline source/harness preparation now produces local candidate archives from
 the pinned historical Git tree, with byte identities, original executable modes
 and a source-only browser harness. See [scope, commands and remaining gates](../../docs/assessments/offline-executor-inputs.md).

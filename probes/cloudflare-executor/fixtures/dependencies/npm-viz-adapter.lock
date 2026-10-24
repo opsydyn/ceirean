@@ -1,0 +1,91 @@
+{
+  "name": "ceirean-viz-adapter-inventory",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "ceirean-viz-adapter-inventory",
+      "dependencies": {
+        "@opsydyn/foldkit-viz": "file:./vendor/foldkit-viz",
+        "effect": "4.0.0",
+        "foldkit": "0.165.0"
+      }
+    },
+    "node_modules/@effect/platform-browser": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/@effect/platform-browser/-/platform-browser-4.0.0.tgz",
+      "integrity": "sha512-OHo7EPpF3RVPiI+mjoU9yd05LdCdKPjzDXqs5wRgF9CsdVvwN76B0zgt54DxPUcvMYri1tVJOtLCVnK0tRkNQQ==",
+      "license": "MIT",
+      "peer": true,
+      "peerDependencies": {
+        "effect": "^4.0.0"
+      }
+    },
+    "node_modules/@opsydyn/foldkit-viz": {
+      "resolved": "vendor/foldkit-viz",
+      "link": true
+    },
+    "node_modules/effect": {
+      "version": "4.0.0",
+      "resolved": "https://registry.npmjs.org/effect/-/effect-4.0.0.tgz",
+      "integrity": "sha512-ooc1TG5t+FfzgYnFz2ff6BBKyZ7EwBRVXC7c4RhQUAD6/TZ2gTXXMeb4WX7a19ozQo4J73/QW+S00YAIresoMQ==",
+      "license": "MIT"
+    },
+    "node_modules/entities": {
+      "version": "8.1.0",
+      "resolved": "https://registry.npmjs.org/entities/-/entities-8.1.0.tgz",
+      "integrity": "sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==",
+      "license": "BSD-2-Clause",
+      "engines": {
+        "node": ">=20.19.0"
+      },
+      "funding": {
+        "url": "https://github.com/fb55/entities?sponsor=1"
+      }
+    },
+    "node_modules/foldkit": {
+      "version": "0.165.0",
+      "resolved": "https://registry.npmjs.org/foldkit/-/foldkit-0.165.0.tgz",
+      "integrity": "sha512-ue0DVJvRtb6PnF4SbW/qWJIEuseXxaPHEiQX1iiG1Nk2n5BUMD0KYjsm741HsboAJlJPojzSvyG9HXwzpVUQmw==",
+      "license": "MIT",
+      "dependencies": {
+        "parse5": "^8.0.1"
+      },
+      "engines": {
+        "node": ">=20.19.0"
+      },
+      "peerDependencies": {
+        "@effect/platform-browser": "4.0.0",
+        "effect": "4.0.0"
+      }
+    },
+    "node_modules/parse5": {
+      "version": "8.0.1",
+      "resolved": "https://registry.npmjs.org/parse5/-/parse5-8.0.1.tgz",
+      "integrity": "sha512-z1e/HMG90obSGeidlli3hj7cbocou0/wa5HacvI3ASx34PecNjNQeaHNo5WIZpWofN9kgkqV1q5YvXe3F0FoPw==",
+      "license": "MIT",
+      "dependencies": {
+        "entities": "^8.0.0"
+      },
+      "funding": {
+        "url": "https://github.com/inikulin/parse5?sponsor=1"
+      }
+    },
+    "vendor/foldkit-viz": {
+      "name": "@opsydyn/foldkit-viz",
+      "version": "0.10.0",
+      "peerDependencies": {
+        "effect": ">=4.0.0 <5.0.0",
+        "foldkit": ">=0.165.0 <0.166.0"
+      },
+      "peerDependenciesMeta": {
+        "effect": {
+          "optional": true
+        },
+        "foldkit": {
+          "optional": true
+        }
+      }
+    }
+  }
+}

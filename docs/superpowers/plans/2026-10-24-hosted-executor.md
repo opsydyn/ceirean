@@ -135,6 +135,10 @@ for measured evidence and remaining integration work.
       candidates, with source-byte/mode validation, nonzero journey discovery and an
       unconditional execution guard. See [measured scope](../../assessments/offline-executor-inputs.md).
       This does not complete the cache, extraction, hosted browser or safety cases below.
+- [x] Freeze the Linux candidate registry inventory from the historical Bun lock,
+      separate metadata-only npm resolution snapshots and pinned browser libraries.
+      [Evidence](../../assessments/frozen-linux-dependencies.md) does not qualify cache
+      contents, packed artifacts, native installs or any hosted/browser execution.
 
 **Files:** Extend Task 4A's preparation files and README; create `tests/{baseline,network,lifecycle}.hosted.ts`.
 

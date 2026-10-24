@@ -1,0 +1,33 @@
+{
+  "name": "ceirean-viz-pure-inventory",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "ceirean-viz-pure-inventory",
+      "dependencies": {
+        "@opsydyn/foldkit-viz": "file:./vendor/foldkit-viz"
+      }
+    },
+    "node_modules/@opsydyn/foldkit-viz": {
+      "resolved": "vendor/foldkit-viz",
+      "link": true
+    },
+    "vendor/foldkit-viz": {
+      "name": "@opsydyn/foldkit-viz",
+      "version": "0.10.0",
+      "peerDependencies": {
+        "effect": ">=4.0.0 <5.0.0",
+        "foldkit": ">=0.165.0 <0.166.0"
+      },
+      "peerDependenciesMeta": {
+        "effect": {
+          "optional": true
+        },
+        "foldkit": {
+          "optional": true
+        }
+      }
+    }
+  }
+}
