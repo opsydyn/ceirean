@@ -102,7 +102,42 @@ Do not restart Colima, create a builder, push a workflow,
 publish an image or spend money under preparation authority. Package credentials
 must stay in a trusted retrieval service, never consumer commands or the payload.
 
-## Activation Remains Blocked
+## Offline Admission And Evidence Contracts
+
+`src/contract.ts` fixes the six probe operation names and source revision. It
+rejects arbitrary argv, caller-selected sandbox IDs, extra fields and requests
+above the 10 MiB command / 512 MiB exported-evidence ceilings. The wider outcome
+vocabulary exists for future hosted reporting, but the current offline manifest
+cannot claim `Feasible`, verified integrity or enabled activation.
+
+`makeAdmissionGate` owns one **process-local** atomic reservation using Effect
+Ref. Exact duplicate IDs replay only the existing reference, including after
+expiry; replay is not permission to start or restart work. Conflicting ID reuse
+is refused. A different operation cannot take the occupied slot. New reservations
+must fit the execution deadline and the full 15-minute cleanup reserve; recorded
+clock regression cannot reopen a refused expired session. The owning controller
+supplies time, never a request field. This is not distributed admission or a
+replacement for the authoritative ledger. There is deliberately no release/reset
+API before Task 3 can couple it to confirmed lifecycle cleanup.
+
+`makeEvidenceCollector` binds a snapshot of the request, lower-or-equal budgets
+and nonempty required artifact names. It meters chunks without storing their
+payloads. Per-command output bytes and reserved artifact sizes share the total
+export budget, so concurrent opens cannot oversubscribe it. It also bounds file
+and command metadata counts to 64 each. Duplicate/unsafe/special entries,
+over-budget chunks, missing required artifacts and incomplete files fail closed;
+a rejected collector cannot be reset by retrying a smaller chunk.
+
+The caller must check each returned Result **before** forwarding bytes to a
+storage sink, and apply backpressure rather than queueing unbounded pending
+Effects. These contracts do not implement a stream reader, writer, file export,
+hash verifier or archive extractor. A claimed SHA-256 is syntax-checked metadata,
+not verified content integrity. Finalization seals the collector and emits only
+`Blocked`, `Unverified`, `CleanupUnconfirmed`, activation `Blocked`, with the
+constructor-bound identity. No caller-supplied final identity or cleanup claim
+is accepted by the collector.
+
+## Activation Gates
 
 Private authenticated operator invocation and the final executor image digest
 remain independent blockers, alongside pending payloads, offline acceptance,
