@@ -32,6 +32,10 @@ hosting and execution appetite still require review.
       replay receipt, including lost-ack redelivery and separate-process recovery.
       [Local proof and limits](assessments/local-executor-invocation.md) do not
       establish hosted authentication, execution admission or activation readiness.
+- [x] Close local invocation coverage gaps: direct DO authorization refusal,
+      concurrent same-object RPC submissions and bridge byte/UTF-8 boundaries.
+      [Scope and mutation checks](assessments/local-executor-invocation.md#coverage-follow-up)
+      retain all hosted activation gates.
 
 ## Delivery Order
 

@@ -128,12 +128,21 @@ function* construct() {
       yield* queue.send(packet);
       return encode({ _tag: 'PublishedLocally', activation: 'Blocked' });
     }
+    function* overlap() {
+      const responses = yield* Effect.all([object.accept(content), object.accept(content)], {
+        concurrency: 2,
+      });
+      const decisions = yield* Effect.forEach(responses, (response) => decodeDecision(response));
+      return encode({ decisions, activation: 'Blocked' });
+    }
     const readingStats = Ref.get(stats).pipe(Effect.map(encode));
     const missing = Effect.succeed(encode({ _tag: 'NotFound', activation: 'Blocked' }));
     const action = Match.value(url.pathname).pipe(
       Match.when('/publish', () => Effect.gen(publish)),
       Match.when('/state', () => object.read()),
       Match.when('/stats', () => readingStats),
+      Match.when('/inspect', () => object.accept(content)),
+      Match.when('/overlap', () => Effect.gen(overlap)),
       Match.when('/fault', () => object.accept(content, true)),
       Match.when('/corrupt', () => object.corrupt()),
       Match.orElse(() => missing),

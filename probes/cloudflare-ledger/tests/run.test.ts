@@ -133,6 +133,8 @@ function* runProbe() {
   });
   yield* fs.chmod(root, 0o700);
   yield* runSuite(root, './invocation-guard.test.ts', 'InvocationGuard');
+  const concurrent = yield* prepareInvocation(root, 'invocation-concurrency');
+  yield* runSuite(root, './invocation.test.ts', 'InvocationConcurrency', concurrent);
   const first = yield* prepareInvocation(root, 'invocation-main');
   yield* runSuite(root, './invocation.test.ts', 'Invocation', first);
   const restarted = yield* prepareInvocation(root, 'invocation-restart');

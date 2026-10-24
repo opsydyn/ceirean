@@ -46,7 +46,7 @@ See [the measured assessment](../../docs/assessments/local-effect-do.md).
 
 The full runner also exercises the separate `CeireanLocalInvocation` stack:
 local ingress/dead-letter queues, an inert inspection Worker and SQLite replay
-storage. Run only those four phases with:
+storage. Run only those five phases with:
 
 ```sh
 cd probes/cloudflare-ledger
@@ -56,6 +56,8 @@ bun --no-env-file tests/run.test.ts --invocation-only
 The stack refuses non-dev assembly and requires the isolated-test flag. Its
 loopback HTTP bridge and fault hooks are test instrumentation, not production
 endpoints. Every result remains activation `Blocked`; no Sandbox is invoked.
-Synthetic signed approval, post-commit Queue retry, rollback, corruption and
-separate-process recovery are covered. The original ledger tests are unchanged.
+Synthetic signed approval, direct DO authorization refusal, concurrent same-object
+RPC submissions, bridge byte/UTF-8 limits, post-commit Queue retry, rollback,
+corruption and separate-process recovery are covered. The original ledger tests
+are unchanged. `/inspect` and `/overlap` are local test routes, not a hosted API.
 See [the measured scope and remaining gaps](../../docs/assessments/local-executor-invocation.md).

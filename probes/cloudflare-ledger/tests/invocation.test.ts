@@ -8,6 +8,17 @@ const decodeRestart = Schema.decodeUnknownSync(Schema.fromJsonString(Restart));
 
 function* mainCases() {
   const f = yield* fixtureData;
+  expect((yield* request('stats', ' '.repeat(131072))).status).toBe(200);
+  expect((yield* request('stats', ' '.repeat(131073))).status).toBe(422);
+  expect((yield* request('stats', new Uint8Array([0xc3, 0x28]))).status).toBe(422);
+  expect((yield* request('stats', new Uint8Array([0xe2, 0x82]))).status).toBe(422);
+  for (const packet of ['{}', f.expired, f.invalidSignature]) {
+    expect((yield* request('inspect', packet)).status).toBe(422);
+    expect(decodeJson((yield* request('state')).content)).toMatchObject({
+      state: { _tag: 'Empty' },
+      eventCount: 0,
+    });
+  }
   yield* request('publish', '{}');
   yield* request('publish', f.expired);
   const denied = yield* waitFor('refused', 2);
@@ -38,6 +49,26 @@ function* mainCases() {
   expect((yield* request('state')).status).toBe(422);
   expect((yield* request('fault', f.valid)).status).toBe(422);
 }
+function* concurrentCalls() {
+  const f = yield* fixtureData;
+  const response = yield* request('overlap', f.valid);
+  expect(response.status).toBe(200);
+  expect(decodeJson(response.content)).toMatchObject({
+    decisions: expect.arrayContaining([
+      expect.objectContaining({ disposition: 'Recorded', activation: 'Blocked' }),
+      expect.objectContaining({ disposition: 'Replay', activation: 'Blocked' }),
+    ]),
+  });
+  expect(decodeJson((yield* request('state')).content)).toMatchObject({
+    state: { _tag: 'Recorded' },
+    eventCount: 1,
+    activation: 'Blocked',
+  });
+  expect(decodeJson((yield* request('inspect', f.valid)).content)).toMatchObject({
+    disposition: 'Replay',
+    activation: 'Blocked',
+  });
+}
 function* seed() {
   const f = yield* fixtureData;
   yield* request('publish', f.valid);
@@ -66,6 +97,7 @@ invocation.test(
     yield* Match.value(phase).pipe(
       Match.when('InvocationSeed', () => Effect.gen(seed)),
       Match.when('InvocationVerify', () => Effect.gen(verify)),
+      Match.when('InvocationConcurrency', () => Effect.gen(concurrentCalls)),
       Match.orElse(() => Effect.gen(mainCases)),
     );
   }),

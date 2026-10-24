@@ -1,4 +1,4 @@
-import { Clock, Effect, FileSystem, Schema } from 'effect';
+import { Clock, Effect, FileSystem, Match, Schema } from 'effect';
 
 import { fixture } from '../../cloudflare-executor/tests/approval-fixtures.ts';
 
@@ -8,6 +8,7 @@ export const InvocationFixture = Schema.Struct({
   conflict: Schema.String,
   busy: Schema.String,
   expired: Schema.String,
+  invalidSignature: Schema.String,
 });
 export const decodeInvocationFixture = Schema.decodeUnknownSync(
   Schema.fromJsonString(InvocationFixture),
@@ -30,20 +31,25 @@ export function prepareInvocation(root: string, sessionId: string) {
       approvalExpiresAtMs: now + 2699000,
     };
     const policy = { ...f.policy, sessionId };
-    function signed(value: unknown) {
+    function signed(value: unknown, invalidSignature = false) {
       function* makePacket() {
         const packet = yield* Effect.promise(() => f.sign(value));
+        const approval = Match.value(invalidSignature).pipe(
+          Match.when(true, () => ({ ...packet.approval, signature: '0'.repeat(128) })),
+          Match.orElse(() => packet.approval),
+        );
         return encode({
           schemaVersion: 1,
           purpose: 'InspectOfflineApproval',
           worksheet: packet.text,
-          approval: packet.approval,
+          approval,
         });
       }
       const operation = Effect.gen(makePacket);
       return operation;
     }
     const valid = yield* signed(base);
+    const invalidSignature = yield* signed(base, true);
     const conflict = yield* signed({ ...base, request: { ...base.request, durationMs: 2000 } });
     const busy = yield* signed({
       ...base,
@@ -63,7 +69,7 @@ export function prepareInvocation(root: string, sessionId: string) {
     const fs = yield* FileSystem.FileSystem;
     yield* fs.writeFileString(
       `${root}/invocation-fixture.json`,
-      encode({ policy, valid, conflict, busy, expired }),
+      encode({ policy, valid, conflict, busy, expired, invalidSignature }),
     );
     return encode(policy);
   }

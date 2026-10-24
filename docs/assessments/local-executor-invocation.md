@@ -77,12 +77,9 @@ original record before redelivery, then observes `Replay` with zero new records.
 This is not simulated persistence within one Ref or one workerd instance.
 
 Independent review found no blocking security or correctness issues. It also
-independently ran the focused tests and full local runtime runner. Three remaining
-test gaps are deliberately not claimed as proof: overlapping same-object RPC
-admission (the Queue consumer is serialized), direct DO refusal of invalid or
-expired envelopes independently of consumer refusal, and runtime rejection of
-oversized/malformed-UTF-8 bridge bodies. These are follow-up hardening coverage,
-not hosted readiness. Pure replay laws cover 300 generated sequences.
+independently ran the focused tests and full local runtime runner. That review
+identified three nonblocking coverage gaps, addressed in the follow-up below.
+Pure replay laws cover 300 generated sequences.
 
 Final repository-wide measurements:
 
@@ -99,3 +96,34 @@ Final repository-wide measurements:
 The proposed hosted image, payloads, private invocation entitlement,
 remote deadlines/cancellation, provider caps and session/build approvals remain
 unresolved. No deployment, spending, merge, push or operational activation.
+
+## Coverage Follow-Up
+
+Approved follow-up from `ad08ed6`, on the same isolated branch:
+
+- The loopback-only `/inspect` route invokes the DO directly, without consumer
+  verification or fault injection. Malformed, correctly signed expired, and
+  structurally valid bad-signature packets each return 422 and leave Empty state
+  with zero events. A valid request later returns `Replay`, proving the route is
+  not merely rejecting everything.
+- A separate fresh-session runtime phase submits two same-stub RPC Effects with
+  concurrency 2 through `/overlap`. Results contain one `Recorded` and one
+  `Replay`; persisted state has exactly one event. This bypasses the serialized
+  Queue consumer to test competing RPC submissions, not parallel SQL execution.
+- Requests to `/stats` accept exactly 131072 bytes and reject 131073 bytes,
+  malformed UTF-8 and truncated UTF-8 with 422. Using a non-JSON route prevents
+  JSON parsing from masking missing byte/decoding guards. Temporary off-by-one
+  and permissive-decoder mutations each made the matching runtime assertion fail;
+  both guards were restored afterward.
+
+The new bridge routes initially returned `NotFound`; tests failed before wiring
+them. The focused invocation runner now has five phases, retaining the original
+Queue retry, corruption, rollback and separate-process recovery checks. All
+routes remain private test instrumentation in a guarded local stack. No executor
+capability, hosted authentication, cost approval or deployment authority is added.
+
+Follow-up verification: root lint/format and all 12 workspace typechecks passed.
+The full serial test suite passed all 12 tasks in 9m 47.522s, retaining all 3000
+native refinement cases and all seven original ledger phases alongside the five
+invocation phases. Every owned local runtime process was reaped. Independent
+source review found no actionable issues; that reviewer did not rerun tests.

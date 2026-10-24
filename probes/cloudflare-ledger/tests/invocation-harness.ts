@@ -53,7 +53,7 @@ invocation.afterAll(
     );
   }),
 );
-export function request(route: string, body?: string) {
+export function request(route: string, body?: string | Uint8Array<ArrayBuffer>) {
   function* send() {
     const { url } = yield* deployed;
     const response = yield* Effect.tryPromise((signal) =>
