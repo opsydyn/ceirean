@@ -4,6 +4,10 @@ Task 4A of the [hosted executor plan](../superpowers/plans/2026-10-24-hosted-exe
 2026-10-24. This delivers an offline recipe/contract harness, not a built image,
 populated dependency cache, browser journey or hosted executor.
 
+Follow-up: [offline source and browser-harness preparation](offline-executor-inputs.md)
+adds local source candidates, real blob/mode validation and non-activating browser
+test discovery. The measurements below preserve this earlier recipe-only scope.
+
 ## Delivered Boundary
 
 Private `probes/cloudflare-executor` workspace, using only already-pinned Effect

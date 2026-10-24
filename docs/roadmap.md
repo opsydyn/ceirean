@@ -36,6 +36,10 @@ hosting and execution appetite still require review.
       concurrent same-object RPC submissions and bridge byte/UTF-8 boundaries.
       [Scope and mutation checks](assessments/local-executor-invocation.md#coverage-follow-up)
       retain all hosted activation gates.
+- [x] Prepare offline historical-source and browser-harness-source candidates,
+      preserving all tracked files/modes and requiring explicit blocked browser
+      startup. [Evidence and gaps](assessments/offline-executor-inputs.md) retain
+      pending caches, dependency closure, image build and all hosted acceptance.
 
 ## Delivery Order
 

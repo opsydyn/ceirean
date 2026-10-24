@@ -231,6 +231,14 @@ of verified payloads. [Measured scope](../../docs/assessments/hosted-executor-in
 
 ## Activation Gates
 
+Offline source/harness preparation now produces local candidate archives from
+the pinned historical Git tree, with byte identities, original executable modes
+and a source-only browser harness. See [scope, commands and remaining gates](../../docs/assessments/offline-executor-inputs.md).
+The harness lists four cases but refuses actual execution before browser launch.
+Its installed dependency closure, consumer caches, extraction and actual browser
+acceptance remain pending; these candidates do not change the baseline manifest
+or authorize source transfer, image build or hosted activation.
+
 Private authenticated operator invocation and the final executor image digest
 remain independent blockers, alongside pending payloads, offline acceptance,
 Chromium sandbox viability, provider limits and the session approval worksheet.

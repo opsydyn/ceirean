@@ -131,6 +131,11 @@ for measured evidence and remaining integration work.
 
 ### Task 4B: Connect Prepared Inputs To Hosted Cases
 
+- [x] Approved offline subset: prepare pinned-tree source and browser-harness-source
+      candidates, with source-byte/mode validation, nonzero journey discovery and an
+      unconditional execution guard. See [measured scope](../../assessments/offline-executor-inputs.md).
+      This does not complete the cache, extraction, hosted browser or safety cases below.
+
 **Files:** Extend Task 4A's preparation files and README; create `tests/{baseline,network,lifecycle}.hosted.ts`.
 
 **Interfaces:** Consume Task 4A's preparation manifest, Task 3's admitted operations and Task 2's evidence. Hosted cases require the resolved final image and payload hashes at activation; a pending image value must fail closed. Never invoke the SDK through a second control path.

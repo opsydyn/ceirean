@@ -9,11 +9,12 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts tests/approval.test.ts tests/private-invocation.test.ts tests/runner-cli.test.ts tests/runner-input.test.ts tests/replay.test.ts",
+    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts tests/approval.test.ts tests/private-invocation.test.ts tests/runner-cli.test.ts tests/runner-input.test.ts tests/replay.test.ts tests/payload.test.ts tests/payload-archive.test.ts tests/browser-policy.test.ts tests/harness-discovery.test.ts tests/prepare-inputs-cli.test.ts tests/source-membership.test.ts tests/browser-redirect.test.ts",
     "prepare:check": "bun --no-env-file scripts/prepare.ts --check"
   },
   "dependencies": {
     "@effect/platform-bun": "4.0.5",
+    "@playwright/test": "1.64.1",
     "effect": "4.0.5"
   }
 }

@@ -139,7 +139,7 @@ function isSafeComponent(part: string) {
 
 export function isSafeArchivePath(path: string) {
   const parts = path.split('/');
-  return path.length <= 512 && /^[A-Za-z0-9_@.+/-]+$/.test(path) && parts.every(isSafeComponent);
+  return path.length <= 512 && /^[A-Za-z0-9_@.+/[\]-]+$/.test(path) && parts.every(isSafeComponent);
 }
 
 const entryContent = Schema.String.check(Schema.isMaxLength(1048576));
