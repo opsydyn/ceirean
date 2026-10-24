@@ -251,6 +251,12 @@ Chromium sandbox viability, provider limits and the session approval worksheet.
 Image-build approval binds reviewed recipe/input hashes and the trusted builder;
 it does not authorize hosted deployment or execution.
 
+Local integrity-checked cache candidates now contain the frozen registry blob
+set and private npm content/metadata cache, with size budgets and no-lockfile
+offline metadata replay. See [evidence, commands and limits](../../docs/assessments/integrity-checked-cache-candidates.md).
+These are not extracted Bun caches, Linux installation or browser acceptance;
+preparation payload fields stay pending and hosted activation remains blocked.
+
 See [the implementation plan](../../docs/superpowers/plans/2026-10-24-hosted-executor.md)
 and [preflight](../../docs/assessments/hosted-executor-preflight.md).
 

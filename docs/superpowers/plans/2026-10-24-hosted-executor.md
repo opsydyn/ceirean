@@ -139,6 +139,10 @@ for measured evidence and remaining integration work.
       separate metadata-only npm resolution snapshots and pinned browser libraries.
       [Evidence](../../assessments/frozen-linux-dependencies.md) does not qualify cache
       contents, packed artifacts, native installs or any hosted/browser execution.
+- [x] Prepare bounded, integrity-checked registry blob/npm cache candidates and
+      replay all three inert metadata profiles offline from no lockfile.
+      [Local evidence](../../assessments/integrity-checked-cache-candidates.md) retains
+      Bun layout, Linux installs, extraction, browser and hosted activation gates.
 
 **Files:** Extend Task 4A's preparation files and README; create `tests/{baseline,network,lifecycle}.hosted.ts`.
 

@@ -44,6 +44,10 @@ hosting and execution appetite still require review.
       nested versions, exact URL/integrity pairs, generated-template resolution
       and explicit unqualified runtime/cache gates.
       [Evidence and limits](assessments/frozen-linux-dependencies.md).
+- [x] Prepare integrity-checked registry/cache candidates with fixed size budgets
+      and no-lockfile offline npm metadata replay. Keep Linux/Bun cache consumer,
+      extraction, browser and hosted activation gates unqualified.
+      [Local evidence](assessments/integrity-checked-cache-candidates.md).
 
 ## Delivery Order
 

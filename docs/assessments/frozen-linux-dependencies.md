@@ -1,5 +1,9 @@
 # Frozen Linux Dependency Inventory
 
+Follow-up: [integrity-checked local cache candidates](integrity-checked-cache-candidates.md)
+now have measured byte verification and offline metadata replay; the original
+inventory-only scope and remaining activation gates below remain historical evidence.
+
 2026-10-24, follow-up from `1ffb971`. Status: **inventory frozen; hosted
 activation blocked**. This freezes metadata and retrieval expectations, not
 installed dependencies, cache archives or Linux/browser acceptance.

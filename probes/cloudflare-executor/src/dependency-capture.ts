@@ -36,7 +36,13 @@ function readOutput(stream: Stream.Stream<Uint8Array, unknown>, maximum: number)
   const workflow = Effect.gen(collect);
   return workflow;
 }
-function invokeResolver(node: string, args: readonly string[], home: string, cwd: string) {
+export function invokeResolver(
+  node: string,
+  args: readonly string[],
+  home: string,
+  cwd: string,
+  cache = `${home}/cache`,
+) {
   function* run() {
     const child = yield* ChildProcess.make(node, args, {
       cwd,
@@ -54,7 +60,7 @@ function invokeResolver(node: string, args: readonly string[], home: string, cwd
         GIT_CONFIG_COUNT: '1',
         GIT_CONFIG_KEY_0: 'protocol.allow',
         GIT_CONFIG_VALUE_0: 'never',
-        NPM_CONFIG_CACHE: `${home}/cache`,
+        NPM_CONFIG_CACHE: cache,
         NPM_CONFIG_USERCONFIG: `${home}/user.npmrc`,
         NPM_CONFIG_GLOBALCONFIG: `${home}/global.npmrc`,
         NPM_CONFIG_IGNORE_SCRIPTS: 'true',
@@ -80,7 +86,7 @@ function invokeResolver(node: string, args: readonly string[], home: string, cwd
   const scoped = Effect.scoped(bounded);
   return scoped;
 }
-function writeEmptyConfig(home: string) {
+export function writeEmptyConfig(home: string) {
   function* write() {
     const fs = yield* FileSystem.FileSystem;
     yield* fs.writeFileString(`${home}/user.npmrc`, '', { flag: 'wx', mode: 0o600 });
