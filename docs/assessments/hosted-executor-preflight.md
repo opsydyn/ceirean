@@ -1,7 +1,9 @@
 # Hosted Executor Preflight
 
-Decision: **Blocked at Task 1**, 2026-10-24. Input/preparation sequencing and an
-unresolved authenticated operator invocation path block continuation, not a
+Current decision, 2026-10-24: **PreparationAllowed; ActivationBlocked** under the
+owner-approved sequencing amendment. Trusted recipe and offline harness work may
+proceed. Private authenticated invocation and the final custom executor image
+digest remain independent blockers before hosted activation. Neither is a
 demonstrated incompatibility between Cloudflare and Effect.
 
 Inspected Ceirean base `952fa12`, installed Alchemy `2.0.0-beta.83`, and FoldKit
@@ -98,7 +100,7 @@ The FoldKit commit is present locally. Static source inspection establishes:
 This is a prerequisite inventory, not an exhaustive cache manifest, historical CI
 runtime reconstruction, executed baseline, test count or browser acceptance result.
 
-## Why The Gate Stops Here
+## Original Stop Decision
 
 Task 1 requires a fully resolved immutable executor image and exact toolchain
 identities before scaffolding. The trusted custom recipe and artifact preparation
@@ -111,18 +113,20 @@ Colima or substitute the Cloudflare managed Node 24 image for the historical
 Node 22 contract. No account eligibility or authenticated invocation proof was
 obtained, and no final image manifest was invented to pass the gate.
 
-Tasks 2-6 remain unstarted under the plan's explicit stop rule.
+The original preflight in `dfc1887` stopped under that plan. No runtime
+implementation or hosted activation was performed by the assessment.
 
-## Recommended Unblock
+## Approved Sequencing Amendment
 
-Approve a narrow sequencing amendment: choose exact compatible Node 22/Git and
+The owner approved the narrow amendment: choose exact compatible Node 22/Git and
 controller-owned Playwright/Chromium pins, then author and locally validate the
 trusted image recipe and offline harness **before requiring the final image
 digest**. Label these fresh qualification pins, not recovered historical facts.
 Keep the final digest mandatory before any hosted execution.
 
-This amendment would permit preparation only, not a `Proceed` result for Task 1.
-Before that gate can pass, concretely document the operator-to-Worker transport,
+The amended plan separates preparation permission from activation readiness. Run
+Task 4A before Tasks 2/3/4B; none of these offline tasks authorizes deployment.
+Before the private invocation gate can pass, concretely document the operator-to-Worker transport,
 authentication and authorization boundary, required resources and support in the
 pinned provider/runtime APIs. Disabling URLs and declaring service bindings alone
 do not satisfy that requirement. Account eligibility remains a separate live
@@ -132,7 +136,10 @@ Prefer a trusted Linux amd64 CI image builder over reviving the throwaway local
 VM setup. Build only reviewed Ceirean-owned image inputs; do not execute consumer
 scripts with cloud credentials. Image publication needs its own bounded approval,
 and the later hosted session still needs the filled cost/time/permission worksheet.
-This recommendation does not authorize a workflow push, image upload or spending.
+This amendment does not authorize a workflow push, image upload or spending.
+The reviewed recipe/input hashes and builder identity support a separate bounded
+build approval. That build produces the final image digest; only afterward may a
+hosted session worksheet reference it. A build approval is not a session approval.
 
 ## Verification And Review
 

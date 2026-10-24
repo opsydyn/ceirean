@@ -10,6 +10,15 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-24-hosted-executor-design.md`
 
+## Approved Execution Order
+
+Owner-approved amendment, 2026-10-24: **1 -> 4A -> 2 -> 3 -> 4B -> 5 -> 6**.
+Task numbers are retained to preserve the preflight evidence and earlier review.
+Static inspection now permits trusted recipe and offline harness preparation.
+It is not hosted readiness: **private invocation and the final custom executor
+image digest remain independent blockers before any hosted activation**.
+Build/upload and hosted session approvals remain separate, as described in Task 5.
+
 ## Global Constraints
 
 - Only `opsydyn/fold-kit-experiments` at `b7484cb46e66b162c8afddcfba235c9507b4f0ab`; baseline-only, no candidate patch.
@@ -28,13 +37,13 @@
 
 1. Duplicate or concurrent control requests must not create a second active job; Task 2 tests admission races.
 2. A disconnected caller or ambiguous remote response must not cause blind command replay; Task 3 tests reconciliation and teardown.
-3. HTTP denial is not proof of DNS/raw-socket denial; Task 4 records each network channel separately and blocks unexpected egress.
-4. A screenshot can exist despite broken interactions or page errors; Task 4 requires assertions, trace and console evidence for every journey.
+3. HTTP denial is not proof of DNS/raw-socket denial; Task 4B records each network channel separately and blocks unexpected egress.
+4. A screenshot can exist despite broken interactions or page errors; Task 4B requires assertions, trace and console evidence for every journey.
 5. A successful destroy response is not proof of cleanup; Tasks 3 and 5 require independent access/readback checks and preserve `CleanupUnconfirmed`.
 
 ## File Map
 
-- `docs/assessments/hosted-executor-preflight.md`: exact compatibility evidence and blockers, before any scaffold.
+- `docs/assessments/hosted-executor-preflight.md`: static compatibility evidence, preparation permission and unresolved activation blockers.
 - `probes/cloudflare-executor/{package.json,tsconfig.json,moon.yml,README.md}` and `.moon/workspace.yml`: private workspace and safe offline commands.
 - `probes/cloudflare-executor/alchemy.run.ts`: isolated stack, private control binding, image/container configuration; never imports operational infrastructure.
 - `src/contract.ts`: strict input/output schemas, fixed operations and budgets.
@@ -42,7 +51,8 @@
 - `src/control.ts`: trusted Effect service owning SDK integration and resource scopes.
 - `src/worker.ts`: authenticated private entrypoint exposing only predefined operations.
 - `src/evidence.ts`: streaming budgets, safe artifact names and evidence manifest validation.
-- `image/Dockerfile` and `fixtures/baseline.json`: trusted image and exact historical input/command inventory.
+- `image/Dockerfile` and `fixtures/baseline.json`: trusted image recipe and exact input/command inventory, with new qualification pins labeled separately from historical pins.
+- `src/preparation.ts` and `tests/preparation.test.ts`: offline source/artifact validation and recipe prerequisite checks, independent of a live SDK adapter.
 - `tests/{contract,admission,control,evidence}.test.ts`: offline deterministic/property tests.
 - `tests/{baseline,network,lifecycle}.hosted.ts`: explicit hosted cases, never auto-discovered by normal tests.
 - `scripts/{prepare,run-hosted}.ts`: trusted preparation and explicitly activated session runner.
@@ -53,28 +63,39 @@ Paths below are relative to `probes/cloudflare-executor/` unless fully qualified
 
 ### Task 1: Resolve Compatibility And Pin The Baseline
 
-Outcome, 2026-10-24: **Blocked**. See
-`docs/assessments/hosted-executor-preflight.md`. Native Alchemy/container support
-is present, but the final custom image/toolchain identities require preparation
-scheduled later in this plan. Authenticated operator-to-Worker invocation also
-remains unresolved and is an independent Task 1 blocker. No Task 2 scaffold or
-paid operation has started. Owner approval of a narrow sequencing amendment would
-permit preparation only; it would not satisfy the private invocation gate.
+Initial outcome, 2026-10-24: **Blocked**, recorded in `dfc1887`. The subsequently
+approved amendment permits Task 4A offline preparation using the static native
+Alchemy/container evidence. No live compatibility, private invocation or final
+executor digest has been qualified. These remain visible activation blockers in
+`docs/assessments/hosted-executor-preflight.md`, not reasons to fabricate pins.
 
 **Files:** Create `docs/assessments/hosted-executor-preflight.md`. No package edits, installs, deployment or cloud mutation in this task.
 
-**Interfaces:** Produces a documented `Proceed` or `Blocked` decision, with source references and exact identities. Task 2 consumes only a `Proceed` decision; a failure ends execution and returns the blocker to the owner.
+**Interfaces:** Produces separate preparation and activation decisions. `PreparationAllowed` permits Tasks 4A/2 and offline implementation of 3/4B only; `ActivationBlocked` retains each unresolved prerequisite. An actual incompatible provider/API premise is `PreparationBlocked` for affected implementation and must be reported, not worked around implicitly.
 
-- [ ] Inspect the installed `packages/infrastructure/node_modules/alchemy` container/image/private-binding APIs and pinned provider implementation. Record exact paths and exports, not inferred support from newer online examples.
-- [ ] Read current official Sandbox generation, process, network, security and lifecycle docs. Resolve a compatible exact SDK/image pair from primary metadata without installing it. Determine whether local image construction is required; if so, explicitly identify a bounded trusted builder rather than reviving the previous local VM effort implicitly.
-- [ ] Verify the historical Git commit exists; statically inventory manifests, lockfile, fixture installs, root commands and browser targets without executing consumer scripts. Resolve historical Bun/Node/Git/Playwright/Chromium identities and all offline artifact requirements.
-- [ ] Record the supported private invocation/authentication path, provider resource caps and remote cancellation/termination/readback mechanisms. Distinguish documented support from account eligibility, which remains a session gate. Lack of enforceable required caps or supported private control yields `Blocked`.
-- [ ] Review the evidence against every spec prerequisite. If any identity or provider mechanism remains unresolved, commit a `Blocked` assessment and stop; do not scaffold an alternative toolchain or weaken a control.
-- [ ] Verify `git diff --check` and root `bun --no-env-file run check`; commit `docs: resolve hosted executor compatibility gate`.
+- [x] Inspect the installed `packages/infrastructure/node_modules/alchemy` container/image/private-binding APIs and pinned provider implementation; record exact paths and exports in the assessment.
+- [x] Read current official SDK/native process/network/lifecycle docs and public SDK/helper metadata. Candidate SDK 1.0.3 and its helper digest are recorded, not installed or compile-qualified.
+- [x] Verify the historical Git commit and record the prerequisite manifest/lockfile/fixture inventory without executing consumer scripts. Unpinned toolchain choices and full offline artifacts move to Task 4A.
+- [x] Record documented resource/cancellation mechanisms and the unresolved authenticated invocation path. Private invocation, final image identity and live eligibility remain activation blockers.
+- [x] Record the initial stop decision, review finding and the owner-approved preparation-only amendment. Do not weaken a control or silently substitute a deployment tool.
+- [x] Verify root check/diff checks and commit the initial preflight as `dfc1887`; this is documentation evidence, not hosted qualification.
+
+### Task 4A: Prepare Trusted Recipe And Offline Harness First
+
+**Files:** Create workspace config, `image/Dockerfile`, `fixtures/baseline.json`, `src/preparation.ts`, `tests/preparation.test.ts`, `scripts/prepare.ts` and README; modify `.moon/workspace.yml` and `bun.lock` for admitted offline dependencies only.
+
+**Interfaces:** `PreparationManifest` records the fixed source SHA, exact toolchain/SDK/helper/base inputs, recipe hash, fixed command inventory and artifact requirements. Distinguish a not-yet-built image from a resolved final digest; a preparation manifest can never serve as activation approval. `validatePreparation(input)` returns inferred Effect validation results with concrete missing prerequisites. `prepare --check` reads reviewed inputs and validates the manifest without building, fetching dependencies, invoking consumer scripts or accessing cloud credentials.
+
+- [ ] Select exact compatible Node 22, Git and controller-owned Playwright/Chromium pins from primary metadata and label them new qualification choices; retain historical Bun 1.3.11 and the recorded baseline. Pin linux/amd64 helper/base inputs by digest. Do not report chosen versions as reconstructed CI runtime facts.
+- [ ] Write failing preparation tests for wrong source/version, missing digest-bound inputs, floating tags, archive traversal/symlink escape, credential-bearing tracked inputs, absent offline consumer artifacts and unapproved redirect destinations. Assert that a valid recipe without a final image is preparation-only, never activation-ready. Use property tests for path and manifest invariants where sensible.
+- [ ] Run the named preparation tests red, then implement pure validators and the non-mutating `prepare --check` path using Effect Schema/Config conventions. Create only the minimal private workspace scaffolding required for those tests; do not install a live SDK merely to type a pure manifest.
+- [ ] Author the reviewed trusted image recipe and fixed command/journey inventory. Preserve root checks and nested npm/bun fixture installs; inventory those offline requirements explicitly. Include Chromium sandbox-enabled verification requirements; no fallback flags, silent fixture skips or arbitrary consumer instructions in the trusted build environment.
+- [ ] Document the proposed trusted Linux amd64 builder and its credential isolation. No builder creation, workflow push, Docker start, image build/upload or consumer execution in this task. Missing artifact payloads stay pending, not marked prepared because their names are listed.
+- [ ] Run preparation tests, workspace typecheck, root check and `git diff --check`; commit `feat: prepare trusted executor recipe and offline harness`.
 
 ### Task 2: Build Offline Admission And Evidence Contracts
 
-**Files:** Create workspace config, `src/{contract,admission,evidence}.ts`, `tests/{contract,admission,evidence}.test.ts`; modify `.moon/workspace.yml` and `bun.lock` only for admitted exact dependencies.
+**Files:** Extend Task 4A's workspace with `src/{contract,admission,evidence}.ts` and `tests/{contract,admission,evidence}.test.ts`; modify `bun.lock` only for admitted exact dependencies.
 
 **Interfaces:** `contract.ts` exports schemas/types `ProbeRequest`, `ProbeManifest`, `ProbeOutcome` and fixed operation names `Baseline`, `NetworkDenial`, `CancelTree`, `Deadline`, `Disconnect`, `Isolation`. Outcomes are `Feasible | Blocked | Inconclusive`; cleanup is `Confirmed | CleanupUnconfirmed`. `admit(request, session)` returns a tagged admission decision. `makeEvidenceCollector(limits)` returns bounded collection operations. Effects infer their channels.
 
@@ -82,7 +103,7 @@ permit preparation only; it would not satisfy the private invocation gate.
 - [ ] Write failing `contract.test.ts` tests rejecting arbitrary argv, source revisions other than the approved SHA, caller-chosen sandbox IDs, unknown fields and expanded budgets. Fixed command definitions are controller-owned, never supplied by repository instructions.
 - [ ] Write failing `evidence.test.ts` cases for traversal, absolute names, duplicate artifact names, special entries, malformed manifests, missing required artifacts and streaming output limits at 10 MiB/512 MiB plus one byte. Accept limits exactly; refuse before unbounded buffering. Use generated path/chunk cases where sensible.
 - [ ] Run `moon run cloudflare-executor:test`; confirm the new tests fail for missing behavior, not an unrelated install/config failure.
-- [ ] Implement schemas and pure decisions using existing Effect conventions. Normal tests run only named offline files, with no cloud calls or credential reads. Add the Moon workspace entry and strict source typechecking; do not copy the ledger declaration exception.
+- [ ] Implement schemas and pure decisions using existing Effect conventions and Task 4A's input manifest. Normal tests run only named offline files, with no cloud calls or credential reads. Retain strict source typechecking; do not copy the ledger declaration exception. Refuse activation while private invocation or final image digest is unresolved.
 - [ ] Run focused tests, `moon run cloudflare-executor:typecheck`, root check and `git diff --check`; commit `feat: add bounded executor admission and evidence contracts`.
 
 ### Task 3: Own Remote Execution And Cleanup
@@ -97,13 +118,13 @@ permit preparation only; it would not satisfy the private invocation gate.
 - [ ] Make the hosted runner refuse absent/mismatched approval worksheet, identity pins, session deadline or cost allowance. Sanitize its environment; never auto-load operational root `.env`. A dry-run validates inputs and prints only a redacted operation plan, performing no cloud calls.
 - [ ] Run fake-driver tests, strict typecheck, root check and a negative dry-run proving missing approval cannot allocate resources. Commit `feat: add private executor lifecycle and fail-closed cleanup`.
 
-### Task 4: Prepare Real Toolchain And Hosted Cases
+### Task 4B: Connect Prepared Inputs To Hosted Cases
 
-**Files:** Create `image/Dockerfile`, `fixtures/baseline.json`, `scripts/prepare.ts`, `tests/{baseline,network,lifecycle}.hosted.ts` and `README.md`.
+**Files:** Extend Task 4A's preparation files and README; create `tests/{baseline,network,lifecycle}.hosted.ts`.
 
-**Interfaces:** Baseline inventory contains the SHA, immutable image identity, exact tool versions, dependency artifact hashes, command argv/cwd pairs and required journey artifacts. Hosted cases use Task 3's admitted operations and Task 2's validated evidence; they never invoke the SDK through a second control path.
+**Interfaces:** Consume Task 4A's preparation manifest, Task 3's admitted operations and Task 2's evidence. Hosted cases require the resolved final image and payload hashes at activation; a pending image value must fail closed. Never invoke the SDK through a second control path.
 
-- [ ] Add offline failing tests for source archive traversal/symlink escape, credential-bearing tracked input, missing cache artifacts, unapproved redirect destinations and changing network policy mid-operation. Pin rejection behavior in the contract before implementing preparation.
+- [ ] Extend Task 4A's tests for resolved payload mismatch and attempted network policy change mid-operation. Retain its source/artifact/redirect rejection cases rather than duplicate validators.
 - [ ] Implement trusted source validation and registry/artifact preparation. Never run consumer scripts in the trusted controller or image builder with credentials. Build tools/browser are pre-provisioned; record exact provenance. A missing artifact stops offline execution.
 - [ ] Implement the unchanged root frozen install/check/typecheck/test/build, Storybook and packed consumer/template checks from the historical inventory. Assert nonzero test discovery and unchanged baseline source. Do not use current FoldKit checkout commands by assumption.
 - [ ] Implement the two fixed journeys at 1440x900 and 390x844: carousel buttons/desktop and mobile drag-settle, promo line point edit/settings consistency. Require interaction assertions, screenshots, trace, console/page-error inventory, deterministic inputs and proof Chromium sandboxing is enabled.
@@ -117,7 +138,10 @@ permit preparation only; it would not satisfy the private invocation gate.
 **Interfaces:** The filled worksheet is the sole activation input to Task 3's runner: exact account/stage, authenticated operator, approved image/toolchain/source/harness hashes, commands, resource tier/enforcement, cost bound, absolute start/deadline, cleanup owner and resource inventory. Unfilled or expired fields are refused, not defaulted.
 
 - [ ] Write and exercise offline worksheet tests for absent approval, stale/hash-mismatched artifacts, invalid timing, excessive budgets, unsupported caps and unconfirmed cleanup from a previous session.
-- [ ] Document trusted build/upload, authenticated invocation, evidence export, stop conditions and teardown/recovery commands against the chosen pinned APIs. Inventory billable residual resources and account entitlement without provisioning; credentials stay outside source and chat.
+- [ ] Close the private invocation blocker with a concrete operator transport, authentication/authorization, required resources and pinned API support; test rejection before allocation. Disabled URLs or service binding declarations alone are insufficient. Do not deploy to discover an unreviewed authentication workaround.
+- [ ] Prepare a separate image-build approval section: reviewed recipe/input hashes, trusted builder identity, credentials boundary, resource/time/cost limits, publication destinations and cleanup. It must not require the not-yet-built final digest. Stop for approval before any build/upload; perform only that approved preparation and record the resulting final image digest and payload hashes. This approval does not authorize probe deployment or execution.
+- [ ] Validate the final digest against the approved recipe/build provenance and exact SDK/helper inputs. Only then complete the hosted worksheet with that immutable image identity. Pending, missing or mismatched identity keeps activation blocked.
+- [ ] Document authenticated invocation, evidence export, stop conditions and teardown/recovery against the pinned APIs. Inventory billable residual resources and account entitlement without provisioning; credentials stay outside source and chat.
 - [ ] Calculate a conservative bound from current official pricing, including build/upload, compute, storage and residual resources. State which bounds are technically enforced and which require operator action. Seek a revised allowance rather than pretending USD 5 is a provider cap.
 - [ ] Run root `bun --no-env-file run check`, `moon run :typecheck` and `moon run :test --concurrency 1`. Preserve existing property counts and timeouts. Inspect the full diff; obtain independent review if an authorized reviewer tool exists, otherwise explicitly disclose author-only review.
 - [ ] Commit `docs: prepare bounded hosted executor rehearsal`. Present the filled worksheet and measured offline results; stop for owner approval. No deploy, upload or paid build is implied by a completed implementation plan.
@@ -136,10 +160,11 @@ permit preparation only; it would not satisfy the private invocation gate.
 
 ## Self-Review
 
-All spec sections map to Tasks 1-6: compatibility/baseline (1), schemas/budgets
-(2), ownership and cancellation (3), preparation/browser/network/isolation (4),
-approval/cost/security review (5), hosted evidence and teardown (6). Review Focus
-items have explicit tests in their owning tasks. Exact SDK-dependent signatures
-are intentionally settled by the blocking first task, not guessed in advance.
-This plan does not assume they are supported. Inline execution was selected in
-the preceding slice; preserve that method unless the owner changes it.
+All spec sections map to Tasks 1/4A/2/3/4B/5/6: static compatibility (1), trusted
+recipe/offline prerequisites (4A), schemas/budgets (2), ownership/cancellation (3),
+browser/network/isolation cases (4B), build and activation gates (5), measured
+hosted evidence/teardown (6). Review Focus items have tests in their owning tasks.
+Exact SDK-dependent signatures are checked against pinned inputs during offline
+implementation, not guessed. Private invocation and the final executor digest
+remain independent blockers before hosted activation. The preparation-only
+amendment does not waive either gate. Inline execution remains selected.

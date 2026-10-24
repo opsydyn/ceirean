@@ -58,11 +58,22 @@ No model or GitHub credentials are needed for this baseline-only proof.
 
 Keep Alchemy at `2.0.0-beta.83`; its upgrade remains paused. Before implementation,
 inspect its installed container support and the current Sandbox package/types.
-Resolve an exact SDK version with a matching immutable container image digest and
-record both. Do not mix SDK generations or use floating image tags in execution.
+The owner-approved sequencing amendment, 2026-10-24, permits trusted image recipe
+and offline harness preparation after this static inspection. Pin the SDK and
+helper/base image inputs while preparing; resolve and record the final custom
+executor image digest after a separately approved build and before any hosted
+activation. A helper/base digest is never the final executor digest. Do not mix
+SDK generations or use floating image tags in execution.
 Prefer the current documented SDK generation for new work, subject to compatibility
 with the pinned Alchemy provider. If unsupported, report the exact blocker before
 upgrading Alchemy or substituting another deployment tool.
+
+Private invocation remains an independent activation blocker: document and verify
+the operator transport, authentication/authorization, required resources and pinned
+API support before deploying or invoking the hosted probe. Offline preparation
+does not satisfy that blocker or authorize an unauthenticated endpoint. A failed
+compatibility premise still stops affected implementation; the amendment moves
+preparation earlier, not security checks later than activation.
 
 Cloudflare documents a microVM boundary, but processes inside a sandbox have
 root-equivalent capabilities. A Linux UID does not preserve the existing Colima
@@ -84,6 +95,9 @@ consumer fixtures and commands; do not use the current checkout's tool versions.
 Pin the historical repository's exact Bun, Node, Git, Playwright, Chromium, fonts,
 architecture and harness identities. Ceirean's current Bun 1.4.2 is not a reason
 to replace the historical runtime. Unresolved exact versions block execution.
+Where the historical source did not pin a Node patch, Git or browser toolchain,
+choose compatible exact qualification pins and label them as new choices, not
+reconstructed historical facts. Keep the consumer source and its Bun pin unchanged.
 
 Transfer only an inventoried source artifact with validated paths, file types,
 symlinks and digest. Exclude local untracked inputs by construction; reject
