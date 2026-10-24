@@ -1,0 +1,9 @@
+**
+!image/
+!image/Dockerfile
+!payload/
+!payload/source.tar
+!payload/bun-cache.tar
+!payload/npm-cache.tar
+!payload/browser-harness.tar
+!payload/SHA256SUMS

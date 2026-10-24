@@ -89,6 +89,13 @@
         "valibot": "1.5.0",
       },
     },
+    "probes/cloudflare-executor": {
+      "name": "@ceirean/cloudflare-executor-probe",
+      "dependencies": {
+        "@effect/platform-bun": "4.0.5",
+        "effect": "4.0.5",
+      },
+    },
     "probes/cloudflare-ledger": {
       "name": "@ceirean/cloudflare-ledger-probe",
       "dependencies": {
@@ -178,6 +185,8 @@
     "@aws/lambda-invoke-store": ["@aws/lambda-invoke-store@0.3.0", "", {}, "sha512-sl4Bm6yiMNYrZKkqqDFWN0UfnWhlS8ivKxrYl+6t0gCLrqr8y3B2IqZZbFRkfaVVp7C/baApyh71P+LeE1A2sQ=="],
 
     "@babel/runtime": ["@babel/runtime@7.29.10", "", {}, "sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA=="],
+
+    "@ceirean/cloudflare-executor-probe": ["@ceirean/cloudflare-executor-probe@workspace:probes/cloudflare-executor"],
 
     "@ceirean/cloudflare-ledger-probe": ["@ceirean/cloudflare-ledger-probe@workspace:probes/cloudflare-ledger"],
 

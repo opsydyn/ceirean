@@ -1,0 +1,14 @@
+{
+  "name": "@ceirean/cloudflare-executor-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts",
+    "prepare:check": "bun --no-env-file scripts/prepare.ts --check"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "4.0.5",
+    "effect": "4.0.5"
+  }
+}

@@ -11,3 +11,4 @@ projects:
   migration-storage: packages/migration-storage
   colima-readiness: probes/colima-readiness
   cloudflare-ledger: probes/cloudflare-ledger
+  cloudflare-executor: probes/cloudflare-executor

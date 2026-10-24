@@ -143,6 +143,9 @@ hosted session worksheet reference it. A build approval is not a session approva
 
 ## Verification And Review
 
+The subsequent [Task 4A preparation evidence](hosted-executor-preparation.md)
+records the new private offline harness. It does not satisfy activation gates.
+
 Independent documentation review identified the need to retain private invocation
 as a distinct blocker in the amendment. That clarification is included above.
 The reviewer did not verify SDK compilation, public metadata authenticity,
