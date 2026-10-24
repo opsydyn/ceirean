@@ -53,6 +53,14 @@ Paths below are relative to `probes/cloudflare-executor/` unless fully qualified
 
 ### Task 1: Resolve Compatibility And Pin The Baseline
 
+Outcome, 2026-10-24: **Blocked**. See
+`docs/assessments/hosted-executor-preflight.md`. Native Alchemy/container support
+is present, but the final custom image/toolchain identities require preparation
+scheduled later in this plan. Authenticated operator-to-Worker invocation also
+remains unresolved and is an independent Task 1 blocker. No Task 2 scaffold or
+paid operation has started. Owner approval of a narrow sequencing amendment would
+permit preparation only; it would not satisfy the private invocation gate.
+
 **Files:** Create `docs/assessments/hosted-executor-preflight.md`. No package edits, installs, deployment or cloud mutation in this task.
 
 **Interfaces:** Produces a documented `Proceed` or `Blocked` decision, with source references and exact identities. Task 2 consumes only a `Proceed` decision; a failure ends execution and returns the blocker to the owner.
