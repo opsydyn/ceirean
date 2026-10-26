@@ -9,7 +9,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts tests/approval.test.ts tests/private-invocation.test.ts tests/runner-cli.test.ts tests/runner-input.test.ts tests/replay.test.ts tests/payload.test.ts tests/payload-archive.test.ts tests/browser-policy.test.ts tests/harness-discovery.test.ts tests/prepare-inputs-cli.test.ts tests/source-membership.test.ts tests/browser-redirect.test.ts tests/dependency-inventory.test.ts tests/dependency-capture.test.ts tests/dependency-cli.test.ts tests/cache-download.test.ts tests/cache-metadata.test.ts tests/cache-replay.test.ts tests/cache-candidate.test.ts tests/cache-cli.test.ts",
+    "test": "bun --no-env-file test tests/preparation.test.ts tests/prepare-cli.test.ts tests/contract.test.ts tests/admission.test.ts tests/evidence.test.ts tests/control.test.ts tests/approval.test.ts tests/private-invocation.test.ts tests/runner-cli.test.ts tests/runner-input.test.ts tests/replay.test.ts tests/payload.test.ts tests/payload-archive.test.ts tests/browser-policy.test.ts tests/harness-discovery.test.ts tests/prepare-inputs-cli.test.ts tests/source-membership.test.ts tests/browser-redirect.test.ts tests/dependency-inventory.test.ts tests/dependency-capture.test.ts tests/dependency-cli.test.ts tests/cache-download.test.ts tests/cache-metadata.test.ts tests/cache-replay.test.ts tests/cache-candidate.test.ts tests/cache-cli.test.ts tests/linux-contract.test.ts",
     "prepare:check": "bun --no-env-file scripts/prepare.ts --check"
   },
   "dependencies": {
