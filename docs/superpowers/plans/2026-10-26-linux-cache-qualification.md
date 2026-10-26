@@ -98,23 +98,30 @@ Task 2 verified in `4d964ce`; review approved. Trusted tools have separate conse
 
 ## Task 3: Archive Admission And Exact Replay
 
-Execution checkpoint: native Node HTTP creation is blocked by the existing exact
-lint boundary policy. Owner approval is requested for one explicit
-`scripts/linux-replay-platform.ts` application boundary; none has been added.
-No Task 3 behavior is implemented or qualified yet.
+Execution checkpoint: on 2026-10-26 the owner approved exactly one native HTTP
+application boundary, `scripts/linux-replay-platform.ts`, registered in the
+existing Node-platform lint rule. Other rules and boundaries stay unchanged.
+Task 3 implementation resumes; no Linux qualification or activation is implied.
 
 **Files:** Create `archives.ts`, `registry.ts`, `tests/linux-archives.test.ts`, `tests/linux-registry.test.ts`; use a narrow static declaration/import for the existing npm distribution parser if needed. No new dependency version or broad `any` shim.
 
 **Interfaces:** Produce `admitArchives(inputs: PreparedInputs)` returning `AdmittedArtifacts`, and scoped `startReplay(artifacts: AdmittedArtifacts)` returning a handle with `stop()` and `snapshotRequests()`. Bind only `127.0.0.1:4873`; supplied URLs cannot change it.
 
-- [ ] Write failing synthetic tests for traversal/absolute/ambiguous paths, duplicate destinations, file-directory conflicts, links, devices, ownership/setuid metadata, unsupported extended headers, malformed/truncated gzip/tar and expansion limits. Assert no entry is handed to Bun before admission completes.
-- [ ] Write registry tests for exact GET/path mapping, absent blob, HEAD/POST, query/encoding ambiguity, packument request and oversized request logs. Assert unknown metadata yields `BlockedMissingBunMetadata`, not proxy/fetch behavior.
-- [ ] Run both focused files and confirm RED; implement streaming admission using the pinned proven parser, with aggregate reservation before accepting chunk bytes. Reject unsupported package formats wholesale, never silently strip entries.
-- [ ] Property-test chunk partitioning and boundary sizes (100 runs, fixed seed): the same bytes yield the same admission, aggregate caps cannot overflow and every accepted path stays inside its root. Use reduced injected limits in synthetic fixtures, never allocate gigabyte fixtures.
-- [ ] Implement replay with a scoped release that waits for listener termination. Synthetic tests may bind ephemeral loopback ports through a private adapter; exported production configuration remains fixed. No external requests in tests.
-- [ ] Run both focused tests and root check; commit `feat: admit archives and restrict Linux replay`.
+- [x] Write failing synthetic tests for traversal/absolute/ambiguous paths, duplicate destinations, file-directory conflicts, links, devices, ownership/setuid metadata, unsupported extended headers, malformed/truncated gzip/tar and expansion limits. Assert no entry is handed to Bun before admission completes.
+- [x] Write registry tests for exact GET/path mapping, absent blob, HEAD/POST, query/encoding ambiguity, packument request and oversized request logs. Assert unknown metadata yields `BlockedMissingBunMetadata`, not proxy/fetch behavior.
+- [x] Run both focused files and confirm RED; implement streaming admission using the pinned proven parser, with aggregate reservation before accepting chunk bytes. Reject unsupported package formats wholesale, never silently strip entries.
+- [x] Property-test chunk partitioning and boundary sizes (100 runs, fixed seed): the same bytes yield the same admission, aggregate caps cannot overflow and every accepted path stays inside its root. Use reduced injected limits in synthetic fixtures, never allocate gigabyte fixtures.
+- [x] Implement replay with a scoped release that waits for listener termination. Synthetic tests may bind ephemeral loopback ports through a private adapter; exported production configuration remains fixed. No external requests in tests.
+- [x] Run both focused tests and root check; commit `feat: admit archives and restrict Linux replay`.
+
+Task 3 verified in `1c14a78` and `885c78b`; task review and scoped re-review passed. Full serialized replay evidence is limited to 256 KiB and 1,024 records; the frozen 661-path one-GET projection is 58,257 bytes, not actual warm-up proof. Local Node/macOS smoke is not pinned Linux proof. Larger multi-block property fixtures remain a deferred non-blocking review item.
 
 ## Task 4: Sealed Cache And Physical Case Isolation
+
+Execution checkpoint: Effect 4.0.5 has no `lstat` service operation. Approval is
+requested for exactly one `scripts/linux-cache-platform.ts` native boundary,
+limited to real no-follow metadata; it has not been added. Do not substitute
+target metadata for link metadata or silently omit link modes/inodes.
 
 **Files:** Create `cache.ts`, `tests/linux-cache.test.ts`.
 
