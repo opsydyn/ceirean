@@ -125,6 +125,82 @@ test(
   inventoriesRealFiles,
 );
 
+async function acceptsPreDotFile(name: string) {
+  function* check() {
+    const { fs, root, parent } = yield* fixture();
+    yield* fs.writeFileString(`${root}/${name}`, 'punctuation bytes');
+    yield* fs.chmod(`${root}/${name}`, 0o600);
+    const seed = yield* sealCache(root);
+    expect(seed.inventory.map((entry) => entry.path)).toEqual([
+      name,
+      '.',
+      '.opaque-state',
+      'opaque',
+      'opaque/data.bin',
+      'opaque/tool',
+    ]);
+    const canonicalSeed = seed.inventory.map(canonicalEntry);
+    const seedJson = encodeJson(canonicalSeed);
+    expect(seed.sha256).toBe(hash(seedJson));
+    const copy = yield* copyCaseCache(seed, `${parent}/case-a`);
+    expect((yield* admitCaseCache(seed, copy)).sha256).toBe(copy.sha256);
+    expect(yield* fs.readFileString(`${copy.root}/${name}`)).toBe('punctuation bytes');
+    const canonicalCopy = copy.inventory.map(canonicalEntry);
+    const copyJson = encodeJson(canonicalCopy);
+    expect(copy.sha256).toBe(hash(copyJson));
+    expect((yield* verifySealedCache(seed)).sha256).toBe(seed.sha256);
+  }
+  const workflow = Effect.gen(check);
+  const scoped = Effect.scoped(workflow);
+  const provided = scoped.pipe(withMetadata, withPlatform);
+  await Effect.runPromise(provided);
+}
+test.each(['!opaque', '-state'])(
+  'seals, copies, and admits a punctuation file sorting before root: %s',
+  acceptsPreDotFile,
+);
+
+async function acceptsPreDotDirectory(name: string) {
+  function* check() {
+    const { fs, root, parent } = yield* fixture();
+    yield* fs.makeDirectory(`${root}/${name}`);
+    yield* fs.chmod(`${root}/${name}`, 0o755);
+    yield* fs.writeFileString(`${root}/${name}/data.bin`, 'punctuation bytes');
+    yield* fs.chmod(`${root}/${name}/data.bin`, 0o600);
+    yield* fs.symlink(name, `${root}/alias`);
+    const seed = yield* sealCache(root);
+    expect(seed.inventory.map((entry) => entry.path)).toEqual([
+      name,
+      `${name}/data.bin`,
+      '.',
+      '.opaque-state',
+      'alias',
+      'opaque',
+      'opaque/data.bin',
+      'opaque/tool',
+    ]);
+    const canonicalSeed = seed.inventory.map(canonicalEntry);
+    const seedJson = encodeJson(canonicalSeed);
+    expect(seed.sha256).toBe(hash(seedJson));
+    const copy = yield* copyCaseCache(seed, `${parent}/case-a`);
+    expect((yield* admitCaseCache(seed, copy)).sha256).toBe(copy.sha256);
+    expect(yield* fs.realPath(`${copy.root}/alias`)).toBe(`${copy.root}/${name}`);
+    expect(yield* fs.readFileString(`${copy.root}/alias/data.bin`)).toBe('punctuation bytes');
+    const canonicalCopy = copy.inventory.map(canonicalEntry);
+    const copyJson = encodeJson(canonicalCopy);
+    expect(copy.sha256).toBe(hash(copyJson));
+    expect((yield* verifySealedCache(seed)).sha256).toBe(seed.sha256);
+  }
+  const workflow = Effect.gen(check);
+  const scoped = Effect.scoped(workflow);
+  const provided = scoped.pipe(withMetadata, withPlatform);
+  await Effect.runPromise(provided);
+}
+test.each(['!opaque', '-state'])(
+  'seals, copies, and admits a punctuation directory sorting before root: %s',
+  acceptsPreDotDirectory,
+);
+
 async function refusesCorruptionBeforeInstall() {
   function* check() {
     const { fs, root, parent } = yield* fixture();
@@ -448,6 +524,7 @@ test(
 async function rejectsDirectoryAliasCycle() {
   function* check() {
     const { fs, root } = yield* fixture();
+    yield* fs.writeFileString(`${root}/!opaque`, 'inert punctuation state');
     yield* fs.makeDirectory(`${root}/other`);
     yield* fs.symlink('../other', `${root}/opaque/to-other`);
     yield* fs.symlink('../opaque', `${root}/other/to-opaque`);

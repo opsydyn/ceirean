@@ -248,7 +248,7 @@ function linkEntry(root: string, name: string, info: Metadata, limits: CacheLimi
 function acyclic(entries: readonly CacheEntry[]) {
   const edges = new Map(entries.map((entry) => [entry.path, [] as string[]]));
   const incoming = new Map(entries.map((entry) => [entry.path, 0]));
-  for (const entry of entries.slice(1)) {
+  for (const entry of entries.filter((value) => !isRootEntry(value.path))) {
     const parent = entry.path.slice(0, entry.path.lastIndexOf('/'));
     const owner = Match.value(entry.path.includes('/')).pipe(
       Match.when(true, () => parent),
