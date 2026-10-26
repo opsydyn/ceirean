@@ -74,11 +74,13 @@ The controller bootstrap tarball is trusted tooling, not permission to unpack co
 
 **Interfaces:** Produce `decodeRequest(input: unknown)`, `makeReceipt(request: QualificationRequest, observations: readonly CaseObservation[], cleanup: CleanupObservation)` and synchronous `qualificationExitCode(receipt: QualificationReceipt)`. Decode with Effect Schema. `CleanupObservation` is schema-derived and distinguishes confirmed removal, remaining resources and unknown state.
 
-- [ ] Write tests named `rejects_configurable_execution`, `requires_all_cases`, `rejects_unrelated_negative_failure`, `requires_independent_pins`, `never_enables_activation`, and `cleanup_unknown_cannot_pass`. Assert activation is always `Blocked`; only all intended case outcomes plus confirmed cleanup produce exit 0; incomplete/failed/blocked produce nonzero; unsupported invocation is 64.
-- [ ] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-contract.test.ts`; confirm missing-module/API failure before implementation.
-- [ ] Implement schemas, exact limits, mandatory case IDs from the spec and pure aggregation. Reasons include `BlockedMissingBunMetadata`, `BlockedRuntime`, `BlockedControls`, `BlockedChildObservation`, `InputChanged`, `ArchiveRefused`, `EvidenceIncomplete` and `CleanupUnknown`. Existing offline exit-2 semantics stay unchanged.
-- [ ] Property-test permutations, omissions, duplicate case IDs, unexpected fields, lowered/raised/NaN budgets and malformed digest values using `Arbitrary.schema`/`Arbitrary.checkEffect`, fixed seed and 100 runs. Reject duplicate observations rather than selecting the last one.
-- [ ] Rerun the focused tests and root `bun --no-env-file run check`; commit `feat: define Linux qualification contracts` after both pass.
+- [x] Write tests named `rejects_configurable_execution`, `requires_all_cases`, `rejects_unrelated_negative_failure`, `requires_independent_pins`, `never_enables_activation`, and `cleanup_unknown_cannot_pass`. Assert activation is always `Blocked`; only all intended case outcomes plus confirmed cleanup produce exit 0; incomplete/failed/blocked produce nonzero; unsupported invocation is 64.
+- [x] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-contract.test.ts`; confirm missing-module/API failure before implementation.
+- [x] Implement schemas, exact limits, mandatory case IDs from the spec and pure aggregation. Reasons include `BlockedMissingBunMetadata`, `BlockedRuntime`, `BlockedControls`, `BlockedChildObservation`, `InputChanged`, `ArchiveRefused`, `EvidenceIncomplete` and `CleanupUnknown`. Existing offline exit-2 semantics stay unchanged.
+- [x] Property-test permutations, omissions, duplicate case IDs, unexpected fields, lowered/raised/NaN budgets and malformed digest values using `Arbitrary.schema`/`Arbitrary.checkEffect`, fixed seed and 100 runs. Reject duplicate observations rather than selecting the last one.
+- [x] Rerun the focused tests and root `bun --no-env-file run check`; commit `feat: define Linux qualification contracts` after both pass.
+
+Task 1 verified in `fc8c00d` and `7071e01`; task review and scoped re-review are clean. Review added independent admission to `makeReceipt(request, observations, cleanup, admission?)` and `qualificationExitCode(receipt, admission?)`; absent admission fails closed. Tasks 2/4/6 supply validated-source, trusted-seed and actual-file evidence, never receipt-derived authority.
 
 ## Task 2: Trusted Input And Tool Capsule Preparation
 
@@ -86,13 +88,20 @@ The controller bootstrap tarball is trusted tooling, not permission to unpack co
 
 **Interfaces:** Produce `prepareLinuxInputs(request: QualificationRequest)` through an inferred owning service, and `validateToolCapsule(input: unknown)`. Return a schema-derived `PreparedInputs` containing admitted source/blob/catalog/tool inventories and independently checked digests. Later tasks consume `PreparedInputs`, never unvalidated paths from dispatch.
 
-- [ ] Write failing tests for changed Git tree/blob, private/inaccessible target, source secret/config paths, unsupported modes, bad SRI, redirected GET, changed lock/tool capsule and Linux tool discovery. Fakes must prove no consumer tarball extraction or executable import occurs on the host.
-- [ ] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-inputs.test.ts`; confirm RED.
-- [ ] Implement fixed anonymous Git retrieval with the existing tree/blob model, isolated HOME/config/hooks and portable owned temp roots. Resolve only fixed Git/Docker paths on the trusted runner and record their readbacks. Keep macOS behavior unchanged.
-- [ ] Implement public allowlisted artifact staging with existing byte/integrity budgets. Build a minimal source/tool/input handoff excluding `.git`, dotenv, package-manager host configuration, operational state and credentials. Verify each capsule file against build provenance plus the approved lock, not just sibling manifest entries.
-- [ ] Add synthetic SRI mismatch and one-byte capsule mutation tests; use fake acquisition/process ports only. Rerun focused tests and root check; commit `feat: prepare verified Linux qualification inputs`.
+- [x] Write failing tests for changed Git tree/blob, private/inaccessible target, source secret/config paths, unsupported modes, bad SRI, redirected GET, changed lock/tool capsule and Linux tool discovery. Fakes must prove no consumer tarball extraction or executable import occurs on the host.
+- [x] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-inputs.test.ts`; confirm RED.
+- [x] Implement fixed anonymous Git retrieval with the existing tree/blob model, isolated HOME/config/hooks and portable owned temp roots. Resolve only fixed Git/Docker paths on the trusted runner and record their readbacks. Keep macOS behavior unchanged.
+- [x] Implement public allowlisted artifact staging with existing byte/integrity budgets. Build a minimal source/tool/input handoff excluding `.git`, dotenv, package-manager host configuration, operational state and credentials. Verify each capsule file against build provenance plus the approved lock, not just sibling manifest entries.
+- [x] Add synthetic SRI mismatch and one-byte capsule mutation tests; use fake acquisition/process ports only. Rerun focused tests and root check; commit `feat: prepare verified Linux qualification inputs`.
+
+Task 2 verified in `4d964ce`; review approved. Trusted tools have separate conservative bounds of 192 MiB per file and 256 MiB total; the raw consumer caps are unchanged. Actual tool size/build provenance remain runtime/controller gates. Successful final-staging test coverage is a deferred non-blocking review item, not a Linux qualification claim.
 
 ## Task 3: Archive Admission And Exact Replay
+
+Execution checkpoint: native Node HTTP creation is blocked by the existing exact
+lint boundary policy. Owner approval is requested for one explicit
+`scripts/linux-replay-platform.ts` application boundary; none has been added.
+No Task 3 behavior is implemented or qualified yet.
 
 **Files:** Create `archives.ts`, `registry.ts`, `tests/linux-archives.test.ts`, `tests/linux-registry.test.ts`; use a narrow static declaration/import for the existing npm distribution parser if needed. No new dependency version or broad `any` shim.
 
