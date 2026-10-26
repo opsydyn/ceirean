@@ -12,6 +12,7 @@ export default defineConfig({
       {
         boundaryPaths: [
           'probes/cloudflare-executor/scripts/linux-replay-platform.ts',
+          'probes/cloudflare-executor/scripts/linux-cache-platform.ts',
           'probes/bun-effect-flue/src/flue-probe.ts',
           'probes/bun-effect-flue/src/restart-child.ts',
           'probes/bun-effect-flue/tests/process.ts',
