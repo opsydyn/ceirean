@@ -24,8 +24,16 @@ The next bounded slice is **Linux cache-consumer/layout qualification**, includi
 missing-artifact refusal and the still-missing Bun/browser metadata requirements.
 The owner approved drafting the [standalone Linux qualification design](superpowers/specs/2026-10-24-linux-cache-consumer-design.md).
 The owner accepted the design on 2026-10-26. The [implementation plan](superpowers/plans/2026-10-26-linux-cache-qualification.md)
-awaits approval; implementation, workflow publication and execution remain separate
-gates. Consumer installs/scripts,
+now has offline-tested owned supervision, production adapter composition and fixed
+durable evidence delivery, plus an inert workflow draft. Root lint/format, all 12
+Moon typecheck/test tasks and independent task/whole-branch reviews passed offline.
+Two nonblocking input-assembly/archive-boundary coverage gaps remain documented in
+the plan. Publication and one-attempt execution are
+separate gates. The exact worksheet, emitted tool/capsule provenance, reviewed child
+observer, effective Linux control/cancellation proof and runner allowance remain
+unavailable or unmeasured. A compatible auxiliary writable-mount layout must also
+fit the unchanged 3 GiB ceiling. Implemented control adapters are not Linux proof.
+The controller refuses before acquisition while these are absent. Consumer installs/scripts,
 extraction, browser execution, image build, private hosted invocation, final image
 digest and hosted activation remain gated; Alchemy migration remains paused.
 

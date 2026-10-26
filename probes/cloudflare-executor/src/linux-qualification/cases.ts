@@ -30,9 +30,11 @@ import {
   QualificationReason,
   type QualificationAdmission,
 } from './contract.ts';
+import type { ProducerExecution } from './live-handoff.ts';
 import { PreparedInputs, SourceDigest } from './prepared-inputs.ts';
 import { startReplay } from './registry.ts';
 import { inputPins, qualificationInstall } from './tool-pins.ts';
+import { holdWarmupForRehearsal } from './warmup-rehearsal.ts';
 
 export class WorkerError extends Data.TaggedError('WorkerError')<{
   readonly code: QualificationReason;
@@ -75,6 +77,8 @@ const isNodeModules = Schema.is(Schema.Literal('node_modules'));
 const isLock = Schema.is(Schema.Literal('bun.lock'));
 const unexplained = Schema.is(Schema.Literal('Unexplained'));
 const isString = Schema.is(Schema.String);
+const isQualification = Schema.is(Schema.Literal('Qualification'));
+const isWarmupPurpose = Schema.is(Schema.Literal('Warmup'));
 const archiveRefused = Schema.is(Schema.Struct({ code: Schema.Literal('ArchiveRefused') }));
 const inputChanged = Schema.is(Schema.Struct({ code: Schema.Literal('InputChanged') }));
 const isArchiveLink = Schema.is(Schema.Literals(['SymbolicLink', 'Link']));
@@ -128,6 +132,7 @@ export type WorkerCommand = {
   readonly home: string;
   readonly tmp: string;
   readonly cache: string;
+  readonly purpose?: 'Warmup';
 };
 export const workerTools = { bun: '/usr/local/bin/bun', node: '/tools/node' } as const;
 const nodeIdentityProgram = [
@@ -182,7 +187,10 @@ function collect(stream: Stream.Stream<Uint8Array, unknown>) {
   const workflow = Effect.gen(read);
   return workflow;
 }
-export function makeWorkerProcess() {
+export function makeWorkerProcess(
+  execution?: typeof ProducerExecution.Type,
+  inputs?: PreparedInputs,
+) {
   function run(command: WorkerCommand) {
     function* execute() {
       const spec = commandSpec(command);
@@ -202,6 +210,13 @@ export function makeWorkerProcess() {
         killSignal: 'SIGKILL',
         forceKillAfter: 0,
       });
+      const rehearsing = (value: typeof execution) =>
+        value !== undefined && !isQualification(value.mode) && isWarmupPurpose(command.purpose);
+      const rehearsal = [execution].filter(rehearsing);
+      for (const owned of rehearsal) {
+        yield* requireWorker(inputs !== undefined, 'InputChanged');
+        yield* holdWarmupForRehearsal(child, inputs!, owned!);
+      }
       const [stdout, stderr, exitCode] = yield* Effect.all(
         [collect(child.stdout), collect(child.stderr), child.exitCode],
         { concurrency: 3 },
@@ -249,18 +264,7 @@ export function makeWorkerPlatform() {
     const workflow = Effect.gen(execute);
     return workflow;
   }
-  function cancellation() {
-    const refused = Effect.fail(new WorkerError({ code: 'CleanupUnknown' }));
-    const workflow = refused.pipe(
-      Effect.map(() => ({
-        deadlineStoppedOwnedResources: false,
-        interruptedWarmupStopped: false,
-        removalConfirmed: false,
-      })),
-    );
-    return workflow;
-  }
-  return { preflight, admitChildObservation, observe, cancellation };
+  return { preflight, admitChildObservation, observe };
 }
 export class WorkerPlatform extends Context.Service<
   WorkerPlatform,
@@ -1043,7 +1047,7 @@ export function makeWorkerCases() {
         const warmup = yield* freshCase(parent, 'warmup', inputs);
         yield* fs.makeDirectory(warmup.cache);
         replay = yield* archives.startReplay(admitted);
-        const warmed = yield* execute(warmup);
+        const warmed = yield* execute({ ...warmup, purpose: 'Warmup' });
         const requests = yield* replay.snapshotRequests();
         yield* requireWorker(!requests.blocked && !requests.truncated, 'BlockedMissingBunMetadata');
         yield* requireWorker(warmed.exitCode === 0);
@@ -1120,18 +1124,8 @@ export function makeWorkerCases() {
         yield* fs.writeFile(packagePath, original);
         yield* snapshot(positive.command.workspace);
         record({ first: positive.cache.sha256, next: next.cache.sha256 });
-        current = 'CancellationDeadline';
-        const cancellation = yield* platform.cancellation();
-        yield* requireWorker(
-          cancellation.deadlineStoppedOwnedResources &&
-            cancellation.interruptedWarmupStopped &&
-            cancellation.removalConfirmed,
-          'CleanupUnknown',
-        );
-        yield* snapshot(positive.command.workspace);
-        record(cancellation);
         return {
-          _tag: 'Completed' as const,
+          _tag: 'PendingHostFinalization' as const,
           exitCode: 0 as const,
           observations,
           seedAdmission,
@@ -1194,7 +1188,7 @@ export function makeWorkerCases() {
         seedAdmission !== undefined;
       return Match.value(complete).pipe(
         Match.when(true, () => ({
-          _tag: 'Completed' as const,
+          _tag: 'PendingHostFinalization' as const,
           exitCode: 0 as const,
           observations,
           seedAdmission: seedAdmission!,

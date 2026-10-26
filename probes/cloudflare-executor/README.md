@@ -1,7 +1,9 @@
 # Cloudflare Executor Preparation Probe
 
-Private, offline preparation and simulated lifecycle only. No Worker, container, remote SDK adapter or
-deployment entrypoint exists in this workspace yet. Operational ingress, Flue,
+Private, offline preparation and simulated lifecycle only. A guarded Linux Docker
+controller exists, but no production authority, observer/control provider or
+Linux runtime proof is admitted. No Worker deployment or remote SDK adapter exists.
+Operational ingress, Flue,
 the application ledger and the Draft Colima replay profile are unchanged.
 
 ## Commands
@@ -21,6 +23,96 @@ no success/activation exit code. Do not interpret `prepare-check` as a green
 deployment readiness task. No build, download, extraction, source checkout or
 consumer script is executed. Run Bun with `--no-env-file`; the command does not
 request or read cloud credentials through Effect Config or otherwise.
+
+## Guarded Linux Qualification
+
+`bun --no-env-file probes/cloudflare-executor/scripts/qualify-linux.ts --check`
+returns **1** with an explicit incomplete diagnostic, without Docker or retrieval.
+`--run` also refuses before acquisition because the exact reviewed worksheet and
+production capability/provenance provider are absent. Extra arguments return
+**64**; JSON and environment variables cannot supply authority.
+
+The library-only `makeQualificationHost(reviewed, locations, authority)` composes
+`LinuxInputHost`/`LinuxInputs`, fixed Docker process/session adapters, metadata and
+owned durable output. Reviewed build context and run/preflight authority remain
+explicit trusted in-process dependencies. The discovered Docker path must match
+the host's fixed executable. The ordinary CLI has no such provider.
+
+The in-process `runQualification` composes Task 2 source admission, owned producer
+supervision, bounded actual-file evidence, Task 1 aggregation and delivery. Ownership is
+registered before create, with no retry/replacement and unconditional removal
+readback. Unknown/late create acknowledgement cannot confirm cleanup. Explicit
+unprivileged UID/GID matches 0700 input staging and tmpfs ownership. Only inputs
+and tools are read-only host mounts; no home, checkout, environment or socket is
+mounted. The canonical evidence path is `/work/evidence`, inside the existing
+2816 MiB work tmpfs. No root alias, root overlay write or additional writable
+mount is needed. The trusted library composition is
+`src/linux-qualification/controller-worker.ts`, not executable CLI main.
+
+Docker inspect, kernel mount/status/cgroup readers and fixed HTTP/DNS/TCP
+negative probes are composed by `makeProductionWorkerPlatform` and the worker
+entrypoint, but remain Linux-unqualified. Its provenance and child/native observer
+are explicit trusted dependencies; defaults refuse. A future admitted observer
+receives the existing fixed `WorkerProcess`, retaining the real warm-up spawn hook.
+No observer, tracer or synthetic success provider is acquired by this composition.
+Requested flags and synthetic readbacks never count as effective control proof.
+Effective admission accounts for all writable mounts, not only the three requested
+tmpfs roots. Their approved allocations fill the 3 GiB ceiling; additional writable
+auxiliary/default mounts, unknown capacities or writable submounts block. A compatible
+measured Docker layout or a separately reviewed design decision is required before
+a live attempt. Mount names and root ownership do not grant exemptions.
+
+The worker owns nine cases and returns `PendingHostFinalization`, not a full
+qualification pass. It never calls a cancellation provider or certifies its own
+container removal. The host collects producer evidence while the namespace is
+alive, then ACKs collection and performs exit/removal readbacks. Only the host
+may generate the tenth `CancellationDeadline` case after actual owned rehearsal
+proofs and removal, write its evidence and cleanup document, and attempt full
+admission. The owned producer, session-bound seal admission and sequential fixed
+rehearsal/finalization writer are implemented and tested offline with fakes.
+Their actual Docker pause/top/EOF/removal behavior remains unqualified. Missing
+host evidence blocks; request flags and READY data cannot replace it.
+
+`QualificationOutput.deliver` exclusively acquires the owning checkout's fixed
+`qualification-output/` directory. It rechecks admitted file identity/hash with
+no-follow reads, writes only the ten case JSON files, worker diagnostic and cleanup,
+and verifies destination bytes. Receipt overhead shares the 16 MiB total cap.
+The verified pending receipt is renamed last; partial delivery is removed, while
+collisions are preserved. Successful output survives source/staging scope exit.
+No source/cache/environment/link discovery, arbitrary CLI destination or new mount
+is involved. The inert workflow lists those exact completed output files only.
+
+One 15-minute controller budget covers acquisition through delivery. Production
+work gets 12 minutes, retaining the shared 9-minute producer/rehearsal cap; cleanup
+gets at most 2 minutes (including the existing 30-second stop grace), and delivery
+gets the remaining minute, including 10 seconds reserved for partial-output cleanup.
+Timeout or unknown cleanup never produces a qualification receipt. Offline
+controller verification and independent task/whole-branch reviews passed. This
+is not a live attempt or Linux qualification. Two nonblocking coverage gaps remain:
+successful final input-handoff assembly and larger archive processing boundaries.
+
+The lifecycle-only host case may have `Unknown` digests: removal destroys the
+cache inodes, so it must not copy the last worker hashes as new observations.
+Its bounded admitted facts and confirmed cleanup remain mandatory. Every cache
+case from `Warmup` through `CaseIsolation` still requires independently anchored
+recorded source/lock/seed before-and-after digests.
+
+Only fixed JSON files cross the bounded stdout tar transport. The existing
+pinned Header codec rejects links, extra members and truncation before host writes.
+The 256 KiB stream cap also bounds each transported file to 260,608 bytes; larger
+documents block without splitting or raising caps. Actual-file admission uses
+no-follow metadata, bounded content decoding, observation consistency and SHA-256.
+Files plus the sanitized receipt share the 16 MiB total. Stdout is never forwarded
+as workflow commands. Source, caches, installed files and environment are not
+artifacts. Worker exit 0 is not qualification: all cases, independently validated
+source, trusted seal admission, evidence and confirmed cleanup are required.
+Pre-seal refusal produces a nonzero incomplete diagnostic, not a fake receipt.
+
+The [inert draft](../../qualification/linux-cache.workflow.yml) stays outside
+`.github/workflows` and unconditionally refuses while the approved implementation
+SHA, [worksheet](../../qualification/linux-cache-run-worksheet.md) and capability
+proofs are absent. Publication and one-attempt run approvals remain separate.
+Synthetic tests and thin local dependency reuse are not clean Linux proof.
 
 ## Pinned Inputs, Not A Built Image
 

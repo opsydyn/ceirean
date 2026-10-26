@@ -28,6 +28,7 @@ import { stage, gzip, goodTar } from './linux-archive-fixtures.ts';
 
 const hash = (bytes: Uint8Array | string) => createHash('sha256').update(bytes).digest('hex');
 const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
+const isHostCancellation = Schema.is(Schema.Literal('CancellationDeadline'));
 const withPlatform = Effect.provide(BunServices.layer);
 const withMetadata = Effect.provideService(CacheMetadata, makeCacheMetadata());
 const withProcesses = Effect.provideService(WorkerProcess, makeWorkerProcess());
@@ -92,7 +93,6 @@ type Options = {
   metadataRequest?: boolean;
   unrelatedFailure?: boolean;
   hardlinkInstall?: boolean;
-  deadlineUnknown?: boolean;
   wrongRuntime?: boolean;
   negativeFailure?: { install: 4 | 5; exitCode: number; stderr: string };
 };
@@ -279,21 +279,11 @@ function scenario(options: Options = {}) {
     );
     return admitted;
   }
-  function cancellation() {
-    calls.push('cancellation');
-    const workflow = Effect.succeed({
-      deadlineStoppedOwnedResources: !options.deadlineUnknown,
-      interruptedWarmupStopped: true,
-      removalConfirmed: true,
-    });
-    return workflow;
-  }
   const platform = {
     ...makeWorkerPlatform(),
     preflight: () => Effect.sync(() => syntheticReadbacks),
     admitChildObservation,
     observe,
-    cancellation,
   };
   const archives = {
     ...makeWorkerArchives(),
@@ -324,12 +314,12 @@ function scenario(options: Options = {}) {
     function* check() {
       const inputs = yield* fixture();
       const result = yield* makeWorkerCases().runWorkerCases(inputs);
-      yield* writeWorkerEvidence(result, `${inputs.root}/evidence`);
+      yield* writeWorkerEvidence(result, `${inputs.root}/work/evidence`);
       const fs = yield* FileSystem.FileSystem;
       const documents: Record<string, string> = {};
       for (const document of result.evidence) {
         const name = evidenceRequirements[document.caseId].name;
-        documents[name] = yield* fs.readFileString(`${inputs.root}/evidence/${name}`);
+        documents[name] = yield* fs.readFileString(`${inputs.root}/work/evidence/${name}`);
       }
       const refusalKeys = Match.value(result).pipe(
         Match.when({ _tag: 'Incomplete' }, (value) => Object.keys(value.refusal)),
@@ -355,9 +345,11 @@ function scenario(options: Options = {}) {
 async function orderedWorkflow() {
   const s = scenario();
   const { result, inputs, documents } = await s.run();
-  expect(result._tag).toBe('Completed');
+  expect(result._tag).toBe('PendingHostFinalization');
   expect(result.exitCode).toBe(0);
-  expect(result.observations.map((item) => item.caseId)).toEqual([...requiredCases]);
+  expect(result.observations.map((item) => item.caseId)).toEqual(requiredCases.slice(0, 9));
+  expect(result.evidence).toHaveLength(9);
+  expect(s.calls).not.toContain('cancellation');
   expect(result.seedAdmission?.sourceSha256).toBe(inputs.source.sha256);
   expect(result.seedAdmission?.sha256).toMatch(/^[a-f0-9]{64}$/);
   expect(s.calls.indexOf('warmup')).toBeLessThan(s.calls.indexOf('stop-replay'));
@@ -424,13 +416,16 @@ async function aliasFailure() {
   expect(result.observations.at(-1)?.caseId).toBe('CaseIsolation');
 }
 test('copy backend hardlink alias caught by installed mutation', aliasFailure);
-async function cancellationFailure() {
-  const s = scenario({ deadlineUnknown: true });
+async function pendingHostFinalization() {
+  const s = scenario();
   const { result } = await s.run();
-  expect(result.exitCode).toBe(1);
-  expect(result.observations.at(-1)?.reason).toBe('CleanupUnknown');
+  expect(result._tag).toBe('PendingHostFinalization');
+  expect(result.observations.at(-1)?.caseId).toBe('CaseIsolation');
+  expect(result.observations).toHaveLength(9);
+  expect(result.evidence.some((item) => isHostCancellation(item.caseId))).toBe(false);
+  expect('receipt' in result).toBe(false);
 }
-test('unconfirmed cancellation cannot pass', cancellationFailure);
+test('worker defers host cancellation and cannot produce a full receipt', pendingHostFinalization);
 async function runtimeFailure() {
   const s = scenario({ wrongRuntime: true });
   const { result } = await s.run();
@@ -696,7 +691,7 @@ async function actualEvidenceFiles() {
     const inputs = yield* fixture();
     const fs = yield* FileSystem.FileSystem;
     const result = yield* makeWorkerCases().runWorkerCases(inputs);
-    const root = `${inputs.root}/evidence`;
+    const root = `${inputs.root}/work/evidence`;
     yield* writeWorkerEvidence(result, root);
     expect(yield* fs.readDirectory(root)).toEqual(['worker-diagnostic.json']);
     const raw = yield* fs.readFileString(`${root}/worker-diagnostic.json`);

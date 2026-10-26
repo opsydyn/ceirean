@@ -155,30 +155,39 @@ Task 5 verified in `f76544a` and `7a7dd0e`; task review and scoped re-review pas
 
 ## Task 6: Host Supervisor, Bounded Evidence And Inert Workflow
 
-Execution checkpoint: offline foundations pass 20 focused tests and all 12 Moon
-typecheck/test tasks, but Task 6 is **not complete**. Behavioral network probes,
-production provider/CLI wiring, cancellation proof, trusted seal handoff and the
-live tmpfs evidence transfer still need implementation. Approval is requested
-for one dedicated `scripts/linux-control-platform.ts` DNS/raw-TCP boundary;
-none has been added. The unfinished source remains an uncommitted draft, not a
-reviewed deliverable or Linux qualification result.
+Verified offline: ownership, host cancellation finalization, live collection,
+effective control adapters, production composition and durable bounded output
+are implemented. The final probe suite (425), root lint/format, all 12 Moon
+typecheck tasks and all 12 Moon test tasks pass. Independent task review, scoped
+fix re-review and whole-branch review have no blockers. Two P3 coverage gaps from
+Tasks 2/3 remain explicitly deferred, not demonstrated by existing tests.
+The owner approved exactly one
+`scripts/linux-control-platform.ts` DNS/raw-TCP boundary using `node:dns/promises`
+and `node:net`; all other lint rules remain unchanged. The observer, reviewed
+worksheet/capsule provenance and effective Linux proofs remain unavailable.
+External probes, Docker, workflow publication and CI execution are not authorized.
 
 **Files:** Create `supervisor.ts`, `scripts/qualify-linux.ts`, `tests/linux-supervisor.test.ts`, `tests/linux-cli.test.ts`, `qualification/linux-cache.workflow.yml`, `qualification/linux-cache-run-worksheet.md`. Extend `receipt.ts`; update probe README and roadmap.
 
 **Interfaces:** Produce `runQualification(request: QualificationRequest)` consuming Tasks 1-5, and an offline `--check` path. `--run` requires an exact reviewed worksheet, platform/capability preflight and fixed invocation; it cannot infer authority from an environment boolean. Ordinary Moon tests invoke only fakes/`--check`.
 
-- [ ] Write failing tests for interruption after create/before start, interrupted warm-up, deadline, stream overflow, missing receipt, failed removal, forged run identity and unknown Docker state. Use fake Docker operations; assert register-ownership-before-start and unconditional cleanup/readback.
-- [ ] Run the two focused test files; confirm RED. Implement fixed Docker argv/readback with network none, read-only root, explicit UID/GID, cap-drop ALL, no-new-privileges, isolated PID/IPC, no devices/ports/socket and 2 CPU/4 GiB/128 PID limits. Assign tmpfs `/work` 2816 MiB, `/home` 128 MiB and `/tmp` 128 MiB, all noexec/nosuid/nodev; total 3072 MiB.
-- [ ] Add behavioral network/DNS/raw-TCP negatives and effective mount/UID/security checks to the runtime contract. Unsupported or unverifiable controls block before historical inputs. Enforce 90-second commands, nine-minute worker deadline and 30-second cleanup grace; force removal then inspect absence. Unknown cleanup never passes.
-- [ ] Implement bounded sanitized receipt export. Treat stdout as untrusted data, not GitHub workflow commands. Export only fixed JSON/diagnostic paths; no environment, source, cache, node_modules or symlink-following artifact discovery. Test truncation and aggregate overflow invalidate success.
-- [ ] Write the inert workflow: `workflow_dispatch` only, fixed reviewed implementation SHA, `contents: read`, no secrets/OIDC/cache restore/dispatch parameters, `ubuntu-24.04`, `timeout-minutes: 15`, no retries, artifact action at the pinned SHA with seven-day retention. No active `.github/workflows` change. Fail if approved SHA/pins/worksheet are absent; never run an arbitrary branch tip.
-- [ ] Add a static workflow test asserting all restrictions and absence of an active qualification workflow. Add worksheet fields for exact run attempt, implementation/tool/input/harness hashes, public retrieval authorization, child-observer capability, effective budgets, billing/entitlement check, evidence recipient, cleanup owner and final status. Documentation must distinguish offline verification from Linux proof.
-- [ ] Rerun focused tests, then `bun --no-env-file run check`, `moon run :typecheck --concurrency 1`, and `moon run :test --concurrency 1`. Confirm no test starts Docker, fetches real artifacts or installs consumers. Review the entire branch independently and resolve findings before committing `feat: prepare guarded Linux qualification controller`.
+- [x] Write failing tests for interruption after create/before start, interrupted warm-up, deadline, stream overflow, missing receipt, failed removal, forged run identity and unknown Docker state. Use fake Docker operations; assert register-ownership-before-start and unconditional cleanup/readback.
+- [x] Run the two focused test files; confirm RED. Implement fixed Docker argv/readback with network none, read-only root, explicit UID/GID, cap-drop ALL, no-new-privileges, isolated PID/IPC, no devices/ports/socket and 2 CPU/4 GiB/128 PID limits. Assign tmpfs `/work` 2816 MiB, `/home` 128 MiB and `/tmp` 128 MiB, all noexec/nosuid/nodev; total 3072 MiB.
+- [x] Add behavioral network/DNS/raw-TCP negatives and effective mount/UID/security checks to the runtime contract. Unsupported or unverifiable controls block before historical inputs. Enforce 90-second commands, nine-minute worker deadline and 30-second cleanup grace; force removal then inspect absence. Unknown cleanup never passes.
+- [x] Implement bounded sanitized receipt export. Treat stdout as untrusted data, not GitHub workflow commands. Export only fixed JSON/diagnostic paths; no environment, source, cache, node_modules or symlink-following artifact discovery. Test truncation and aggregate overflow invalidate success.
+- [x] Write the inert workflow: `workflow_dispatch` only, fixed reviewed implementation SHA, `contents: read`, no secrets/OIDC/cache restore/dispatch parameters, `ubuntu-24.04`, `timeout-minutes: 15`, no retries, artifact action at the pinned SHA with seven-day retention. No active `.github/workflows` change. Fail if approved SHA/pins/worksheet are absent; never run an arbitrary branch tip.
+- [x] Add a static workflow test asserting all restrictions and absence of an active qualification workflow. Add worksheet fields for exact run attempt, implementation/tool/input/harness hashes, public retrieval authorization, child-observer capability, effective budgets, billing/entitlement check, evidence recipient, cleanup owner and final status. Documentation must distinguish offline verification from Linux proof.
+- [x] Rerun focused tests, then `bun --no-env-file run check`, `moon run :typecheck --concurrency 1`, and `moon run :test --concurrency 1`. Confirm no test starts Docker, fetches real artifacts or installs consumers. Review the entire branch independently and resolve findings before committing `feat: prepare guarded Linux qualification controller`.
+
+The task review fixed malformed Docker UTF-8 cleanup continuation and effective
+aggregate tmpfs accounting with RED/GREEN regressions; scoped re-review is clean.
+The final full test graph passed in 10m20s. Actual Linux controls, a compatible
+auxiliary-mount layout, observer and tool/worksheet authority remain live gates.
 
 ## Completion And Separate Next Gates
 
-- [ ] Verify `activation-policy.ts`, historical `pins.ts`, frozen inputs and active workflows unchanged; inspect final diff and clean status. Commit every verified task, never unverified work merely to clear the worktree.
-- [ ] Report only offline implementation/test status. No Linux qualification claim follows from synthetic tests or an unpublished workflow.
+- [x] Verify `activation-policy.ts`, historical `pins.ts`, frozen inputs and active workflows unchanged; inspect final diff and clean status. Commit every verified task, never unverified work merely to clear the worktree.
+- [x] Report only offline implementation/test status. No Linux qualification claim follows from synthetic tests or an unpublished workflow.
 - [ ] Stop for publication approval. After publication is approved, verify the published workflow/ref/permissions without dispatching it.
 - [ ] Stop for one-attempt run approval. Missing child-execution observation, tool provenance, runner controls, resource allowance or reviewed capsule hashes are explicit blockers. A deliberately blocked run is not worth spending the rehearsal budget merely to rediscover a known missing capability.
 - [ ] Only a separately approved run can retrieve real inputs, pull pinned images, stage source and execute the fixed cases. Failed/uncertain attempts do not authorize retries. A measured pass still leaves hosted activation, final image and private invocation blocked.

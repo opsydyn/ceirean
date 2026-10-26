@@ -1,4 +1,4 @@
-import { Effect, Match, Result, Schema } from 'effect';
+import { Effect, FileSystem, Match, Result, Schema } from 'effect';
 
 import {
   ControlReadbacks,
@@ -8,6 +8,7 @@ import {
   QualificationReceipt,
   QualificationRequest,
   decodeRequest,
+  decodeReceipt,
   cleanupEvidenceRequirement,
   evidenceRequirements,
   requiredCases,
@@ -31,8 +32,13 @@ const expected = {
 const isPassed = Schema.is(Schema.Literal('Passed'));
 const isFailed = Schema.is(Schema.Literal('Failed'));
 const isPreflight = Schema.is(Schema.Literal('RuntimeIsolationPreflight'));
-const earlyCase = Schema.is(
-  Schema.Literals(['RuntimeIsolationPreflight', 'ArchiveAdmissionNegatives', 'ScriptCanaries']),
+const unrecordedDigestCase = Schema.is(
+  Schema.Literals([
+    'RuntimeIsolationPreflight',
+    'ArchiveAdmissionNegatives',
+    'ScriptCanaries',
+    'CancellationDeadline',
+  ]),
 );
 const sameReadbacks = Schema.toEquivalence(ControlReadbacks);
 const sameRequest = Schema.toEquivalence(QualificationRequest);
@@ -52,7 +58,11 @@ function digestChecks(
 ) {
   return Match.value(item.digests).pipe(
     Match.tagsExhaustive({
-      Unknown: () => [{ invalid: !earlyCase(item.caseId), reason: 'EvidenceIncomplete' as const }],
+      // Host lifecycle evidence follows removal; its required facts and cleanup
+      // are checked separately, without claiming a new hash of destroyed cache.
+      Unknown: () => [
+        { invalid: !unrecordedDigestCase(item.caseId), reason: 'EvidenceIncomplete' as const },
+      ],
       Recorded: (value) => [
         {
           invalid: [
@@ -278,4 +288,28 @@ export function qualificationExitCode(
     onFailure: () => 1,
     onSuccess: (value) => exitForReceipt(value.receipt, value.admission),
   });
+}
+
+// This export is fixed-path and schema-sanitized. Prior admitted files and this
+// receipt share one budget; a receipt never gets an additional 16 MiB allowance.
+export function exportReceipt(root: string, receipt: QualificationReceipt, usedBytes: number) {
+  function* write() {
+    const fs = yield* FileSystem.FileSystem;
+    const decoded = yield* decodeReceipt(receipt);
+    const encodeReceipt = Schema.encodeSync(Schema.fromJsonString(QualificationReceipt));
+    const bytes = new TextEncoder().encode(encodeReceipt(decoded));
+    const fits = [
+      Number.isSafeInteger(usedBytes),
+      usedBytes >= 0,
+      bytes.length <= 16777216 - usedBytes,
+    ].every(Boolean);
+    const checked = Result.succeed(fits).pipe(
+      Result.filterOrFail(Boolean, () => new Error('EvidenceIncomplete')),
+      Effect.fromResult,
+    );
+    yield* checked;
+    yield* fs.writeFile(`${root}/qualification-receipt.json`, bytes, { flag: 'wx', mode: 0o600 });
+  }
+  const workflow = Effect.gen(write);
+  return workflow;
 }

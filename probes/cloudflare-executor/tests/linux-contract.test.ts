@@ -187,15 +187,21 @@ const evidenceFixtures = {
   },
 } as const;
 function observations(): readonly CaseObservation[] {
-  return cases.map(([caseId, stage, reason]) => ({
-    caseId,
-    stage,
-    outcome: 'Passed' as const,
-    reason,
-    evidence: [evidenceFixtures[caseId].name],
-    readbacks,
-    digests,
-  }));
+  return cases.map(([caseId, stage, reason]) =>
+    Match.value(caseId).pipe(
+      Match.when('CancellationDeadline', () => ({ _tag: 'Unknown' as const })),
+      Match.orElse(() => digests),
+      (observedDigests) => ({
+        caseId,
+        stage,
+        outcome: 'Passed' as const,
+        reason,
+        evidence: [evidenceFixtures[caseId].name],
+        readbacks,
+        digests: observedDigests,
+      }),
+    ),
+  );
 }
 const cleanup = { _tag: 'ConfirmedRemoval', evidence: ['cleanup.json'] } as const;
 const admission = {
@@ -403,6 +409,7 @@ async function evidenceCannotBeForged() {
 test('receipt_rechecks_evidence_instead_of_trusting_outcome', evidenceCannotBeForged);
 
 async function requiresCacheCaseDigests() {
+  const decoded = await Effect.runPromise(decodeRequest(request));
   for (const caseId of [
     'Warmup',
     'FreshPositive',
@@ -410,7 +417,6 @@ async function requiresCacheCaseDigests() {
     'MissingRequiredArtifact',
     'CorruptCacheContent',
     'CaseIsolation',
-    'CancellationDeadline',
   ]) {
     const input = observations().map((item) =>
       Match.value(item.caseId === caseId).pipe(
@@ -418,10 +424,81 @@ async function requiresCacheCaseDigests() {
         Match.orElse(() => item),
       ),
     );
-    expect(qualificationExitCode(await receipt(input))).toBe(1);
+    const context = {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: admission.evidence.cases.map((file, index) => ({
+          ...file,
+          observation: input[index]!,
+        })),
+      },
+    };
+    const value = await Effect.runPromise(makeReceipt(decoded, input, cleanup, context));
+    expect(value.reasons).toContain('EvidenceIncomplete');
+    expect(exitWithAdmission(value, context)).toBe(1);
   }
 }
 test('requires_all_cache_case_digests', requiresCacheCaseDigests);
+
+async function hostUnknownNeedsFinalizedEvidence() {
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const input = observations();
+  expect(input[9]!.digests).toEqual({ _tag: 'Unknown' });
+  expect(qualificationExitCode(await receipt(input))).toBe(0);
+  const files = admission.evidence.cases;
+  const contexts: readonly QualificationAdmission[] = [
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: [...files.slice(0, 9), { _tag: 'Missing', caseId: 'CancellationDeadline' }],
+      },
+    },
+    ...evidenceFixtures.CancellationDeadline.checks.map((missing) => ({
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: files.map((file, index) => ({
+          ...file,
+          checks: file.checks.filter((check) => index !== 9 || check !== missing),
+        })),
+      },
+    })),
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: files.map((file, index) => ({ ...file, truncated: index === 9 })),
+      },
+    },
+    { ...admission, evidence: { ...admission.evidence, cleanup: { _tag: 'Missing' } } },
+  ];
+  for (const context of contexts) {
+    const value = await Effect.runPromise(makeReceipt(decoded, input, cleanup, context));
+    expect(value.reasons).toContain('EvidenceIncomplete');
+    expect(exitWithAdmission(value, context)).toBe(1);
+  }
+  for (const removal of [
+    { _tag: 'Unknown', evidence: ['cleanup.json'] },
+    { _tag: 'RemainingResources', resources: ['owned-fixture'], evidence: ['cleanup.json'] },
+  ] as const) {
+    const context = {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cleanup: { ...admission.evidence.cleanup, observation: removal },
+      },
+    };
+    const value = await Effect.runPromise(makeReceipt(decoded, input, removal, context));
+    expect(value.reasons).toContain('CleanupUnknown');
+    expect(exitWithAdmission(value, context)).toBe(1);
+  }
+}
+test(
+  'host_lifecycle_unknown_requires_finalized_admitted_facts_and_removal',
+  hostUnknownNeedsFinalizedEvidence,
+);
 
 async function requiresCoherentRuntime() {
   const conflicting = observations().map((item) =>

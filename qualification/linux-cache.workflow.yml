@@ -1,0 +1,36 @@
+name: Linux Cache Qualification (Unpublished Draft)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Refuse Until Publication And One-Attempt Review
+        run: |
+          printf '%s\n' 'BLOCKED: approved implementation SHA, worksheet, capsule provenance and observer/control proofs are absent.'
+          exit 1
+      - name: Upload Fixed Evidence Only
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: linux-cache-qualification
+          path: |
+            qualification-output/runtime-isolation.json
+            qualification-output/archive-negatives.json
+            qualification-output/script-canaries.json
+            qualification-output/warmup.json
+            qualification-output/fresh-positive.json
+            qualification-output/empty-cache.json
+            qualification-output/missing-artifact.json
+            qualification-output/corrupt-cache.json
+            qualification-output/case-isolation.json
+            qualification-output/cancellation-deadline.json
+            qualification-output/worker-diagnostic.json
+            qualification-output/cleanup.json
+            qualification-output/qualification-receipt.json
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
