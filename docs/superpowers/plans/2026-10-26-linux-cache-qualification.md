@@ -118,20 +118,23 @@ Task 3 verified in `1c14a78` and `885c78b`; task review and scoped re-review pas
 
 ## Task 4: Sealed Cache And Physical Case Isolation
 
-Execution checkpoint: Effect 4.0.5 has no `lstat` service operation. Approval is
-requested for exactly one `scripts/linux-cache-platform.ts` native boundary,
-limited to real no-follow metadata; it has not been added. Do not substitute
-target metadata for link metadata or silently omit link modes/inodes.
+Execution checkpoint: Effect 4.0.5 has no `lstat` service operation. On 2026-10-26
+the owner approved exactly one `scripts/linux-cache-platform.ts` native boundary,
+limited to `node:fs/promises` `lstat` metadata. All other operations and lint rules
+remain unchanged. Do not substitute target metadata for link metadata or omit
+link modes/inodes.
 
 **Files:** Create `cache.ts`, `tests/linux-cache.test.ts`.
 
 **Interfaces:** Produce `sealCache(root: string)`, `copyCaseCache(seed: SealedCache, destination: string)` and `admitCaseCache(seed: SealedCache, copy: CaseCache)`. `SealedCache` includes full path/mode/content/link inventory and root digest; `CaseCache` binds the source seed digest and its independent destination.
 
-- [ ] Write failing tests for one-byte mutation, omitted/extra files, escaping links, special files, duplicate/case-conflicting destinations and mode changes. Assert corruption is refused by hash admission before any install invocation.
-- [ ] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-cache.test.ts`; confirm RED.
-- [ ] Implement deterministic inventory and physical copies with no hardlink sharing. Preserve only admitted internal cache links and verify their destinations; unlike raw tarballs, cache links have a distinct policy. Avoid hand-rolling Bun directory names.
-- [ ] Test mutation of one case cache and installed-file copy leaves the seed and second case unchanged; verify inode separation where supported. Rehash seed after every case. Synthetic platform limitations are reported, not represented as Linux proof.
-- [ ] Rerun focused tests and root check; commit `feat: seal and isolate Linux cache cases`.
+- [x] Write failing tests for one-byte mutation, omitted/extra files, escaping links, special files, duplicate/case-conflicting destinations and mode changes. Assert corruption is refused by hash admission before any install invocation.
+- [x] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-cache.test.ts`; confirm RED.
+- [x] Implement deterministic inventory and physical copies with no hardlink sharing. Preserve only admitted internal cache links and verify their destinations; unlike raw tarballs, cache links have a distinct policy. Avoid hand-rolling Bun directory names.
+- [x] Test mutation of one case cache and installed-file copy leaves the seed and second case unchanged; verify inode separation where supported. Rehash seed after every case. Synthetic platform limitations are reported, not represented as Linux proof.
+- [x] Rerun focused tests and root check; commit `feat: seal and isolate Linux cache cases`.
+
+Task 4 verified in `5788d12` and `c043fd3`; task review and scoped re-review passed. Cache inventories include explicit original, sealed and writable-case modes; inode isolation and actual seed rehashing use the approved metadata port. Local synthetic filesystem evidence does not establish native Bun layout or Linux usability.
 
 ## Task 5: Ordered Worker Cases And Script-Suppression Gates
 
@@ -139,16 +142,26 @@ target metadata for link metadata or silently omit link modes/inodes.
 
 **Interfaces:** Produce `runWorkerCases(inputs: PreparedInputs)` through an inferred service consuming archive/replay/cache/process capabilities. Return ordered `CaseObservation` values. Keep process execution fixed to the trusted Node harness and installer Bun; no dispatch-defined shell, command or environment.
 
-- [ ] Write failing fake-process tests asserting order: runtime/control checks, archive negatives, canaries, tarball-only warm-up, seal, replay stop, fresh positive, empty cache, missing direct required artifact, corrupt admission, two-case isolation, cancellation/deadline. Later cases cannot run after prerequisite refusal.
-- [ ] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-cases.test.ts`; confirm RED.
-- [ ] Implement Node-compatible static bundling boundaries; replace Bun-only hashing inside the worker with Node-compatible Effect/platform or standard crypto APIs. Host-only Bun hashing may remain unchanged.
-- [ ] Require effective Bun 1.3.11 flag support, Node 22.23.4/libc readback, fresh HOME/TMPDIR/cache/workspace, source/lock invariance and exact qualification argv. Warm-up node_modules is never reused. Stop replay and confirm termination before the positive case.
-- [ ] Add root and trusted-dependency script canaries. Require a trustworthy child/native-execution observation capability, not process polling or marker absence alone. Its admission returns `BlockedChildObservation` if unavailable; no historical source install may run in that state. Tests inject observed allowlisted/unexpected executions and an unavailable observer.
+- [x] Write failing fake-process tests asserting order: runtime/control checks, archive negatives, canaries, tarball-only warm-up, seal, replay stop, fresh positive, empty cache, missing direct required artifact, corrupt admission, two-case isolation, cancellation/deadline. Later cases cannot run after prerequisite refusal.
+- [x] Run `bun --no-env-file test probes/cloudflare-executor/tests/linux-cases.test.ts`; confirm RED.
+- [x] Implement Node-compatible static bundling boundaries; replace Bun-only hashing inside the worker with Node-compatible Effect/platform or standard crypto APIs. Host-only Bun hashing may remain unchanged.
+- [x] Require effective Bun 1.3.11 flag support, Node 22.23.4/libc readback, fresh HOME/TMPDIR/cache/workspace, source/lock invariance and exact qualification argv. Warm-up node_modules is never reused. Stop replay and confirm termination before the positive case.
+- [x] Add root and trusted-dependency script canaries. Require a trustworthy child/native-execution observation capability, not process polling or marker absence alone. Its admission returns `BlockedChildObservation` if unavailable; no historical source install may run in that state. Tests inject observed allowlisted/unexpected executions and an unavailable observer.
 - [ ] Before proposing a live run, separately review any additional tracing/enforcement tool and its immutable acquisition identity. This plan does not authorize fetching an unpinned tracer or weakening the observation requirement. Synthetic tests cannot close this live capability gate.
-- [ ] Audit installed package metadata and workspace links as bounded data against the historical lock/platform. Choose the missing-artifact negative from a demonstrated installed, direct nonoptional dependency; assert the intended cache miss, not a runtime startup failure. Explain GNU/musl exclusions without requiring all 661 packages to install.
-- [ ] Rerun focused tests and root check; commit `feat: orchestrate fail-closed Linux cache cases`.
+- [x] Audit installed package metadata and workspace links as bounded data against the historical lock/platform. Choose the missing-artifact negative from a demonstrated installed, direct nonoptional dependency; assert the intended cache miss, not a runtime startup failure. Explain GNU/musl exclusions without requiring all 661 packages to install.
+- [x] Rerun focused tests and root check; commit `feat: orchestrate fail-closed Linux cache cases`.
+
+Task 5 verified in `f76544a` and `7a7dd0e`; task review and scoped re-review passed. Negative cases require a narrow identity-bound normal refusal, and workspace links bind full scoped names and canonical targets. The unchecked observer-tool review is a future live-run prerequisite, not unfinished acquisition authority for this implementation. Real runtime/control/canary/cache behavior is still unqualified; defaults refuse and early failures emit no invented seal or full receipt.
 
 ## Task 6: Host Supervisor, Bounded Evidence And Inert Workflow
+
+Execution checkpoint: offline foundations pass 20 focused tests and all 12 Moon
+typecheck/test tasks, but Task 6 is **not complete**. Behavioral network probes,
+production provider/CLI wiring, cancellation proof, trusted seal handoff and the
+live tmpfs evidence transfer still need implementation. Approval is requested
+for one dedicated `scripts/linux-control-platform.ts` DNS/raw-TCP boundary;
+none has been added. The unfinished source remains an uncommitted draft, not a
+reviewed deliverable or Linux qualification result.
 
 **Files:** Create `supervisor.ts`, `scripts/qualify-linux.ts`, `tests/linux-supervisor.test.ts`, `tests/linux-cli.test.ts`, `qualification/linux-cache.workflow.yml`, `qualification/linux-cache-run-worksheet.md`. Extend `receipt.ts`; update probe README and roadmap.
 
