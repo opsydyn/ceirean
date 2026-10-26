@@ -2,14 +2,17 @@ import { Effect, Match, Result, Schema } from 'effect';
 
 import {
   ControlReadbacks,
+  CaseObservation,
+  CleanupObservation,
+  QualificationAdmission,
   QualificationReceipt,
+  QualificationRequest,
   decodeRequest,
+  cleanupEvidenceRequirement,
+  evidenceRequirements,
   requiredCases,
   strict,
-  type CaseObservation,
-  type CleanupObservation,
   type QualificationReason,
-  type QualificationRequest,
 } from './contract.ts';
 import { inputPins } from './tool-pins.ts';
 
@@ -32,8 +35,21 @@ const earlyCase = Schema.is(
   Schema.Literals(['RuntimeIsolationPreflight', 'ArchiveAdmissionNegatives', 'ScriptCanaries']),
 );
 const sameReadbacks = Schema.toEquivalence(ControlReadbacks);
+const sameRequest = Schema.toEquivalence(QualificationRequest);
+const sameObservation = Schema.toEquivalence(CaseObservation);
+const sameCleanup = Schema.toEquivalence(CleanupObservation);
+const sameAdmission = Schema.toEquivalence(QualificationAdmission);
+const verifiedIntegrity = Schema.is(Schema.Literal('Verified'));
+const ExitInput = Schema.Struct({
+  receipt: QualificationReceipt,
+  admission: QualificationAdmission,
+});
 
-function digestChecks(request: QualificationRequest, item: CaseObservation) {
+function digestChecks(
+  request: QualificationRequest,
+  item: CaseObservation,
+  admission: QualificationAdmission,
+) {
   return Match.value(item.digests).pipe(
     Match.tagsExhaustive({
       Unknown: () => [{ invalid: !earlyCase(item.caseId), reason: 'EvidenceIncomplete' as const }],
@@ -41,9 +57,11 @@ function digestChecks(request: QualificationRequest, item: CaseObservation) {
         {
           invalid: [
             value.sourceBefore !== value.sourceAfter,
+            value.sourceBefore !== admission.source.sha256,
             value.lockBefore !== inputPins.lockSha256,
             value.lockAfter !== inputPins.lockSha256,
             value.seedBefore !== value.seedAfter,
+            value.seedBefore !== admission.seed.sha256,
             value.harnessSha256 !== request.harnessSha256,
             value.toolCapsuleSha256 !== request.toolCapsuleSha256,
           ].some(Boolean),
@@ -54,7 +72,64 @@ function digestChecks(request: QualificationRequest, item: CaseObservation) {
   );
 }
 
-function observationChecks(request: QualificationRequest, item: CaseObservation) {
+function caseEvidenceComplete(item: CaseObservation, admission: QualificationAdmission) {
+  const required = evidenceRequirements[item.caseId];
+  const files = admission.evidence.cases.filter((file) => file.caseId === item.caseId);
+  return (
+    files.length === 1 &&
+    files.every((file) =>
+      Match.value(file).pipe(
+        Match.tagsExhaustive({
+          Missing: () => false,
+          Admitted: (value) =>
+            [
+              value.name === required.name,
+              !value.truncated,
+              verifiedIntegrity(value.integrity),
+              value.checks.length === required.checks.length,
+              new Set(value.checks).size === value.checks.length,
+              required.checks.every((check) =>
+                value.checks.some((confirmed) => confirmed === check),
+              ),
+              sameObservation(value.observation, item),
+              item.evidence.length === 1 && item.evidence[0] === value.name,
+            ].every(Boolean),
+        }),
+      ),
+    )
+  );
+}
+
+function cleanupEvidenceComplete(cleanup: CleanupObservation, admission: QualificationAdmission) {
+  return Match.value(admission.evidence.cleanup).pipe(
+    Match.tagsExhaustive({
+      Missing: () => false,
+      Admitted: (file) =>
+        [
+          file.name === cleanupEvidenceRequirement.name,
+          !file.truncated,
+          verifiedIntegrity(file.integrity),
+          cleanup.evidence.length === 1 && cleanup.evidence[0] === file.name,
+          sameCleanup(file.observation, cleanup),
+        ].every(Boolean),
+    }),
+  );
+}
+
+function admittedFileBytes(admission: QualificationAdmission) {
+  const sizes = [...admission.evidence.cases, admission.evidence.cleanup].map((file) =>
+    Match.value(file).pipe(
+      Match.tagsExhaustive({ Missing: () => 0, Admitted: (value) => value.byteLength }),
+    ),
+  );
+  return sizes.reduce((sum, size) => sum + size, 0);
+}
+
+function observationChecks(
+  request: QualificationRequest,
+  item: CaseObservation,
+  admission: QualificationAdmission,
+) {
   const controlsMissing = Match.value(item.readbacks).pipe(
     Match.tagsExhaustive({ Unknown: () => true, Verified: () => false }),
   );
@@ -69,7 +144,8 @@ function observationChecks(request: QualificationRequest, item: CaseObservation)
       reason: 'EvidenceIncomplete' as const,
     },
     { invalid: isPreflight(item.caseId) && controlsMissing, reason: 'BlockedControls' as const },
-    ...digestChecks(request, item),
+    { invalid: !caseEvidenceComplete(item, admission), reason: 'EvidenceIncomplete' as const },
+    ...digestChecks(request, item, admission),
   ];
 }
 
@@ -77,6 +153,7 @@ function summarize(
   request: QualificationRequest,
   observations: readonly CaseObservation[],
   cleanup: CleanupObservation,
+  admission: QualificationAdmission,
 ) {
   const ids = observations.map((item) => item.caseId);
   const recorded = observations.flatMap((item) =>
@@ -109,7 +186,25 @@ function summarize(
     { invalid: sourceDigests.size > 1 || seedDigests.size > 1, reason: 'InputChanged' as const },
     { invalid: !runtimeCoherent, reason: 'InputChanged' as const },
     { invalid: cleanupMissing, reason: 'CleanupUnknown' as const },
-    ...observations.flatMap((item) => observationChecks(request, item)),
+    {
+      invalid:
+        !sameRequest(request, admission.request) ||
+        admission.seed.sourceSha256 !== admission.source.sha256,
+      reason: 'InputChanged' as const,
+    },
+    {
+      invalid: !cleanupEvidenceComplete(cleanup, admission),
+      reason: 'EvidenceIncomplete' as const,
+    },
+    {
+      invalid: admittedFileBytes(admission) > request.limits.evidenceBytes,
+      reason: 'EvidenceIncomplete' as const,
+    },
+    {
+      invalid: admission.evidence.cases.length !== requiredCases.length,
+      reason: 'EvidenceIncomplete' as const,
+    },
+    ...observations.flatMap((item) => observationChecks(request, item, admission)),
   ];
   const reasons: QualificationReason[] = [
     ...new Set(checks.filter((check) => check.invalid).map((check) => check.reason)),
@@ -129,9 +224,12 @@ export function makeReceipt(
   request: QualificationRequest,
   observations: readonly CaseObservation[],
   cleanup: CleanupObservation,
+  // Only trusted boundary output belongs here; receipt JSON is not admission.
+  admission?: QualificationAdmission,
 ) {
   function* aggregate() {
     const decoded = yield* decodeRequest(request);
+    const trusted = yield* Schema.decodeUnknownEffect(QualificationAdmission, strict)(admission);
     const draft = yield* Schema.decodeUnknownEffect(
       QualificationReceipt,
       strict,
@@ -141,18 +239,20 @@ export function makeReceipt(
       request: decoded,
       observations,
       cleanup,
+      admission: trusted,
       outcome: 'Blocked',
       reasons: [],
     });
-    return { ...draft, ...summarize(decoded, draft.observations, draft.cleanup) };
+    return { ...draft, ...summarize(decoded, draft.observations, draft.cleanup, trusted) };
   }
   const workflow = Effect.gen(aggregate);
   return workflow;
 }
 
-function exitForReceipt(value: QualificationReceipt) {
-  const actual = summarize(value.request, value.observations, value.cleanup);
+function exitForReceipt(value: QualificationReceipt, admission: QualificationAdmission) {
+  const actual = summarize(value.request, value.observations, value.cleanup, admission);
   const coherent = [
+    sameAdmission(value.admission, admission),
     value.outcome === actual.outcome,
     value.reasons.length === actual.reasons.length,
     value.reasons.every((reason, index) => reason === actual.reasons[index]),
@@ -169,7 +269,13 @@ function exitForReceipt(value: QualificationReceipt) {
   );
 }
 
-export function qualificationExitCode(receipt: QualificationReceipt) {
-  const decoded = Schema.decodeUnknownResult(QualificationReceipt, strict)(receipt);
-  return Result.match(decoded, { onFailure: () => 1, onSuccess: exitForReceipt });
+export function qualificationExitCode(
+  receipt: QualificationReceipt,
+  admission?: QualificationAdmission,
+) {
+  const decoded = Schema.decodeUnknownResult(ExitInput, strict)({ receipt, admission });
+  return Result.match(decoded, {
+    onFailure: () => 1,
+    onSuccess: (value) => exitForReceipt(value.receipt, value.admission),
+  });
 }

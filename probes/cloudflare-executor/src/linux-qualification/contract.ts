@@ -176,12 +176,122 @@ export const CleanupObservation = Schema.Union([
   Schema.TaggedStruct('Unknown', { evidence }),
 ]);
 export type CleanupObservation = typeof CleanupObservation.Type;
+
+// Fixed documents and required facts; the file-admission boundary verifies these
+// facts from bounded file contents, not from the observations supplied to aggregation.
+export const evidenceRequirements = {
+  RuntimeIsolationPreflight: {
+    name: 'runtime-isolation.json',
+    checks: ['RuntimeIdentities', 'EffectiveControls', 'NetworkDnsTcpDenied', 'RunnerEligible'],
+  },
+  ArchiveAdmissionNegatives: {
+    name: 'archive-negatives.json',
+    checks: [
+      'TraversalRefused',
+      'SymlinkRefused',
+      'HardlinkRefused',
+      'DuplicateRefused',
+      'MalformedHeaderRefused',
+      'ExpansionBombRefused',
+    ],
+  },
+  ScriptCanaries: {
+    name: 'script-canaries.json',
+    checks: [
+      'RootMarkerAbsent',
+      'TrustedDependencyMarkerAbsent',
+      'UnexpectedChildAbsent',
+      'NativeExecutionAbsent',
+    ],
+  },
+  Warmup: {
+    name: 'warmup.json',
+    checks: ['InventoriedGetsOnly', 'InputsUnchanged', 'NativeCacheInventoried'],
+  },
+  FreshPositive: {
+    name: 'fresh-positive.json',
+    checks: [
+      'NoInitialNodeModules',
+      'ReplayStopped',
+      'FixedInstallExitedZero',
+      'InstalledIdentitiesAudited',
+    ],
+  },
+  EmptyCache: {
+    name: 'empty-cache.json',
+    checks: ['FreshWorkspace', 'EmptyCache', 'IntendedInstallFailure', 'NoBorrowingOrFetch'],
+  },
+  MissingRequiredArtifact: {
+    name: 'missing-artifact.json',
+    checks: ['DirectNonoptionalArtifactRemoved', 'IntendedInstallFailure'],
+  },
+  CorruptCacheContent: {
+    name: 'corrupt-cache.json',
+    checks: ['CopyHashAdmitted', 'MutationRefusedBeforeInstall'],
+  },
+  CaseIsolation: {
+    name: 'case-isolation.json',
+    checks: ['DistinctCopies', 'InstalledMutationIsolated', 'SeedUnchanged', 'NextCaseUnchanged'],
+  },
+  CancellationDeadline: {
+    name: 'cancellation-deadline.json',
+    checks: ['DeadlineStoppedOwnedResources', 'InterruptedWarmupStopped', 'RemovalConfirmed'],
+  },
+} as const;
+export const cleanupEvidenceRequirement = { name: 'cleanup.json' } as const;
+const fileFields = {
+  name: evidenceName,
+  byteLength: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 16777216 })),
+  sha256: Sha256,
+  truncated: Schema.Boolean,
+  integrity: Schema.Literals(['Verified', 'Mismatch']),
+};
+const evidenceFact = Schema.Literals(
+  Object.values(evidenceRequirements).flatMap((value) => value.checks),
+);
+export const CaseEvidenceAdmission = Schema.Union([
+  Schema.TaggedStruct('Missing', { caseId: CaseId }),
+  Schema.TaggedStruct('Admitted', {
+    ...fileFields,
+    caseId: CaseId,
+    checks: Schema.Array(evidenceFact).check(Schema.isMaxLength(16)),
+    observation: CaseObservation,
+  }),
+]);
+export const CleanupEvidenceAdmission = Schema.Union([
+  Schema.TaggedStruct('Missing', {}),
+  Schema.TaggedStruct('Admitted', { ...fileFields, observation: CleanupObservation }),
+]);
+// A trusted caller supplies this separately from receipt JSON. Schema validity
+// describes boundary output; it does not establish that the boundary ran.
+export const QualificationAdmission = Schema.Struct({
+  request: QualificationRequest,
+  source: Schema.Struct({
+    provenance: Schema.Literal('ValidatedInputBoundary'),
+    revision: Schema.Literal(inputPins.sourceRevision),
+    tree: Schema.Literal(inputPins.sourceTree),
+    inventorySha256: Schema.Literal(inputPins.inventorySha256),
+    sha256: Sha256,
+  }),
+  seed: Schema.Struct({
+    provenance: Schema.Literal('TrustedSealBoundary'),
+    sourceSha256: Sha256,
+    sha256: Sha256,
+  }),
+  evidence: Schema.Struct({
+    provenance: Schema.Literal('BoundedActualFileAdmission'),
+    cases: Schema.Array(CaseEvidenceAdmission).check(Schema.isMaxLength(requiredCases.length)),
+    cleanup: CleanupEvidenceAdmission,
+  }),
+});
+export type QualificationAdmission = typeof QualificationAdmission.Type;
 export const QualificationReceipt = Schema.Struct({
   authority: Schema.Literal('EvidenceOnly'),
   activation: Schema.Literal('Blocked'),
   request: QualificationRequest,
   observations: Schema.Array(CaseObservation).check(Schema.isMaxLength(requiredCases.length)),
   cleanup: CleanupObservation,
+  admission: QualificationAdmission,
   outcome: Schema.Literals(['Passed', 'Failed', 'Blocked']),
   reasons: Schema.Array(QualificationReason).check(Schema.isMaxLength(32)),
 });

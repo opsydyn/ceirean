@@ -6,9 +6,13 @@ import {
   CaseObservation,
   CleanupObservation,
   QualificationReceipt,
+  QualificationAdmission,
   decodeRequest,
 } from '../src/linux-qualification/contract.ts';
-import { makeReceipt, qualificationExitCode } from '../src/linux-qualification/receipt.ts';
+import {
+  makeReceipt,
+  qualificationExitCode as exitWithAdmission,
+} from '../src/linux-qualification/receipt.ts';
 import { qualificationInstall, toolPins } from '../src/linux-qualification/tool-pins.ts';
 
 const strict = { onExcessProperty: 'error' } as const;
@@ -123,21 +127,117 @@ const cases = [
   ['CaseIsolation', 'Isolation', 'CopiesIsolated'],
   ['CancellationDeadline', 'Cleanup', 'CancellationConfirmed'],
 ] as const;
+const evidenceFixtures = {
+  RuntimeIsolationPreflight: {
+    name: 'runtime-isolation.json',
+    checks: ['RuntimeIdentities', 'EffectiveControls', 'NetworkDnsTcpDenied', 'RunnerEligible'],
+  },
+  ArchiveAdmissionNegatives: {
+    name: 'archive-negatives.json',
+    checks: [
+      'TraversalRefused',
+      'SymlinkRefused',
+      'HardlinkRefused',
+      'DuplicateRefused',
+      'MalformedHeaderRefused',
+      'ExpansionBombRefused',
+    ],
+  },
+  ScriptCanaries: {
+    name: 'script-canaries.json',
+    checks: [
+      'RootMarkerAbsent',
+      'TrustedDependencyMarkerAbsent',
+      'UnexpectedChildAbsent',
+      'NativeExecutionAbsent',
+    ],
+  },
+  Warmup: {
+    name: 'warmup.json',
+    checks: ['InventoriedGetsOnly', 'InputsUnchanged', 'NativeCacheInventoried'],
+  },
+  FreshPositive: {
+    name: 'fresh-positive.json',
+    checks: [
+      'NoInitialNodeModules',
+      'ReplayStopped',
+      'FixedInstallExitedZero',
+      'InstalledIdentitiesAudited',
+    ],
+  },
+  EmptyCache: {
+    name: 'empty-cache.json',
+    checks: ['FreshWorkspace', 'EmptyCache', 'IntendedInstallFailure', 'NoBorrowingOrFetch'],
+  },
+  MissingRequiredArtifact: {
+    name: 'missing-artifact.json',
+    checks: ['DirectNonoptionalArtifactRemoved', 'IntendedInstallFailure'],
+  },
+  CorruptCacheContent: {
+    name: 'corrupt-cache.json',
+    checks: ['CopyHashAdmitted', 'MutationRefusedBeforeInstall'],
+  },
+  CaseIsolation: {
+    name: 'case-isolation.json',
+    checks: ['DistinctCopies', 'InstalledMutationIsolated', 'SeedUnchanged', 'NextCaseUnchanged'],
+  },
+  CancellationDeadline: {
+    name: 'cancellation-deadline.json',
+    checks: ['DeadlineStoppedOwnedResources', 'InterruptedWarmupStopped', 'RemovalConfirmed'],
+  },
+} as const;
 function observations(): readonly CaseObservation[] {
   return cases.map(([caseId, stage, reason]) => ({
     caseId,
     stage,
     outcome: 'Passed' as const,
     reason,
-    evidence: ['fixture.json'],
+    evidence: [evidenceFixtures[caseId].name],
     readbacks,
     digests,
   }));
 }
 const cleanup = { _tag: 'ConfirmedRemoval', evidence: ['cleanup.json'] } as const;
+const admission = {
+  request,
+  source: {
+    provenance: 'ValidatedInputBoundary',
+    revision: request.sourceRevision,
+    tree: request.sourceTree,
+    inventorySha256: request.inventorySha256,
+    sha256: digest,
+  },
+  seed: { provenance: 'TrustedSealBoundary', sourceSha256: digest, sha256: digest },
+  evidence: {
+    provenance: 'BoundedActualFileAdmission',
+    cases: observations().map((observation) => ({
+      _tag: 'Admitted' as const,
+      caseId: observation.caseId,
+      name: evidenceFixtures[observation.caseId].name,
+      checks: evidenceFixtures[observation.caseId].checks,
+      byteLength: 100,
+      sha256: digest,
+      truncated: false,
+      integrity: 'Verified' as const,
+      observation,
+    })),
+    cleanup: {
+      _tag: 'Admitted',
+      name: 'cleanup.json',
+      byteLength: 100,
+      sha256: digest,
+      truncated: false,
+      integrity: 'Verified',
+      observation: cleanup,
+    },
+  },
+} as const;
+function qualificationExitCode(value: QualificationReceipt) {
+  return exitWithAdmission(value, admission);
+}
 async function receipt(input = observations(), removal: CleanupObservation = cleanup) {
   const decoded = await Effect.runPromise(decodeRequest(request));
-  const result = await Effect.runPromise(makeReceipt(decoded, input, removal));
+  const result = await Effect.runPromise(makeReceipt(decoded, input, removal, admission));
   return result;
 }
 async function rejected(input: unknown) {
@@ -337,6 +437,264 @@ async function requiresCoherentRuntime() {
 }
 test('requires_coherent_runtime_readbacks', requiresCoherentRuntime);
 
+async function rejectsCoherentSourceSubstitution() {
+  const input = observations().map((item) => ({
+    ...item,
+    digests: { ...digests, sourceBefore: 'f'.repeat(64), sourceAfter: 'f'.repeat(64) },
+  }));
+  const context = {
+    ...admission,
+    evidence: {
+      ...admission.evidence,
+      cases: admission.evidence.cases.map((file) => ({
+        ...file,
+        observation: {
+          ...file.observation,
+          digests: { ...digests, sourceBefore: 'f'.repeat(64), sourceAfter: 'f'.repeat(64) },
+        },
+      })),
+    },
+  };
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const result = await Effect.runPromise(makeReceipt(decoded, input, cleanup, context));
+  expect(result.reasons).toContain('InputChanged');
+  expect(exitWithAdmission(result, context)).toBe(1);
+}
+test('rejects_coherent_source_substitution', rejectsCoherentSourceSubstitution);
+
+async function rejectsCoherentSeedSubstitution() {
+  const input = observations().map((item) => ({
+    ...item,
+    digests: { ...digests, seedBefore: 'f'.repeat(64), seedAfter: 'f'.repeat(64) },
+  }));
+  const context = {
+    ...admission,
+    evidence: {
+      ...admission.evidence,
+      cases: admission.evidence.cases.map((file) => ({
+        ...file,
+        observation: {
+          ...file.observation,
+          digests: { ...digests, seedBefore: 'f'.repeat(64), seedAfter: 'f'.repeat(64) },
+        },
+      })),
+    },
+  };
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const result = await Effect.runPromise(makeReceipt(decoded, input, cleanup, context));
+  expect(result.reasons).toContain('InputChanged');
+  expect(exitWithAdmission(result, context)).toBe(1);
+}
+test('rejects_coherent_seed_substitution', rejectsCoherentSeedSubstitution);
+
+async function rejectsMissingFilenameEvidence() {
+  const input = observations().map((item) => ({ ...item, evidence: ['missing.json'] }));
+  expect(qualificationExitCode(await receipt(input))).toBe(1);
+}
+test('rejects_missing_filename_evidence', rejectsMissingFilenameEvidence);
+
+async function legacyInvocationCannotPass() {
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const result = await Effect.runPromise(
+    makeReceipt(decoded, observations(), cleanup).pipe(Effect.result),
+  );
+  expect(result._tag).toBe('Failure');
+}
+test('legacy_three_argument_receipt_fails_closed', legacyInvocationCannotPass);
+
+async function requiresExternalAdmissionForExit() {
+  expect(exitWithAdmission(await receipt())).toBe(1);
+}
+test('exit_without_external_admission_fails_closed', requiresExternalAdmissionForExit);
+
+async function requiresAdmittedEvidence() {
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const files = admission.evidence.cases;
+  for (const index of files.keys()) {
+    const variants = [
+      files.filter((_, position) => position !== index),
+      files.map((file, position) => ({ ...file, truncated: position === index })),
+      files.map((file, position) => ({
+        ...file,
+        checks: file.checks.filter((_, check) => position !== index || check !== 0),
+      })),
+      files.map((file, position) =>
+        Match.value(position === index).pipe(
+          Match.when(true, () => ({ ...file, name: 'missing.json' })),
+          Match.orElse(() => file),
+        ),
+      ),
+      files.map((file, position) =>
+        Match.value(position === index).pipe(
+          Match.when(true, () => ({ ...file, name: files[(index + 1) % files.length]!.name })),
+          Match.orElse(() => file),
+        ),
+      ),
+      files.map((file, position) =>
+        Match.value(position === index).pipe(
+          Match.when(true, () => ({ ...file, integrity: 'Mismatch' as const })),
+          Match.orElse(() => file),
+        ),
+      ),
+      files.map((file, position) =>
+        Match.value(position === index).pipe(
+          Match.when(true, () => ({
+            ...file,
+            observation: files[(index + 1) % files.length]!.observation,
+          })),
+          Match.orElse(() => file),
+        ),
+      ),
+    ];
+    for (const variant of variants) {
+      const context = { ...admission, evidence: { ...admission.evidence, cases: variant } };
+      const value = await Effect.runPromise(makeReceipt(decoded, observations(), cleanup, context));
+      expect(exitWithAdmission(value, context)).toBe(1);
+    }
+  }
+}
+test('requires_complete_case_bound_actual_file_admission', requiresAdmittedEvidence);
+
+async function serializedAdmissionCannotAuthorize() {
+  // Synthetic sealing output is supplied independently; no native hash is pre-pinned.
+  const context = {
+    ...admission,
+    seed: { ...admission.seed, sha256: 'b'.repeat(64) },
+    evidence: {
+      ...admission.evidence,
+      cases: admission.evidence.cases.map((file) => ({
+        ...file,
+        observation: {
+          ...file.observation,
+          digests: { ...digests, seedBefore: 'b'.repeat(64), seedAfter: 'b'.repeat(64) },
+        },
+      })),
+    },
+  };
+  const input = context.evidence.cases.map((file) => file.observation);
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const value = await Effect.runPromise(makeReceipt(decoded, input, cleanup, context));
+  expect(exitWithAdmission(value, context)).toBe(0);
+  expect(exitWithAdmission(value, admission)).toBe(1);
+  expect(exitWithAdmission(value)).toBe(1);
+  const original = await receipt();
+  const edited = {
+    ...original,
+    admission: {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: admission.evidence.cases.map((file) => ({ ...file, sha256: 'f'.repeat(64) })),
+      },
+    },
+  };
+  expect(exitWithAdmission(edited, admission)).toBe(1);
+}
+test('serialized_admission_cannot_replace_external_authority', serializedAdmissionCannotAuthorize);
+
+async function requiresBoundedCleanupAndEvidence() {
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  const duplicate = [...admission.evidence.cases.slice(1), admission.evidence.cases[1]!];
+  const contexts: readonly QualificationAdmission[] = [
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: [
+          { _tag: 'Missing', caseId: 'ArchiveAdmissionNegatives' },
+          ...admission.evidence.cases.slice(1),
+        ],
+      },
+    },
+    { ...admission, evidence: { ...admission.evidence, cases: duplicate } },
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: admission.evidence.cases.map((file) => ({ ...file, byteLength: 16777216 })),
+      },
+    },
+    { ...admission, evidence: { ...admission.evidence, cleanup: { _tag: 'Missing' } } },
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cleanup: { ...admission.evidence.cleanup, truncated: true },
+      },
+    },
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cleanup: { ...admission.evidence.cleanup, integrity: 'Mismatch' },
+      },
+    },
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cleanup: { ...admission.evidence.cleanup, name: 'fresh-positive.json' },
+      },
+    },
+    { ...admission, seed: { ...admission.seed, sourceSha256: 'f'.repeat(64) } },
+    { ...admission, request: { ...request, run: { ...request.run, runId: 'different-run' } } },
+  ];
+  for (const context of contexts) {
+    const value = await Effect.runPromise(makeReceipt(decoded, observations(), cleanup, context));
+    expect(exitWithAdmission(value, context)).toBe(1);
+  }
+}
+test(
+  'rejects_missing_duplicate_overbudget_and_incomplete_cleanup_admission',
+  requiresBoundedCleanupAndEvidence,
+);
+
+async function rejectsMalformedAdmission() {
+  const decoded = await Effect.runPromise(decodeRequest(request));
+  for (const context of [
+    { ...admission, extra: true },
+    { ...admission, source: { ...admission.source, extra: true } },
+    { ...admission, seed: { ...admission.seed, extra: true } },
+    { ...admission, evidence: { ...admission.evidence, extra: true } },
+    {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: admission.evidence.cases.map((file) => ({ ...file, extra: true })),
+      },
+    },
+  ]) {
+    const result = await Effect.runPromise(
+      makeReceipt(decoded, observations(), cleanup, context).pipe(Effect.result),
+    );
+    expect(result._tag).toBe('Failure');
+    expect(exitWithAdmission(await receipt(), context)).toBe(1);
+  }
+  for (const byteLength of [0, -1, NaN, 16777217]) {
+    const context = {
+      ...admission,
+      evidence: {
+        ...admission.evidence,
+        cases: admission.evidence.cases.map((file) => ({ ...file, byteLength })),
+      },
+    };
+    expect(Schema.decodeUnknownResult(QualificationAdmission, strict)(context)._tag).toBe(
+      'Failure',
+    );
+  }
+  for (const context of [
+    { ...admission, source: { ...admission.source, provenance: 'ReceiptClaim' } },
+    { ...admission, seed: { ...admission.seed, provenance: 'Observation' } },
+    { ...admission, evidence: { ...admission.evidence, provenance: 'FilenamesOnly' } },
+    { ...admission, seed: { ...admission.seed, sha256: 'bad' } },
+    { ...admission, source: { ...admission.source, revision: 'f'.repeat(40) } },
+  ])
+    expect(Schema.decodeUnknownResult(QualificationAdmission, strict)(context)._tag).toBe(
+      'Failure',
+    );
+}
+test('admission_is_strict_and_provenance_specific', rejectsMalformedAdmission);
+
 async function rejectsTrailingHashAndEvidenceNewlines() {
   for (const suffix of ['\n', '\r', '\r\n']) {
     expect(await rejected({ ...request, harnessSha256: digest + suffix })).toBe(true);
@@ -346,7 +704,7 @@ async function rejectsTrailingHashAndEvidenceNewlines() {
     const decoded = await Effect.runPromise(decodeRequest(request));
     const input = observations().map((item) => ({ ...item, evidence: ['fixture.json' + suffix] }));
     const result = await Effect.runPromise(
-      makeReceipt(decoded, input, cleanup).pipe(Effect.result),
+      makeReceipt(decoded, input, cleanup, admission).pipe(Effect.result),
     );
     expect(result._tag).toBe('Failure');
   }
@@ -381,7 +739,7 @@ async function contractProperties() {
       [conflictingDuplicate, ...ordered],
     ]) {
       const result = await Effect.runPromise(
-        makeReceipt(decoded, input, cleanup).pipe(Effect.result),
+        makeReceipt(decoded, input, cleanup, admission).pipe(Effect.result),
       );
       expect(result._tag).toBe('Failure');
     }
