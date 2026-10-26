@@ -11,6 +11,7 @@ export default defineConfig({
       'error',
       {
         boundaryPaths: [
+          'probes/cloudflare-executor/scripts/linux-replay-platform.ts',
           'probes/bun-effect-flue/src/flue-probe.ts',
           'probes/bun-effect-flue/src/restart-child.ts',
           'probes/bun-effect-flue/tests/process.ts',
