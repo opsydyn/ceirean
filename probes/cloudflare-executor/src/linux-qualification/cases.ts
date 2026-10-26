@@ -488,12 +488,12 @@ function auditInstalled(workspace: string, input: unknown) {
       const workflow = Effect.gen(inspect);
       return workflow;
     }
-    function inspectLink(root: string, name: string, path: string) {
+    function inspectLink(root: string, path: string) {
       function* inspect() {
         const target = yield* fs.realPath(path);
         yield* requireWorker(within(workspace, target));
         const workspaceEntry = Object.entries(lock.workspaces).find(
-          ([relative]) => `${workspace}/${relative}` === target,
+          ([relative]) => paths.resolve(workspace, relative) === target,
         );
         const registryLink = !root.endsWith('/.bin') && workspaceEntry === undefined;
         const readingRegistryLink = inspectPackage(target);
@@ -504,7 +504,8 @@ function auditInstalled(workspace: string, input: unknown) {
           const item = yield* Schema.decodeUnknownEffect(Workspace)(
             yield* readJson(`${target}/package.json`),
           );
-          yield* requireWorker(item.name === entry.name && name === item.name?.split('/').at(-1));
+          const moduleSpecifier = path.split('/node_modules/').at(-1);
+          yield* requireWorker(item.name === entry.name && moduleSpecifier === entry.name);
         }
         links.push({ path, target });
       }
@@ -561,7 +562,7 @@ function auditInstalled(workspace: string, input: unknown) {
           const info = yield* metadata.lstat(path);
           const action = Match.value(info.type).pipe(
             Match.when('Directory', () => inspectDirectory(path)),
-            Match.when('SymbolicLink', () => inspectLink(root, name, path)),
+            Match.when('SymbolicLink', () => inspectLink(root, path)),
             Match.when('File', () => requireWorker(name.startsWith('.'))),
             Match.orElse(() => Effect.fail(new WorkerError({ code: 'EvidenceIncomplete' }))),
           );
@@ -752,31 +753,28 @@ export function classifyCacheFailure(
   result: { exitCode: number; stderr: string },
   identity?: string,
 ) {
-  // Bun's absence diagnostics must identify the requested artifact, not ENOENT,
-  // a loader/flag error, or an arbitrary nonzero exit. Runtime proof is still open.
-  const knownMiss =
-    /(?:ConnectionRefused|ECONNREFUSED|FailedToOpenSocket|failed to connect|cache miss)/i.test(
-      result.stderr,
-    );
+  // Only this complete refusal shape and normal exit are supported. Unknown or
+  // mixed diagnostics block; pinned-runtime evidence is needed for any expansion.
   const relevant = Match.value(identity).pipe(
     Match.when(isString, identifiesMissingArtifact),
-    Match.orElse(() => /(?:https?:\/\/127\.0\.0\.1:4873|127\.0\.0\.1:4873)/.test(result.stderr)),
+    Match.orElse(() => false),
   );
   function identifiesMissingArtifact(value: string) {
     const split = value.lastIndexOf('@');
     const name = value.slice(0, split);
     const version = value.slice(split + 1);
     const basename = name.split('/').at(-1);
-    return result.stderr.includes(`http://127.0.0.1:4873/${name}/-/${basename}-${version}.tgz`);
-  }
-  return (
-    result.exitCode !== 0 &&
-    knownMiss &&
-    relevant &&
-    !/(?:error while loading shared libraries|unknown option|command not found)/i.test(
+    const refusal = {
+      line: `ConnectionRefused http://127.0.0.1:4873/${name}/-/${basename}-${version}.tgz`,
+    };
+    const completeDiagnostic = [refusal.line, `${refusal.line}\n`, `${refusal.line}\r\n`].includes(
       result.stderr,
-    )
-  );
+    );
+    return (
+      split > 0 && safeRelative(name) && /^[0-9A-Za-z.+-]+$/.test(version) && completeDiagnostic
+    );
+  }
+  return result.exitCode === 1 && relevant;
 }
 
 // Synthetic archives are constructed, not extracted. The reviewed streaming
@@ -1077,7 +1075,7 @@ export function makeWorkerCases() {
         yield* fs.makeDirectory(empty.cache);
         yield* requireWorker((yield* fs.readDirectory(empty.cache)).length === 0);
         const emptyResult = yield* execute(empty);
-        yield* requireWorker(classifyCacheFailure(emptyResult));
+        yield* requireWorker(classifyCacheFailure(emptyResult, audit.direct[0]!.identity));
         yield* snapshot(empty.workspace);
         record();
         current = 'MissingRequiredArtifact';

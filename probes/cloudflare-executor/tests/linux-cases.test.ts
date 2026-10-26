@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 import { createHash } from 'node:crypto';
 
 import { BunServices } from '@effect/platform-bun';
-import { Effect, FileSystem, Match, Result, Schema } from 'effect';
+import { Effect, FileSystem, Match, Path, Result, Schema } from 'effect';
 
 import { CacheMetadata, makeCacheMetadata } from '../src/linux-qualification/cache.ts';
 import {
@@ -94,6 +94,7 @@ type Options = {
   hardlinkInstall?: boolean;
   deadlineUnknown?: boolean;
   wrongRuntime?: boolean;
+  negativeFailure?: { install: 4 | 5; exitCode: number; stderr: string };
 };
 function fixture() {
   function* prepare() {
@@ -251,10 +252,14 @@ function scenario(options: Options = {}) {
         Match.when(true, () => ['/work/helper']),
         Match.orElse(() => [] as string[]),
       );
+      const failure = [options.negativeFailure].find((value) => value?.install === installs);
+      const processResult = Match.value(failure).pipe(
+        Match.when(undefined, () => ({ stderr, exitCode: Number(miss) })),
+        Match.orElse((value) => ({ stderr: value.stderr, exitCode: value.exitCode })),
+      );
       return {
         stdout: '',
-        stderr,
-        exitCode: Number(miss),
+        ...processResult,
         complete: true,
         executions,
         nativeExecutions,
@@ -447,6 +452,141 @@ function exactNegative() {
   expect(classifyCacheFailure({ exitCode: 1, stderr: 'unknown option --backend' })).toBe(false);
 }
 test('negative classification requires missing identity and cache diagnostic', exactNegative);
+
+const normalCacheMiss = {
+  exitCode: 1,
+  stderr: 'ConnectionRefused http://127.0.0.1:4873/foo/-/foo-1.0.0.tgz',
+};
+const misleadingCacheFailures = [
+  {
+    name: 'review warning plus EACCES',
+    stderr:
+      'warning: cache miss http://127.0.0.1:4873/foo/-/foo-1.0.0.tgz\nerror: EACCES opening bun.lock',
+  },
+  {
+    name: 'permission after exact refusal',
+    stderr: `${normalCacheMiss.stderr}\nerror: EACCES opening bun.lock`,
+  },
+  {
+    name: 'permission before exact refusal',
+    stderr: `error: EPERM opening cache\n${normalCacheMiss.stderr}`,
+  },
+  {
+    name: 'permission on refusal line',
+    stderr: `${normalCacheMiss.stderr} EACCES opening bun.lock`,
+  },
+  {
+    name: 'missing runtime executable',
+    stderr: `${normalCacheMiss.stderr}\nerror: ENOENT spawning bun`,
+  },
+  {
+    name: 'runtime loader failure',
+    stderr: `${normalCacheMiss.stderr}\nerror while loading shared libraries`,
+  },
+  {
+    name: 'unsupported runtime flag',
+    stderr: `${normalCacheMiss.stderr}\nunknown option --backend`,
+  },
+  { name: 'OOM diagnostic', stderr: `${normalCacheMiss.stderr}\nOut of memory: Killed process` },
+  {
+    name: 'fatal V8 heap diagnostic',
+    stderr: `${normalCacheMiss.stderr}\nFATAL ERROR: Reached heap limit`,
+  },
+  { name: 'signal diagnostic', stderr: `${normalCacheMiss.stderr}\nterminated by SIGKILL` },
+  {
+    name: 'segmentation fault diagnostic',
+    stderr: `${normalCacheMiss.stderr}\nSegmentation fault`,
+  },
+  { name: 'deadline diagnostic', stderr: `${normalCacheMiss.stderr}\nprocess deadline exceeded` },
+  {
+    name: 'warning alone',
+    stderr: 'warning: cache miss http://127.0.0.1:4873/foo/-/foo-1.0.0.tgz',
+  },
+  {
+    name: 'unrelated socket failure with URL elsewhere',
+    stderr: 'ConnectionRefused on another endpoint\nhttp://127.0.0.1:4873/foo/-/foo-1.0.0.tgz',
+  },
+  { name: 'wrong version', stderr: 'ConnectionRefused http://127.0.0.1:4873/foo/-/foo-2.0.0.tgz' },
+  { name: 'URL query suffix', stderr: `${normalCacheMiss.stderr}?failure=EACCES` },
+  {
+    name: 'unknown multiline diagnostic',
+    stderr: `${normalCacheMiss.stderr}\nunknown installer failure`,
+  },
+];
+for (const failure of misleadingCacheFailures) {
+  test(`cache classifier refuses ${failure.name}`, () =>
+    expect(classifyCacheFailure({ exitCode: 1, stderr: failure.stderr }, 'foo@1.0.0')).toBe(false));
+}
+for (const exitCode of [
+  0,
+  2,
+  64,
+  126,
+  127,
+  128,
+  129,
+  134,
+  137,
+  139,
+  143,
+  255,
+  -9,
+  -15,
+  1.5,
+  NaN,
+  Infinity,
+]) {
+  test(`cache classifier refuses abnormal or unsupported exit ${exitCode}`, () =>
+    expect(classifyCacheFailure({ ...normalCacheMiss, exitCode }, 'foo@1.0.0')).toBe(false));
+}
+function intendedCacheFailureContext() {
+  expect(classifyCacheFailure(normalCacheMiss)).toBe(false);
+  expect(classifyCacheFailure(normalCacheMiss, 'bar@1.0.0')).toBe(false);
+  expect(classifyCacheFailure(normalCacheMiss, 'foo@2.0.0')).toBe(false);
+  expect(classifyCacheFailure(normalCacheMiss, 'foo@1.0.0')).toBe(true);
+  expect(
+    classifyCacheFailure(
+      { ...normalCacheMiss, stderr: `${normalCacheMiss.stderr}\n` },
+      'foo@1.0.0',
+    ),
+  ).toBe(true);
+  expect(
+    classifyCacheFailure(
+      {
+        exitCode: 1,
+        stderr: 'ConnectionRefused http://127.0.0.1:4873/@owned/local/-/local-1.0.0.tgz\r\n',
+      },
+      '@owned/local@1.0.0',
+    ),
+  ).toBe(true);
+}
+test(
+  'cache classifier requires exact missing identity context and preserves normal refusals',
+  intendedCacheFailureContext,
+);
+
+async function unrelatedNegativeStops(install: 4 | 5, failure: typeof normalCacheMiss) {
+  const s = scenario({ negativeFailure: { install, ...failure } });
+  const { result } = await s.run();
+  const caseId = Match.value(install).pipe(
+    Match.when(4, () => 'EmptyCache' as const),
+    Match.orElse(() => 'MissingRequiredArtifact' as const),
+  );
+  expect(result._tag).toBe('Incomplete');
+  expect(result.observations.at(-1)?.caseId).toBe(caseId);
+  expect(result.observations.at(-1)?.stage).toBe('Offline');
+  expect(result.observations.at(-1)?.reason).toBe('EvidenceIncomplete');
+  expect(s.installs()).toBe(install);
+}
+for (const install of [4, 5] as const) {
+  test(`mixed permission failure stops negative install ${install}`, () =>
+    unrelatedNegativeStops(install, {
+      exitCode: 1,
+      stderr: `${normalCacheMiss.stderr}\nerror: EACCES opening bun.lock`,
+    }));
+  test(`abnormal status stops negative install ${install}`, () =>
+    unrelatedNegativeStops(install, { ...normalCacheMiss, exitCode: 137 }));
+}
 async function metadataAudit() {
   function* check() {
     const fs = yield* FileSystem.FileSystem;
@@ -733,3 +873,82 @@ test(
   'verified workspace link satisfies local dependency without inventing a registry identity',
   verifiedWorkspaceLink,
 );
+
+async function rejectsWorkspaceAlias(aliases: readonly string[]) {
+  function* check() {
+    const fs = yield* FileSystem.FileSystem;
+    const paths = yield* Path.Path;
+    const temporary = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-workspace-alias-' });
+    const root = yield* fs.realPath(temporary);
+    yield* fs.makeDirectory(`${root}/packages/local`, { recursive: true });
+    yield* fs.writeFileString(
+      `${root}/packages/local/package.json`,
+      '{"name":"@owned/local","version":"1.0.0"}',
+    );
+    for (const alias of aliases) {
+      const link = `${root}/node_modules/${alias}`;
+      const parent = paths.dirname(link);
+      yield* fs.makeDirectory(parent, { recursive: true });
+      yield* fs.symlink(paths.relative(parent, `${root}/packages/local`), link);
+    }
+    const dependencies = Match.value(aliases.includes('@owned/local')).pipe(
+      Match.when(true, () => ({ '@owned/local': 'workspace:*' })),
+      Match.orElse(() => ({})),
+    );
+    const input = {
+      selected: [],
+      excluded: [],
+      workspaces: { '': { dependencies }, 'packages/local': { name: '@owned/local' } },
+    };
+    const result = yield* makeWorkerCases().auditInstalled(root, input).pipe(Effect.result);
+    expect(result._tag).toBe('Failure');
+  }
+  const workflow = Effect.gen(check);
+  const scoped = Effect.scoped(workflow);
+  const provided = scoped.pipe(withMetadata, withPlatform);
+  await Effect.runPromise(provided);
+}
+for (const aliases of [
+  ['@wrong/local'],
+  ['local'],
+  ['@owned/local', '@wrong/local'],
+  ['@wrong/@owned/local'],
+]) {
+  test(`workspace aliases must match full admitted scoped name ${aliases.join(',')}`, () =>
+    rejectsWorkspaceAlias(aliases));
+}
+
+async function rejectsWorkspaceTargetOrMetadata(target: string, metadataName: string) {
+  function* check() {
+    const fs = yield* FileSystem.FileSystem;
+    const paths = yield* Path.Path;
+    const temporary = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-workspace-binding-' });
+    const root = yield* fs.realPath(temporary);
+    yield* fs.makeDirectory(`${root}/packages/local`, { recursive: true });
+    yield* fs.makeDirectory(`${root}/packages/other`, { recursive: true });
+    yield* fs.makeDirectory(`${root}/node_modules/@owned`, { recursive: true });
+    yield* fs.writeFileString(
+      `${root}/${target}/package.json`,
+      encode({ name: metadataName, version: '1.0.0' }),
+    );
+    yield* fs.symlink(
+      paths.relative(`${root}/node_modules/@owned`, `${root}/${target}`),
+      `${root}/node_modules/@owned/local`,
+    );
+    const input = {
+      selected: [],
+      excluded: [],
+      workspaces: { '': {}, 'packages/local': { name: '@owned/local' } },
+    };
+    const result = yield* makeWorkerCases().auditInstalled(root, input).pipe(Effect.result);
+    expect(result._tag).toBe('Failure');
+  }
+  const workflow = Effect.gen(check);
+  const scoped = Effect.scoped(workflow);
+  const provided = scoped.pipe(withMetadata, withPlatform);
+  await Effect.runPromise(provided);
+}
+test('workspace link rejects canonical but unadmitted target with matching package name', () =>
+  rejectsWorkspaceTargetOrMetadata('packages/other', '@owned/local'));
+test('workspace link rejects admitted target with mismatched package metadata', () =>
+  rejectsWorkspaceTargetOrMetadata('packages/local', '@wrong/local'));
