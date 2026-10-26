@@ -10,6 +10,12 @@ const RequestRecord = Schema.Struct({
   outcome: Schema.Literals(['Verified', 'BlockedMissingBunMetadata']),
 });
 const encodeRecord = Schema.encodeSync(Schema.fromJsonString(RequestRecord));
+const RequestSnapshot = Schema.Struct({
+  blocked: Schema.Boolean,
+  truncated: Schema.Boolean,
+  requests: Schema.Array(RequestRecord),
+});
+const encodeSnapshot = Schema.encodeSync(Schema.fromJsonString(RequestSnapshot));
 const isGet = Schema.is(Schema.Literal('GET'));
 export function startReplayOn(artifacts: AdmittedArtifacts, listen: typeof productionListener) {
   function* start() {
@@ -46,9 +52,15 @@ export function startReplayOn(artifacts: AdmittedArtifacts, listen: typeof produ
         ),
       ).join('');
       const record = RequestRecord.make({ method: request.method.slice(0, 16), path, outcome });
-      const size = new TextEncoder().encode(encodeRecord(record)).length;
-      const countFits = requests.length < 128;
-      const sizeFits = size <= 262000 - logBytes;
+      const nextBlocked = blocked || bytes === undefined;
+      const wrapper = RequestSnapshot.make({ blocked: nextBlocked, truncated, requests: [] });
+      const wrapperBytes = new TextEncoder().encode(encodeSnapshot(wrapper)).length;
+      const size =
+        new TextEncoder().encode(encodeRecord(record)).length + Number(requests.length > 0);
+      const countFits = requests.length < 1024;
+      // Include wrapper/flags and each comma before retaining the record. Later
+      // flag transitions only shorten the wrapper (false -> true).
+      const sizeFits = size <= 262144 - wrapperBytes - logBytes;
       const pathFits = request.path.length <= 2048;
       const fits = countFits && sizeFits && pathFits;
       function recordAccepted() {
@@ -71,15 +83,17 @@ export function startReplayOn(artifacts: AdmittedArtifacts, listen: typeof produ
     const acquiring = Scope.provide(listen(respond), scope);
     const starting = acquiring.pipe(Effect.onError(() => Scope.close(scope, Exit.void)));
     const bound = yield* starting;
+    function readRequestSnapshot() {
+      return RequestSnapshot.make({
+        blocked,
+        truncated,
+        requests: requests.map((request) => RequestRecord.make(request)),
+      });
+    }
     return {
       ...bound,
       stop: () => Scope.close(scope, Exit.void),
-      snapshotRequests: () =>
-        Effect.sync(() => ({
-          blocked,
-          truncated,
-          requests: requests.map((request) => RequestRecord.make(request)),
-        })),
+      snapshotRequests: () => Effect.sync(readRequestSnapshot),
     };
   }
   const workflow = Effect.gen(start);
