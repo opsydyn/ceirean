@@ -24,6 +24,7 @@ type Mount = {
   device: string;
   path: string;
   category: Category;
+  rootIsFilesystemRoot: boolean;
   writable: boolean;
   tmpfs: boolean;
   bytes: Option.Option<number>;
@@ -91,6 +92,7 @@ function readMount(line: string): Mount {
     device,
     path,
     category: definitions.find((definition) => definition.path === path)?.category ?? 'Other',
+    rootIsFilesystemRoot: isRoot(decodePath(root)),
     writable: isReadWrite(access[0]) && isReadWrite(superAccess[0]),
     tmpfs: isTmpfs(fields[separator + 1]),
     bytes,
@@ -155,6 +157,7 @@ function reportMounts(mounts: ReadonlyArray<Mount>) {
   const writable = mounts.filter((mount) => mount.writable);
   const capacity = sumCapacity(mounts);
   const categories = definitions.map((definition) => categoryReport(mounts, definition));
+  const rootCount = mounts.filter((mount) => isRoot(mount.path)).length;
   const conditions = [
     { finding: 'DuplicateId', observed: hasDuplicate(mounts.map((mount) => mount.id)) },
     {
@@ -162,6 +165,8 @@ function reportMounts(mounts: ReadonlyArray<Mount>) {
       observed: hasDuplicate(writable.map((mount) => mount.device)),
     },
     { finding: 'Overmount', observed: hasDuplicate(mounts.map((mount) => mount.path)) },
+    { finding: 'MissingRoot', observed: rootCount === 0 },
+    { finding: 'AmbiguousRoot', observed: rootCount > 1 },
     { finding: 'WritableRoot', observed: writable.some((mount) => isRoot(mount.path)) },
     { finding: 'WritableSubmount', observed: mounts.some(isWritableSubmount) },
     {
@@ -183,9 +188,18 @@ function reportMounts(mounts: ReadonlyArray<Mount>) {
     budgetBytes,
     writableTmpfsBytes: capacity.bytes,
     categories,
-    findings: conditions
-      .filter((condition) => condition.observed)
-      .map((condition) => condition.finding),
+    findings: [
+      ...conditions.filter((condition) => condition.observed).map((condition) => condition.finding),
+      ...definitions
+        .filter(
+          (definition) =>
+            definition.proposedBytes !== null &&
+            mounts.some(
+              (mount) => mount.category === definition.category && !mount.rootIsFilesystemRoot,
+            ),
+        )
+        .map((definition) => `NonRootMountRoot:${definition.category}`),
+    ],
   };
 }
 function inspectString(input: string) {

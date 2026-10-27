@@ -49,6 +49,52 @@ function writableRoot() {
 }
 test('reports a writable root even when the proposed tmpfs budget is exact', writableRoot);
 
+function missingRoot() {
+  const missing = inspectMountInventory(Object.values(fixture).slice(1).join('\n'));
+  expect(missing.input).toBe('Parsed');
+  expect(missing.findings).toContain('MissingRoot');
+  expect(missing.findings).not.toContain('AmbiguousRoot');
+}
+test('identifies a missing root mount', missingRoot);
+
+function ambiguousRoot() {
+  const ambiguous = inspectMountInventory(`${inventory}\n7 0 0:7 / / ro - overlay overlay ro`);
+  expect(ambiguous.findings).toContain('AmbiguousRoot');
+  expect(ambiguous.findings).toContain('Overmount');
+  expect(ambiguous.findings).not.toContain('MissingRoot');
+}
+test('identifies ambiguous root mounts', ambiguousRoot);
+
+const fixedMounts = [
+  { line: fixture.work, finding: 'NonRootMountRoot:Work' },
+  { line: fixture.home, finding: 'NonRootMountRoot:Home' },
+  { line: fixture.tmp, finding: 'NonRootMountRoot:Tmp' },
+  { line: fixture.dev, finding: 'NonRootMountRoot:Dev' },
+  { line: fixture.shm, finding: 'NonRootMountRoot:DevShm' },
+] as const;
+
+function fixedMountRoots() {
+  for (const { line, finding } of fixedMounts) {
+    const changedLine = line.replace(' / /', ' /private /');
+    const changed = inventory.replace(line, changedLine);
+    const result = inspectMountInventory(changed);
+    expect(result.input).toBe('Parsed');
+    expect(result.findings).toContain(finding);
+    expect(encode(result)).not.toContain('/private');
+    expect(result.kernelMountPolicy).toBe('Unreviewed');
+  }
+  const escapedHome = fixture.home.replace(' / /', ' /private\\040home /');
+  const changed = inventory.replace(fixture.home, escapedHome);
+  const multiple = inspectMountInventory(
+    `${changed}\n7 1 0:7 /private-work /work ro - tmpfs tmpfs ro`,
+  );
+  expect(multiple.findings).toContain('NonRootMountRoot:Home');
+  expect(multiple.findings).toContain('NonRootMountRoot:Work');
+  expect(multiple.findings).toContain('Overmount');
+  expect(encode(multiple)).not.toContain('private');
+}
+test('identifies each proposed fixed mount with a non-root mount-root', fixedMountRoots);
+
 function duplicateMounts() {
   const result = inspectMountInventory(`${inventory}\n2 1 0:2 / /work rw - tmpfs tmpfs rw,size=1k`);
   expect(result.findings).toContain('DuplicateId');
@@ -207,6 +253,21 @@ async function capacityLaw(sample: typeof samples.Type) {
   expect(inspectMountInventory(`${fixture.root}\n`.repeat(257 + (sample.amount % 10))).input).toBe(
     'TooLarge',
   );
+  const fixed = fixedMounts[sample.amount % fixedMounts.length]!;
+  const mountRoot = `/private-${sample.amount}`;
+  const changedRoot = inventory.replace(fixed.line, fixed.line.replace(' / /', ` ${mountRoot} /`));
+  const reordered = changedRoot.split('\n').reverse().join('\n');
+  const rootResult = inspectMountInventory(reordered);
+  expect(rootResult.findings).toContain(fixed.finding);
+  expect(encode(rootResult)).not.toContain(mountRoot);
+  expect(
+    inspectMountInventory(
+      reordered
+        .split('\n')
+        .filter((line) => line !== fixture.root)
+        .join('\n'),
+    ).findings,
+  ).toContain('MissingRoot');
   return true;
 }
 async function capacityProperties() {
