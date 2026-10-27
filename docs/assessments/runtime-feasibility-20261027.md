@@ -158,8 +158,21 @@ cannot certify cleanup, even if removal later succeeds. Scoped finalizers are
 awaited: an uninterruptible provider operation or finalizer can outlive 30 seconds,
 and synchronous work can also prevent readback from being scheduled. Actual
 production termination, independent resource-absence readback and a hard deadline
-remain blocked. These observations do not change the existing budgets or approve
-detached cleanup.
+remain blocked. The simulation does not approve detached cleanup.
+
+The fixed-worker supervisor now also schedules its actual cleanup through a single
+20-second cooperative removal window covering inventory, ownership inspection,
+a best-effort stop capped at three seconds, and force removal. Independent
+inventory readback starts after removal settles or at the window's deadline, with
+up to ten seconds inside a 30-second cooperative outer budget. A readback before
+successful removal cannot establish confirmed removal; lost create acknowledgement
+also remains uncertain. The supervisor retains scoped ownership and refuses to
+start a later mutation once the removal deadline has elapsed. Fake-process and
+test-clock checks demonstrate scheduling only: interruption cannot force an
+uninterruptible process or finalizer to settle, synchronous blocking can prevent
+the scheduler from running, and a request already issued to Docker can have
+effects after cancellation. Real daemon termination, independent host readback,
+descendant handling and hard-deadline enforcement remain unproved and blocked.
 
 Unknown or refused controls may be reported for readiness only; they cannot admit
 the historical workload. Review and freeze actual inventory before final kernel

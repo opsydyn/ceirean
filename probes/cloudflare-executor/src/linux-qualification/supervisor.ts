@@ -14,7 +14,7 @@ import {
 import { evidenceRequirements, requiredCases, type CleanupObservation } from './contract.ts';
 import { assertDockerReadback } from './docker-controls.ts';
 import { readDockerEvidence } from './docker-evidence.ts';
-import { DockerProcess, requireSupervisor } from './docker-process.ts';
+import { DockerProcess, requireSupervisor, SupervisorError } from './docker-process.ts';
 import { DockerSession } from './docker-session.ts';
 import {
   openWorkerEvidenceChannel,
@@ -185,9 +185,14 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
       encode({ name, token, create: 'Pending' }),
       { flag: 'wx', mode: 0o600 },
     );
-    function command(args: readonly string[], timeout = 90000) {
+    function command(args: readonly string[], timeout = 90000, expired?: Deferred.Deferred<void>) {
       function* invoke() {
-        const output = yield* docker.run(args, root, timeout);
+        const blocked = expired !== undefined && Deferred.isDoneUnsafe(expired);
+        const action = Match.value(blocked).pipe(
+          Match.when(true, () => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
+          Match.orElse(() => docker.run(args, root, timeout)),
+        );
+        const output = yield* action;
         const bounded = [output.stdout, output.stderr].every(
           (text) => new TextEncoder().encode(text).length <= 262144,
         );
@@ -197,18 +202,21 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
       const workflow = Effect.gen(invoke);
       return workflow;
     }
-    function inventory() {
+    function inventory(timeout = 90000) {
       function* list() {
-        const listed = yield* command([
-          'container',
-          'ls',
-          '--all',
-          '--no-trunc',
-          '--filter',
-          `name=^/${name}$`,
-          '--format',
-          '{{.ID}}',
-        ]);
+        const listed = yield* command(
+          [
+            'container',
+            'ls',
+            '--all',
+            '--no-trunc',
+            '--filter',
+            `name=^/${name}$`,
+            '--format',
+            '{{.ID}}',
+          ],
+          timeout,
+        );
         const readable = [listed.exitCode === 0, isEmpty(listed.stderr)].every(Boolean);
         yield* requireSupervisor(readable, 'CleanupUnknown');
         const ids = listed.stdout.trim().split('\n').filter(Boolean);
@@ -221,9 +229,9 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
       const workflow = Effect.gen(list);
       return workflow;
     }
-    function confirmOwner(expectedRunning?: boolean) {
+    function confirmOwner(expectedRunning?: boolean, timeout = 90000) {
       function* inspect() {
-        const inspected = yield* command(['inspect', '--type=container', name]);
+        const inspected = yield* command(['inspect', '--type=container', name], timeout);
         const readable = [inspected.exitCode === 0, isEmpty(inspected.stderr)].every(Boolean);
         yield* requireSupervisor(readable, 'CleanupUnknown');
         const items = yield* decodeOwnership(inspected.stdout);
@@ -245,24 +253,69 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
       const workflow = Effect.gen(inspect);
       return workflow;
     }
-    function* removeOwned() {
-      for (const expectedId of yield* inventory()) {
-        const id = yield* confirmOwner();
+    function* removeOwned(expired: Deferred.Deferred<void>) {
+      for (const expectedId of yield* inventory(20000)) {
+        const id = yield* confirmOwner(undefined, 20000);
         yield* requireSupervisor(id === expectedId, 'CleanupUnknown');
-        const stopping = command(['stop', '--time=30', id], 30000).pipe(Effect.result);
+        const stopping = command(['stop', '--time=3', id], 3000, expired).pipe(
+          Effect.timeout(3000),
+          Effect.catchDefect(() => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
+          Effect.result,
+        );
         yield* stopping;
-        const removed = yield* command(['rm', '--force', id]);
+        const removed = yield* command(['rm', '--force', id], 20000, expired);
         yield* requireSupervisor(removed.exitCode === 0, 'CleanupUnknown');
       }
     }
     function cleanup() {
       function* clean() {
-        const removing = Effect.gen(removeOwned);
-        const removalResult = removing.pipe(Effect.result);
-        const removal = yield* removalResult;
-        const reading = inventory().pipe(Effect.result);
-        const readback = yield* reading;
-        const confirmed = [Result.isSuccess(removal), state.acknowledged].every(Boolean);
+        const expired = yield* Deferred.make<void>();
+        const settled = yield* Deferred.make<void>();
+        let removalSucceeded = false;
+        function* expirePhase() {
+          yield* Effect.sleep(20000);
+          yield* Deferred.succeed(expired, undefined);
+        }
+        const timer = yield* Effect.gen(expirePhase).pipe(Effect.forkChild);
+        function* waitForExpiry() {
+          yield* Deferred.await(expired).pipe(Effect.timeoutOption(30000));
+          yield* Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }));
+        }
+        function* removePhase() {
+          const expiry = Effect.gen(waitForExpiry);
+          const removal = yield* Effect.gen(() => removeOwned(expired)).pipe(
+            Effect.raceFirst(expiry),
+            Effect.scoped,
+            Effect.catchDefect(() => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
+            Effect.result,
+          );
+          removalSucceeded = Result.isSuccess(removal);
+          yield* Deferred.succeed(settled, undefined);
+          return removal;
+        }
+        function* readPhase() {
+          const expiration = Deferred.await(expired).pipe(Effect.timeout(30000));
+          const settlement = Deferred.await(settled).pipe(Effect.timeout(30000));
+          yield* Effect.raceFirst(settlement, expiration).pipe(Effect.scoped);
+          const afterRemoval = removalSucceeded;
+          const readback = yield* inventory(10000).pipe(
+            Effect.timeout(10000),
+            Effect.catchDefect(() => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
+            Effect.result,
+          );
+          return { readback, afterRemoval };
+        }
+        const [removal, observation] = yield* Effect.all(
+          [Effect.gen(removePhase), Effect.gen(readPhase)],
+          { concurrency: 2 },
+        );
+        yield* Fiber.interrupt(timer);
+        const readback = observation.readback;
+        const confirmed = [
+          Result.isSuccess(removal),
+          observation.afterRemoval,
+          state.acknowledged,
+        ].every(Boolean);
         const resources = Result.getOrElse(readback, () => [] as string[]);
         const status = {
           readable: Result.isSuccess(readback),
@@ -283,7 +336,13 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
         );
       }
       const workflow = Effect.gen(clean);
-      const bounded = workflow.pipe(Effect.interruptible, Effect.timeout(120000), Effect.result);
+      const bounded = workflow.pipe(
+        Effect.scoped,
+        Effect.interruptible,
+        Effect.timeout(30000),
+        Effect.catchDefect(() => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
+        Effect.result,
+      );
       function record(result: Result.Result<void, unknown>) {
         state.cleanup = Result.match(result, {
           onSuccess: () => state.cleanup,

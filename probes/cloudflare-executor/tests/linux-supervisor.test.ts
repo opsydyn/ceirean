@@ -3,6 +3,7 @@ import { expect, test } from 'bun:test';
 import { BunServices } from '@effect/platform-bun';
 import {
   Cause,
+  Clock,
   Deferred,
   Effect,
   Exit,
@@ -17,6 +18,7 @@ import {
   Stdio,
   Stream,
 } from 'effect';
+import { TestClock } from 'effect/testing';
 
 import { CacheMetadata, makeCacheMetadata } from '../src/linux-qualification/cache.ts';
 import { WorkerProcess } from '../src/linux-qualification/cases.ts';
@@ -783,6 +785,533 @@ function scenario(fault: Fault = 'none', ownedProof = false) {
   };
   return { calls, run, attach };
 }
+type BudgetCase =
+  | 'inventory'
+  | 'inspect'
+  | 'stop'
+  | 'rm'
+  | 'cumulative'
+  | 'late-inspect'
+  | 'late-stop'
+  | 'early-absent'
+  | 'finalizer'
+  | 'stop-finalizer'
+  | 'rm-finalizer'
+  | 'readback-stall'
+  | 'readback-at-20-stall'
+  | 'inspect-throw'
+  | 'invoke-throw'
+  | 'stop-defect'
+  | 'rm-defect'
+  | 'readback-throw'
+  | 'foreign';
+
+async function budgetCase(kind: BudgetCase) {
+  function* run() {
+    const fault = Match.value(kind).pipe(
+      Match.when('foreign', () => 'forged' as const),
+      Match.orElse(() => 'before-start' as const),
+    );
+    const fake = scenario(fault);
+    const started = yield* Deferred.make<void>();
+    const events: { operation: string; time: number; args: readonly string[]; timeout: number }[] =
+      [];
+    let inventories = 0;
+    let finished = false;
+    function markFinished() {
+      finished = true;
+    }
+    function* recordReadbackEnd() {
+      events.push({
+        operation: 'readback-ended',
+        time: yield* Clock.currentTimeMillis,
+        args: [],
+        timeout: 0,
+      });
+    }
+    function* finalizerStall() {
+      yield* Effect.addFinalizer(() => Effect.sleep(35000));
+      yield* Effect.sleep(1000000);
+    }
+    function late() {
+      const waiting = Effect.sleep(25000);
+      return waiting.pipe(Effect.uninterruptible);
+    }
+    function finalizer() {
+      const waiting = Effect.gen(finalizerStall);
+      return waiting.pipe(Effect.scoped);
+    }
+    function stalledReadback() {
+      const record = Effect.gen(recordReadbackEnd);
+      const waiting = Effect.sleep(1000000);
+      return waiting.pipe(Effect.ensuring(record));
+    }
+    function synchronousThrow() {
+      throw new SupervisorError({ code: 'CleanupUnknown' });
+    }
+    function runDocker(args: readonly string[], cwd: string, timeout: number) {
+      const throwing = [
+        isOperation('invoke-throw')(kind),
+        inventories > 0,
+        isOperation('inspect')(args[0]),
+      ].every(Boolean);
+      for (const _ of [throwing].filter(Boolean)) synchronousThrow();
+      function* invoke() {
+        for (const _ of [args[0]].filter(isOperation('container'))) inventories++;
+        const operation = Match.value(args[0]).pipe(
+          Match.when('container', () => `inventory-${inventories}`),
+          Match.orElse(() => args[0]!),
+        );
+        for (const _ of [inventories].filter((value) => value > 0)) {
+          events.push({ operation, time: yield* Clock.currentTimeMillis, args, timeout });
+          for (const _ of [operation].filter(isOperation('inventory-1')))
+            yield* Deferred.succeed(started, undefined);
+          const usesFinalizer = Match.value({ kind, operation }).pipe(
+            Match.when({ kind: 'finalizer', operation: 'inspect' }, () => true),
+            Match.when({ kind: 'stop-finalizer', operation: 'stop' }, () => true),
+            Match.when({ kind: 'rm-finalizer', operation: 'rm' }, () => true),
+            Match.orElse(() => false),
+          );
+          for (const _ of [usesFinalizer].filter(Boolean)) yield* finalizer();
+          const delay = Match.value({ kind, operation }).pipe(
+            Match.when({ kind: 'inventory', operation: 'inventory-1' }, () => Effect.sleep(25000)),
+            Match.when({ kind: 'inspect', operation: 'inspect' }, () => Effect.sleep(25000)),
+            Match.when({ kind: 'stop', operation: 'stop' }, () => Effect.sleep(10000)),
+            Match.when({ kind: 'rm', operation: 'rm' }, () => Effect.sleep(25000)),
+            Match.when({ kind: 'cumulative', operation: 'inventory-1' }, () => Effect.sleep(8000)),
+            Match.when({ kind: 'cumulative', operation: 'inspect' }, () => Effect.sleep(9000)),
+            Match.when({ kind: 'cumulative', operation: 'stop' }, () => Effect.sleep(10000)),
+            Match.when({ kind: 'late-inspect', operation: 'inspect' }, late),
+            Match.when({ kind: 'late-stop', operation: 'stop' }, late),
+            Match.when({ kind: 'early-absent', operation: 'rm' }, late),
+            Match.when({ kind: 'readback-stall', operation: 'inventory-2' }, stalledReadback),
+            Match.when({ kind: 'readback-at-20-stall', operation: 'inspect' }, () =>
+              Effect.sleep(25000),
+            ),
+            Match.when({ kind: 'readback-at-20-stall', operation: 'inventory-2' }, stalledReadback),
+            Match.when({ kind: 'inspect-throw', operation: 'inspect' }, () =>
+              Effect.sync(synchronousThrow),
+            ),
+            Match.when({ kind: 'readback-throw', operation: 'inventory-2' }, () =>
+              Effect.sync(synchronousThrow),
+            ),
+            Match.when({ kind: 'stop-defect', operation: 'stop' }, () => Effect.die('stop')),
+            Match.when({ kind: 'rm-defect', operation: 'rm' }, () => Effect.die('rm')),
+            Match.orElse(() => Effect.sleep(0)),
+          );
+          yield* delay;
+        }
+        const response = Match.value({ kind, operation }).pipe(
+          Match.when({ kind: 'early-absent', operation: 'inventory-2' }, () =>
+            Effect.succeed(output()),
+          ),
+          Match.orElse(() => fake.run(args, cwd, timeout)),
+        );
+        return yield* response;
+      }
+      const workflow = Effect.gen(invoke);
+      return workflow;
+    }
+    const inputs = yield* stage([]);
+    const supervised = superviseFixedWorker(inputs).pipe(
+      Effect.provideService(DockerProcess, { run: runDocker }),
+      Effect.provideService(DockerSession, { attach: fake.attach }),
+      Effect.tap(() => Effect.sync(markFinished)),
+    );
+    const fiber = yield* Effect.forkChild(supervised);
+    yield* Deferred.await(started).pipe(Effect.timeout(40000));
+    yield* TestClock.adjust(20000);
+    yield* TestClock.adjust(10000);
+    const finishedAt30 = finished;
+    yield* TestClock.adjust(100000);
+    const result = yield* Fiber.join(fiber);
+    return { events, result, finishedAt30 };
+  }
+  const workflow = Effect.gen(run);
+  const clock = Effect.provide(TestClock.layer());
+  return await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+}
+function eventNamed(operation: string) {
+  return (event: { operation: string }) => isOperation(operation)(event.operation);
+}
+async function schedulingCases() {
+  for (const kind of [
+    'inventory',
+    'inspect',
+    'rm',
+    'late-inspect',
+    'late-stop',
+    'cumulative',
+  ] as const) {
+    const { events, result } = await budgetCase(kind);
+    expect(events.find(eventNamed('inventory-2'))?.time).toBe(20000);
+    expect(result.cleanup._tag).toBe('RemainingResources');
+    const removed = events.some(eventNamed('rm'));
+    const stopped = events.some(eventNamed('stop'));
+    for (const _ of [kind].filter((value) => !isOperation('rm')(value)))
+      expect(removed).toBe(false);
+    for (const _ of [kind].filter(isOperation('late-inspect'))) expect(stopped).toBe(false);
+    for (const _ of [kind].filter(isOperation('cumulative')))
+      expect(events.find(eventNamed('stop'))?.time).toBe(17000);
+  }
+}
+test('cleanup shares one 20-second window and refuses late mutations', schedulingCases);
+async function cappedStop() {
+  const { events, result } = await budgetCase('stop');
+  const stop = events.find(eventNamed('stop'));
+  expect(stop?.args[1]).toBe('--time=3');
+  expect(stop?.timeout).toBeLessThanOrEqual(3000);
+  expect(events.find(eventNamed('inventory-1'))?.timeout).toBe(20000);
+  expect(events.find(eventNamed('inspect'))?.timeout).toBe(20000);
+  expect(events.find(eventNamed('rm'))?.timeout).toBe(20000);
+  expect(events.find(eventNamed('inventory-2'))?.timeout).toBe(10000);
+  expect(events.find(eventNamed('rm'))?.time).toBe(3000);
+  expect(events.find(eventNamed('inventory-2'))?.time).toBe(3000);
+  expect(result.cleanup._tag).toBe('ConfirmedRemoval');
+}
+test('best-effort stop is capped at three seconds before force removal', cappedStop);
+async function independentReadback() {
+  const early = await budgetCase('early-absent');
+  expect(early.events.find(eventNamed('inventory-2'))?.time).toBe(20000);
+  expect(early.result.cleanup._tag).toBe('Unknown');
+  const finalizer = await budgetCase('finalizer');
+  expect(finalizer.events.find(eventNamed('inventory-2'))?.time).toBe(20000);
+  expect(finalizer.finishedAt30).toBe(false);
+  expect(finalizer.result.cleanup._tag).toBe('Unknown');
+  const stalled = await budgetCase('readback-stall');
+  expect(stalled.events.find(eventNamed('readback-ended'))?.time).toBe(10000);
+  expect(stalled.result.cleanup._tag).toBe('Unknown');
+  const reserved = await budgetCase('readback-at-20-stall');
+  expect(reserved.events.find(eventNamed('inventory-2'))?.time).toBe(20000);
+  expect(reserved.events.find(eventNamed('readback-ended'))?.time).toBe(30000);
+  expect(reserved.result.cleanup._tag).toBe('Unknown');
+}
+test('readback is independent, bounded and cannot certify unsettled removal', independentReadback);
+async function finalizerOrdering() {
+  for (const [kind, order] of [
+    ['finalizer', ['inventory-1', 'inspect', 'inventory-2']],
+    ['stop-finalizer', ['inventory-1', 'inspect', 'stop', 'inventory-2']],
+    ['rm-finalizer', ['inventory-1', 'inspect', 'stop', 'rm', 'inventory-2']],
+  ] as const) {
+    const { events, result, finishedAt30 } = await budgetCase(kind);
+    expect(events.map((event) => event.operation)).toEqual([...order]);
+    expect(events.find(eventNamed('inventory-2'))?.time).toBe(20000);
+    expect(finishedAt30).toBe(false);
+    expect(result.cleanup._tag).toBe('Unknown');
+  }
+}
+test(
+  'inspect, stop and rm finalizers retain scoped order and independent readback',
+  finalizerOrdering,
+);
+async function earlyAbsenceThenLateRemoval() {
+  function* run() {
+    const fake = scenario('before-start');
+    const started = yield* Deferred.make<void>();
+    const events: { operation: string; time: number }[] = [];
+    let inventories = 0;
+    function runDocker(args: readonly string[], cwd: string, timeout: number) {
+      function* finishRemoval() {
+        yield* Effect.sleep(25000);
+        const result = yield* fake.run(args, cwd, timeout);
+        events.push({ operation: 'rm-success', time: yield* Clock.currentTimeMillis });
+        return result;
+      }
+      function lateRemoval() {
+        const workflow = Effect.gen(finishRemoval);
+        return workflow.pipe(Effect.uninterruptible);
+      }
+      function* invoke() {
+        for (const _ of [args[0]].filter(isOperation('container'))) inventories++;
+        const operation = Match.value(args[0]).pipe(
+          Match.when('container', () => `inventory-${inventories}`),
+          Match.orElse(() => args[0]!),
+        );
+        for (const _ of [inventories].filter((value) => value > 0))
+          events.push({ operation, time: yield* Clock.currentTimeMillis });
+        for (const _ of [operation].filter(isOperation('inventory-1')))
+          yield* Deferred.succeed(started, undefined);
+        const response = Match.value(operation).pipe(
+          Match.when('rm', lateRemoval),
+          Match.when('inventory-2', () => Effect.succeed(output())),
+          Match.orElse(() => fake.run(args, cwd, timeout)),
+        );
+        return yield* response;
+      }
+      const workflow = Effect.gen(invoke);
+      return workflow;
+    }
+    const inputs = yield* stage([]);
+    const supervised = superviseFixedWorker(inputs).pipe(
+      Effect.provideService(DockerProcess, { run: runDocker }),
+      Effect.provideService(DockerSession, { attach: fake.attach }),
+    );
+    const fiber = yield* Effect.forkChild(supervised);
+    yield* Deferred.await(started).pipe(Effect.timeout(40000));
+    yield* TestClock.adjust(20000);
+    yield* TestClock.adjust(5000);
+    const result = yield* Fiber.join(fiber);
+    expect(events.map((event) => event.operation)).toEqual([
+      'inventory-1',
+      'inspect',
+      'stop',
+      'rm',
+      'inventory-2',
+      'rm-success',
+    ]);
+    expect(events.find(eventNamed('inventory-2'))?.time).toBe(20000);
+    expect(events.find(eventNamed('rm-success'))?.time).toBe(25000);
+    expect(result.cleanup._tag).toBe('Unknown');
+  }
+  const workflow = Effect.gen(run);
+  const clock = Effect.provide(TestClock.layer());
+  await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+}
+test(
+  'early empty readback stays unknown after a late accepted removal succeeds',
+  earlyAbsenceThenLateRemoval,
+);
+async function cleanupDefects() {
+  for (const [kind, expected] of [
+    ['inspect-throw', 'RemainingResources'],
+    ['invoke-throw', 'RemainingResources'],
+    ['stop-defect', 'ConfirmedRemoval'],
+    ['rm-defect', 'RemainingResources'],
+    ['readback-throw', 'Unknown'],
+    ['foreign', 'RemainingResources'],
+  ] as const) {
+    const { events, result } = await budgetCase(kind);
+    const readback = events.some(eventNamed('inventory-2'));
+    const stopped = events.some(eventNamed('stop'));
+    expect(readback).toBe(true);
+    expect(result.cleanup._tag).toBe(expected);
+    for (const _ of [kind].filter((value) =>
+      ['foreign', 'inspect-throw', 'invoke-throw'].some(isOperation(value)),
+    ))
+      expect(stopped).toBe(false);
+  }
+}
+test('cleanup handles synchronous throws, defects and foreign ownership', cleanupDefects);
+async function invalidCleanupIdentity() {
+  for (const [kind, order] of [
+    ['malformed', ['inventory-1', 'inventory-2']],
+    ['multiple', ['inventory-1', 'inventory-2']],
+    ['wrong-name', ['inventory-1', 'inspect', 'inventory-2']],
+    ['inventory-mismatch', ['inventory-1', 'inspect', 'inventory-2']],
+    ['ack-mismatch', ['inventory-1', 'inspect', 'inventory-2']],
+  ] as const) {
+    function* run() {
+      const fake = scenario('before-start');
+      const events: string[] = [];
+      let inventories = 0;
+      const ownership = Schema.Array(
+        Schema.Struct({
+          Id: Schema.String,
+          Name: Schema.String,
+          Config: Schema.Struct({ Labels: Schema.Record(Schema.String, Schema.String) }),
+        }),
+      );
+      const decode = Schema.decodeUnknownSync(Schema.fromJsonString(ownership));
+      function runDocker(args: readonly string[], cwd: string, timeout: number) {
+        function* invoke() {
+          for (const _ of [args[0]].filter(isOperation('container'))) inventories++;
+          const operation = Match.value(args[0]).pipe(
+            Match.when('container', () => `inventory-${inventories}`),
+            Match.orElse(() => args[0]!),
+          );
+          for (const _ of [inventories].filter((value) => value > 0)) events.push(operation);
+          const actual = yield* fake.run(args, cwd, timeout);
+          function wrongName() {
+            const items = decode(actual.stdout).map((item) => ({ ...item, Name: '/foreign' }));
+            return output(encode(items));
+          }
+          function wrongId() {
+            const items = decode(actual.stdout).map((item) => ({ ...item, Id: 'b'.repeat(64) }));
+            return output(encode(items));
+          }
+          const response = Match.value({ kind, operation }).pipe(
+            Match.when({ kind: 'malformed', operation: 'inventory-1' }, () =>
+              output('not-an-id\n'),
+            ),
+            Match.when({ kind: 'multiple', operation: 'inventory-1' }, () =>
+              output(`${'a'.repeat(64)}\n${'b'.repeat(64)}\n`),
+            ),
+            Match.when({ kind: 'inventory-mismatch', operation: 'inventory-1' }, () =>
+              output(`${'b'.repeat(64)}\n`),
+            ),
+            Match.when({ kind: 'ack-mismatch', operation: 'inventory-1' }, () =>
+              output(`${'b'.repeat(64)}\n`),
+            ),
+            Match.when({ kind: 'wrong-name', operation: 'inspect' }, wrongName),
+            Match.when({ kind: 'ack-mismatch', operation: 'inspect' }, wrongId),
+            Match.orElse(() => actual),
+          );
+          return response;
+        }
+        const workflow = Effect.gen(invoke);
+        return workflow;
+      }
+      const inputs = yield* stage([]);
+      const supervised = superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: runDocker }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+      );
+      const result = yield* supervised;
+      expect(events).toEqual([...order]);
+      expect(result.cleanup._tag).toBe('RemainingResources');
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test(
+  'invalid inventory and ownership identities never authorize cleanup mutation',
+  invalidCleanupIdentity,
+);
+async function emptyInventory() {
+  for (const fault of ['before-start', 'create-unknown'] as const) {
+    function* run() {
+      const fake = scenario(fault);
+      function runDocker(args: readonly string[], cwd: string, timeout: number) {
+        const workflow = Match.value(args[0]).pipe(
+          Match.when('container', () => Effect.succeed(output())),
+          Match.orElse(() => fake.run(args, cwd, timeout)),
+        );
+        return workflow;
+      }
+      const inputs = yield* stage([]);
+      const result = yield* superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: runDocker }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+      );
+      const expected = Match.value(fault).pipe(
+        Match.when('before-start', () => 'ConfirmedRemoval' as const),
+        Match.orElse(() => 'Unknown' as const),
+      );
+      expect(result.cleanup._tag).toBe(expected);
+      expect(fake.calls.some((args) => isOperation('rm')(args[0]))).toBe(false);
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test('empty inventory preserves acknowledgement and ambiguous-create semantics', emptyInventory);
+async function cancelledCreate() {
+  function* run() {
+    const fake = scenario('before-start');
+    const created = yield* Deferred.make<void>();
+    const events: string[] = [];
+    function runDocker(args: readonly string[], cwd: string, timeout: number) {
+      function* invoke() {
+        events.push(args[0]!);
+        const result = yield* fake.run(args, cwd, timeout);
+        for (const _ of [args[0]].filter(isOperation('create'))) {
+          yield* Deferred.succeed(created, undefined);
+          yield* Effect.sleep(1000000);
+        }
+        return result;
+      }
+      const workflow = Effect.gen(invoke);
+      return workflow;
+    }
+    const inputs = yield* stage([]);
+    const supervised = superviseFixedWorker(inputs).pipe(
+      Effect.provideService(DockerProcess, { run: runDocker }),
+      Effect.provideService(DockerSession, { attach: fake.attach }),
+    );
+    const fiber = yield* Effect.forkChild(supervised);
+    yield* Deferred.await(created).pipe(Effect.timeout(40000));
+    yield* Fiber.interrupt(fiber);
+    const exit = yield* Fiber.await(fiber);
+    expect(Exit.hasInterrupts(exit)).toBe(true);
+    const inventories = events.filter(isOperation('container'));
+    expect(inventories).toHaveLength(2);
+    expect(events).toContain('rm');
+    expect(events.at(-1)).toBe('container');
+  }
+  const workflow = Effect.gen(run);
+  const clock = Effect.provide(TestClock.layer());
+  await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+}
+test(
+  'parent cancellation during ambiguous create still scopes removal and readback',
+  cancelledCreate,
+);
+async function cancellationDuringCleanup() {
+  for (const [target, expected] of [
+    ['inventory-1', ['inventory-1', 'inventory-2']],
+    ['stop', ['inventory-1', 'inspect', 'stop', 'inventory-2']],
+    ['rm', ['inventory-1', 'inspect', 'stop', 'rm', 'inventory-2']],
+    ['inventory-2', ['inventory-1', 'inspect', 'stop', 'rm', 'inventory-2']],
+  ] as const) {
+    function* run() {
+      const fake = scenario('before-start');
+      const started = yield* Deferred.make<void>();
+      const events: string[] = [];
+      let inventories = 0;
+      let cancellationFinished = false;
+      let finalizerFinished = false;
+      function markCancellation() {
+        cancellationFinished = true;
+      }
+      function markFinalizer() {
+        finalizerFinished = true;
+      }
+      function* finishFinalizer() {
+        yield* Effect.sleep(35000);
+        markFinalizer();
+      }
+      function* stall() {
+        yield* Effect.addFinalizer(() => Effect.gen(finishFinalizer));
+        yield* Deferred.succeed(started, undefined);
+        yield* Effect.sleep(1000000);
+      }
+      function runDocker(args: readonly string[], cwd: string, timeout: number) {
+        function* invoke() {
+          for (const _ of [args[0]].filter(isOperation('container'))) inventories++;
+          const operation = Match.value(args[0]).pipe(
+            Match.when('container', () => `inventory-${inventories}`),
+            Match.orElse(() => args[0]!),
+          );
+          for (const _ of [inventories].filter((value) => value > 0)) events.push(operation);
+          for (const _ of [operation].filter(isOperation(target)))
+            yield* Effect.gen(stall).pipe(Effect.scoped);
+          return yield* fake.run(args, cwd, timeout);
+        }
+        const workflow = Effect.gen(invoke);
+        return workflow;
+      }
+      const inputs = yield* stage([]);
+      const supervised = superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: runDocker }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+      );
+      const fiber = yield* Effect.forkChild(supervised);
+      yield* Deferred.await(started).pipe(Effect.timeout(40000));
+      const cancel = Fiber.interrupt(fiber).pipe(Effect.tap(() => Effect.sync(markCancellation)));
+      const cancelling = yield* Effect.forkChild(cancel);
+      yield* TestClock.adjust(20000);
+      yield* TestClock.adjust(10000);
+      const pendingAt30 = !cancellationFinished && !finalizerFinished;
+      yield* TestClock.adjust(70000);
+      yield* Fiber.join(cancelling);
+      const exit = yield* Fiber.await(fiber);
+      expect(pendingAt30).toBe(true);
+      expect(finalizerFinished).toBe(true);
+      expect(Exit.hasInterrupts(exit)).toBe(true);
+      expect(events).toEqual([...expected]);
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test(
+  'parent cancellation waits for stalled scoped cleanup and never reports success',
+  cancellationDuringCleanup,
+);
 function exercise(fault: Fault) {
   const fake = scenario(fault);
   function* run() {
