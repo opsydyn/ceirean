@@ -29,6 +29,9 @@ type Mount = {
   tmpfs: boolean;
   bytes: Option.Option<number>;
   sizeOverflow: boolean;
+  filesystem: string;
+  flags: ReadonlyArray<string>;
+  access: string;
 };
 const escapes: Record<string, string> = {
   '\\040': ' ',
@@ -73,6 +76,10 @@ function readMount(line: string): Mount {
   const bytes = Option.liftPredicate(number, (value) =>
     [sizes.length === 1, Number.isSafeInteger(value), value > 0].every(Boolean),
   );
+  const mountAccess = Match.value(access[0] === superAccess[0]).pipe(
+    Match.when(true, () => access[0] ?? ''),
+    Match.orElse(() => ''),
+  );
   return {
     valid: [
       line.length <= 4096,
@@ -97,6 +104,9 @@ function readMount(line: string): Mount {
     tmpfs: isTmpfs(fields[separator + 1]),
     bytes,
     sizeOverflow: sizes.length === 1 && size !== null && !Number.isSafeInteger(number),
+    filesystem: fields[separator + 1] ?? '',
+    flags: [...flags, ...superFlags],
+    access: mountAccess,
   };
 }
 function emptyReport(input: 'Invalid' | 'TooLarge') {
@@ -232,5 +242,80 @@ export function inspectMountInventory(input: unknown) {
   return Match.value(input).pipe(
     Match.when(isString, inspectString),
     Match.orElse(() => emptyReport('Invalid')),
+  );
+}
+
+const detailPaths = [
+  ['Root', '/'],
+  ['Work', '/work'],
+  ['Home', '/home'],
+  ['Tmp', '/tmp'],
+  ['Dev', '/dev'],
+  ['DevShm', '/dev/shm'],
+  ['Proc', '/proc'],
+  ['Sys', '/sys'],
+  ['Cgroup', '/sys/fs/cgroup'],
+  ['DevPts', '/dev/pts'],
+] as const;
+const knownTypes = [
+  'overlay',
+  'tmpfs',
+  'proc',
+  'sysfs',
+  'cgroup2',
+  'devpts',
+  'ext4',
+  'xfs',
+] as const;
+const isParsed = Schema.is(Schema.Literal('Parsed'));
+function unambiguousFlags(flags: ReadonlyArray<string>) {
+  const nonAccess = flags
+    .filter((entry) => !isAccess(entry))
+    .map((entry) => entry.split('=')[0] ?? '');
+  const conflicting = [
+    ['nosuid', 'suid'],
+    ['nodev', 'dev'],
+    ['noexec', 'exec'],
+  ].some((pair) => pair.every((entry) => flags.includes(entry)));
+  return !hasDuplicate(nonAccess) && !conflicting;
+}
+function mountDetail(mounts: ReadonlyArray<Mount>, [category, path]: (typeof detailPaths)[number]) {
+  const selected = mounts.filter((mount) => mount.path === path);
+  const first = selected[0];
+  const single = selected.length === 1;
+  const filesystem = knownTypes.find((type) => type === first?.filesystem) ?? 'Unknown';
+  const access = Match.value(first?.access).pipe(
+    Match.when(isAccess, (value) => value),
+    Match.orElse(() => 'Unknown' as const),
+  );
+  function reviewed<T>(value: T) {
+    return Match.value(single).pipe(
+      Match.when(true, () => value),
+      Match.orElse(() => 'Unknown' as const),
+    );
+  }
+  function reviewedFlag(name: string) {
+    const flags = first?.flags ?? [];
+    return Match.value(single && unambiguousFlags(flags)).pipe(
+      Match.when(true, () => flags.includes(name)),
+      Match.orElse(() => 'Unknown' as const),
+    );
+  }
+  const detail = {
+    category,
+    count: selected.length,
+    type: reviewed(filesystem),
+    access: reviewed(access),
+    nosuid: reviewedFlag('nosuid'),
+    nodev: reviewedFlag('nodev'),
+    noexec: reviewedFlag('noexec'),
+  };
+  return Option.toArray(Option.liftPredicate(detail, () => selected.length > 0));
+}
+export function inspectMountDetails(input: string) {
+  const mounts = input.split('\n').filter(Boolean).map(readMount);
+  return Match.value(inspectMountInventory(input).input).pipe(
+    Match.when(isParsed, () => detailPaths.flatMap((path) => mountDetail(mounts, path))),
+    Match.orElse(() => []),
   );
 }
