@@ -11,6 +11,7 @@ import {
   invokeReadinessWorker,
   ReadinessOnly,
 } from '../src/linux-qualification/readiness-worker.ts';
+import { inspectMountDetails } from '../src/linux-qualification/readiness.ts';
 
 const paths = { mount: '/proc/self/mountinfo', status: '/proc/self/status' };
 const namespaces = ['mnt', 'pid', 'ipc', 'net', 'user'] as const;
@@ -169,7 +170,7 @@ async function ambiguousMountFlags() {
     ['ro', 'ro,privateflag,privateflag'],
     ['ro', 'ro,size=1k,size=2k'],
   ]) {
-    const line = `1 0 0:1 / / ${options[0]} - overlay overlay ${options[1]}`;
+    const line = `1 0 0:1 / / ${options[0]} - overlay overlay ${options[1]}\n`;
     const { result } = await collect({ texts: { [paths.mount]: line } });
     const root = result.mounts.details.find((entry) => isRoot(entry.category));
     expect(root).toMatchObject({ nosuid: 'Unknown', nodev: 'Unknown', noexec: 'Unknown' });
@@ -242,6 +243,64 @@ async function missingReadbacks() {
   expect(encode(result)).not.toContain('/proc/self/ns/net');
 }
 test('missing controls and namespace links remain unknown', missingReadbacks);
+
+async function truncatedMount() {
+  const { result } = await collect({
+    texts: { [paths.mount]: '1 0 0:1 / / ro - overlay overlay ro' },
+  });
+  expect(result.mounts.summary.input).toBe('Invalid');
+  expect(result.mounts.details).toEqual([]);
+}
+test('unterminated mount record is invalid', truncatedMount);
+
+async function truncatedStatus() {
+  const { result } = await collect({
+    texts: { [paths.status]: 'Uid: 1000 1000 1000 1000\nGid: 1001 1001 1001 1001' },
+  });
+  expect(result.status.uid).toBe('Unknown');
+  expect(result.status.gid).toBe('Unknown');
+}
+test('unterminated status makes all status readbacks unknown', truncatedStatus);
+
+async function truncatedCgroups() {
+  const { result } = await collect({
+    texts: {
+      '/sys/fs/cgroup/cpu.max': '200000 100000',
+      '/sys/fs/cgroup/memory.max': '4294',
+      '/sys/fs/cgroup/memory.swap.max': '0',
+      '/sys/fs/cgroup/pids.max': '12',
+    },
+  });
+  expect(result.cgroups).toEqual({
+    cpu: 'Unknown',
+    memory: 'Unknown',
+    swap: 'Unknown',
+    pids: 'Unknown',
+  });
+}
+test('unterminated CPU, memory, swap and pids records are unknown', truncatedCgroups);
+
+function oversizedMountDetails() {
+  const split = spyOn(String.prototype, 'split');
+  activeSpy.restore = () => split.mockRestore();
+  const oversized = 'x'.repeat(65537);
+  expect(inspectMountDetails(oversized)).toEqual([]);
+  expect(split.mock.contexts.some((context) => String(context) === oversized)).toBe(false);
+  const multibyte = '\u00e9'.repeat(32769);
+  expect(inspectMountDetails(multibyte)).toEqual([]);
+  expect(split.mock.contexts.some((context) => String(context) === multibyte)).toBe(false);
+}
+test('mount details enforce byte bounds before splitting oversized input', oversizedMountDetails);
+
+function overlongMountInventory() {
+  const split = spyOn(String.prototype, 'split');
+  activeSpy.restore = () => split.mockRestore();
+  const tooMany = '1 0 0:1 / / ro - overlay overlay ro\n'.repeat(257);
+  expect(inspectMountDetails(tooMany)).toEqual([]);
+  const isFieldSeparator = Schema.is(Schema.Literal(' '));
+  expect(split.mock.calls.some((args) => isFieldSeparator(args[0]))).toBe(false);
+}
+test('mount details enforce line bounds before parsing records', overlongMountInventory);
 
 async function schemaIsolation() {
   const { result } = await collect();
@@ -336,7 +395,7 @@ async function cpuCollectorBounds() {
     '1000 1000001',
     '9007199254740992 100000',
   ]) {
-    const { result } = await collect({ texts: { '/sys/fs/cgroup/cpu.max': input } });
+    const { result } = await collect({ texts: { '/sys/fs/cgroup/cpu.max': `${input}\n` } });
     expect(result.cgroups.cpu).toBe('Unknown');
   }
   for (const [input, cpu] of [
@@ -345,7 +404,7 @@ async function cpuCollectorBounds() {
     ['max 1000', { quota: 'Max', period: 1000 }],
     ['max 1000000', { quota: 'Max', period: 1000000 }],
   ] as const) {
-    const { result } = await collect({ texts: { '/sys/fs/cgroup/cpu.max': input } });
+    const { result } = await collect({ texts: { '/sys/fs/cgroup/cpu.max': `${input}\n` } });
     expect(result.cgroups.cpu).toEqual(cpu);
   }
 }
@@ -383,7 +442,7 @@ async function multicoreQuota() {
   const clock = Effect.provide(TestClock.layer());
   for (const quota of [2000000, Number.MAX_SAFE_INTEGER]) {
     const { result } = await collect({
-      texts: { '/sys/fs/cgroup/cpu.max': `${quota} 1000000` },
+      texts: { '/sys/fs/cgroup/cpu.max': `${quota} 1000000\n` },
     });
     expect(result.cgroups.cpu).toEqual({ quota, period: 1000000 });
     const decoded = await Effect.runPromise(decodeReadiness(result).pipe(clock, Effect.result));

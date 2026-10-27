@@ -155,6 +155,15 @@ function readText(fs: FileSystem.FileSystem, path: string, max: number) {
       offset += chunk.length;
     }
     const text = yield* Effect.try(() => new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+    // A final newline detects an incomplete last record, not truncation at an earlier record boundary.
+    yield* Effect.fromResult(
+      Result.succeed(text).pipe(
+        Result.filterOrFail(
+          (value) => value.endsWith('\n'),
+          () => 'Unterminated' as const,
+        ),
+      ),
+    );
     return { tag: 'Read' as const, text };
   }
   function failed(error: unknown): Read {

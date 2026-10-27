@@ -138,7 +138,9 @@ emitted when available. Raw errors are not exported. The
 namespace length check limits subsequent classification, but `readLink` allocates
 its result before that check, so allocation by the platform operation is not
 bounded. Kernel mount details are known-only and incomplete; neither their absence
-nor a synthetic summary is a final mount policy. Observer, network negatives and
+nor a synthetic summary is a final mount policy. A terminal newline rejects some
+truncated reads but cannot prove a snapshot was not cut at a record boundary.
+Observer, network negatives and
 cleanup are explicitly `NotMeasured`. The worker produces no qualification receipt,
 leaves kernel policy unreviewed and activation blocked.
 

@@ -226,10 +226,9 @@ function inspectLines(input: string) {
     Match.when('', () => lines.slice(0, -1)),
     Match.orElse(() => lines),
   );
-  const mounts = content.map(readMount);
   return Match.value(content.length > 256).pipe(
     Match.when(true, () => emptyReport('TooLarge')),
-    Match.orElse(() => inspectParsed(mounts)),
+    Match.orElse(() => inspectParsed(content.map(readMount))),
   );
 }
 function inspectParsed(mounts: ReadonlyArray<Mount>) {
@@ -312,10 +311,13 @@ function mountDetail(mounts: ReadonlyArray<Mount>, [category, path]: (typeof det
   };
   return Option.toArray(Option.liftPredicate(detail, () => selected.length > 0));
 }
-export function inspectMountDetails(input: string) {
+function mountDetailsForParsed(input: string) {
   const mounts = input.split('\n').filter(Boolean).map(readMount);
+  return detailPaths.flatMap((path) => mountDetail(mounts, path));
+}
+export function inspectMountDetails(input: string) {
   return Match.value(inspectMountInventory(input).input).pipe(
-    Match.when(isParsed, () => detailPaths.flatMap((path) => mountDetail(mounts, path))),
+    Match.when(isParsed, () => mountDetailsForParsed(input)),
     Match.orElse(() => []),
   );
 }
