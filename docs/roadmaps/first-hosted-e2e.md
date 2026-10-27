@@ -54,22 +54,29 @@ is needed to begin this roadmap.
 
 ## 1. Resolve The Runtime Feasibility Decision
 
+The approved static assessment is [recorded here](../assessments/runtime-feasibility-20261027.md):
+conditional GO for the existing Cloudflare design; NO-GO for execution today.
+The [Linux readiness amendment](../superpowers/specs/2026-10-27-linux-runtime-readiness-design.md)
+is proposed for approval, not applied. No runtime proof or tool acquisition follows
+from the assessment, and the hosted microVM isolation approval is not reopened.
+
 - [ ] Select and review a real child/native-execution observation mechanism.
       Establish its immutable acquisition, behavior and compatibility with the
       existing nonroot, no-new-privileges and capability restrictions. No tracer
       acquisition or permission expansion is authorized by this document.
-- [ ] Map the required isolation/lifecycle controls to both the Linux qualification
+- [x] Map the required isolation/lifecycle controls to both the Linux qualification
       runner and the pinned Cloudflare provider. Static API review can expose a
       missing mechanism; it cannot establish effective hosted enforcement. Resolve
       known unsupported requirements before investing in the final image.
-- [ ] Produce an explicit writable-mount allocation that includes required
+- [x] Produce a proposed writable-mount allocation that includes required
       auxiliary mounts. The existing 2816/128/128 MiB allocations fill 3 GiB;
       do not add exemptions or silently increase the ceiling. Any reallocation
       or isolation-policy change requires an owner-approved design amendment.
 - [ ] Define a small Ceirean-owned control canary and request separate approval
       for its execution on the intended Linux runner. It is not a FoldKit install
       or permission to consume the historical qualification attempt.
-- [ ] Record a go/no-go result for observation, controls and cancellation.
+- [x] Record the static go/no-go result for observation, controls and cancellation;
+      actual runner/provider behavior remains unknown and execution stays blocked.
 
 Exit: a reviewed, testable runtime design with no known missing capability.
 Proposed appetite: one engineering day to reach that decision, not a promise to
