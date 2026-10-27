@@ -11,6 +11,7 @@ import {
   Scope,
 } from 'effect';
 
+import { CleanupMonotonicClock } from './cleanup-clock.ts';
 import { evidenceRequirements, requiredCases, type CleanupObservation } from './contract.ts';
 import { assertDockerReadback } from './docker-controls.ts';
 import { readDockerEvidence } from './docker-evidence.ts';
@@ -118,6 +119,7 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
   function* supervise() {
     const fs = yield* FileSystem.FileSystem;
     const docker = yield* DockerProcess;
+    const monotonic = yield* CleanupMonotonicClock;
     const supervisorScope = yield* Scope.Scope;
     const transports: Effect.Success<ReturnType<typeof DockerSession.Service.attach>>[] = [];
     const handoffs: Effect.Success<ReturnType<typeof openWorkerEvidenceChannel>>[] = [];
@@ -185,9 +187,36 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
       encode({ name, token, create: 'Pending' }),
       { flag: 'wx', mode: 0o600 },
     );
-    function command(args: readonly string[], timeout = 90000, expired?: Deferred.Deferred<void>) {
+    type CleanupGuard = {
+      expired: Deferred.Deferred<void>;
+      started: number;
+      last: number;
+      blocked: boolean;
+    };
+    function guardBlocked(clock: CleanupGuard) {
+      const reading = Result.try(monotonic);
+      const now = Result.getOrElse(reading, () => Number.NaN);
+      const invalid = [
+        clock.blocked,
+        Deferred.isDoneUnsafe(clock.expired),
+        !Number.isFinite(clock.started),
+        !Number.isFinite(now),
+        now < clock.last,
+        now - clock.started >= 20000,
+      ].some(Boolean);
+      clock.blocked = invalid;
+      clock.last = Match.value(invalid).pipe(
+        Match.when(false, () => now),
+        Match.orElse(() => clock.last),
+      );
+      return invalid;
+    }
+    function command(args: readonly string[], timeout = 90000, guard?: CleanupGuard) {
       function* invoke() {
-        const blocked = expired !== undefined && Deferred.isDoneUnsafe(expired);
+        const blocked = Option.match(Option.fromNullishOr(guard), {
+          onNone: () => false,
+          onSome: guardBlocked,
+        });
         const action = Match.value(blocked).pipe(
           Match.when(true, () => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
           Match.orElse(() => docker.run(args, root, timeout)),
@@ -253,23 +282,36 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
       const workflow = Effect.gen(inspect);
       return workflow;
     }
-    function* removeOwned(expired: Deferred.Deferred<void>) {
+    function* removeOwned(guard: CleanupGuard) {
       for (const expectedId of yield* inventory(20000)) {
         const id = yield* confirmOwner(undefined, 20000);
         yield* requireSupervisor(id === expectedId, 'CleanupUnknown');
-        const stopping = command(['stop', '--time=3', id], 3000, expired).pipe(
+        const stopping = command(['stop', '--time=3', id], 3000, guard).pipe(
           Effect.timeout(3000),
           Effect.catchDefect(() => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),
           Effect.result,
         );
         yield* stopping;
-        const removed = yield* command(['rm', '--force', id], 20000, expired);
-        yield* requireSupervisor(removed.exitCode === 0, 'CleanupUnknown');
+        const removed = yield* command(['rm', '--force', id], 20000, guard);
+        const removalAcknowledged = [
+          removed.exitCode === 0,
+          isEmpty(removed.stderr),
+          [id, `${id}\n`].includes(removed.stdout),
+        ].every(Boolean);
+        yield* requireSupervisor(removalAcknowledged, 'CleanupUnknown');
       }
     }
     function cleanup() {
       function* clean() {
+        const reading = yield* Effect.try(monotonic).pipe(Effect.option);
+        const started = Option.getOrElse(reading, () => Number.NaN);
         const expired = yield* Deferred.make<void>();
+        const guard: CleanupGuard = {
+          expired,
+          started,
+          last: started,
+          blocked: !Number.isFinite(started),
+        };
         const settled = yield* Deferred.make<void>();
         let removalSucceeded = false;
         function* expirePhase() {
@@ -283,7 +325,7 @@ export function superviseFixedWorker(inputs: PreparedInputs, mode: WorkerMode = 
         }
         function* removePhase() {
           const expiry = Effect.gen(waitForExpiry);
-          const removal = yield* Effect.gen(() => removeOwned(expired)).pipe(
+          const removal = yield* Effect.gen(() => removeOwned(guard)).pipe(
             Effect.raceFirst(expiry),
             Effect.scoped,
             Effect.catchDefect(() => Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }))),

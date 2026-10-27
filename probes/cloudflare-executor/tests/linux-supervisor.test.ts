@@ -22,6 +22,7 @@ import { TestClock } from 'effect/testing';
 
 import { CacheMetadata, makeCacheMetadata } from '../src/linux-qualification/cache.ts';
 import { WorkerProcess } from '../src/linux-qualification/cases.ts';
+import { CleanupMonotonicClock } from '../src/linux-qualification/cleanup-clock.ts';
 import {
   CaseObservation,
   ControlReadbacks,
@@ -573,7 +574,7 @@ function scenario(fault: Fault = 'none', ownedProof = false) {
         yield* Queue.end(frames);
       for (const exited of [state.exited].filter((value) => value !== undefined))
         yield* Deferred.succeed(exited, undefined);
-      return output();
+      return output('a'.repeat(64) + '\n');
     }
     function copy() {
       const name = args[1]!.split('/').at(-1)!;
@@ -1169,6 +1170,238 @@ test(
   'invalid inventory and ownership identities never authorize cleanup mutation',
   invalidCleanupIdentity,
 );
+async function malformedRemovalOutput() {
+  for (const [stdout, stderr] of [
+    ['b'.repeat(64) + '\n', ''],
+    ['a'.repeat(64) + '\nextra\n', ''],
+    ['a'.repeat(63) + '\n', ''],
+    ['', ''],
+    ['a'.repeat(64) + '\n', 'unexpected warning'],
+  ]) {
+    function* run() {
+      const fake = scenario('before-start');
+      let inventoryOutput: string | undefined;
+      function runDocker(args: readonly string[], cwd: string, timeout: number) {
+        function* invoke() {
+          const actual = yield* fake.run(args, cwd, timeout);
+          for (const _ of [args[0]].filter(isOperation('container')))
+            inventoryOutput = actual.stdout;
+          const response = Match.value(args[0]).pipe(
+            Match.when('rm', () => output(stdout, 0, stderr)),
+            Match.orElse(() => actual),
+          );
+          return response;
+        }
+        const workflow = Effect.gen(invoke);
+        return workflow;
+      }
+      const inputs = yield* stage([]);
+      const result = yield* superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: runDocker }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+      );
+      expect(fake.calls.at(-1)?.slice(0, 2)).toEqual(['container', 'ls']);
+      expect(inventoryOutput).toBe('');
+      expect(result.cleanup._tag).toBe('Unknown');
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test('force removal requires an exact owned ID and empty stderr', malformedRemovalOutput);
+async function validRemovalOutput() {
+  for (const suffix of ['', '\n']) {
+    function* run() {
+      const fake = scenario('before-start');
+      function runDocker(args: readonly string[], cwd: string, timeout: number) {
+        function* invoke() {
+          const actual = yield* fake.run(args, cwd, timeout);
+          const response = Match.value(args[0]).pipe(
+            Match.when('rm', () => output('a'.repeat(64) + suffix)),
+            Match.orElse(() => actual),
+          );
+          return response;
+        }
+        const workflow = Effect.gen(invoke);
+        return workflow;
+      }
+      const inputs = yield* stage([]);
+      const result = yield* superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: runDocker }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+      );
+      expect(result.cleanup._tag).toBe('ConfirmedRemoval');
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test('force removal accepts only the exact ID with optional terminal newline', validRemovalOutput);
+async function monotonicExpiryBeforeTimer() {
+  for (const [target, expected] of [
+    ['inspect', ['inventory-1', 'inspect', 'inventory-2']],
+    ['stop', ['inventory-1', 'inspect', 'stop', 'inventory-2']],
+  ] as const) {
+    function* run() {
+      const fake = scenario('before-start');
+      const operations: string[] = [];
+      let inventories = 0;
+      let monotonic = 0;
+      function now() {
+        return monotonic;
+      }
+      function runDocker(args: readonly string[], cwd: string, timeout: number) {
+        function* invoke() {
+          for (const _ of [args[0]].filter(isOperation('container'))) inventories++;
+          const operation = Match.value(args[0]).pipe(
+            Match.when('container', () => `inventory-${inventories}`),
+            Match.orElse(() => args[0]!),
+          );
+          for (const _ of [inventories].filter((value) => value > 0)) operations.push(operation);
+          const result = yield* fake.run(args, cwd, timeout);
+          for (const _ of [inventories].filter((value) => value > 0))
+            for (const _ of [operation].filter(isOperation(target))) monotonic = 20000;
+          return result;
+        }
+        const workflow = Effect.gen(invoke);
+        return workflow;
+      }
+      const inputs = yield* stage([]);
+      const supervised = superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: runDocker }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+        Effect.provideService(CleanupMonotonicClock, now),
+      );
+      const result = yield* supervised;
+      expect(yield* Clock.currentTimeMillis).toBe(0);
+      expect(operations).toEqual([...expected]);
+      expect(result.cleanup._tag).toBe('RemainingResources');
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test(
+  'monotonic expiry prevents mutation before the expiry timer executes',
+  monotonicExpiryBeforeTimer,
+);
+async function invalidMonotonicClock() {
+  for (const kind of ['not-finite', 'backwards', 'throws'] as const) {
+    function* run() {
+      const fake = scenario('before-start');
+      let reads = 0;
+      function failClock() {
+        throw new SupervisorError({ code: 'CleanupUnknown' });
+      }
+      function now() {
+        reads++;
+        return Match.value(kind).pipe(
+          Match.when('not-finite', () => Number.NaN),
+          Match.when('backwards', () => 100 - reads),
+          Match.orElse(failClock),
+        );
+      }
+      const inputs = yield* stage([]);
+      const supervised = superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: fake.run }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+        Effect.provideService(CleanupMonotonicClock, now),
+      );
+      const result = yield* supervised;
+      const mutating = fake.calls.filter((args) =>
+        [isOperation('stop')(args[0]), isOperation('rm')(args[0])].some(Boolean),
+      );
+      expect(mutating).toEqual([]);
+      expect(fake.calls.at(-1)?.slice(0, 2)).toEqual(['container', 'ls']);
+      expect(result.cleanup._tag).toBe('RemainingResources');
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+}
+test(
+  'invalid monotonic readings refuse mutation and retain independent readback',
+  invalidMonotonicClock,
+);
+for (const [label, samples, expectedStops] of [
+  ['regression above start', [100, 19000, 18000], 1],
+  ['transient throw', [100, 'throw', 101], 0],
+  ['transient NaN', [100, Number.NaN, 101], 0],
+  ['transient infinity', [100, Number.POSITIVE_INFINITY, 101], 0],
+  ['transient backwards', [100, 99, 101], 0],
+  ['transient expiry', [100, 20100, 101], 0],
+] as const) {
+  async function verifyClockLatch() {
+    function* run() {
+      const fake = scenario('before-start');
+      let reads = 0;
+      function failClock() {
+        throw new SupervisorError({ code: 'CleanupUnknown' });
+      }
+      function now() {
+        const sample = samples[reads] ?? 101;
+        reads++;
+        return Match.value(sample).pipe(
+          Match.when('throw', failClock),
+          Match.orElse((value) => value),
+        );
+      }
+      const inputs = yield* stage([]);
+      const supervised = superviseFixedWorker(inputs).pipe(
+        Effect.provideService(DockerProcess, { run: fake.run }),
+        Effect.provideService(DockerSession, { attach: fake.attach }),
+        Effect.provideService(CleanupMonotonicClock, now),
+      );
+      const result = yield* supervised;
+      const stops = fake.calls.filter((args) => isOperation('stop')(args[0]));
+      const removals = fake.calls.filter((args) => isOperation('rm')(args[0]));
+      expect(stops).toHaveLength(expectedStops);
+      expect(removals).toHaveLength(0);
+      expect(fake.calls.at(-1)?.slice(0, 2)).toEqual(['container', 'ls']);
+      expect(result.cleanup._tag).toBe('RemainingResources');
+    }
+    const workflow = Effect.gen(run);
+    const clock = Effect.provide(TestClock.layer());
+    await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+  }
+  test(`clock guard latches ${label}`, verifyClockLatch);
+}
+async function healthyClockStopFailure() {
+  function* run() {
+    const fake = scenario('before-start');
+    function now() {
+      return 100;
+    }
+    function runDocker(args: readonly string[], cwd: string, timeout: number) {
+      function* invoke() {
+        const actual = yield* fake.run(args, cwd, timeout);
+        for (const _ of [args[0]].filter(isOperation('stop')))
+          yield* Effect.fail(new SupervisorError({ code: 'CleanupUnknown' }));
+        return actual;
+      }
+      const workflow = Effect.gen(invoke);
+      return workflow;
+    }
+    const inputs = yield* stage([]);
+    const supervised = superviseFixedWorker(inputs).pipe(
+      Effect.provideService(DockerProcess, { run: runDocker }),
+      Effect.provideService(DockerSession, { attach: fake.attach }),
+      Effect.provideService(CleanupMonotonicClock, now),
+    );
+    const result = yield* supervised;
+    const removals = fake.calls.filter((args) => isOperation('rm')(args[0]));
+    expect(removals).toHaveLength(1);
+    expect(result.cleanup._tag).toBe('ConfirmedRemoval');
+  }
+  const workflow = Effect.gen(run);
+  const clock = Effect.provide(TestClock.layer());
+  await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform, clock));
+}
+test('healthy clock permits force removal after an ordinary stop failure', healthyClockStopFailure);
 async function emptyInventory() {
   for (const fault of ['before-start', 'create-unknown'] as const) {
     function* run() {

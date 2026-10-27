@@ -167,7 +167,12 @@ inventory readback starts after removal settles or at the window's deadline, wit
 up to ten seconds inside a 30-second cooperative outer budget. A readback before
 successful removal cannot establish confirmed removal; lost create acknowledgement
 also remains uncertain. The supervisor retains scoped ownership and refuses to
-start a later mutation once the removal deadline has elapsed. Fake-process and
+start a later mutation once the removal deadline has elapsed, checking both the
+expiration signal and monotonic elapsed time immediately before invoking a
+mutation. Any failed, non-finite, backwards or expired clock reading latches a
+refusal for all later mutations, including after best-effort stop. Force removal
+must acknowledge the exact owned full ID with empty
+stderr before an empty readback can confirm removal. Fake-process and
 test-clock checks demonstrate scheduling only: interruption cannot force an
 uninterruptible process or finalizer to settle, synchronous blocking can prevent
 the scheduler from running, and a request already issued to Docker can have
