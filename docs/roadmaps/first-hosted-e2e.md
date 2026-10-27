@@ -57,32 +57,47 @@ is needed to begin this roadmap.
 The approved static assessment is [recorded here](../assessments/runtime-feasibility-20261027.md):
 conditional GO for the existing Cloudflare design; NO-GO for execution today.
 The [Linux readiness amendment](../superpowers/specs/2026-10-27-linux-runtime-readiness-design.md)
-is proposed for approval, not applied. No runtime proof or tool acquisition follows
-from the assessment, and the hosted microVM isolation approval is not reopened.
+is approved for offline preparation. Its execution, tool acquisition/build and
+publication remain separately gated; the hosted microVM isolation approval is
+not reopened. No actual Linux runtime proof follows from the amendment.
 
-- [ ] Select and review a real child/native-execution observation mechanism.
-      Establish its immutable acquisition, behavior and compatibility with the
-      existing nonroot, no-new-privileges and capability restrictions. No tracer
-      acquisition or permission expansion is authorized by this document.
+- [ ] Prepare and review the selected strace candidate and a protected observation
+      channel through the owned `WorkerProcess`. Existing stdout/stderr do not
+      demonstrate tracer-only output, and a same-UID 0600 file does not isolate
+      the tracee. Effect exposes `additionalFds`, but inheritance/closure, proc
+      access, channel integrity and actual Linux behavior are unproven; investigate
+      rather than assume either success or a concrete incompatibility. Bind tracer
+      and actual Bun PIDs separately. Default observer and provenance stay
+      unavailable until evidence supports admission.
 - [x] Map the required isolation/lifecycle controls to both the Linux qualification
       runner and the pinned Cloudflare provider. Static API review can expose a
       missing mechanism; it cannot establish effective hosted enforcement. Resolve
       known unsupported requirements before investing in the final image.
-- [x] Produce a proposed writable-mount allocation that includes required
-      auxiliary mounts. The existing 2816/128/128 MiB allocations fill 3 GiB;
-      do not add exemptions or silently increase the ceiling. Any reallocation
-      or isolation-policy change requires an owner-approved design amendment.
-- [ ] Define a small Ceirean-owned control canary and request separate approval
-      for its execution on the intended Linux runner. It is not a FoldKit install
-      or permission to consume the historical qualification attempt.
+- [x] Approve offline preparation of the proposed writable-mount reallocation,
+      including auxiliary mounts, within the existing 3 GiB ceiling. Actual
+      capacities, security and kernel-mount policy remain unmeasured and unadmitted.
+- [ ] Implement fixed canary collection and bounded sanitized `ReadinessOnly`
+      inventory export. The existing pure `inspectMountInventory` only evaluates
+      supplied synthetic or other input; it does not collect actual mounts, run a
+      canary, authorize execution or issue a receipt. Freeze the reviewed actual
+      inventory before admitting the kernel policy.
+- [ ] Prepare the [bounded acquisition/build and one-run checklist](../assessments/runtime-feasibility-20261027.md#canary-approval-preparation):
+      independently approve and check the actual strace binary hash/provenance,
+      freeze the fixed Ceirean-owned harness, and resolve the still-unknown builder,
+      runner and image identities before requesting the relevant separate approvals.
+      Fixed cases include `execveat`, conditional `CLONE_UNTRACED`, UID/FD/proc
+      access and spoofing, actual control/network readbacks and owned cleanup.
+      Readiness evidence is not a FoldKit install, historical qualification attempt
+      or automatic retry authorization; this checklist grants no acquisition or run.
 - [x] Record the static go/no-go result for observation, controls and cancellation;
       actual runner/provider behavior remains unknown and execution stays blocked.
 
-Exit: a reviewed, testable runtime design with no known missing capability.
-Proposed appetite: one engineering day to reach that decision, not a promise to
-finish deployment. If the observer or mount policy cannot coexist with the
-chosen isolation, return the concrete conflict for a decision; do not add another
-layer of simulation or run a qualification job known to be blocked.
+Exit: reviewed actual canary evidence and a testable runtime design with the
+observer, ownership and mount policy supported by that evidence. Offline
+preparation and a pure diagnostic do not satisfy this exit. The assessment's
+one-day appetite was for the feasibility decision, not a deployment commitment.
+If testing establishes a conflict with the chosen isolation, return that concrete
+conflict for a decision; an untested candidate alone is not proof of incompatibility.
 
 ## 2. Qualify The Real Linux Dependency Path
 
@@ -193,5 +208,6 @@ incomplete evidence or budget exhaustion. A failure changes the next decision;
 it does not expand authority. Scope may shrink, but consent, isolation and recovery
 must not be removed to fit the appetite.
 
-Next bounded action: approve the first milestone's scope and the runtime-feasibility
-work, then write its implementation plan against the concrete observer/mount design.
+Next bounded action: complete the approved offline canary and observer preparation,
+keeping acquisition, publication and the one bounded Linux run behind their
+separate approvals. Review its evidence before considering historical qualification.

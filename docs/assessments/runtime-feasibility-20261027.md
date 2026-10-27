@@ -8,8 +8,9 @@ Scope: the approved one-day, baseline/browser-first feasibility slice.
 **Conditional GO for the existing Cloudflare direction. NO-GO for a historical
 Linux qualification or hosted activation today.** The pinned provider exposes the
 required lifecycle primitives; no upgrade or platform replacement is justified.
-Two concrete Linux-readiness changes need review before implementation: an admitted
-execution observer and a mount policy that models kernel mounts as well as data.
+An admitted execution observer and a mount policy that models kernel mounts as
+well as data remain unfinished. The Linux readiness amendment now approves their
+offline preparation, not acquisition or execution.
 
 The recommended next deliverable is one credential-free, Ceirean-owned Linux
 control canary, not another simulation layer or an attempt against FoldKit known
@@ -49,7 +50,8 @@ specific proposed reallocation is:
 | `/dev/shm` | 64       | Explicit shared-memory allowance                         |
 | **Total**  | **3072** | Unchanged total ceiling                                  |
 
-This is a proposed policy amendment, not permission to modify existing limits.
+The amendment approves offline preparation of this reallocation, not a change to
+the existing runtime limits or permission to execute it.
 Actual mount capacities, modes, devices, masking/read-only submounts and namespace
 ownership must be measured. A different layout refuses; it does not auto-grow the
 allowlist. All writable tmpfs capacity still counts. Kernel pseudo-filesystems
@@ -94,6 +96,44 @@ The observer must continue through the owned `WorkerProcess` boundary, not launc
 an independent installer. Linux DNS error classification also needs real canary
 evidence; a resolver timeout must not be relabeled concrete denial.
 
+### Integrity And Ownership Review
+
+The current `WorkerProcess` launches the fixed command with piped stdout and
+stderr, collects each under a 256 KiB limit and returns those streams with the
+exit code. That transport does not demonstrate an authenticated tracer-only
+channel: a tracee can also produce ordinary output. A same-UID 0600 trace file
+likewise does not isolate the file from that tracee. Neither is evidence of
+complete, unforgeable observation.
+
+The installed Effect `ChildProcess` API offers `additionalFds`; the current worker
+does not use it. It is a candidate to investigate, not an established solution:
+descriptor inheritance/closure, same-UID access through proc, tracer-only writes
+and behavior on the intended Linux runner remain unproven. Select and review a
+protected channel within the approved boundary, then test it; do not declare an
+incompatibility merely because this mechanism has not yet been evaluated.
+
+The rehearsal marker currently records the spawned child handle's PID, which is
+Bun for the direct invocation. Wrapping that invocation in a tracer would make
+the handle's PID the tracer's, not establish the actual Bun PID. Binding both
+identities and the warm-up to the owned process tree, handling tracer loss and
+descendants, and proving cleanup remain work for the owned supervisor and actual
+canary. The supervisor's stop/force-remove and absence readback are implemented
+controls, not proof that the proposed tracer lifecycle works on Linux.
+`makeChildObservation` still refuses admission and the default provenance
+preflight remains unavailable; neither a candidate channel nor a synthetic
+result changes that state.
+
+### Inventory Preparation
+
+`inspectMountInventory` is a pure, bounded parser of supplied mount inventory. It
+returns sanitized categories, capacity findings and `ReadinessOnly` with an
+unreviewed kernel policy; it neither collects host data nor authorizes a workload
+or produces a qualification receipt. Synthetic tests are not a runnable canary.
+A fixed canary still needs bounded collection of actual mount, namespace, security
+and cgroup facts and sanitized inventory export for review. Unknown or refused
+controls may be reported for readiness only; they cannot admit the historical
+workload. Review and freeze actual inventory before final kernel policy admission.
+
 ## Pinned Provider Mapping
 
 Static installed-source audit: `ContainerClient.ts` exposes start, argv exec,
@@ -124,17 +164,81 @@ storage, not Linux qualification's 4 GiB/3 GiB. `standard-3` currently maps to
 request 2 vCPU / 4 GiB and treat rejection as an Alchemy defect. These are documented
 options, not account eligibility/enforcement proof: [current limits](https://developers.cloudflare.com/containers/platform/limits/).
 
+## Canary Approval Preparation
+
+This checklist defines the smallest requested scope to prepare for review; it is
+not permission to acquire, build, publish or run anything. The exact builder,
+build recipe and inputs, controlled Ceirean-owned harness and its identity,
+runner and image identities, and actual tracer binary hash and provenance are
+not yet selected or established. An approval request must name and freeze them;
+do not invent their values or treat a source tag as a binary identity.
+
+- [ ] Request a separate, bounded acquisition/build for only strace 6.19 at
+      upstream tag object `129b5e1cc8edb89b80e75edda8e2dacb527ed89c` and peeled
+      commit `1d78a4ce1bfa3754b3b99b1e4bb15790001b77cb`, plus the fixed
+      Ceirean-owned canary harness and its necessary pinned build inputs. Specify
+      the proposed builder, recipe, input identities, output custody and finite
+      resource/time allowance before approval. No historical repository, consumer
+      dependencies, secret, credentials or operational state enters the build.
+- [ ] Independently review and approve the actual tracer binary hash and build
+      provenance, not just the acquired source identity. Freeze the exact harness,
+      its hash and inputs, tracer binary, and proposed runner/image identities
+      before seeking a run; check the actual bytes against those approved
+      identities at admission. Any needed image acquisition/build or publication
+      requires its own explicit approval; none is implied here.
+- [ ] Prepare one fixed, non-arbitrary harness invocation through the owned
+      process/supervisor boundary. It must bind tracer PID and actual Bun PID
+      separately to the warm-up and owned process tree, account for tracer and
+      descendant lifecycle, and retain raw traces internally under the existing
+      evidence bounds. No second installer transport or caller-supplied provenance.
+- [ ] Fix the observation cases before approval: known child and grandchild execs;
+      a harmless disallowed executable; `execveat` and relevant clone forms;
+      unknown or escaping events; malformed, missing and truncated output; and
+      tracer loss. Exercise a `CLONE_UNTRACED` descendant only if the mechanism is
+      possible under the intended controls; record inability or uncertainty rather
+      than claiming an observed escape or complete coverage. Each incomplete or
+      unsupported observation must refuse, not silently pass.
+- [ ] Fix channel-integrity cases for the actual nonroot UID/GID: read back tracer
+      and tracee identities and descriptor ownership; check descriptor inheritance
+      and closure across exec and descendants; attempt tracee writes or reopening
+      through inherited descriptors and `/proc` FD paths; and attempt spoofed trace
+      records through stdout, stderr and any candidate file/channel. Record access
+      and refusal results without exposing raw trace data. A same-UID 0600 file is
+      not isolation, and `additionalFds` is an unproven candidate, not a guarantee.
+- [ ] Fix bounded readbacks of actual mount types, paths, capacities, flags,
+      namespace ownership and protected submounts; UID/GID, capabilities, NNP,
+      seccomp and rootfs; cgroup CPU, memory/swap and PID limits; and fixed HTTP,
+      DNS and raw-TCP negatives. Export sanitized `ReadinessOnly` inventory and
+      findings, including unknown/refused controls; DNS timeout alone is not proof
+      of denial. Read back deadline/interruption behavior and whole-container
+      removal/absence under the named cleanup owner, including descendant handling.
+- [ ] Request a separate approval for exactly one Linux canary allocation and run,
+      with frozen identities, fixed cases, runner, evidence recipient, cleanup
+      owner and finite window. Retain at most 2 CPUs, 4 GiB memory with equal
+      memory-swap, 128 PIDs and 3072 MiB total writable tmpfs; retain 90 seconds
+      per command, the shared nine-minute sequence, fifteen-minute job and existing
+      cleanup/evidence policy, including 256 KiB per stream and 16 MiB aggregate.
+      The proposed 2688/128/128/64/64 MiB allocation remains subject to actual
+      readback and policy review. No historical repository, install, browser,
+      secrets, arbitrary diagnostics, widened privilege, fallback or retry is
+      authorized. A failed, incomplete or unknown result stops for review.
+
 ## Next Bounded Work
 
-1. Review the [proposed Linux amendment](../superpowers/specs/2026-10-27-linux-runtime-readiness-design.md).
-2. After approval, prepare exact observer/capsule admission, mount contracts and a
-   Ceirean-owned control-canary implementation plan. Do not implement a new hosted
-   stack or broaden the historical acceptance profile in that slice.
-3. Obtain separate immutable-tool preparation/build permission and freeze actual
-   binary/harness identities. Then request publication and one canary-run approval
-   with a finite allowance and cleanup owner. No current gate supplies those.
-4. Only a successful actual canary can justify preparing the historical one-attempt
-   worksheet. Keep the two P3 coverage gaps and corpus-fit test in that later gate.
+1. Under the [approved offline amendment](../superpowers/specs/2026-10-27-linux-runtime-readiness-design.md),
+   prepare the fixed owned canary collection, sanitized inventory, observer channel
+   and PID/lifecycle design and their bounded tests. Keep observer and provenance
+   admission unavailable until independently supported; do not broaden the
+   historical acceptance profile.
+2. Complete the acquisition/build and one-run approval requests in the checklist
+   above, including independent identity review and the unresolved builder,
+   harness, image and runner details. Obtain each separate approval before acting.
+3. Only after those approvals, run the frozen fixed control canary once and export
+   its bounded sanitized evidence for review. No current gate supplies that authority.
+4. Review actual results and freeze the mount policy and observer admission only
+   where supported. A successful canary is necessary, not sufficient, for the
+   historical one-attempt worksheet; the two P3 gaps, corpus fit, provenance and
+   separate historical run approval remain. No retry is implicit.
 
 No-go/stop: unsupported trace completeness, incompatible libc, unknown mounts or
 network result, unavailable required controls, exceeded budgets, unknown cleanup
