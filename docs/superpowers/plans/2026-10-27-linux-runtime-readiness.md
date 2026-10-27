@@ -34,8 +34,10 @@
 ### Task 1: Non-Authorizing Readiness Inventory
 
 **Files:**
+
 - Create: `probes/cloudflare-executor/src/linux-qualification/readiness.ts`
 - Create: `probes/cloudflare-executor/tests/linux-readiness.test.ts`
+- Modify: `probes/cloudflare-executor/moon.yml` to include the test in the explicit suite.
 - Modify: readiness documentation as necessary; do not change existing qualification acceptance.
 
 **Interfaces:** Provide a bounded pure diagnostic for synthetic Linux mount inventory. Its result explicitly identifies `ReadinessOnly`, reports only fixed, sanitized mount categories and reviewed capacity facts, and never returns an approval or receipt. It must not read the host or invoke a process. Keep final kernel-mount admission unavailable pending actual canary inventory.
@@ -49,6 +51,7 @@
 ### Task 2: Observer Integrity And Canary Handoff
 
 **Files:**
+
 - Modify: `docs/assessments/runtime-feasibility-20261027.md` and `docs/roadmaps/first-hosted-e2e.md` only as supported by the independent integrity review.
 
 **Interfaces:** Preserve `makeChildObservation` and provenance as unavailable. Identify a concrete approved-boundary mechanism for authenticated tracer output or explicitly mark the observer blocked. Describe the exact smallest separately authorized acquisition and control canary required before runtime admission.
