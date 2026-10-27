@@ -1,6 +1,6 @@
 # Linux Runtime Readiness Amendment
 
-2026-10-27. **Proposal for owner review; implementation and execution not approved.**
+2026-10-27. **Owner approved offline preparation; execution remains separately gated.**
 Implements the next step from the [feasibility decision](../../assessments/runtime-feasibility-20261027.md),
 not a replacement for the existing hosted design or historical qualification.
 
