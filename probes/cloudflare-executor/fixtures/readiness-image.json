@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "platform": "linux/amd64",
+  "recipeSha256": "140c90b94cebfddd8ce1c56d7f6d5899e8830eda2b4595b537c113b8597048f1",
+  "activation": "Blocked",
+  "image": "Unbuilt",
+  "images": {
+    "node": "docker.io/library/node@sha256:ea11b74b986d520137cdef9a5346e447a00f275ecc4abc0055b7151226231e09",
+    "bun": "docker.io/oven/bun@sha256:38919894db4e117a37f74e3dca503e84f24d97f19cabc5f499a289c2a5d0db7c",
+    "playwright": "mcr.microsoft.com/playwright@sha256:d65108d1a8095d8b0c4a5e32bf1807a40a5ce90ff0c78473e1116b1c243235e8"
+  },
+  "straceSource": {
+    "tagObject": "129b5e1cc8edb89b80e75edda8e2dacb527ed89c",
+    "commit": "1d78a4ce1bfa3754b3b99b1e4bb15790001b77cb"
+  },
+  "artifacts": {
+    "readinessWorker": { "path": "input/readiness-worker.mjs", "sha256": "Pending" },
+    "strace": { "path": "input/strace", "sha256": "Pending" },
+    "observerCanary": { "path": "input/observer-canary", "sha256": "Pending" }
+  }
+}

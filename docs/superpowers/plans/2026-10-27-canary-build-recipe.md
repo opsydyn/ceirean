@@ -35,6 +35,7 @@
 - Create `probes/cloudflare-executor/readiness-image/Dockerfile` and `probes/cloudflare-executor/readiness-image/.dockerignore`.
 - Create `probes/cloudflare-executor/fixtures/readiness-image.json`.
 - Create `probes/cloudflare-executor/src/readiness-image.ts` and `probes/cloudflare-executor/tests/readiness-image.test.ts`.
+- Create `probes/cloudflare-executor/scripts/prepare-readiness-image.ts` and register its fixed `--check` command in the probe's `package.json`.
 - Modify `probes/cloudflare-executor/moon.yml` to include the test.
 
 **Interfaces:** Use existing `sha256` and strict Schema patterns. Export a `validateReadinessImagePreparation(input: unknown, recipe: string)` Effect that only accepts a strict fixed candidate manifest and the independently source-pinned exact Dockerfile hash; return a finite `PreparationOnly` report with `activation: Blocked`, `image: Unbuilt` and named missing artifacts. Keep strace source identity fixed at tag object `129b5e1cc8edb89b80e75edda8e2dacb527ed89c` and peeled commit `1d78a4ce1bfa3754b3b99b1e4bb15790001b77cb`.
@@ -42,6 +43,7 @@
 - [ ] Write failing tests for the exact candidate manifest and recipe; mutated Dockerfile plus matching caller-supplied hash, mutable image tags, altered source pins, extra keys, supplied future hashes, path escapes, arbitrary CMD/COPY/RUN, and attempts to set built/approved status must refuse. The successful report must remain blocked and enumerate all missing inputs.
 - [ ] Add a separate digest-pinned multi-stage recipe using the existing Node/Bun/Playwright image refs, fixed `COPY` of exactly the three named artifacts with safe modes, `pwuser`, and exact `bun --no-env-file --no-install ... --worker` command. Add a restrictive Docker ignore file and state that fresh, independently verified context staging is still missing. Do not build or execute the image.
 - [ ] Implement the strict preparation check and pending-only fixture; pin the actual candidate Dockerfile hash in source, never accept the supplied hash as its own authority. Run fake/static tests, typecheck, lint and formatting; independently review and commit.
+- [ ] Expose a fixed `--check` CLI that reads only the bounded committed fixture and Dockerfile, reports preparation as blocked and refuses other arguments; test without building or running an image.
 
 ### Task 2: Worksheet And Handoff
 

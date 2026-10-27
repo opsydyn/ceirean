@@ -4,6 +4,7 @@ import { BunServices } from '@effect/platform-bun';
 import { Arbitrary, Effect, FileSystem, Result, Schema } from 'effect';
 
 import baseline from '../fixtures/baseline.json' with { type: 'json' };
+import packageJson from '../package.json' with { type: 'json' };
 import {
   isSafeArchivePath,
   validatePreparation,
@@ -191,3 +192,24 @@ function seedTest(seed: number) {
 for (const seed of [0, 1, 163]) {
   test(`archive path laws; seed ${seed}; 200 sequences`, seedTest(seed));
 }
+
+const moonTasks = Schema.Struct({
+  tasks: Schema.Struct({
+    test: Schema.Struct({ command: Schema.String }),
+  }),
+});
+const decodeMoonTasks = Schema.decodeUnknownSync(moonTasks);
+
+async function checksReadinessTestRegistration() {
+  const moonText = await Bun.file(new URL('../moon.yml', import.meta.url)).text();
+  const moon = decodeMoonTasks(Bun.YAML.parse(moonText));
+  for (const command of [packageJson.scripts.test, moon.tasks.test.command]) {
+    const args = command.split(/\s+/);
+    expect(args).toContain('tests/readiness-image.test.ts');
+    expect(args).toContain('tests/prepare-readiness-image-cli.test.ts');
+  }
+}
+test(
+  'package and Moon test commands both register readiness image tests',
+  checksReadinessTestRegistration,
+);

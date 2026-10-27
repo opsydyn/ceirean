@@ -1,0 +1,6 @@
+*
+!input/
+input/*
+!input/readiness-worker.mjs
+!input/strace
+!input/observer-canary
