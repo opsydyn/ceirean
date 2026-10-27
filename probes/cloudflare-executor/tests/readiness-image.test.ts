@@ -61,6 +61,9 @@ test('rejects altered fixed identity, paths, pending hashes and status claims', 
     { ...baseline, activation: 'Approved' },
     { ...baseline, image: 'Built' },
     { ...baseline, platform: 'linux/arm64' },
+    { ...baseline, buildTargetPlatform: 'linux/arm64' },
+    { ...baseline, buildTargetPlatform: 'Pending' },
+    { ...baseline, buildTargetPlatform: undefined },
     { ...baseline, images: { ...baseline.images, node: 'node:latest' } },
     { ...baseline, images: { ...baseline.images, bun: 'bun:latest' } },
     { ...baseline, images: { ...baseline.images, playwright: 'playwright:latest' } },
@@ -127,11 +130,61 @@ test('rejects any changed recipe even with its caller-supplied matching digest',
   }
 });
 
+test('rejects entrypoint and per-stage platform drift even with a matching caller digest', async () => {
+  const changes = [
+    recipe.replace('ENTRYPOINT ["/usr/local/bin/bun"', 'ENTRYPOINT ["bun"'),
+    recipe.replace('"--worker"]', '"--worker", "--extra"]'),
+    recipe.replace(
+      'FROM --platform=linux/amd64 docker.io/library/node',
+      'FROM docker.io/library/node',
+    ),
+    recipe.replace(
+      'FROM --platform=linux/amd64 docker.io/oven/bun',
+      'FROM --platform=linux/arm64 docker.io/oven/bun',
+    ),
+    recipe.replace(
+      'FROM --platform=linux/amd64 mcr.microsoft.com/playwright',
+      'FROM mcr.microsoft.com/playwright',
+    ),
+  ];
+  for (const changed of changes) {
+    expect(changed).not.toBe(recipe);
+    const recipeSha256 = await Effect.runPromise(sha256(changed));
+    await rejected({ ...baseline, recipeSha256 }, changed);
+    await rejected(baseline, changed, 'RecipeMismatch');
+  }
+});
+
 function isContextCopy(line: string) {
   return line.startsWith('COPY ') && !line.includes('--from=');
 }
 
+function isFrom(line: string) {
+  return line.startsWith('FROM ');
+}
+
+function isEntrypointOrCmd(line: string) {
+  return line.startsWith('ENTRYPOINT ') || line.startsWith('CMD ');
+}
+
+function checksStagePlatforms() {
+  expect(recipe.split('\n').filter(isFrom)).toEqual([
+    'FROM --platform=linux/amd64 docker.io/library/node@sha256:ea11b74b986d520137cdef9a5346e447a00f275ecc4abc0055b7151226231e09 AS node22',
+    'FROM --platform=linux/amd64 docker.io/oven/bun@sha256:38919894db4e117a37f74e3dca503e84f24d97f19cabc5f499a289c2a5d0db7c AS bun',
+    'FROM --platform=linux/amd64 mcr.microsoft.com/playwright@sha256:d65108d1a8095d8b0c4a5e32bf1807a40a5ce90ff0c78473e1116b1c243235e8',
+  ]);
+}
+test('all candidate stages select linux amd64', checksStagePlatforms);
+
+function checksEntrypoint() {
+  expect(recipe.split('\n').filter(isEntrypointOrCmd)).toEqual([
+    'ENTRYPOINT ["/usr/local/bin/bun", "--no-env-file", "--no-install", "/opt/ceirean/readiness-worker.mjs", "--worker"]',
+  ]);
+}
+test('recipe declares only the fixed exec entrypoint and no CMD', checksEntrypoint);
+
 function checksCandidateFiles() {
+  expect(baseline.buildTargetPlatform).toBe('linux/amd64');
   const contextCopies = recipe.split('\n').filter(isContextCopy);
   expect(contextCopies).toEqual([
     'COPY --chown=root:root --chmod=0444 input/readiness-worker.mjs /opt/ceirean/readiness-worker.mjs',
@@ -139,9 +192,6 @@ function checksCandidateFiles() {
     'COPY --chown=root:root --chmod=0555 input/observer-canary /usr/local/bin/observer-canary',
   ]);
   expect(recipe).toContain('USER pwuser\n');
-  expect(recipe).toContain(
-    'CMD ["/usr/local/bin/bun", "--no-env-file", "--no-install", "/opt/ceirean/readiness-worker.mjs", "--worker"]',
-  );
   expect(ignore).toBe(
     '*\n!input/\ninput/*\n!input/readiness-worker.mjs\n!input/strace\n!input/observer-canary\n',
   );

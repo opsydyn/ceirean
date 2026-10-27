@@ -227,12 +227,24 @@ do not invent their values or treat a source tag as a binary identity.
 
 The candidate [Dockerfile](../../probes/cloudflare-executor/readiness-image/Dockerfile)
 and strict pending-only [manifest](../../probes/cloudflare-executor/fixtures/readiness-image.json)
-describe assembly for `linux/amd64` from pinned Node, Bun and Playwright image
-references. The recipe copies three fixed inputs with root ownership and fixed
-modes, selects `pwuser`, and invokes the readiness worker with absolute Bun path.
-The recipe digest is pinned independently in source; the references and candidate
-platform do not establish selected image contents, effective entrypoint or runtime
-behavior. The manifest explicitly retains `Unbuilt` and `Blocked`.
+describe candidate assembly for `linux/amd64` from pinned Node, Bun and Playwright
+image references. Every recipe stage selects `linux/amd64`, and the manifest also
+records `linux/amd64` as the required builder target. The recipe copies three fixed
+inputs with root ownership and fixed modes, selects `pwuser`, and declares one
+exec-form entrypoint for the readiness worker using the absolute Bun path. The
+recipe declares no `CMD`: under Docker's image configuration semantics, setting a
+new `ENTRYPOINT` resets an inherited `CMD`. These declarations are static, not an
+inspection of a built image. The recipe digest is pinned independently in source;
+the manifest explicitly retains `Unbuilt` and `Blocked`.
+
+Any future separately approved builder must itself select `--platform=linux/amd64`
+and independently verify each selected base platform, the architecture of the
+executables, and the resulting image's actual platform and configuration. The
+configuration check must establish the exact entrypoint and empty command without
+extra arguments. Stage selection alone does not establish the final platform,
+executable compatibility, effective entrypoint, or runtime behavior. No image has
+been built or verified by this preparation check, and the recipe does not prevent a
+future runtime caller from overriding image configuration or appending arguments.
 
 All three artifacts and their SHA-256 hashes remain pending:
 `input/readiness-worker.mjs`, `input/strace`, and `input/observer-canary`.

@@ -5,7 +5,7 @@ import { PreparationError, preparationCondition, sha256 } from './preparation.ts
 
 // This source pin, not a manifest supplied by a caller, identifies the candidate.
 const candidate = {
-  recipeSha256: '140c90b94cebfddd8ce1c56d7f6d5899e8830eda2b4595b537c113b8597048f1',
+  recipeSha256: '7c6334babb30c753f51ed9d27f12a8c77deb6aa9c316209d9080719399073e5a',
 } as const;
 const strict = { onExcessProperty: 'error' } as const;
 
@@ -16,6 +16,7 @@ function pendingArtifact(path: string) {
 const ReadinessImageManifest = Schema.Struct({
   schemaVersion: Schema.Literal(1),
   platform: Schema.Literal('linux/amd64'),
+  buildTargetPlatform: Schema.Literal('linux/amd64'),
   recipeSha256: Schema.Literal(candidate.recipeSha256),
   activation: Schema.Literal('Blocked'),
   image: Schema.Literal('Unbuilt'),
