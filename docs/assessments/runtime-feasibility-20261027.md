@@ -51,7 +51,8 @@ specific proposed reallocation is:
 | **Total**  | **3072** | Unchanged total ceiling                                  |
 
 The amendment approves offline preparation of this reallocation, not a change to
-the existing runtime limits or permission to execute it.
+the historical three-mount admission or permission to execute it. This five-mount
+proposal is unmeasured, unadmitted and not active.
 Actual mount capacities, modes, devices, masking/read-only submounts and namespace
 ownership must be measured. A different layout refuses; it does not auto-grow the
 allowlist. All writable tmpfs capacity still counts. Kernel pseudo-filesystems
@@ -216,17 +217,59 @@ options, not account eligibility/enforcement proof: [current limits](https://dev
 ## Canary Approval Preparation
 
 This checklist defines the smallest requested scope to prepare for review; it is
-not permission to acquire, build, publish or run anything. The exact builder,
-build recipe and inputs, controlled Ceirean-owned harness and its identity,
-runner and image identities, and actual tracer binary hash and provenance are
-not yet selected or established. An approval request must name and freeze them;
+not permission to acquire, build, publish or run anything. A candidate recipe now
+exists, but the exact builder and toolchain, controlled Ceirean-owned harness and
+its identity, runner and final image identities, and actual tracer binary hash and
+provenance are not established. An approval request must name and freeze them;
 do not invent their values or treat a source tag as a binary identity.
 
-- [ ] Request a separate, bounded acquisition/build for only strace 6.19 at
+### Candidate Readiness Image
+
+The candidate [Dockerfile](../../probes/cloudflare-executor/readiness-image/Dockerfile)
+and strict pending-only [manifest](../../probes/cloudflare-executor/fixtures/readiness-image.json)
+describe assembly for `linux/amd64` from pinned Node, Bun and Playwright image
+references. The recipe copies three fixed inputs with root ownership and fixed
+modes, selects `pwuser`, and invokes the readiness worker with absolute Bun path.
+The recipe digest is pinned independently in source; the references and candidate
+platform do not establish selected image contents, effective entrypoint or runtime
+behavior. The manifest explicitly retains `Unbuilt` and `Blocked`.
+
+All three artifacts and their SHA-256 hashes remain pending:
+`input/readiness-worker.mjs`, `input/strace`, and `input/observer-canary`.
+Their acquisition or production, trusted provenance, complete transitive closure,
+reviewed toolchain, runner identity and final image identity are unresolved. A
+fresh, independently verified build context must admit exact regular-file identities
+and reject missing, duplicate or extra entries, symlinks and secrets. The candidate
+`.dockerignore` is only a context filter, not security admission or proof of those
+properties. Independent review and separate acquisition, image-build and canary-run
+approvals remain required; publication or deployment is not authorized.
+
+From `probes/cloudflare-executor`, the fixed preparation-only check is:
+
+```sh
+bun --no-env-file --no-install run prepare:readiness-image:check
+```
+
+It validates the fixed manifest and recipe and reports the pending blockers; its
+blocked status exits 2 by design. Static validation and synthetic tests do not
+build an image, establish actual runtime readbacks, execute a full canary or deploy
+anything. The existing shared bounded reader checks `stat` before opening a path;
+a concurrent malicious replacement with a FIFO can block the open despite the
+byte limit. This wall-time race is deferred and the reader has not been changed.
+It must not be treated as a bounded-time context-admission mechanism.
+
+The candidate also lacks an admitted protected observer channel and a real
+production provider for the host handoff. Fake ports, `additionalFds` as a
+candidate, and static checks do not establish tracer-only observation, process
+ownership, Linux controls, termination or independent resource-absence readback.
+Those remain prerequisites to a separately approved run, not results of the image
+recipe.
+
+- [ ] Request separately approved, bounded acquisition and build work for only strace 6.19 at
       upstream tag object `129b5e1cc8edb89b80e75edda8e2dacb527ed89c` and peeled
       commit `1d78a4ce1bfa3754b3b99b1e4bb15790001b77cb`, plus the fixed
       Ceirean-owned canary harness and its necessary pinned build inputs. Specify
-      the proposed builder, recipe, input identities, output custody and finite
+      the proposed builder, candidate recipe, input identities, output custody and finite
       resource/time allowance before approval. No historical repository, consumer
       dependencies, secret, credentials or operational state enters the build.
 - [ ] Independently review and approve the actual tracer binary hash and build
