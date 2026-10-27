@@ -5,20 +5,26 @@ remain unchanged. Historical evidence and source identities below are retained.
 The next live step is an explicitly approved, finite session using the
 [rehearsal worksheet](runbooks/ceirean-rehearsal-approval.md), not deployment.
 
-Local delivery map, updated 2026-10-24. Checkboxes describe delivered outcomes,
+Local delivery map, updated 2026-10-27. Checkboxes describe delivered outcomes,
 not permission to implement unchecked items. The organisation-discovery direction
 is requested by the owner; its architecture, implementation plan, permissions,
 hosting and execution appetite still require review.
 
 ## Current Handoff
 
-Local main consolidates the executor preparation chain through `5699d40`, including
-the signed local invocation, trusted source/harness candidates, frozen dependency
-inventory and integrity-checked cache candidates. All other existing local branch
-tips are already contained in that history; remote publication remains separate.
-Existing worktrees with ignored notes or local evidence are intentionally retained,
-not unmerged delivery work. The stale registration for the missing compatibility
-worktree has been removed without deleting any source or evidence.
+Local main now includes the reviewed Linux qualification controller through
+`10209fd`, following the signed local invocation, trusted source/harness candidates,
+frozen inventory and integrity-checked cache candidates. Every existing local
+branch tip is contained in main. Remote publication remains separate. Worktrees
+with ignored notes/audit evidence are retained, not unmerged delivery work.
+
+The proposed [path to the first hosted end-to-end run](roadmaps/first-hosted-e2e.md)
+sequences runtime feasibility, Linux dependency qualification, the immutable image,
+private hosted actuation and a real FoldKit baseline before the Flue repair loop.
+It is a delivery proposal, not authority to publish, acquire new tools or execute.
+The owner selected baseline and browser evidence first on 2026-10-27. Flue patch
+generation follows later; remaining roadmap details and all live operations still
+require their respective approvals.
 
 The next bounded slice is **Linux cache-consumer/layout qualification**, including
 missing-artifact refusal and the still-missing Bun/browser metadata requirements.
