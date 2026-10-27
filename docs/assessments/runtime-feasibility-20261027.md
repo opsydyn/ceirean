@@ -128,11 +128,40 @@ result changes that state.
 `inspectMountInventory` is a pure, bounded parser of supplied mount inventory. It
 returns sanitized categories, capacity findings and `ReadinessOnly` with an
 unreviewed kernel policy; it neither collects host data nor authorizes a workload
-or produces a qualification receipt. Synthetic tests are not a runnable canary.
-A fixed canary still needs bounded collection of actual mount, namespace, security
-and cgroup facts and sanitized inventory export for review. Unknown or refused
-controls may be reported for readiness only; they cannot admit the historical
-workload. Review and freeze actual inventory before final kernel policy admission.
+or produces a qualification receipt.
+
+Offline preparation now includes a separate fixed readiness worker entrypoint,
+accepting only `--worker`, and a collector for fixed mount, namespace, security
+and cgroup inputs. Text reads and the emitted frame are bounded; namespace link
+targets and mount identifiers are redacted, while numeric UID/GID tuples are
+emitted when available. Raw errors are not exported. The
+namespace length check limits subsequent classification, but `readLink` allocates
+its result before that check, so allocation by the platform operation is not
+bounded. Kernel mount details are known-only and incomplete; neither their absence
+nor a synthetic summary is a final mount policy. Observer, network negatives and
+cleanup are explicitly `NotMeasured`. The worker produces no qualification receipt,
+leaves kernel policy unreviewed and activation blocked.
+
+The separate host handoff implements strict, canonical bounded framing and a
+session-bound lifecycle simulation with injected fake ports. It supplies no
+production Docker process, channel provider or authority, and always reports
+`complete: false` and authority unavailable. Its fake ownership and cleanup
+observations are not host evidence. No production worker or canary has run, and
+this wiring is not an end-to-end runnable canary.
+
+The fake lifecycle retains a 20-second cooperative removal phase, a separate
+10-second readback bound and a 30-second cooperative outer cleanup budget.
+Readback can start while removal is still settling; an early absent readback
+cannot certify cleanup, even if removal later succeeds. Scoped finalizers are
+awaited: an uninterruptible provider operation or finalizer can outlive 30 seconds,
+and synchronous work can also prevent readback from being scheduled. Actual
+production termination, independent resource-absence readback and a hard deadline
+remain blocked. These observations do not change the existing budgets or approve
+detached cleanup.
+
+Unknown or refused controls may be reported for readiness only; they cannot admit
+the historical workload. Review and freeze actual inventory before final kernel
+policy admission.
 
 ## Pinned Provider Mapping
 
@@ -226,10 +255,11 @@ do not invent their values or treat a source tag as a binary identity.
 ## Next Bounded Work
 
 1. Under the [approved offline amendment](../superpowers/specs/2026-10-27-linux-runtime-readiness-design.md),
-   prepare the fixed owned canary collection, sanitized inventory, observer channel
-   and PID/lifecycle design and their bounded tests. Keep observer and provenance
-   admission unavailable until independently supported; do not broaden the
-   historical acceptance profile.
+   review the fixed worker and fake-only handoff, and finish the observer channel
+   and production PID/lifecycle design. Establish independent termination and
+   resource-absence readback and a hard deadline before any real run. Keep observer
+   and provenance admission unavailable until independently supported; do not
+   broaden the historical acceptance profile.
 2. Complete the acquisition/build and one-run approval requests in the checklist
    above, including independent identity review and the unresolved builder,
    harness, image and runner details. Obtain each separate approval before acting.

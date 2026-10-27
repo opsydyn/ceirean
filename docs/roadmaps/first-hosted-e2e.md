@@ -76,11 +76,27 @@ not reopened. No actual Linux runtime proof follows from the amendment.
 - [x] Approve offline preparation of the proposed writable-mount reallocation,
       including auxiliary mounts, within the existing 3 GiB ceiling. Actual
       capacities, security and kernel-mount policy remain unmeasured and unadmitted.
-- [ ] Implement fixed canary collection and bounded sanitized `ReadinessOnly`
-      inventory export. The existing pure `inspectMountInventory` only evaluates
-      supplied synthetic or other input; it does not collect actual mounts, run a
-      canary, authorize execution or issue a receipt. Freeze the reviewed actual
-      inventory before admitting the kernel policy.
+- [x] Prepare a separate fixed `--worker` readiness entrypoint and bounded,
+      sanitized `ReadinessOnly` collection, with synthetic tests. Its known-only
+      kernel mount details are incomplete, namespace `readLink` allocation is not
+      bounded before the length check, and the kernel policy remains unreviewed.
+      Observer, network negatives and cleanup are `NotMeasured`; no qualification
+      receipt or activation authority is produced. The pure `inspectMountInventory`
+      evaluates supplied input, not an actual runner.
+- [ ] Provide and review the fixed production observer/channel and lifecycle
+      provider. The host's strict canonical frame reader and session-bound lifecycle
+      are exercised only with fake ports; there is no production Docker process or
+      authority, and the handoff remains incomplete. No real worker or canary run,
+      end-to-end execution, deployment or final mount policy is established.
+      Freeze the reviewed actual inventory before admitting the kernel policy.
+- [ ] Establish actual process termination, independent resource-absence readback
+      and a hard cleanup deadline. Fake readback can run while removal settles, but
+      an early absent result cannot certify cleanup. The 20-second removal phase,
+      separate 10-second readback bound and 30-second outer budget are cooperative:
+      uninterruptible or synchronous provider work can outlive 30 seconds, and
+      synchronous work can prevent readback scheduling. Scoped finalizers are
+      awaited; no production deadline or cleanup proof follows. Existing budgets
+      remain unchanged.
 - [ ] Prepare the [bounded acquisition/build and one-run checklist](../assessments/runtime-feasibility-20261027.md#canary-approval-preparation):
       independently approve and check the actual strace binary hash/provenance,
       freeze the fixed Ceirean-owned harness, and resolve the still-unknown builder,
@@ -93,8 +109,8 @@ not reopened. No actual Linux runtime proof follows from the amendment.
       actual runner/provider behavior remains unknown and execution stays blocked.
 
 Exit: reviewed actual canary evidence and a testable runtime design with the
-observer, ownership and mount policy supported by that evidence. Offline
-preparation and a pure diagnostic do not satisfy this exit. The assessment's
+observer, ownership and mount policy supported by that evidence. The fixed worker,
+fake-only handoff and pure diagnostic do not satisfy this exit. The assessment's
 one-day appetite was for the feasibility decision, not a deployment commitment.
 If testing establishes a conflict with the chosen isolation, return that concrete
 conflict for a decision; an untested candidate alone is not proof of incompatibility.
