@@ -83,6 +83,12 @@ Filesystem metadata checks alone do not establish exclusive custody or a hard
 deadline. A synthetic staging test is not proof that the real build context is
 safe or that its artifacts are approved.
 
+The new sealed-memory primitive copies a bounded source into a Linux memfd and
+checks write, grow, shrink and further-seal restrictions. Its caller must still
+own the source bytes, descriptor table and shared file offset, and independently
+verify the copied digest. Fake-operation tests and Linux cross-compilation do not
+establish a native runtime pass, a helper executable, or builder consumption.
+
 The custody review must exclude competing same-UID processes and privileged
 writers, not merely other users: mode `0700` is insufficient on its own. A
 bounded reader must not block indefinitely when a regular file is replaced by a

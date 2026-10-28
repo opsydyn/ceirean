@@ -10,6 +10,11 @@ cc -std=c11 -Wall -Wextra -Werror -pedantic \
   "$directory/tests/linux-fs-boundary.test.c" \
   -o "$temporary/linux-fs-boundary-test"
 "$temporary/linux-fs-boundary-test"
+cc -std=c11 -Wall -Wextra -Werror -pedantic \
+  "$directory/src/internal/linux-sealed-bytes.c" \
+  "$directory/tests/linux-sealed-bytes.test.c" \
+  -o "$temporary/linux-sealed-bytes-test"
+"$temporary/linux-sealed-bytes-test"
 
 if [ "${CEIREAN_RUN_LINUX_FS_INTEGRATION:-0}" = 1 ]; then
   if [ "$(uname -s)" != Linux ] || [ "$(uname -m)" != x86_64 ]; then
@@ -22,6 +27,12 @@ if [ "${CEIREAN_RUN_LINUX_FS_INTEGRATION:-0}" = 1 ]; then
     "$directory/tests/linux-fs-boundary.integration.c" \
     -o "$temporary/linux-fs-boundary-integration"
   "$temporary/linux-fs-boundary-integration"
+  cc -std=c11 -Wall -Wextra -Werror -pedantic \
+    "$directory/src/internal/linux-sealed-bytes.c" \
+    "$directory/src/internal/linux-sealed-bytes-linux.c" \
+    "$directory/tests/linux-sealed-bytes.integration.c" \
+    -o "$temporary/linux-sealed-bytes-integration"
+  "$temporary/linux-sealed-bytes-integration"
 else
   printf '%s\n' 'Linux filesystem integration not requested; not run'
 fi
