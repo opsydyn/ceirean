@@ -51,6 +51,10 @@ All runtime settings go through Effect Config. Required values are:
   Worker secret by Alchemy; at least 32 characters. It never enters container configuration.
 - `CEIREAN_PREPARE_READONLY=approved`: an accidental-invocation guard for this
   separate stack. Setting a variable is not owner approval for deployment.
+- `CEIREAN_READONLY_INGRESS`: defaults to `Private`, which declares no public
+  route. `Rehearsal` declares only `ceirean-hooks.opsydyn.xyz/webhook` in the
+  verified `opsydyn.xyz` zone. Neither mode enables a workers.dev URL. Set it back
+  to `Private` for teardown; arbitrary route strings are rejected.
 - Existing validated `CF_TOKEN` and the pinned account are used only by an
   explicitly approved operational deployment. The old tunnel-only token may
   lack Workers, DO, Containers or registry permissions; do not broaden it silently.
@@ -68,8 +72,9 @@ Before the next external operation, agree one combined deployment/rehearsal scop
    No custom canary image build, Linux qualification suite or tracer is needed.
 2. Select the existing test issue, numeric operator/installation/repository IDs,
    a fresh session and five-minute window. Prepare the exact
-   `ceirean-hooks.opsydyn.xyz/webhook` Worker route. The current stack deliberately
-   contains no public route; adding one requires this activation decision.
+   `ceirean-hooks.opsydyn.xyz/webhook` Worker route. The stack remains private by
+   default; the owner approved the bounded rehearsal on 2026-10-28. That approval
+   does not broaden credential permissions or begin the five-minute window.
 3. Deploy, verify the private resource/image bindings, then activate that route
    and the App webhook for the bounded window. Send one allowed comment and
    redeliver that delivery once. Check the private `status` RPC or structured
@@ -82,6 +87,9 @@ This document authorizes none of these external operations. Once that combined
 scope is approved, execute it end to end without inventing further speculative
 research prerequisites. A real provider failure should produce a concrete fix,
 not a new generic qualification framework.
+
+The [28 October preflight](../evidence/readonly-hosted/preflight-20261028.md)
+records the current credential blocker. The rehearsal window has not started.
 
 ## Current Evidence And Limits
 

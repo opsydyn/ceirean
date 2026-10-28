@@ -6,6 +6,7 @@ import { fromWeb, text } from 'effect/http/HttpServerResponse';
 import { handleReadOnlyRequest } from './ingress.ts';
 import type { Candidate, Policy } from './job.ts';
 import { ReadOnlyJob, policyConfiguration } from './object.ts';
+import { ingressConfiguration, readOnlyRoutes } from './routing.ts';
 
 type Namespace = Effect.Success<typeof ReadOnlyJob>;
 function validateSigningSecret(secret: Redacted.Redacted<string>) {
@@ -55,11 +56,12 @@ function* construct() {
   return makeReadOnlyHandlers(objects, policy, secret);
 }
 
-export default class ReadOnlyWorker extends Cloudflare.Worker<ReadOnlyWorker>()(
-  'ReadOnlyWorker',
-  {
+function* workerProperties() {
+  const mode = yield* ingressConfiguration;
+  return {
     main: import.meta.url,
     workersDev: false,
+    routes: readOnlyRoutes(mode),
     dev: { host: '127.0.0.1', port: 0 },
     compatibility: { date: '2026-10-28', flags: ['nodejs_compat'] },
     observability: {
@@ -67,6 +69,12 @@ export default class ReadOnlyWorker extends Cloudflare.Worker<ReadOnlyWorker>()(
       logs: { enabled: true, invocationLogs: true },
       traces: { enabled: true },
     },
-  },
+  };
+}
+export const readOnlyWorkerProperties = Effect.gen(workerProperties);
+
+export default class ReadOnlyWorker extends Cloudflare.Worker<ReadOnlyWorker>()(
+  'ReadOnlyWorker',
+  readOnlyWorkerProperties,
   Effect.gen(construct),
 ) {}
