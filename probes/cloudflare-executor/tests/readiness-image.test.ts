@@ -6,6 +6,7 @@ import { Effect, FileSystem } from 'effect';
 import baseline from '../fixtures/readiness-image.json' with { type: 'json' };
 import { sha256 } from '../src/preparation.ts';
 import { validateReadinessImagePreparation } from '../src/readiness-image.ts';
+import * as readinessImage from '../src/readiness-image.ts';
 
 const recipeUrl = new URL('../readiness-image/Dockerfile', import.meta.url);
 const ignoreUrl = new URL('../readiness-image/.dockerignore', import.meta.url);
@@ -19,6 +20,14 @@ const recipeReading = Effect.provide(readingRecipe, BunServices.layer);
 const ignoreReading = Effect.provide(readingIgnore, BunServices.layer);
 const recipe = await Effect.runPromise(recipeReading);
 const ignore = await Effect.runPromise(ignoreReading);
+
+test('production staging refuses while artifact identities and custody are pending', async () => {
+  const result = await Effect.runPromise(readinessImage.stageReadinessImage().pipe(Effect.result));
+  expect(result).toMatchObject({
+    _tag: 'Failure',
+    failure: { code: 'StagingBlocked', artifactPins: 'Pending', custody: 'Unproven' },
+  });
+});
 
 async function rejected(
   input: unknown,
@@ -129,6 +138,30 @@ test('rejects any changed recipe even with its caller-supplied matching digest',
     await rejected(baseline, changed, 'RecipeMismatch');
   }
 });
+
+async function rejectsMutableRecipePin() {
+  const changed = recipe + '\nRUN echo unsafe\n';
+  const changedHash = await Effect.runPromise(sha256(changed));
+  const exposed = (readinessImage as { readinessImageCandidate?: { recipeSha256: string } })
+    .readinessImageCandidate ?? { recipeSha256: '' };
+  const previous = exposed.recipeSha256;
+  exposed.recipeSha256 = changedHash;
+  const claimed = await Effect.runPromise(
+    validateReadinessImagePreparation({ ...baseline, recipeSha256: changedHash }, changed).pipe(
+      Effect.result,
+    ),
+  );
+  const altered = await Effect.runPromise(
+    validateReadinessImagePreparation(baseline, changed).pipe(Effect.result),
+  );
+  exposed.recipeSha256 = previous;
+  expect(claimed).toMatchObject({ _tag: 'Failure', failure: { code: 'InvalidManifest' } });
+  expect(altered).toMatchObject({ _tag: 'Failure', failure: { code: 'RecipeMismatch' } });
+}
+test(
+  'an in-process caller cannot replace the source-controlled recipe identity',
+  rejectsMutableRecipePin,
+);
 
 test('rejects entrypoint and per-stage platform drift even with a matching caller digest', async () => {
   const changes = [

@@ -100,9 +100,19 @@ nonregular files before reopening a pinned inode through a caller-supplied procf
 descriptor. The caller must independently establish trusted root, genuine procfs,
 mount namespace and descriptor-table custody. `O_NONBLOCK` does not bound regular
 file or metadata latency; an independently qualified filesystem and isolation or
-deadline mechanism are required. Fake-operation tests and cross-compilation do not
-prove Linux kernel, procfs or race behavior. No production staging caller, pinned
-helper executable, artifact provenance or builder handoff is admitted yet.
+deadline mechanism are required. The one-off [Linux amd64 run](https://github.com/opsydyn/ceirean/actions/runs/40751781409)
+at commit `96bf79d9fbe21c8a9c517f9bbc452beb14a51535` passed the current native
+integration cases on Ubuntu 24.04.5 and Linux `7.0.0-1017-azure`. This is evidence
+for those cases only, not hostile-writer custody, mount-crossing or all race
+behavior. No production staging caller, pinned helper executable, artifact
+provenance or builder handoff is admitted yet.
+
+Offline snapshot inspection and a deterministic in-memory context archive are
+exercised with synthetic identities and a one-attempt test sink. They check the
+source-pinned recipe and fixture hashes, but caller-supplied identities do not
+establish provenance. A sink returning successfully does not establish what a
+builder consumed or whether it stopped on interruption. These tests do not
+authorize invoking a builder or provide the separate build approval.
 
 Record the reviewed implementation revision, artifact identities, context
 inventory, runner and builder versions, pinned base-image readbacks, platform,

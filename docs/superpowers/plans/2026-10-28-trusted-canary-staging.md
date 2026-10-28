@@ -29,3 +29,9 @@ Update the qualification worksheet with the exact remaining provenance, custody,
 ## Task 3: Linux filesystem boundary
 
 Implement a Linux-only descriptor-relative boundary with nonblocking, no-symlink resolution and fail-closed handling for unavailable primitives. The boundary is a mechanism, not artifact approval, custody, or build authority; no execution of the canary image or hosted resources. Test the host-independent control flow using deterministic fakes and cross-compile the Linux source if local tooling permits; record Linux kernel qualification as a separate outstanding gate. Do not wire an unreviewed helper binary or caller-selected hashes into a production builder.
+
+## Task 4: Artifact snapshots and exact-byte handoff
+
+The dedicated Linux amd64 integration run at `96bf79d` passed the native boundary's current tests; it did not prove mount-crossing behavior, content immutability, helper provenance or builder custody. Preserve those limits.
+
+Implement bounded, fixed-member byte admission against independently supplied reviewed identities and a deterministic archive with an exact-byte, one-attempt synthetic sink. Caller-supplied identities and synthetic test ports do not establish production authority. The production entry point must refuse before acquisition or handoff while its source-controlled identities and custody remain pending. Test byte mutation, inventory and hash mismatch, sink failure and repetition without running a builder. Update the worksheet and independently review authority, byte ownership and cleanup. Do not change the image-build or activation gates.

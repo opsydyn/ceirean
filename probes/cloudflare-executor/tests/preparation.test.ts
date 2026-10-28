@@ -206,6 +206,9 @@ async function checksReadinessTestRegistration() {
   for (const command of [packageJson.scripts.test, moon.tasks.test.command]) {
     const args = command.split(/\s+/);
     expect(args).toContain('tests/readiness-image.test.ts');
+    expect(args).toContain('tests/readiness-artifact-snapshots.test.ts');
+    expect(args).toContain('tests/readiness-context-archive.test.ts');
+    expect(args).toContain('tests/synthetic-readiness-pipeline.test.ts');
     expect(args).toContain('tests/prepare-readiness-image-cli.test.ts');
   }
 }

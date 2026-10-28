@@ -1,12 +1,34 @@
-import { Effect, Schema } from 'effect';
+import { Data, Effect, Schema } from 'effect';
 
 import { reviewedInputs } from './pins.ts';
 import { PreparationError, preparationCondition, sha256 } from './preparation.ts';
 
+export class ReadinessStagingBlocked extends Data.TaggedError('ReadinessStagingBlocked')<{
+  readonly code: 'StagingBlocked';
+  readonly artifactPins: 'Pending';
+  readonly custody: 'Unproven';
+}> {}
+
+export function stageReadinessImage() {
+  const blocked = Effect.fail(
+    new ReadinessStagingBlocked({
+      code: 'StagingBlocked',
+      artifactPins: candidate.artifactPins,
+      custody: candidate.custody,
+    }),
+  );
+  return blocked;
+}
+
 // This source pin, not a manifest supplied by a caller, identifies the candidate.
 const candidate = {
   recipeSha256: '7c6334babb30c753f51ed9d27f12a8c77deb6aa9c316209d9080719399073e5a',
+  artifactPins: 'Pending',
+  custody: 'Unproven',
 } as const;
+export function readinessImageRecipeSha256() {
+  return candidate.recipeSha256;
+}
 const strict = { onExcessProperty: 'error' } as const;
 
 function pendingArtifact(path: string) {
