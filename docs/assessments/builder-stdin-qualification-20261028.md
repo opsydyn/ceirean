@@ -22,10 +22,17 @@ client-process exit establishes what a Docker daemon consumed.
 ## Gate
 
 Do not use the current stdin result as an exact-byte builder receipt. Before a
-real transport is admitted, it needs a narrowly scoped process boundary that
-observes stdin finish, close and errors, an independently verified receiver-side
+real transport is admitted, it needs an independently verified receiver-side
 byte identity, one-attempt cancellation and cleanup handling, and explicit
 builder identity and authorization. Even those observations must not be promoted
 into daemon-consumption evidence without a qualified builder-side mechanism.
 Artifact provenance, source custody, image build approval and hosted activation
 remain separate unresolved gates.
+
+The scoped `builder-stdin-platform.ts` adapter now observes local writable
+`finish`, premature `close` and `error`, with a one-attempt guard and a
+cooperative observation timeout. Abort or timeout stops observation only: the
+write may continue and the caller retains responsibility for late errors,
+process termination and cleanup. A `finish` result is not a receiver digest,
+builder acknowledgment or proof of daemon consumption. The adapter does not
+launch a process or make the blocked staging entry point available.

@@ -11,6 +11,7 @@ export default defineConfig({
       'error',
       {
         boundaryPaths: [
+          'probes/cloudflare-executor/scripts/builder-stdin-platform.ts',
           'probes/cloudflare-executor/scripts/linux-replay-platform.ts',
           'probes/cloudflare-executor/scripts/linux-cache-platform.ts',
           'probes/cloudflare-executor/scripts/linux-control-platform.ts',
