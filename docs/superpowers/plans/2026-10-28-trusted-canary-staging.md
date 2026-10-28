@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - No network, image build, Docker, credentials, deployment, or hosted activation.
-- No new native Node boundary or lint exception.
+- No new lint exception. The user approved a narrowly scoped Linux-native filesystem boundary on 2026-10-28.
 - Exact canary paths are `input/readiness-worker.mjs`, `input/strace`, and `input/observer-canary`; the recipe hash remains source-pinned.
 - Real artifact identities and provenance are pending; do not manufacture them or claim build approval.
 - Do not consume concurrently mutable untrusted filesystem inputs under an unproven custody guarantee.
@@ -25,3 +25,7 @@ Implement bounded snapshot validation and fresh-context creation with fixed path
 ## Task 2: Build preparation and review
 
 Update the qualification worksheet with the exact remaining provenance, custody, platform, image-build and approval gates. Run affected tests, all typechecks, lint and formatting; independently review the complete diff for authority bypass, filesystem races, unbounded input and misleading readiness claims. Commit verified documentation and any review corrections. Do not build or run an image.
+
+## Task 3: Linux filesystem boundary
+
+Implement a Linux-only descriptor-relative boundary with nonblocking, no-symlink resolution and fail-closed handling for unavailable primitives. The boundary is a mechanism, not artifact approval, custody, or build authority; no execution of the canary image or hosted resources. Test the host-independent control flow using deterministic fakes and cross-compile the Linux source if local tooling permits; record Linux kernel qualification as a separate outstanding gate. Do not wire an unreviewed helper binary or caller-selected hashes into a production builder.

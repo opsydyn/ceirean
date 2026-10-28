@@ -94,6 +94,16 @@ and how it is maintained through the builder's final read. Prefer binding a
 deterministic context archive or stream to the approval, while retaining custody
 of the exact bytes. Neither approach by itself proves the builder consumed them.
 
+The Linux amd64 native filesystem boundary is preparation only. It opens below a
+borrowed root descriptor with `openat2` and rejects links, mount crossings and
+nonregular files before reopening a pinned inode through a caller-supplied procfs
+descriptor. The caller must independently establish trusted root, genuine procfs,
+mount namespace and descriptor-table custody. `O_NONBLOCK` does not bound regular
+file or metadata latency; an independently qualified filesystem and isolation or
+deadline mechanism are required. Fake-operation tests and cross-compilation do not
+prove Linux kernel, procfs or race behavior. No production staging caller, pinned
+helper executable, artifact provenance or builder handoff is admitted yet.
+
 Record the reviewed implementation revision, artifact identities, context
 inventory, runner and builder versions, pinned base-image readbacks, platform,
 resource and time budgets, cleanup owner, and output/evidence destination. A
