@@ -70,8 +70,10 @@ Selected candidate for bounded canary evaluation: **strace 6.19**, upstream tag
 object `129b5e1cc8edb89b80e75edda8e2dacb527ed89c`, peeled commit
 `1d78a4ce1bfa3754b3b99b1e4bb15790001b77cb`. Identities came from public
 `git ls-remote --tags`; [upstream release metadata](https://github.com/strace/strace/releases/tag/v6.19)
-agrees. No binary/source archive was acquired or executed. Source identity does
-not supply a binary hash, trusted build provenance or acquisition approval.
+agrees. At the time of this assessment no binary or source archive had been
+acquired or executed. A later source-archive digest check is recorded in the
+[artifact assessment](readiness-artifact-identities-20261028.md); it does not
+identify a binary or establish independently verified source authenticity.
 
 The versioned [manual](https://raw.githubusercontent.com/strace/strace/v6.19/doc/strace.1.in)
 supports following forks, process-lifecycle tracing and killing tracees when the
@@ -246,14 +248,14 @@ executable compatibility, effective entrypoint, or runtime behavior. No image ha
 been built or verified by this preparation check, and the recipe does not prevent a
 future runtime caller from overriding image configuration or appending arguments.
 
-All three artifacts and their SHA-256 hashes remain pending:
+Admission of all three production artifacts and their SHA-256 pins remains pending:
 `input/readiness-worker.mjs`, `input/strace`, and `input/observer-canary`.
-Their acquisition or production, trusted provenance, complete transitive closure,
+Their approved production or acquisition, trusted provenance, complete transitive closure,
 reviewed toolchain, runner identity and final image identity are unresolved. A
 fresh, independently verified build context must admit exact regular-file identities
 and reject missing, duplicate or extra entries, symlinks and secrets. The candidate
 `.dockerignore` is only a context filter, not security admission or proof of those
-properties. Independent review and separate acquisition, image-build and canary-run
+properties. Independent review and separate image-build and canary-run
 approvals remain required; publication or deployment is not authorized.
 
 From `probes/cloudflare-executor`, the fixed preparation-only check is:
