@@ -65,6 +65,42 @@ The candidate readiness-image recipe and pending manifest described in the runti
 assessment do not provide a buildable or runnable canary, a real production
 provider, or approval to acquire inputs, build an image or run it.
 
+## Canary Build Gate
+
+The bounded build remains a separate, unapproved operation. Before requesting it,
+independently review the origin, exact SHA-256, size, target platform, build
+toolchain and dependency closure of each of the readiness worker bundle, strace
+executable and observer harness. Pin the resulting identities in reviewed
+source; a manifest or checksum supplied with the artifacts is not authority.
+The strace source tag and commit in the candidate manifest are not executable
+provenance. Acquire no artifacts under this worksheet alone.
+
+Stage only through a fresh private context with exclusive custody from admission
+through the build. Reject links, nonregular files, unexpected entries and changed
+bytes; bind the exact pinned recipe and artifact snapshots. Do not use a mutable
+untrusted input directory or treat `.dockerignore` as an admission boundary.
+Filesystem metadata checks alone do not establish exclusive custody or a hard
+deadline. A synthetic staging test is not proof that the real build context is
+safe or that its artifacts are approved.
+
+The custody review must exclude competing same-UID processes and privileged
+writers, not merely other users: mode `0700` is insufficient on its own. A
+bounded reader must not block indefinitely when a regular file is replaced by a
+FIFO before open, and final-component no-follow checks do not protect parent
+directories. For hostile paths, require a reviewed descriptor-relative native
+boundary or an equivalent qualified mechanism; do not silently fall back to
+path-based checks. For a controlled source, document who holds exclusive custody
+and how it is maintained through the builder's final read. Prefer binding a
+deterministic context archive or stream to the approval, while retaining custody
+of the exact bytes. Neither approach by itself proves the builder consumed them.
+
+Record the reviewed implementation revision, artifact identities, context
+inventory, runner and builder versions, pinned base-image readbacks, platform,
+resource and time budgets, cleanup owner, and output/evidence destination. A
+separately approved one-attempt build must bind these values; it does not itself
+authorize running the image, hosted execution or webhooks. The final image digest,
+configuration and runtime controls require independent readback and review.
+
 The host delivers only the fixed admitted JSON allowlist to the owning checkout's
 `qualification-output/`, before staging cleanup. Existing destinations refuse,
 partial output is removed, receipt publication is last, and all bytes including
