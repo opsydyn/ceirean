@@ -3,5 +3,5 @@
   "compilerOptions": {
     "skipLibCheck": true
   },
-  "include": ["alchemy.run.ts", "src", "tests"]
+  "include": ["alchemy.run.ts", "readonly.alchemy.ts", "src", "tests"]
 }

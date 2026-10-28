@@ -2,6 +2,13 @@
 
 Date: 2026-10-27. Status: proposed delivery roadmap, not execution approval.
 
+> Delivery reset, 2026-10-28: the first deployment checkpoint is now the
+> [read-only hosted spine](../superpowers/plans/2026-10-28-readonly-hosted-spine.md).
+> The custom observer, sealed builder and offline-cache programme below remains
+> historical qualification research, not a prerequisite for that trusted fixed
+> command. Baseline/browser qualification is still deferred, not proven or waived.
+> No existing probe gate or external activation approval changes automatically.
+
 ## Outcome
 
 An operator manually requests one private job against the pinned FoldKit source,

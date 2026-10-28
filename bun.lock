@@ -63,6 +63,8 @@
     "packages/infrastructure": {
       "name": "@ceirean/infrastructure",
       "devDependencies": {
+        "@ceirean/domain": "workspace:*",
+        "@ceirean/github-adapter": "workspace:*",
         "@effect/platform-bun": "4.0.5",
         "@effect/platform-node": "4.0.5",
         "alchemy": "2.0.0-beta.83",

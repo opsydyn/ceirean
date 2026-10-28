@@ -1,5 +1,10 @@
 # Ceirean Tunnel Preparation
 
+The workspace also contains a separate, **not deployed**, read-only Worker/DO
+composition. See the [hosted rehearsal runbook](../../docs/runbooks/readonly-hosted-rehearsal.md).
+It reuses signed ingress and runs one fixed runtime smoke command; it does not
+activate the tunnel, webhooks, migration executor or any research probe.
+
 Status: the owner approved the infrastructure-only declaration exception and
 guarded operational entrypoint. The three-resource apply was separately approved
 and completed on 2026-10-21; independent verification found zero connectors.
@@ -49,7 +54,8 @@ existing Effect lint rules, other workspace configs and cohort pins are unchange
 This scoped policy is not a fix to the SDK declarations or deployment approval.
 Adding Workers ambient types and database peers was tested and did not produce
 a compatible host type environment; those experimental additions were removed.
-The dependency set stays limited to Alchemy and its Effect platform peers.
+The read-only composition additionally depends on the existing Ceirean domain and
+GitHub adapter workspaces. No existing external package resolution was upgraded.
 
 The tests compile the actual resource graph with an in-memory state store and
 offline credentials, resolve references against a synthetic tunnel ID, assert
