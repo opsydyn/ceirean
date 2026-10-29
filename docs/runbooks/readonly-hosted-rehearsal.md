@@ -4,8 +4,10 @@ Status: signed GitHub delivery, durable alarm execution, terminal `Succeeded`
 (`v22.23.4`) and stopped-container readback verified on 29 October 2026. The
 public route is removed and admission expired. GitHub webhook delivery is disabled
 and verified after reload; teardown is complete. Accepted-duplicate replay remains open.
-The follow-up readiness guard and accepted-replay regression are implemented
-locally, not deployed. They do not extend the hosted evidence.
+The follow-up readiness guard is now privately deployed. One authenticated
+readiness/status check verified the exact expired policy and unchanged retained
+job; see the [private follow-up evidence](../evidence/readonly-hosted/private-readiness-20261029.md).
+The accepted-replay regression remains local evidence, not hosted replay proof.
 See the
 [hosted evidence](../evidence/readonly-hosted/rehearsal-20261029.md).
 This replaces the custom-observer programme as the next delivery checkpoint,
@@ -109,8 +111,10 @@ failed qualification initially: the pinned runtime detached preview acquisition
 and uploads an executable bridge. Acquisition ownership is now patched and
 cancellation-tested locally. The single-use operator command is prepared with
 sanitized output tests and an overall runtime deadline, but disabled by default.
-Explicit preview-capability scope and a private update of the old deployed
-Worker remain prerequisites; no enabled operator invocation has been performed.
+A separately approved private update and one real invocation have now succeeded
+against the expired policy, preserving the consumed ledger. The SDK's remote
+preview-token lifetime/revocation remains unverified; local disposal is not
+proof of server-side revocation. A future session needs its own exact-policy check.
 Do not substitute a public endpoint, assume CLI apply proves readiness, or claim
 a live preactivation check from local tests. A new hosted window is still separate.
 
@@ -151,10 +155,10 @@ The [28 October preflight](../evidence/readonly-hosted/preflight-20261028.md)
 records the historical credential blocker. A replacement credential cleared it
 on 29 October. A fresh confirmed window subsequently produced the terminal smoke
 result. The first request reached an older DO version and was refused, so a
-private readiness check for the current DO policy/version is the next focused
-fix, now implemented locally as the contract above. CLI apply completion alone
-is not readiness; do not replace this check with a fixed sleep or another
-infrastructure qualification programme.
+private readiness check was the focused fix. It is now implemented, privately
+deployed and observed remotely for the expired policy. CLI apply completion
+alone is still not readiness; do not replace the next session's check with a
+fixed sleep or another infrastructure qualification programme.
 
 ## Current Evidence And Limits
 

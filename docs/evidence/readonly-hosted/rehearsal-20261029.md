@@ -176,3 +176,12 @@ alarm history after reconstruction. A 1,000-case property checks policy identity
 session and window mutations. These tests do not change the hosted result above:
 the new code is not deployed and a hosted private operator transport is not yet
 qualified. No new route, webhook, comment, redelivery or runtime was activated.
+
+## Later Private Follow-Up
+
+The statements above describe the original rehearsal and its local follow-up.
+A later, separately approved private update and authenticated readiness/status
+check succeeded against the same expired policy and consumed ledger. See
+[private readiness, 29 October](private-readiness-20261029.md) for the exact
+source, deployment, observation and post-run limits. This adds no public delivery
+or accepted-duplicate replay evidence to the original rehearsal.

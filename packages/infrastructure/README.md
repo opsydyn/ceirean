@@ -4,11 +4,13 @@ The workspace also contains a separate, **privately deployed**, read-only Worker
 composition. Signed GitHub delivery, durable alarm execution, terminal runtime
 success and stopped-container readback were verified on 29 October. The route is
 removed, GitHub webhook delivery is disabled and teardown is verified.
-Policy/version readiness and accepted-duplicate replay remain open. See the
+Private protocol/policy readiness was verified in a subsequent authenticated
+check; accepted-duplicate replay remains open. See the
 [hosted rehearsal runbook](../../docs/runbooks/readonly-hosted-rehearsal.md).
-The local follow-up adds private protocol/policy readiness, fail-closed ingress
-guards and a signed-bridge accepted-replay regression. This code has not been
-deployed; a hosted operator transport and live replay still need qualification.
+The follow-up adds private protocol/policy readiness, fail-closed ingress
+guards and a signed-bridge accepted-replay regression. Source `5f122fe` is now
+privately deployed; one real operator check observed the exact expired policy
+and unchanged successful ledger. Live accepted-duplicate replay remains unproven.
 It reuses signed ingress and runs one fixed runtime smoke command; it does not
 activate the tunnel, webhooks, migration executor or any research probe.
 
@@ -373,9 +375,12 @@ merely because these disconnected resources now exist.
 The [operator runbook](../../docs/runbooks/private-operator-probe.md) records the
 qualified readiness/status contract and local native service-binding path.
 The pinned runtime's acquisition ownership is now patched and cancellation-
-tested through Bun source and Node compiled exports. Hosted transport remains
-unqualified: it uploads an auxiliary executable bridge and still needs explicit
-private-operation approval. The `operator:probe` command is prepared but defaults
+tested through Bun source and Node compiled exports. One separately approved
+hosted invocation succeeded after the private target update; see the
+[sanitized evidence](../../docs/evidence/readonly-hosted/private-readiness-20261029.md).
+The transport uploads an auxiliary executable bridge; its remote token lifetime
+and revocation remain unverified. Each invocation needs explicit operational
+approval. The `operator:probe` command defaults
 to a fixed disabled refusal before policy, credentials or runtime setup. It has
 sanitized output and a deadline enclosing the whole runtime lifetime. It cannot
 enable public routes/webhooks or enqueue/execute a job. See the runbook for its

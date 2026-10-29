@@ -1,10 +1,12 @@
 # Private Operator Probe Qualification
 
 **Result:** the application contract, local native RPC path and patched acquisition
-ownership pass local qualification. A disabled-by-default single-use command is
-now prepared and locally tested. The complete hosted transport is still
-**not qualified**. No remote session, deployment, route, webhook action,
-admission or container execution occurred during these qualification slices.
+ownership pass local qualification. On 29 October, a separately approved private
+target update and one authenticated invocation succeeded against the exact expired
+policy and retained successful job. See the
+[hosted private-readiness evidence](../evidence/readonly-hosted/private-readiness-20261029.md).
+The single-use command still defaults to disabled. No route, webhook, admission
+or container execution was activated by that follow-up.
 
 ## Qualified Contract
 
@@ -98,13 +100,14 @@ otherwise writes full native configuration, including a local bearer token,
 outside the output sink and potentially outside the temporary state root.
 
 The only recognized opt-in value is `CEIREAN_OPERATOR_PREVIEW=approved`.
-It is an accidental-invocation guard, **not human authorization**. It has not
-been set for a real operation, written to `.env`, or enabled in any deployed
-configuration. Do not opt in until the next private-operation scope is approved.
+It is an accidental-invocation guard, **not human authorization**. It was set only
+in one approved operational child's environment for the hosted check. It was not
+written to `.env` or enabled in deployed configuration; the disabled refusal was
+checked again afterwards. Each further opt-in needs its own approved scope.
 Synthetic tests may use it only with injected fake operations; subprocess tests
 remain disabled or refuse invalid arguments before the live operation.
 
-After a future approved opt-in, `CEIREAN_OPERATOR_POLICY_FILE` identifies the
+For an approved opt-in, `CEIREAN_OPERATOR_POLICY_FILE` identifies the
 desired policy JSON file. The file is read locally, then rejected if its text
 exceeds 16,384 UTF-16 code units or fails the strict real `Policy` schema. This
 is a validation bound after reading, not a streaming filesystem allocation
@@ -143,7 +146,7 @@ real disabled CLI subprocess output. A local workerd subprocess emits stdout
 and stderr canaries; the silent runtime is verified to discard both. None of
 these tests creates a remote preview or contacts Cloudflare.
 
-## Concrete Hosted Blockers
+## Hosted Transport Scope And Limits
 
 Source inspection and independent review of the pinned runtime found:
 
@@ -157,27 +160,32 @@ Source inspection and independent review of the pinned runtime found:
    request was canceled or rolled back, or that hosted transport is ready.
 3. The pinned runtime exposes no explicit remote-preview revocation operation
    or verified server-side token lifetime. Local disposal is not proof of remote
-   revocation. The preview bridge's service binding is broader than a server-
+   revocation. This limitation remains after the successful private check.
+   The preview bridge's service binding is broader than a server-
    enforced readiness/status allowlist; its token is a credential.
-4. The previously deployed source `9e5fae7` lacks readiness. Even a working
-   transport cannot establish current desired-policy readiness until an approved
-   private target update, with expired admission and the consumed ledger intact.
+4. The old deployed source `9e5fae7` lacked readiness. The approved private update
+   to `5f122fe` resolved that blocker without DO migration, fresh admission or
+   ledger reset. The real probe compared the full desired expired policy and
+   observed the original successful job unchanged. This is not a readiness claim
+   for a future policy or session.
 
 Cloudflare's [service-binding RPC](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/rpc/)
 does not require a public HTTP endpoint. That does not make a newly created
 preview bridge a read-only management operation.
 
 The earlier unqualified entrypoint was removed; its replacement is the guarded,
-disabled-by-default command above. Existing credential files, protected
-deployment state and cloud resources were not read or changed for this
-qualification. No real enabled operator invocation was performed.
+disabled-by-default command above. The initial qualification slices were local
+only. The later approved hosted check used the protected operational state and
+credentials, updated only the existing Worker, and invoked that command once.
+No permanent auxiliary operator script was registered in the post-run readback;
+this does not establish server-side preview-token revocation.
 
 ## Next Bounded Decision
 
-The single-use operator boundary is prepared and must remain disabled.
-Next, explicitly approve the authenticated preview
-capability/upload and private target update together; verify desired-policy
-readiness and retained status while target routes, workers.dev, previews and
-GitHub webhooks stay disabled. The preview token's lifetime/revocation limitation
-must remain explicit. A fresh timeboxed hosted rehearsal is a separate later
-approval; this ownership fix authorizes no hosted operation.
+The private target update and authenticated readiness/status check are complete.
+Keep the command disabled and preserve the consumed ledger. Accepted-duplicate
+delivery without reexecution remains the next bounded hosted proof: select a
+fresh session and timebox, prepare it privately, then check that exact desired
+policy before any separately approved route/webhook activation. The preview
+token's lifetime/revocation limitation remains explicit. This runbook authorizes
+no further operation.
