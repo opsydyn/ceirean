@@ -126,6 +126,11 @@ ledger or alarm history. This is local evidence, not the missing hosted replay.
 
 ## One Bounded Activation Decision
 
+The next attempt has a concrete
+[accepted-duplicate rehearsal plan](../superpowers/plans/2026-10-29-accepted-replay-rehearsal.md).
+It is planning only: activation, the fresh session and the relative five-minute
+clock still require separate execution/start confirmation.
+
 Before the next external operation, agree one combined deployment/rehearsal scope:
 
 1. Verify the Cloudflare account supports native DO Containers and review the
