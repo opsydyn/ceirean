@@ -35,12 +35,12 @@
 **Inputs:** existing source, protected credentials/state, consumed-session evidence.
 **Output:** sanitized preflight record, proposed session and ready-to-start bounded operation; clock not started.
 
-- [ ] Run `moon run infrastructure:test --concurrency 1`, `moon run :typecheck --concurrency 1` and `bun --no-env-file --no-install run check`. Require all passing, preserving unrelated observer work.
-- [ ] Verify token/account, existing Worker/image/DO bindings, no matching route, public URLs off, zero active native instances and the retained original instance still stopped. Do not log secret bindings or credential values.
+- [x] Run `moon run infrastructure:test --concurrency 1`, `moon run :typecheck --concurrency 1` and `bun --no-env-file --no-install run check`. Require all passing, preserving unrelated observer work.
+- [x] Verify token/account, existing Worker/image/DO bindings, no matching route, public URLs off, zero active native instances and the retained original instance still stopped. Do not log secret bindings or credential values.
 - [ ] Verify App permissions remain Issues Read and Metadata Read, selected repository and signed issue-comment delivery; issue #57 is open and numeric identities match. Verify webhook Active off and SSL verification on.
 - [ ] Have the owner complete sudo authentication if needed, then verify the webhook enable/disable controls are accessible. Do not use preview auth or an App key to infer authority to edit App settings. Do not start the clock while OS/browser access is blocked.
-- [ ] Export the pinned committed source into protected operational storage, using frozen offline dependencies without lifecycle scripts if a new export is needed. Reuse the existing pinned image; do not start Docker/Colima unless an unexpected image-copy requirement is separately resolved.
-- [ ] Prepare an independent watchdog for exact matching-route deletion at the deadline, using existing protected credentials without printing them. Confirm it can run independently of the browser. It must never create a route or change GitHub permissions. Record capability and authentication checks before activation.
+- [x] Export the pinned committed source into protected operational storage, using frozen offline dependencies without lifecycle scripts if a new export is needed. Reuse the existing pinned image; do not start Docker/Colima unless an unexpected image-copy requirement is separately resolved.
+- [x] Prepare an independent watchdog for exact matching-route deletion at the deadline, using existing protected credentials without printing them. Confirm it can run independently of the browser. It must never create a route or change GitHub permissions. Record capability and authentication checks before activation.
 - [ ] Present the proposed session, one-execution scope, preview-capability limitation and five-minute relative deadline for final start confirmation. No absolute dates/window are preauthorized by this plan.
 
 ## Task 2: One Five-Minute Operation
@@ -72,6 +72,11 @@
 - [ ] Run root lint/format and `git diff --check`; commit only sanitized evidence and matching documentation. No merge or push is included in activation authority.
 
 ## Exit And Product Follow-Up
+
+The [preflight record](../../evidence/readonly-hosted/accepted-replay-preflight-20261029.md)
+records completed checks and the pending GitHub sudo/control gate. No clock or
+activation has started. Checked preparation items are not permission to skip
+refreshing changed state before execution.
 
 After verified teardown, the next product slice is a trusted pinned FoldKit
 manifest/dependency report. Baseline commands and browser evidence follow that;
