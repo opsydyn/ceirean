@@ -11,6 +11,9 @@ The follow-up adds private protocol/policy readiness, fail-closed ingress
 guards and a signed-bridge accepted-replay regression. Source `5f122fe` is now
 privately deployed; one real operator check observed the exact expired policy
 and unchanged successful ledger. Live accepted-duplicate replay remains unproven.
+A later [replay attempt](../../docs/evidence/readonly-hosted/accepted-replay-20261029-231248.md)
+passed fresh-session readiness but stopped at the browser action-time approval
+gate. It ended private, expired and with an empty ledger; no new execution occurred.
 It reuses signed ingress and runs one fixed runtime smoke command; it does not
 activate the tunnel, webhooks, migration executor or any research probe.
 

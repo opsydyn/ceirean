@@ -8,6 +8,11 @@ The follow-up readiness guard is now privately deployed. One authenticated
 readiness/status check verified the exact expired policy and unchanged retained
 job; see the [private follow-up evidence](../evidence/readonly-hosted/private-readiness-20261029.md).
 The accepted-replay regression remains local evidence, not hosted replay proof.
+The [23:12 UTC replay attempt](../evidence/readonly-hosted/accepted-replay-20261029-231248.md)
+passed private readiness but was aborted when the browser approval control refused
+the webhook-enable click. Its route was removed and policy expired; no comment,
+delivery, admission or execution occurred. Collect click-specific confirmation
+while still private before any next route exposure; fresh scope/window is required.
 See the
 [hosted evidence](../evidence/readonly-hosted/rehearsal-20261029.md).
 This replaces the custom-observer programme as the next delivery checkpoint,

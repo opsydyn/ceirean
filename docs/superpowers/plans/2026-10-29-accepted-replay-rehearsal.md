@@ -10,6 +10,11 @@
 
 **Spec:** [hosted rehearsal runbook](../../runbooks/readonly-hosted-rehearsal.md), constrained by the [verified private-readiness follow-up](../../evidence/readonly-hosted/private-readiness-20261029.md).
 
+**Execution result:** [23:12 UTC attempt](../../evidence/readonly-hosted/accepted-replay-20261029-231248.md)
+was aborted at the browser's action-time confirmation gate. Private readiness and
+teardown succeeded; no GitHub delivery or execution occurred. Unchecked proof
+steps remain unproven, not authority to resume this expired window.
+
 ## Authority And Fixed Scope
 
 - This document is a plan only. No new cloud read, update, probe, comment, route, webhook or execution was performed while preparing it.
@@ -37,20 +42,20 @@
 
 - [x] Run `moon run infrastructure:test --concurrency 1`, `moon run :typecheck --concurrency 1` and `bun --no-env-file --no-install run check`. Require all passing, preserving unrelated observer work.
 - [x] Verify token/account, existing Worker/image/DO bindings, no matching route, public URLs off, zero active native instances and the retained original instance still stopped. Do not log secret bindings or credential values.
-- [ ] Verify App permissions remain Issues Read and Metadata Read, selected repository and signed issue-comment delivery; issue #57 is open and numeric identities match. Verify webhook Active off and SSL verification on.
-- [ ] Have the owner complete sudo authentication if needed, then verify the webhook enable/disable controls are accessible. Do not use preview auth or an App key to infer authority to edit App settings. Do not start the clock while OS/browser access is blocked.
+- [x] Verify App permissions remain Issues Read and Metadata Read, selected repository and signed issue-comment delivery; issue #57 is open and numeric identities match. Verify webhook Active off and SSL verification on.
+- [x] Have the owner complete sudo authentication if needed, then verify the webhook enable/disable controls are accessible. Do not use preview auth or an App key to infer authority to edit App settings. Do not start the clock while OS/browser access is blocked.
 - [x] Export the pinned committed source into protected operational storage, using frozen offline dependencies without lifecycle scripts if a new export is needed. Reuse the existing pinned image; do not start Docker/Colima unless an unexpected image-copy requirement is separately resolved.
 - [x] Prepare an independent watchdog for exact matching-route deletion at the deadline, using existing protected credentials without printing them. Confirm it can run independently of the browser. It must never create a route or change GitHub permissions. Record capability and authentication checks before activation.
-- [ ] Present the proposed session, one-execution scope, preview-capability limitation and five-minute relative deadline for final start confirmation. No absolute dates/window are preauthorized by this plan.
+- [x] Present the proposed session, one-execution scope, preview-capability limitation and five-minute relative deadline for final start confirmation. No absolute dates/window are preauthorized by this plan.
 
 ## Task 2: One Five-Minute Operation
 
 **Inputs:** completed preflight and fresh start confirmation.
 **Output:** accepted-replay proof or an explicitly incomplete result; no automatic rerun.
 
-- [ ] At confirmation receipt record `T0` in UTC, set `opensAtMs = T0`, `closesAtMs = T0 + 300000`, generate the fresh session and arm the watchdog for that same deadline. All preparation and activation below consume this window; it never restarts.
-- [ ] Plan the fresh policy with ingress `Private`. Require only expected Worker configuration changes, unchanged class/namespace/image and no destructive resource changes. Apply privately; do not reset either session's ledger.
-- [ ] Run the fixed operator once against the exact fresh policy. Require `readonly-policy-v1`, full policy equality and `job: null`. Refusal, mismatch, unexpected job or inadequate remaining time means abort, not retry. This checkpoint may initialize the named DO but must not admit or execute a job.
+- [x] At confirmation receipt record `T0` in UTC, set `opensAtMs = T0`, `closesAtMs = T0 + 300000`, generate the fresh session and arm the watchdog for that same deadline. All preparation and activation below consume this window; it never restarts.
+- [x] Plan the fresh policy with ingress `Private`. Require only expected Worker configuration changes, unchanged class/namespace/image and no destructive resource changes. Apply privately; do not reset either session's ledger.
+- [x] Run the fixed operator once against the exact fresh policy. Require `readonly-policy-v1`, full policy equality and `job: null`. Refusal, mismatch, unexpected job or inadequate remaining time means abort, not retry. This checkpoint may initialize the named DO but must not admit or execute a job.
 - [ ] Before `T0 + 120000`, apply ingress `Rehearsal` with the **identical** policy, then enable/save the App webhook and verify Active on. Only the exact route may be added. If either action fails or runs late, go straight to teardown; do not post a comment.
 - [ ] Post exactly one `/ceirean assess` comment on issue #57. Retain its URL and original delivery response. Require HTTP 202 and a valid fresh-session job. Preserve large GitHub delivery IDs as exact strings, never rounded JavaScript numbers.
 - [ ] Observe terminal success through bounded provider observability, then invoke the operator once to retain the exact `Succeeded` job. It must identify the fresh session and expected runtime, with independent stopped-instance evidence. If success is not confirmed before `T0 + 180000`, skip redelivery and tear down.
@@ -61,22 +66,23 @@
 
 **Files:** create `docs/evidence/readonly-hosted/accepted-replay-<actual-UTC-date-time>.md`; update `docs/runbooks/readonly-hosted-rehearsal.md` and `packages/infrastructure/README.md` only to match actual results.
 
-- [ ] Disable/save the App webhook immediately after evidence collection (or on abort). Independently restore ingress `Private` with the same fresh session and expired `opensAtMs: 0`, `closesAtMs: 300000`; do not delay route removal while waiting on browser access.
-- [ ] If Alchemy teardown fails, use the scoped exact-route deletion fallback. The watchdog removes any remaining matching route at `T0 + 300000` regardless. Verify no matching route and both public URL flags off. Record any failure rather than assuming rollback.
-- [ ] Verify webhook Active off after reload. If the Mac locks, request manual unlock while route removal proceeds independently; report delivery-disable delay separately. Do not bypass OS authentication or claim the watchdog controls GitHub delivery.
-- [ ] Run one final operator check against the expired fresh-session policy. Retain the same terminal job, or the actual failure/cleanup state. Verify zero active native instances and fresh instance stopped/exit 0; reconcile `CleanupRequired` without another execution before any future run.
-- [ ] Limit operator invocations to the four documented checkpoints (empty ledger, terminal before replay, post-replay, expired policy). They are observations, not retries. A checkpoint failure ends the attempted proof and triggers teardown; necessary safety reconciliation must be separately identified.
-- [ ] Stop the watchdog only after verified route removal; dispose operational processes. Do not delete either durable ledger, protected state, stopped instance history or evidence. Confirm the operator still refuses a disabled invocation.
-- [ ] Record source/deployment identities, UTC timestamps, desired policies, comment/delivery identifiers, both 202 bodies, operator observations, execution/instance readbacks and each teardown fact. No secret, raw preview token, full provider config or credential file belongs in Git.
-- [ ] Report success only if both deliveries were accepted, the terminal job is identical, one execution is observed and teardown is verified. Otherwise record partial/failure without an unapproved rerun. No claim extends beyond the observation period.
-- [ ] Run root lint/format and `git diff --check`; commit only sanitized evidence and matching documentation. No merge or push is included in activation authority.
+- [x] Disable/save the App webhook immediately after evidence collection (or on abort); if it was never enabled, verify it stayed off instead. Independently restore ingress `Private` with the same fresh session and expired `opensAtMs: 0`, `closesAtMs: 300000`; do not delay route removal while waiting on browser access.
+- [x] Use scoped exact-route deletion if immediate safety removal is needed or Alchemy teardown fails. The watchdog removes any remaining matching route at `T0 + 300000` regardless. Verify no matching route and both public URL flags off. Record any failure rather than assuming rollback.
+- [x] Verify webhook Active off after reload. If the Mac locks, request manual unlock while route removal proceeds independently; report delivery-disable delay separately. Do not bypass OS authentication or claim the watchdog controls GitHub delivery.
+- [x] Run one final operator check against the expired fresh-session policy. Retain the same terminal job, actual failure/cleanup state, or null if no admission occurred. Verify zero active native instances and any allocated fresh instance stopped/exit 0; reconcile `CleanupRequired` without another execution before any future run.
+- [x] Limit operator invocations to the four documented checkpoints (empty ledger, terminal before replay, post-replay, expired policy). They are observations, not retries. A checkpoint failure ends the attempted proof and triggers teardown; necessary safety reconciliation must be separately identified.
+- [x] Stop the watchdog only after verified route removal, or observe its normal completion; dispose operational processes. Do not delete either durable ledger, protected state, stopped instance history or evidence. Confirm the operator still refuses a disabled invocation.
+- [x] Record source/deployment identities, UTC timestamps, desired policies, available comment/delivery identifiers and 202 bodies, operator observations, execution/instance readbacks and each teardown fact. Explicitly record missing proof when aborted before delivery. No secret, raw preview token, full provider config or credential file belongs in Git.
+- [x] Report success only if both deliveries were accepted, the terminal job is identical, one execution is observed and teardown is verified. Otherwise record partial/failure without an unapproved rerun. No claim extends beyond the observation period.
+- [x] Run root lint/format and `git diff --check`; commit only sanitized evidence and matching documentation. No merge or push is included in activation authority.
 
 ## Exit And Product Follow-Up
 
 The [preflight record](../../evidence/readonly-hosted/accepted-replay-preflight-20261029.md)
-records completed checks and the pending GitHub sudo/control gate. No clock or
-activation has started. Checked preparation items are not permission to skip
-refreshing changed state before execution.
+is historical. The later attempt cleared sudo authentication but was stopped by
+the separate action-time enable gate. A future run must collect click-specific
+confirmation while still private, before route exposure, without extending a
+window. Revisit the sequence and obtain fresh approval before another attempt.
 
 After verified teardown, the next product slice is a trusted pinned FoldKit
 manifest/dependency report. Baseline commands and browser evidence follow that;

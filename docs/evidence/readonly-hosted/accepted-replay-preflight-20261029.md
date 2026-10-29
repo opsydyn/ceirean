@@ -69,3 +69,12 @@ Complete GitHub sudo authentication and verify the saved unchecked state and
 controls before asking for the final start confirmation. That confirmation
 creates a fresh session/window; no expired approval or clock is reused. If
 credentials, source or cloud state changes, refresh the affected checks first.
+
+## Subsequent Attempt
+
+The owner later completed sudo authentication and saved-state verification, then
+confirmed the fresh five-minute clock. The
+[23:12 UTC attempt](accepted-replay-20261029-231248.md) passed private readiness
+but stopped at the distinct browser action-time enable gate. It was torn down
+without delivery or execution; the pending-authentication statements above are
+historical preflight state, not the current blocker.
