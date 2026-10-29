@@ -105,10 +105,11 @@ private readiness check against that policy → bounded route/webhook activation
 Do not change the policy while opening the route. The
 [private operator probe](private-operator-probe.md) now has local native
 service-binding and fail-closed contract tests. Its proposed hosted transport
-failed qualification: the pinned runtime detaches preview acquisition and
-uploads an executable bridge. No remote operator entrypoint is retained.
-Supervised acquisition, explicit preview-capability scope and a private update
-of the old deployed Worker remain prerequisites.
+failed qualification initially: the pinned runtime detached preview acquisition
+and uploads an executable bridge. Acquisition ownership is now patched and
+cancellation-tested locally; a single-use remote operator boundary is not yet
+retained. Explicit preview-capability scope, sanitized boundary tests and a
+private update of the old deployed Worker remain prerequisites.
 Do not substitute a public endpoint, assume CLI apply proves readiness, or claim
 a live preactivation check from local tests. A new hosted window is still separate.
 

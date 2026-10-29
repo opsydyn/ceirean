@@ -4,7 +4,7 @@ import * as Runtime from '@alchemy.run/cloudflare-runtime/core/Runtime';
 import * as RuntimeServices from '@alchemy.run/cloudflare-runtime/core/RuntimeServices';
 import { layer as bunServices } from '@effect/platform-bun/BunServices';
 import { Credentials } from 'alchemy/Cloudflare';
-import { ConfigProvider, Effect, FileSystem, Layer, Schema } from 'effect';
+import { ConfigProvider, Effect, FileSystem, Layer, Result, Schema } from 'effect';
 import { layer as httpClient } from 'effect/http/FetchHttpClient';
 
 import { probeLocalReadOnlyOperator } from '../src/readonly/operator-transport.ts';
@@ -56,6 +56,13 @@ const nativeLayer = RuntimeServices.layerRuntime({ api: { accountId: 'unused-loc
 const withNative = Effect.provide(nativeLayer);
 
 async function nativeRpc() {
+  const proxyUrls: URL[] = [];
+  function record(url: URL) {
+    const recording = Effect.sync(() => {
+      proxyUrls.push(url);
+    });
+    return recording;
+  }
   function* scenario() {
     const runtime = yield* Runtime.Runtime;
     const url = yield* runtime.start({
@@ -65,8 +72,19 @@ async function nativeRpc() {
       bindings: [],
       modules: [{ name: 'fixture.mjs', type: 'ESModule', content: source }],
     });
-    const result = yield* probeLocalReadOnlyOperator('ceirean-operator-fixture', policy);
+    const recording: Runtime.Runtime['Service'] = {
+      start: (worker) => runtime.start(worker).pipe(Effect.tap(record)),
+    };
+    const withRecording = Effect.provideService(Runtime.Runtime, recording);
+    const result = yield* probeLocalReadOnlyOperator('ceirean-operator-fixture', policy).pipe(
+      withRecording,
+    );
     expect(result).toEqual({ protocol: 'readonly-policy-v1', policy, job: null });
+    expect(proxyUrls).toHaveLength(1);
+    for (const proxyUrl of proxyUrls) {
+      const closed = yield* Effect.tryPromise(() => fetch(proxyUrl)).pipe(Effect.result);
+      expect(Result.isFailure(closed)).toBe(true);
+    }
     return url;
   }
   const closed = await Effect.runPromise(Effect.gen(scenario).pipe(Effect.scoped, withNative));

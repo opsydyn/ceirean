@@ -1,0 +1,44 @@
+diff --git a/src/core/remote-bindings/RemoteBindings.ts b/src/core/remote-bindings/RemoteBindings.ts
+--- a/src/core/remote-bindings/RemoteBindings.ts
++++ b/src/core/remote-bindings/RemoteBindings.ts
+@@ -42,6 +42,7 @@ export const RemoteBindingsLive = Layer.effect(
+   Effect.gen(function* () {
+     const loopback = yield* Loopback.Loopback;
+     const remoteWorker = yield* RemoteWorker.RemoteWorker;
++    const acquisitionScope = yield* Effect.scope;
+     const prefetches = new Map<
+       number,
+       Fiber.Fiber<RemoteWorkerResult, ApiError | ConfigError | SystemError>
+@@ -59,7 +60,11 @@ export const RemoteBindingsLive = Layer.effect(
+         if (prefetched) {
+           prefetches.delete(hash);
+         }
+-        const deploy = prefetched ? Fiber.join(prefetched) : remoteWorker.deploy(json);
++        const deploy = prefetched ? Fiber.join(prefetched) : Effect.acquireUseRelease(
++          Effect.forkIn(remoteWorker.deploy(json), acquisitionScope, { uninterruptible: false }),
++          Fiber.join,
++          Fiber.interrupt,
++        );
+         return yield* deploy.pipe(
+           Effect.flatMap((result) => HttpServerResponse.json({ ok: true, result })),
+           Effect.tapCause((cause) => cause.pipe(Cause.pretty, Effect.logError)),
+@@ -71,7 +76,7 @@ export const RemoteBindingsLive = Layer.effect(
+       config: RemoteWorkerConfig,
+     ): Effect.fn.Return<Plugin.PluginConfig> {
+       if (config.bindings.length === 0) return {};
+-      const fiber = yield* Effect.forkDetach(remoteWorker.deploy(config));
++      const fiber = yield* Effect.forkIn(remoteWorker.deploy(config), acquisitionScope);
+       prefetches.set(Hash.structure(config), fiber);
+       const [outboundWorker, clientWorker] = yield* Effect.forEach(
+         [OutboundWorker, ClientWorker],
+diff --git a/dist/core/node/remote-bindings/RemoteBindings.mjs b/dist/core/node/remote-bindings/RemoteBindings.mjs
+--- a/dist/core/node/remote-bindings/RemoteBindings.mjs
++++ b/dist/core/node/remote-bindings/RemoteBindings.mjs
+@@ -28,0 +29,1 @@
++	const acquisitionScope = yield* Effect.scope;
+@@ -36,1 +37,1 @@
+-		return yield* (prefetched ? Fiber.join(prefetched) : remoteWorker.deploy(json)).pipe(Effect.flatMap((result) => HttpServerResponse.json({
++		return yield* (prefetched ? Fiber.join(prefetched) : Effect.acquireUseRelease(Effect.forkIn(remoteWorker.deploy(json), acquisitionScope, { uninterruptible: false }), Fiber.join, Fiber.interrupt)).pipe(Effect.flatMap((result) => HttpServerResponse.json({
+@@ -46,1 +47,1 @@
+-		const fiber = yield* Effect.forkDetach(remoteWorker.deploy(config));
++		const fiber = yield* Effect.forkIn(remoteWorker.deploy(config), acquisitionScope);

@@ -372,7 +372,9 @@ merely because these disconnected resources now exist.
 
 The [operator runbook](../../docs/runbooks/private-operator-probe.md) records the
 qualified readiness/status contract and local native service-binding path.
-Hosted transport remains unqualified because the pinned runtime detaches preview
-acquisition and uploads an auxiliary executable bridge. No remote entrypoint is
-retained. The contract/local adapter cannot enable public routes or webhooks,
-and do not enqueue or execute a job. See the runbook for the bounded next fix.
+The pinned runtime's acquisition ownership is now patched and cancellation-
+tested through Bun source and Node compiled exports. Hosted transport remains
+unqualified: it uploads an auxiliary executable bridge and still needs an
+approved, sanitized single-use boundary. No remote entrypoint is retained. The
+contract/local adapter cannot enable public routes or webhooks, and do not
+enqueue or execute a job. See the runbook for the bounded next step.
