@@ -1,8 +1,11 @@
 # First Read-Only Cloudflare Rehearsal
 
-Status: implementation preparation only. No resources deployed or live endpoints
-enabled by this change. This replaces the custom-observer programme as the next
-delivery checkpoint, not its stricter research acceptance criteria.
+Status: private Worker/DO deployment and immutable image preparation verified on
+29 October 2026. The first route window was closed without enabling GitHub
+delivery; signed job execution remains unproven. See the
+[hosted evidence](../evidence/readonly-hosted/rehearsal-20261029.md).
+This replaces the custom-observer programme as the next delivery checkpoint,
+not its stricter research acceptance criteria.
 
 ## What This Proves
 
@@ -89,7 +92,10 @@ research prerequisites. A real provider failure should produce a concrete fix,
 not a new generic qualification framework.
 
 The [28 October preflight](../evidence/readonly-hosted/preflight-20261028.md)
-records the current credential blocker. The rehearsal window has not started.
+records the historical credential blocker. A replacement credential cleared it
+on 29 October; the first bounded window ended without GitHub delivery. A fresh
+window requires action-time webhook confirmation, not another infrastructure
+qualification programme.
 
 ## Current Evidence And Limits
 
@@ -102,10 +108,13 @@ not actual workerd SQLite or hosted alarm results. Alchemy's own Worker bundler 
 and representative DO export metadata without provisioning. That test does not
 execute the Worker or discover the actual deployment plan.
 
-Real DO storage/alarm execution, Cloudflare image preparation, account eligibility,
-live delivery, platform isolation and actual cleanup have not been demonstrated
-for this new composition. A successful HTTP response or local test does not prove
-the hosted milestone.
+Cloudflare image preparation and private Worker/container-application deployment
+have now been verified. Real DO storage/alarm execution, live signed delivery,
+platform isolation and post-execution cleanup have not been demonstrated for
+this composition. A successful HTTP response or local test does not prove the
+hosted milestone. Deployment uses the protected operational state, an explicit
+profile/stage and an explicit Colima `DOCKER_HOST` for the pinned image copy;
+no custom image build is needed.
 
 Next product increment after this smoke: inspect a pinned FoldKit manifest using
 trusted code and export its dependency report. Then add fixed baseline commands

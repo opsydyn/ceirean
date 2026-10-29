@@ -1,7 +1,9 @@
 # Ceirean Tunnel Preparation
 
-The workspace also contains a separate, **not deployed**, read-only Worker/DO
-composition. See the [hosted rehearsal runbook](../../docs/runbooks/readonly-hosted-rehearsal.md).
+The workspace also contains a separate, **privately deployed**, read-only Worker/DO
+composition. Image preparation and private provisioning were verified on
+29 October; signed runtime execution remains unproven. See the
+[hosted rehearsal runbook](../../docs/runbooks/readonly-hosted-rehearsal.md).
 It reuses signed ingress and runs one fixed runtime smoke command; it does not
 activate the tunnel, webhooks, migration executor or any research probe.
 
