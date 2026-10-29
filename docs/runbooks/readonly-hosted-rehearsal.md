@@ -2,8 +2,8 @@
 
 Status: signed GitHub delivery, durable alarm execution, terminal `Succeeded`
 (`v22.23.4`) and stopped-container readback verified on 29 October 2026. The
-public route is removed and admission expired. Final GitHub webhook-off
-verification awaits manual Mac unlock. Accepted-duplicate replay remains open.
+public route is removed and admission expired. GitHub webhook delivery is disabled
+and verified after reload; teardown is complete. Accepted-duplicate replay remains open.
 See the
 [hosted evidence](../evidence/readonly-hosted/rehearsal-20261029.md).
 This replaces the custom-observer programme as the next delivery checkpoint,

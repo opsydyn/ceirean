@@ -130,9 +130,15 @@ Independent API readback found no Worker routes and no running instance. The
 watchdog completed with zero matching routes, and the authenticated tail exited.
 Colima had remained stopped throughout this second window.
 
-GitHub webhook-off verification is pending manual Mac unlock. Until confirmed,
-the App can still attempt deliveries, but there is no Ceirean Worker route and
-admission is expired. Do not describe all webhook delivery as disabled yet.
+After the owner unlocked the Mac and explicitly approved the final disable/save
+action, GitHub webhook Active was unchecked and saved at approximately 19:00 UTC.
+Reloading the App settings independently showed Active still unchecked, the same
+webhook URL and SSL verification still enabled. App permissions were not changed.
+Final Cloudflare readback confirmed no Worker routes, disabled workers.dev and
+preview URLs, and the retained instance history record stopped with exit code 0.
+Delivery shutdown was delayed by the locked Mac and action-time confirmation;
+public routing and admission had already closed before the rehearsal deadline.
+Teardown is complete; the private deployment and durable ledger are preserved.
 
 ## Verification And Remaining Gates
 
