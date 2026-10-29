@@ -66,12 +66,86 @@ An independent, exact-route removal watchdog was armed before activation.
 - The confirmation arrived after the original deadline. It did not silently
   extend the expired window; a fresh relative five-minute window was requested.
 
-## Verification And Remaining Gate
+## Fresh Confirmed Window: Runtime Succeeded
+
+The owner confirmed a new five-minute window starting on receipt of confirmation:
+18:43:27-18:48:27 UTC. The same exact-route watchdog was armed before activation.
+No additional comment, image build, code change or deadline extension was used.
+
+- The route-only/secret-policy apply completed at 18:44:06 UTC. GitHub webhook
+  Active was enabled using the freshly confirmed browser action.
+- One comment was posted at 18:44:22 UTC:
+  [comment 6505395627](https://github.com/opsydyn/fold-kit-experiments/issues/57#issuecomment-6505395627).
+- Original delivery `3851081277788651520` returned 403 / `NotAllowed` at
+  18:44:25 UTC. Its numeric identity fields matched the approved allowlist.
+- The one approved redelivery, `3851081578398629888`, returned 202 with a real
+  `Queued` record at 18:46:45 UTC. Delivery IDs exceed JavaScript's safe integer
+  range: the operational reader retained their original JSON numeric lexemes as
+  strings rather than sending rounded IDs back to GitHub.
+- A native `ReadOnlyJob` alarm claimed the job at `1793299605257`. Persisted
+  Cloudflare observability, not only the human-readable tail, reported:
+
+```json
+{
+  "_tag": "Succeeded",
+  "sessionId": "readonly-20261029",
+  "runtime": "v22.23.4",
+  "queuedAtMs": 1793299605229,
+  "closesAtMs": 1793299707000,
+  "startedAtMs": 1793299605257
+}
+```
+
+- The alarm completed successfully at 18:46:55.873 UTC, wall time 10,595 ms.
+  Trace `4f565d8d4a27b8fda9fe1235ae4563bb`, request
+  `eb6c785b8cdb2592231b6a0bdda6d5d4`, contains the terminal job payload.
+- Independent native-instance readback identified object/instance
+  `c7d1d05656b6c9126d6209272c7b63912a8fe2505473cc4b2bcc13e433a725ba`,
+  name `readonly-20261029`, started at 18:46:47.048 UTC and **stopped** at
+  18:46:55.814 UTC, exit code 0, using the reviewed registry digest.
+  The stopped history record remains visible; this is not zero instance records.
+
+### Rollout Skew Explains The First Refusal
+
+The first request's stateless Worker ran version
+`e278aa56-e863-436e-9154-138177f6aba8` (created 18:44:00.834 UTC). Its `enqueue`
+RPC reached the same named DO on version
+`bfed1d54-a73c-44c7-be3d-3709dee83f4f` (created 18:33:02.563 UTC during the
+earlier expired-policy/private teardown). The redelivery and successful alarm
+used the new version. These traces localize the 403 to an old-policy DO during
+Worker/DO rollout skew; matching live GitHub IDs were not the problem.
+
+Do not treat CLI apply completion as evidence that a DO is using the current
+admission policy. Before a further activation, add a private policy/version
+readiness check and cover this skew with a focused regression test. Do not use
+an arbitrary sleep or permanently weaken the allowlist. No such implementation
+or additional hosted run was performed in this rehearsal.
+
+### Teardown
+
+The Mac locked before the GitHub webhook-off action. Manual unlock was requested;
+OS authentication was not bypassed. Alchemy immediately restored `Private` and
+an expired admission policy, completing at 18:48:04.573 UTC, before the deadline.
+Independent API readback found no Worker routes and no running instance. The
+watchdog completed with zero matching routes, and the authenticated tail exited.
+Colima had remained stopped throughout this second window.
+
+GitHub webhook-off verification is pending manual Mac unlock. Until confirmed,
+the App can still attempt deliveries, but there is no Ceirean Worker route and
+admission is expired. Do not describe all webhook delivery as disabled yet.
+
+## Verification And Remaining Gates
 
 All 45 infrastructure tests, all 12 workspace typechecks, lint and formatting
 passed in the existing worktree. Unrelated uncommitted research was preserved.
 
-Image preparation and private provisioning are now observed facts. A real signed
-GitHub delivery, DO alarm execution, terminal job, one-execution replay and
-post-execution cleanup are **not yet demonstrated**. Zero instances before any
-admission is not proof that a running instance was destroyed.
+Signed GitHub delivery, durable admission/alarm execution, terminal success and
+post-execution stopped-state readback are now observed facts. The first delivery
+was refused, so this does **not** demonstrate two accepted deliveries returning
+the same durable result without another execution. That hosted deduplication
+check remains open; no extra redelivery was sent beyond the approved one.
+
+The `readonly-20261029` session has consumed its one job. Preserve its ledger;
+do not reset it or create a new execution without fresh approval. Browser
+baseline, FoldKit inspection, migration patches and untrusted-code isolation
+remain outside this runtime-only evidence.

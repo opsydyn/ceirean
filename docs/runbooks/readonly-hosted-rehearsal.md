@@ -1,13 +1,15 @@
 # First Read-Only Cloudflare Rehearsal
 
-Status: private Worker/DO deployment and immutable image preparation verified on
-29 October 2026. The first route window was closed without enabling GitHub
-delivery; signed job execution remains unproven. See the
+Status: signed GitHub delivery, durable alarm execution, terminal `Succeeded`
+(`v22.23.4`) and stopped-container readback verified on 29 October 2026. The
+public route is removed and admission expired. Final GitHub webhook-off
+verification awaits manual Mac unlock. Accepted-duplicate replay remains open.
+See the
 [hosted evidence](../evidence/readonly-hosted/rehearsal-20261029.md).
 This replaces the custom-observer programme as the next delivery checkpoint,
 not its stricter research acceptance criteria.
 
-## What This Proves
+## Target Contract
 
 One signed `/ceirean assess` comment from one configured numeric GitHub operator,
 on one configured issue in `opsydyn/fold-kit-experiments`, during a maximum
@@ -31,7 +33,7 @@ not used. No complete untrusted-code isolation claim follows from this smoke.
   no Queue is needed for this single-job checkpoint.
 - Native container: `ReadOnlyRuntime`, prebuilt immutable Node image from the
   existing reviewed recipe's source digest. It is copied at deployment, not built
-  from repository code. Actual Cloudflare image preparation is still unverified.
+  from repository code. Cloudflare image preparation was verified on 29 October.
 - `enableInternet: false`, no sandbox credentials, no SSH, `lite` instance,
   60-second execution budget and 15-second cooperative cleanup observation budget.
 - A queued job that misses its admission window expires without allocation.
@@ -78,12 +80,14 @@ Before the next external operation, agree one combined deployment/rehearsal scop
    `ceirean-hooks.opsydyn.xyz/webhook` Worker route. The stack remains private by
    default; the owner approved the bounded rehearsal on 2026-10-28. That approval
    does not broaden credential permissions or begin the five-minute window.
-3. Deploy, verify the private resource/image bindings, then activate that route
+3. Deploy, verify the private resource/image bindings and current DO policy/version,
+   then activate that route
    and the App webhook for the bounded window. Send one allowed comment and
    redeliver that delivery once. Check the private `status` RPC or structured
    Worker result log: the same job must be returned and the runtime must stop.
 4. Disable webhook delivery/remove the public route, confirm the job terminal
-   state and container absence, and retain the sanitized result. If cleanup is
+   state and no running container (a stopped history record may remain), and
+   retain the sanitized result. If cleanup is
    unknown, stop, manually reconcile the one named runtime, and do not run again.
 
 This document authorizes none of these external operations. Once that combined
@@ -93,9 +97,11 @@ not a new generic qualification framework.
 
 The [28 October preflight](../evidence/readonly-hosted/preflight-20261028.md)
 records the historical credential blocker. A replacement credential cleared it
-on 29 October; the first bounded window ended without GitHub delivery. A fresh
-window requires action-time webhook confirmation, not another infrastructure
-qualification programme.
+on 29 October. A fresh confirmed window subsequently produced the terminal smoke
+result. The first request reached an older DO version and was refused, so a
+private readiness check for the current DO policy/version is the next focused
+fix. CLI apply completion alone is not readiness; do not replace this check
+with a fixed sleep or another infrastructure qualification programme.
 
 ## Current Evidence And Limits
 
@@ -104,17 +110,18 @@ encoding, restart policy, fixed native argv/start settings, capped output and
 cleanup on failure/timeout. Transactional storage fakes exercise the real Alchemy
 storage wrapper for duplicate admission, rollback, reconstructed-store recovery,
 bounded watchdogs and compare-and-set protection against late writes. These are
-not actual workerd SQLite or hosted alarm results. Alchemy's own Worker bundler compiles the entrypoint
+not by themselves actual workerd SQLite or hosted alarm results. Alchemy's own Worker bundler compiles the entrypoint
 and representative DO export metadata without provisioning. That test does not
 execute the Worker or discover the actual deployment plan.
 
-Cloudflare image preparation and private Worker/container-application deployment
-have now been verified. Real DO storage/alarm execution, live signed delivery,
-platform isolation and post-execution cleanup have not been demonstrated for
-this composition. A successful HTTP response or local test does not prove the
-hosted milestone. Deployment uses the protected operational state, an explicit
-profile/stage and an explicit Colima `DOCKER_HOST` for the pinned image copy;
-no custom image build is needed.
+Cloudflare image preparation, private provisioning, real signed delivery,
+durable alarm execution and a persisted terminal success log have now been
+verified. Independent native-instance readback confirmed stopped state and exit
+code 0. The first delivery was refused, so accepted-duplicate/no-reexecution
+proof remains open. This trusted smoke does not prove untrusted-code isolation.
+Deployment uses the protected operational state, an explicit profile/stage and
+an explicit Colima `DOCKER_HOST` for the pinned image copy; no custom image build
+is needed.
 
 Next product increment after this smoke: inspect a pinned FoldKit manifest using
 trusted code and export its dependency report. Then add fixed baseline commands
