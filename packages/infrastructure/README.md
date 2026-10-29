@@ -367,3 +367,12 @@ Next is the separately approved bounded rehearsal, with an explicit issue,
 session timebox/operator and activation/teardown checklist. Fallow remains queued
 until rehearsal teardown. Do not start cloudflared or enable webhook delivery
 merely because these disconnected resources now exist.
+
+## Private Operator Probe
+
+The [operator runbook](../../docs/runbooks/private-operator-probe.md) records the
+qualified readiness/status contract and local native service-binding path.
+Hosted transport remains unqualified because the pinned runtime detaches preview
+acquisition and uploads an auxiliary executable bridge. No remote entrypoint is
+retained. The contract/local adapter cannot enable public routes or webhooks,
+and do not enqueue or execute a job. See the runbook for the bounded next fix.

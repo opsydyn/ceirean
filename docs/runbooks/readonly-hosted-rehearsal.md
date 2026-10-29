@@ -102,11 +102,15 @@ the unguarded method is no longer exported. `status()` remains compatible.
 
 Future operational order is **private preparation with the desired policy →
 private readiness check against that policy → bounded route/webhook activation**.
-Do not change the policy while opening the route. The repository has not yet
-qualified a hosted operator transport to invoke this private RPC from the local
-CLI. Do not substitute a public endpoint, assume CLI apply proves readiness, or
-claim a live preactivation check from the synthetic tests. Qualifying that small
-private transport and approving a new hosted window remain separate gates.
+Do not change the policy while opening the route. The
+[private operator probe](private-operator-probe.md) now has local native
+service-binding and fail-closed contract tests. Its proposed hosted transport
+failed qualification: the pinned runtime detaches preview acquisition and
+uploads an executable bridge. No remote operator entrypoint is retained.
+Supervised acquisition, explicit preview-capability scope and a private update
+of the old deployed Worker remain prerequisites.
+Do not substitute a public endpoint, assume CLI apply proves readiness, or claim
+a live preactivation check from local tests. A new hosted window is still separate.
 
 The local signed-bridge regression uses the real Alchemy storage wrapper over
 the transactional native-storage fake: stale policy and probe/enqueue skew write
