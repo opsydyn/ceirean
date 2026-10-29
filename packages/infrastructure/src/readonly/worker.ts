@@ -6,9 +6,39 @@ import { fromWeb, text } from 'effect/http/HttpServerResponse';
 import { handleReadOnlyRequest } from './ingress.ts';
 import type { Candidate, Policy } from './job.ts';
 import { ReadOnlyJob, policyConfiguration } from './object.ts';
+import { ReadOnlyNotReady, inspectReadiness } from './readiness.ts';
 import { ingressConfiguration, readOnlyRoutes } from './routing.ts';
 
 type Namespace = Effect.Success<typeof ReadOnlyJob>;
+type JobClient = Pick<ReturnType<Namespace['getByName']>, 'readiness' | 'enqueueReadyV1'>;
+type JobNamespace = { readonly getByName: (name: string) => JobClient };
+
+export function makeReadOnlyAdmission(objects: JobNamespace, policy: Policy) {
+  function readiness() {
+    function* probe() {
+      const observed = yield* objects
+        .getByName(policy.sessionId)
+        .readiness()
+        .pipe(
+          Effect.timeout('5 seconds'),
+          Effect.mapError(() => new ReadOnlyNotReady({ code: 'Unavailable' })),
+        );
+      yield* Effect.fromResult(inspectReadiness(policy, observed));
+      return observed;
+    }
+    const probing = Effect.gen(probe);
+    return probing;
+  }
+  function enqueue(candidate: Candidate) {
+    function* admit() {
+      const observed = yield* readiness();
+      return yield* objects.getByName(policy.sessionId).enqueueReadyV1(candidate, observed);
+    }
+    const admitting = Effect.gen(admit);
+    return admitting;
+  }
+  return { readiness, enqueue };
+}
 function validateSigningSecret(secret: Redacted.Redacted<string>) {
   const valid = Redacted.value(secret).length >= 32;
   return Match.value(valid).pipe(
@@ -30,12 +60,11 @@ export function makeReadOnlyHandlers(
   policy: Policy,
   secret: Redacted.Redacted<string>,
 ) {
+  const admission = makeReadOnlyAdmission(objects, policy);
   function* request() {
     const incoming = yield* HttpServerRequest;
     const web = yield* toWeb(incoming);
-    const enqueue = (candidate: Candidate) =>
-      objects.getByName(policy.sessionId).enqueue(candidate);
-    const response = yield* handleReadOnlyRequest(web, policy, secret, enqueue);
+    const response = yield* handleReadOnlyRequest(web, policy, secret, admission.enqueue);
     return fromWeb(response);
   }
   function* conversionFailure() {
@@ -45,6 +74,7 @@ export function makeReadOnlyHandlers(
   const handling = Effect.gen(request);
   return {
     fetch: handling.pipe(Effect.catch(() => Effect.gen(conversionFailure))),
+    readiness: admission.readiness,
     status: () => objects.getByName(policy.sessionId).status(),
   };
 }

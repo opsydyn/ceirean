@@ -4,6 +4,8 @@ Status: signed GitHub delivery, durable alarm execution, terminal `Succeeded`
 (`v22.23.4`) and stopped-container readback verified on 29 October 2026. The
 public route is removed and admission expired. GitHub webhook delivery is disabled
 and verified after reload; teardown is complete. Accepted-duplicate replay remains open.
+The follow-up readiness guard and accepted-replay regression are implemented
+locally, not deployed. They do not extend the hosted evidence.
 See the
 [hosted evidence](../evidence/readonly-hosted/rehearsal-20261029.md).
 This replaces the custom-observer programme as the next delivery checkpoint,
@@ -68,6 +70,50 @@ Do not copy `.env`, PEMs or Alchemy state into a worktree or image. Keep deploym
 state in the existing protected operational directory, not this temporary checkout.
 Do not invoke the tunnel stack to deploy this Worker.
 
+## Private Readiness Contract
+
+The Worker and DO now expose a service-binding-only `readiness()` RPC. There is
+no HTTP status route, diagnostic URL, public listener or new cloud resource.
+The JSON descriptor contains `protocol: "readonly-policy-v1"` and the full
+validated admission policy, never the signing secret or deployment credentials.
+`status()` retains its existing job-only response.
+
+The Worker's readiness method checks its DO's descriptor against its own policy.
+An operator must additionally compare the returned descriptor to the **desired
+local policy**, using `inspectReadiness(desiredPolicy, reply)`: an old Worker
+and old DO agreeing with each other is not proof of the desired configuration.
+This attests application protocol compatibility and exact policy, not equality
+of Cloudflare deployment IDs or arbitrary code identity. Bump the protocol when
+the readiness/admission wire contract becomes incompatible.
+
+The signed ingress probes lazily before enqueue. Stale policy, malformed replies,
+missing legacy capability and a probe exceeding its five-second cooperative
+budget produce 503 without attempting admission. The DO also compares the
+caller descriptor in the enqueue invocation, before any store access: a policy
+change between probe and enqueue must not create a job or alarm. Numeric actor
+checks and both existing time-window checks remain mandatory. No enqueue retry,
+fixed rollout delay or weakening of an authorization rule was added.
+
+Guarded admission uses the new `enqueueReadyV1(candidate, descriptor)` RPC only.
+There is no fallback to legacy `enqueue(candidate)`: a rollback after a successful
+probe must fail unavailable, not reach an old implementation that silently ignores
+the guard argument. An older Worker calling a newer DO also fails closed because
+the unguarded method is no longer exported. `status()` remains compatible.
+
+Future operational order is **private preparation with the desired policy →
+private readiness check against that policy → bounded route/webhook activation**.
+Do not change the policy while opening the route. The repository has not yet
+qualified a hosted operator transport to invoke this private RPC from the local
+CLI. Do not substitute a public endpoint, assume CLI apply proves readiness, or
+claim a live preactivation check from the synthetic tests. Qualifying that small
+private transport and approving a new hosted window remain separate gates.
+
+The local signed-bridge regression uses the real Alchemy storage wrapper over
+the transactional native-storage fake: stale policy and probe/enqueue skew write
+nothing; one accepted job executes and cleans up once; a second accepted signed
+delivery after success returns the identical terminal job without changing its
+ledger or alarm history. This is local evidence, not the missing hosted replay.
+
 ## One Bounded Activation Decision
 
 Before the next external operation, agree one combined deployment/rehearsal scope:
@@ -100,8 +146,9 @@ records the historical credential blocker. A replacement credential cleared it
 on 29 October. A fresh confirmed window subsequently produced the terminal smoke
 result. The first request reached an older DO version and was refused, so a
 private readiness check for the current DO policy/version is the next focused
-fix. CLI apply completion alone is not readiness; do not replace this check
-with a fixed sleep or another infrastructure qualification programme.
+fix, now implemented locally as the contract above. CLI apply completion alone
+is not readiness; do not replace this check with a fixed sleep or another
+infrastructure qualification programme.
 
 ## Current Evidence And Limits
 

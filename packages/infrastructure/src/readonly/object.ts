@@ -2,7 +2,8 @@ import * as Cloudflare from 'alchemy/Cloudflare';
 import { Clock, Config, Effect, Match, Schema } from 'effect';
 
 import { makeSmokeContainer } from './container.ts';
-import { Candidate, Policy, finishJob, recoverJob } from './job.ts';
+import { Policy, finishJob, recoverJob } from './job.ts';
+import { makeReadOnlyJobAdmission } from './readiness.ts';
 import { cleanupSmoke, runSmoke } from './runner.ts';
 import { makeJobStore, type Dispatch } from './store.ts';
 
@@ -32,14 +33,7 @@ function* construct() {
     const state = yield* Cloudflare.DurableObjectState;
     const store = makeJobStore(state.storage);
     const smoke = makeSmokeContainer(container);
-    function enqueue(candidate: Candidate) {
-      function* admit() {
-        const now = yield* Clock.currentTimeMillis;
-        return encode(yield* store.admit(policy, candidate, now));
-      }
-      const admitting = Effect.gen(admit);
-      return admitting;
-    }
+    const admission = makeReadOnlyJobAdmission(policy, store);
     function alarm() {
       function process(dispatch: Dispatch) {
         function* execute(value: Extract<Dispatch, { readonly _tag: 'Run' }>) {
@@ -74,7 +68,7 @@ function* construct() {
       return dispatching.pipe(Effect.catch((error) => Effect.die(error)));
     }
     const status = () => store.read().pipe(Effect.map(encode));
-    return { enqueue, status, alarm };
+    return { ...admission, status, alarm };
   }
   const initializing = Effect.gen(initialize);
   return initializing;

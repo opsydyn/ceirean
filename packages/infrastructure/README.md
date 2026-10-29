@@ -6,6 +6,9 @@ success and stopped-container readback were verified on 29 October. The route is
 removed, GitHub webhook delivery is disabled and teardown is verified.
 Policy/version readiness and accepted-duplicate replay remain open. See the
 [hosted rehearsal runbook](../../docs/runbooks/readonly-hosted-rehearsal.md).
+The local follow-up adds private protocol/policy readiness, fail-closed ingress
+guards and a signed-bridge accepted-replay regression. This code has not been
+deployed; a hosted operator transport and live replay still need qualification.
 It reuses signed ingress and runs one fixed runtime smoke command; it does not
 activate the tunnel, webhooks, migration executor or any research probe.
 

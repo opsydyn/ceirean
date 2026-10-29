@@ -1,11 +1,16 @@
 import { expect, test } from 'bun:test';
 
 import { fromDurableObjectStorage } from 'alchemy/Cloudflare/Workers/DurableObjectStorage';
+import { makeRpcStub } from 'alchemy/Cloudflare/Workers/Rpc';
 import { RuntimeContext } from 'alchemy/RuntimeContext';
-import { Context, Data, Effect, Exit, Match, Option, Schema } from 'effect';
+import { Context, Data, Effect, Exit, Match, Option, Redacted, Result, Schema } from 'effect';
 
-import type { Job } from '../src/readonly/job.ts';
+import { handleReadOnlyRequest } from '../src/readonly/ingress.ts';
+import { Job, claimJob, finishJob } from '../src/readonly/job.ts';
+import { describeReadiness, makeReadOnlyJobAdmission } from '../src/readonly/readiness.ts';
+import { runSmoke } from '../src/readonly/runner.ts';
 import { makeJobStore } from '../src/readonly/store.ts';
+import { makeReadOnlyAdmission } from '../src/readonly/worker.ts';
 
 type NativeStorage = Parameters<typeof fromDurableObjectStorage>[0];
 type NativeTransaction = Parameters<Parameters<NativeStorage['transaction']>[0]>[0];
@@ -401,4 +406,162 @@ async function finishWithoutJob() {
 test(
   'finish returns null and allocates nothing when the expected prior job is absent',
   finishWithoutJob,
+);
+
+const replayFixture = { secret: 'synthetic-readonly-replay-signing-secret', runtime: 'v22.23.4' };
+const encodePayload = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
+const decodeJob = Schema.decodeUnknownSync(Job);
+async function signedReplayRequest() {
+  const payload = {
+    action: 'created',
+    installation: { id: candidate.installationId },
+    repository: {
+      id: candidate.repositoryId,
+      name: 'fold-kit-experiments',
+      owner: { id: candidate.ownerId, login: 'opsydyn' },
+    },
+    issue: { id: 400, number: candidate.issueNumber },
+    comment: { id: 55, body: '/ceirean assess', user: { id: candidate.operatorId, type: 'User' } },
+    sender: { id: candidate.operatorId, type: 'User' },
+  };
+  const bytes = new TextEncoder().encode(encodePayload(payload));
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(replayFixture.secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, bytes));
+  const hex = Array.from(signature, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return new Request('https://ceirean.invalid/webhook', {
+    method: 'POST',
+    body: bytes,
+    headers: {
+      'content-type': 'application/json',
+      'x-github-event': 'issue_comment',
+      'x-github-delivery': 'accepted-replay-1',
+      'x-hub-signature-256': `sha256=${hex}`,
+    },
+  });
+}
+
+async function acceptedReplayThroughBridge() {
+  const now = Date.now();
+  const live = { ...policy, opensAtMs: now - 1000, closesAtMs: now + 60000 };
+  const stale = { ...live, closesAtMs: live.closesAtMs - 1 };
+  const fixture = transactionalStorage();
+  const staleClient = makeReadOnlyJobAdmission(stale, fixture.store);
+  let current = staleClient;
+  const admission = makeReadOnlyAdmission({ getByName: () => current }, live);
+  const secret = Redacted.make(replayFixture.secret);
+  const request = await signedReplayRequest();
+  const staleRequest = request.clone();
+  const refusing = handleReadOnlyRequest(staleRequest, live, secret, admission.enqueue);
+  const firstRefusal = await run(refusing);
+  expect(firstRefusal.status).toBe(503);
+  expect(fixture.snapshot()).toEqual({ values: new Map(), alarm: null, alarmWrites: [] });
+
+  // A successful probe cannot authorize a different policy at enqueue time.
+  current = {
+    readiness: () => Effect.succeed(describeReadiness(live)),
+    enqueueReadyV1: staleClient.enqueueReadyV1,
+  };
+  const raceRequest = request.clone();
+  const racing = handleReadOnlyRequest(raceRequest, live, secret, admission.enqueue);
+  const raced = await run(racing);
+  expect(raced.status).toBe(503);
+  expect(fixture.snapshot()).toEqual({ values: new Map(), alarm: null, alarmWrites: [] });
+
+  current = makeReadOnlyJobAdmission(live, fixture.store);
+  const acceptedRequest = request.clone();
+  const admitting = handleReadOnlyRequest(acceptedRequest, live, secret, admission.enqueue);
+  const accepted = await run(admitting);
+  expect(accepted.status).toBe(202);
+  const job = decodeJob(await accepted.json());
+  expect(job._tag).toBe('Queued');
+  const claimingAt = job.queuedAtMs + 1;
+  const claimed = Result.getOrThrow(claimJob(job, claimingAt));
+  expect(await run(fixture.store.take(claimingAt))).toEqual({ _tag: 'Run', job: claimed });
+
+  const calls = { starts: 0, executions: 0, destroys: 0 };
+  function start() {
+    calls.starts += 1;
+  }
+  function execute() {
+    calls.executions += 1;
+    return replayFixture.runtime;
+  }
+  function destroy() {
+    calls.destroys += 1;
+  }
+  const outcome = await run(
+    runSmoke({
+      start: () => Effect.sync(start),
+      execute: () => Effect.sync(execute),
+      destroy: () => Effect.sync(destroy),
+      stopped: Effect.succeed(true),
+    }),
+  );
+  const terminal = finishJob(claimed, outcome.outcome, outcome.cleaned);
+  expect(await run(fixture.store.finish(terminal, claimed, claimingAt + 1))).toEqual(terminal);
+  expect(terminal._tag).toBe('Succeeded');
+  const beforeReplay = fixture.snapshot();
+
+  current = makeReadOnlyJobAdmission(live, fixture.restart());
+  const replay = await run(handleReadOnlyRequest(request, live, secret, admission.enqueue));
+  expect(replay.status).toBe(202);
+  expect(decodeJob(await replay.json())).toEqual(terminal);
+  expect(fixture.snapshot()).toEqual(beforeReplay);
+  expect(await run(fixture.restart().take(claimingAt + 2))).toEqual({ _tag: 'None' });
+  expect(calls).toEqual({ starts: 1, executions: 1, destroys: 1 });
+  expect(fixture.snapshot().alarm).toBeNull();
+  expect(fixture.snapshot().alarmWrites).toHaveLength(2);
+}
+test(
+  'signed bridge rejects rollout skew then accepted terminal replay preserves one execution and alarm history',
+  acceptedReplayThroughBridge,
+);
+
+async function rollbackAfterProbe() {
+  const now = Date.now();
+  const live = { ...policy, opensAtMs: now - 1000, closesAtMs: now + 60000 };
+  const oldPolicy = { ...live, closesAtMs: live.closesAtMs - 1 };
+  const fixture = transactionalStorage();
+  const ready = makeReadOnlyJobAdmission(live, fixture.store);
+  let legacyAdmissions = 0;
+  function legacyEnqueue(incoming: typeof candidate) {
+    legacyAdmissions += 1;
+    const admission = fixture.store
+      .admit(oldPolicy, incoming, Date.now())
+      .pipe(Effect.map(encodePayload));
+    return run(admission);
+  }
+  const legacy = makeRpcStub<ReturnType<Parameters<typeof makeReadOnlyAdmission>[0]['getByName']>>({
+    enqueue: legacyEnqueue,
+  });
+  let lookups = 0;
+  function getByName() {
+    lookups += 1;
+    return Match.value(lookups).pipe(
+      Match.when(1, () => ready),
+      Match.orElse(() => legacy),
+    );
+  }
+  const guarded = makeReadOnlyAdmission({ getByName }, live);
+  const request = await signedReplayRequest();
+  const receiving = handleReadOnlyRequest(
+    request,
+    live,
+    Redacted.make(replayFixture.secret),
+    guarded.enqueue,
+  );
+  const response = await run(receiving);
+  expect(response.status).toBe(503);
+  expect(legacyAdmissions).toBe(0);
+  expect(fixture.snapshot()).toEqual({ values: new Map(), alarm: null, alarmWrites: [] });
+}
+test(
+  'rollback after a matching probe cannot invoke baseline unguarded admission',
+  rollbackAfterProbe,
 );

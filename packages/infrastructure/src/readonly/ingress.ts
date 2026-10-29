@@ -7,11 +7,13 @@ import {
 } from '@ceirean/github-adapter/protocol';
 import { Clock, Effect, Match, Option, Redacted } from 'effect';
 
-import { admitJob, type Policy } from './job.ts';
+import { admitJob, type Candidate, type Policy } from './job.ts';
 import type { ReadOnlyJob } from './object.ts';
 
 type Namespace = Effect.Success<typeof ReadOnlyJob>;
-type Enqueue = ReturnType<Namespace['getByName']>['enqueue'];
+type Enqueue = (
+  candidate: Candidate,
+) => ReturnType<ReturnType<Namespace['getByName']>['enqueueReadyV1']>;
 
 function inspectWebhook(
   request: Request,
@@ -68,6 +70,9 @@ export function handleReadOnlyRequest(
     yield* Effect.logInfo('Ceirean read-only command outside rehearsal policy');
     return Response.json({ _tag: 'NotAllowed' }, { status: 403 });
   }
+  function notReady() {
+    return Response.json({ _tag: 'NotReady' }, { status: 503 });
+  }
   function bodyFailure(error: RequestBodyError) {
     function* rejectedBody() {
       yield* Effect.logInfo('Ceirean read-only request body refused', { code: error.code });
@@ -88,6 +93,7 @@ export function handleReadOnlyRequest(
   return receiving.pipe(
     Effect.catchTag('RequestBodyError', bodyFailure),
     Effect.catchTag('JobRefusal', () => Effect.gen(forbidden)),
+    Effect.catchTag('ReadOnlyNotReady', () => Effect.sync(notReady)),
     Effect.catch(refusal),
   );
 }

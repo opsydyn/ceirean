@@ -4,7 +4,12 @@ import { RuntimeContext } from 'alchemy/RuntimeContext';
 import { ConfigProvider, Context, Data, Effect, Exit, Redacted, Result, Schema } from 'effect';
 
 import { handleReadOnlyRequest } from '../src/readonly/ingress.ts';
-import { makeReadOnlyHandlers, webhookSecretConfiguration } from '../src/readonly/worker.ts';
+import { describeReadiness } from '../src/readonly/readiness.ts';
+import {
+  makeReadOnlyAdmission,
+  makeReadOnlyHandlers,
+  webhookSecretConfiguration,
+} from '../src/readonly/worker.ts';
 
 const fixture = { secret: 'synthetic-readonly-signing-secret' };
 const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
@@ -110,6 +115,31 @@ async function rejected() {
 }
 test('wrong operator or invalid signature never reaches durable admission', rejected);
 
+async function staleReadinessResponse() {
+  let admissions = 0;
+  const config = policy();
+  const stale = { ...config, closesAtMs: config.closesAtMs - 1 };
+  function recordUnexpectedAdmission() {
+    admissions += 1;
+    return encode({ _tag: 'Unexpected' });
+  }
+  const client = {
+    readiness: () => Effect.succeed(describeReadiness(stale)),
+    enqueueReadyV1: () => Effect.sync(recordUnexpectedAdmission),
+  };
+  const admission = makeReadOnlyAdmission({ getByName: () => client }, config);
+  const response = await run(
+    handleReadOnlyRequest(await signed(), config, Redacted.make(fixture.secret), admission.enqueue),
+  );
+  expect(response.status).toBe(503);
+  expect(await response.json()).toEqual({ _tag: 'NotReady' });
+  expect(admissions).toBe(0);
+}
+test(
+  'valid signed delivery during DO rollout skew returns 503 without admission or policy disclosure',
+  staleReadinessResponse,
+);
+
 async function persistenceFailure() {
   const request = await signed();
   const store = { enqueue: () => Effect.die({ _tag: 'SyntheticStorageFault' }) };
@@ -134,6 +164,7 @@ function lazyNamespace() {
   const handlers = makeReadOnlyHandlers(namespace, policy(), Redacted.make(fixture.secret));
   expect(lookups).toBe(0);
   expect(Effect.isEffect(handlers.fetch)).toBe(true);
+  expect(typeof handlers.readiness).toBe('function');
 }
 test('preparing handlers never dereferences a runtime-only DO namespace', lazyNamespace);
 

@@ -155,3 +155,24 @@ The `readonly-20261029` session has consumed its one job. Preserve its ledger;
 do not reset it or create a new execution without fresh approval. Browser
 baseline, FoldKit inspection, migration patches and untrusted-code isolation
 remain outside this runtime-only evidence.
+
+## Local Follow-Up, Not Additional Hosted Evidence
+
+The subsequent source change adds a private `readonly-policy-v1` descriptor and
+full-policy comparison before admission, with a second comparison at the DO's
+enqueue boundary. Stale/missing capability is a transient 503 instead of an
+authorization 403. Status, authorization, execution and cleanup rules are
+unchanged. The regression was observed failing (202 instead of 503 when the DO
+guard was temporarily removed) and passing after restoration.
+Independent review also identified rollback to the original unguarded enqueue
+method. The correction uses `enqueueReadyV1` without a legacy fallback; a second
+RED-to-GREEN regression verifies that a rollback after probing cannot call the
+old method or mutate its job/alarm state.
+
+A local signed HTTP bridge test composes those guards with the real Alchemy
+storage adapter over transactional native-storage fakes. It verifies two accepted
+deliveries around one successful execution, preserving the terminal job and
+alarm history after reconstruction. A 1,000-case property checks policy identity,
+session and window mutations. These tests do not change the hosted result above:
+the new code is not deployed and a hosted private operator transport is not yet
+qualified. No new route, webhook, comment, redelivery or runtime was activated.
