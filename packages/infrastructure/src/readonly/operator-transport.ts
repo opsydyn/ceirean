@@ -5,7 +5,7 @@ import { Effect } from 'effect';
 import type { Policy } from './job.ts';
 import { qualifyReadOnlyOperator } from './operator.ts';
 
-type NativeReads = {
+export type NativeReads = {
   readonly TARGET: {
     readonly readiness: () => PromiseLike<unknown>;
     readonly status: () => PromiseLike<unknown>;

@@ -107,9 +107,10 @@ Do not change the policy while opening the route. The
 service-binding and fail-closed contract tests. Its proposed hosted transport
 failed qualification initially: the pinned runtime detached preview acquisition
 and uploads an executable bridge. Acquisition ownership is now patched and
-cancellation-tested locally; a single-use remote operator boundary is not yet
-retained. Explicit preview-capability scope, sanitized boundary tests and a
-private update of the old deployed Worker remain prerequisites.
+cancellation-tested locally. The single-use operator command is prepared with
+sanitized output tests and an overall runtime deadline, but disabled by default.
+Explicit preview-capability scope and a private update of the old deployed
+Worker remain prerequisites; no enabled operator invocation has been performed.
 Do not substitute a public endpoint, assume CLI apply proves readiness, or claim
 a live preactivation check from local tests. A new hosted window is still separate.
 

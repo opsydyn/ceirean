@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "operator:probe": "bun --no-env-file --no-install src/readonly/operator/main.ts probe",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

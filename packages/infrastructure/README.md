@@ -374,7 +374,9 @@ The [operator runbook](../../docs/runbooks/private-operator-probe.md) records th
 qualified readiness/status contract and local native service-binding path.
 The pinned runtime's acquisition ownership is now patched and cancellation-
 tested through Bun source and Node compiled exports. Hosted transport remains
-unqualified: it uploads an auxiliary executable bridge and still needs an
-approved, sanitized single-use boundary. No remote entrypoint is retained. The
-contract/local adapter cannot enable public routes or webhooks, and do not
-enqueue or execute a job. See the runbook for the bounded next step.
+unqualified: it uploads an auxiliary executable bridge and still needs explicit
+private-operation approval. The `operator:probe` command is prepared but defaults
+to a fixed disabled refusal before policy, credentials or runtime setup. It has
+sanitized output and a deadline enclosing the whole runtime lifetime. It cannot
+enable public routes/webhooks or enqueue/execute a job. See the runbook for its
+explicit disabled check, guard semantics, local evidence and remaining gates.

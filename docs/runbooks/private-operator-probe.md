@@ -1,7 +1,8 @@
 # Private Operator Probe Qualification
 
 **Result:** the application contract, local native RPC path and patched acquisition
-ownership pass local qualification. The complete hosted transport is still
+ownership pass local qualification. A disabled-by-default single-use command is
+now prepared and locally tested. The complete hosted transport is still
 **not qualified**. No remote session, deployment, route, webhook action,
 admission or container execution occurred during these qualification slices.
 
@@ -71,6 +72,77 @@ suite and its Node acquisition-test prerequisite. The same nine tests execute
 through Bun source and Node compiled exports, under the existing pinned runtimes.
 All provider calls are fake; no Cloudflare token is supplied to this harness.
 
+## Prepared Command, Disabled By Default
+
+From the Ceirean checkout, this explicit disabled check performs no hosted work:
+
+```sh
+CEIREAN_OPERATOR_PREVIEW=disabled bun --no-env-file --no-install \
+  packages/infrastructure/src/readonly/operator/main.ts probe
+```
+
+It exits 2, leaves stdout empty and emits exactly one JSON refusal on stderr:
+
+```json
+{ "_tag": "OperatorRefused", "code": "Disabled" }
+```
+
+The workspace also has an `operator:probe` script. Disable implicit dotenv
+loading on the parent Bun invocation too; do not rely only on a child command's
+`--no-env-file`. The command accepts only the single argument `probe`; there is
+no target, arbitrary method, HTTP, retry, watch, deployment or ingress selector.
+Unknown arguments exit 64 before evaluating the preview guard.
+An enabled invocation also refuses any configured `WORKERD_DUMP_CONFIG` through
+Effect Config before policy, credentials or runtime construction: the pinned SDK
+otherwise writes full native configuration, including a local bearer token,
+outside the output sink and potentially outside the temporary state root.
+
+The only recognized opt-in value is `CEIREAN_OPERATOR_PREVIEW=approved`.
+It is an accidental-invocation guard, **not human authorization**. It has not
+been set for a real operation, written to `.env`, or enabled in any deployed
+configuration. Do not opt in until the next private-operation scope is approved.
+Synthetic tests may use it only with injected fake operations; subprocess tests
+remain disabled or refuse invalid arguments before the live operation.
+
+After a future approved opt-in, `CEIREAN_OPERATOR_POLICY_FILE` identifies the
+desired policy JSON file. The file is read locally, then rejected if its text
+exceeds 16,384 UTF-16 code units or fails the strict real `Policy` schema. This
+is a validation bound after reading, not a streaming filesystem allocation
+limit. Policy validation precedes runtime construction and token resolution.
+The existing Effect Config `CF_TOKEN` validator supplies redacted API-token
+credentials; no OAuth/profile fallback, webhook secret, App key or Alchemy
+deployment state is used. Account and target Worker are pinned in source.
+
+One invocation owns one runtime. Its XDG cache/config/data/state roots are a
+fresh temporary directory, explicitly 0700, removed on scoped disposal. No
+shared developer registry/cache is used. Abrupt process termination is not proof
+of temporary-file cleanup or remote-token revocation. Only readiness/status
+RPCs are issued, with the existing desired-policy checks and application budget.
+
+A single **45-second cooperative deadline** wraps argument/guard handling,
+policy loading, runtime-layer construction, RPC work, output validation and
+runtime disposal. Delayed uninterruptible finalizers are joined before returning,
+so cleanup can exceed that deadline; this is not a hard wall-clock process kill.
+Tests cover expiry during layer construction, probe work and disposal, failed
+probe disposal and fresh ownership on successive synthetic invocations.
+
+Successful output is one strict `OperatorObservation` JSON line with only the
+protocol, validated desired policy and retained job/null. It is an observation,
+not an activation or readiness authorization. Extra fields and encoded output
+over 16,384 bytes are refused; nothing is partially written. Failure stdout is
+always empty. Stderr contains only `OperatorRefused` and a finite code: `Usage`,
+`Disabled`, `InvalidConfiguration`, `TimedOut`, `Mismatch`, `InvalidStatus`,
+`Unavailable` or `InvalidReport`. Success exits 0; operational refusals exit 1.
+
+The boundary disables upstream Effect logs and intercepts native workerd
+stdout/stderr before SDK forwarding. The main entrypoint disables automatic
+error reporting and writes only the prepared result. Tests check raw defects,
+typed errors, output-field leakage, configuration-dump refusal before operation,
+a 100-case non-approved-guard property and
+real disabled CLI subprocess output. A local workerd subprocess emits stdout
+and stderr canaries; the silent runtime is verified to discard both. None of
+these tests creates a remote preview or contacts Cloudflare.
+
 ## Concrete Hosted Blockers
 
 Source inspection and independent review of the pinned runtime found:
@@ -95,16 +167,15 @@ Cloudflare's [service-binding RPC](https://developers.cloudflare.com/workers/run
 does not require a public HTTP endpoint. That does not make a newly created
 preview bridge a read-only management operation.
 
-The unqualified remote entrypoint was removed before commit. There is no hosted
-operator command to accidentally invoke. Existing `CF_TOKEN`, webhook secret,
-App key, protected deployment state and cloud resources were not read or changed
-for this qualification.
+The earlier unqualified entrypoint was removed; its replacement is the guarded,
+disabled-by-default command above. Existing credential files, protected
+deployment state and cloud resources were not read or changed for this
+qualification. No real enabled operator invocation was performed.
 
 ## Next Bounded Decision
 
-Prepare the fixed-target, single-use remote operator boundary with sanitized
-CLI-output tests and its runtime layer inside the overall deadline. Keep it
-disabled by default. Then explicitly approve the authenticated preview
+The single-use operator boundary is prepared and must remain disabled.
+Next, explicitly approve the authenticated preview
 capability/upload and private target update together; verify desired-policy
 readiness and retained status while target routes, workers.dev, previews and
 GitHub webhooks stay disabled. The preview token's lifetime/revocation limitation

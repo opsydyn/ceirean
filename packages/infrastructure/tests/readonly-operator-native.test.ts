@@ -8,6 +8,7 @@ import { ConfigProvider, Effect, FileSystem, Layer, Result, Schema } from 'effec
 import { layer as httpClient } from 'effect/http/FetchHttpClient';
 
 import { probeLocalReadOnlyOperator } from '../src/readonly/operator-transport.ts';
+import { silentOperatorRuntime } from '../src/readonly/operator/runtime.ts';
 import { describeReadiness } from '../src/readonly/readiness.ts';
 
 const policy = {
@@ -25,7 +26,11 @@ const encodeString = Schema.encodeSync(Schema.fromJsonString(Schema.String));
 const source = `
 import { WorkerEntrypoint } from 'cloudflare:workers';
 export default class Fixture extends WorkerEntrypoint {
-  readiness() { return ${encodeString(describeReadiness(policy))}; }
+  readiness() {
+    console.log('operator-native-output-canary');
+    console.error('operator-native-output-canary');
+    return ${encodeString(describeReadiness(policy))};
+  }
   status() { return 'null'; }
   enqueueReadyV1() { throw new Error('Forbidden admission'); }
   fetch() { return new Response('Forbidden HTTP', { status: 500 }); }
@@ -48,11 +53,12 @@ const noCredentials = Layer.succeed(
   Credentials,
   Effect.die('Remote credentials forbidden in local tests'),
 );
-const nativeLayer = RuntimeServices.layerRuntime({ api: { accountId: 'unused-local-test' } }).pipe(
+const baseRuntime = RuntimeServices.layerRuntime({ api: { accountId: 'unused-local-test' } }).pipe(
   Layer.provide(noCredentials),
   Layer.provide(configLayer),
   Layer.provide(platformLayer),
 );
+const nativeLayer = silentOperatorRuntime.pipe(Layer.provideMerge(baseRuntime));
 const withNative = Effect.provide(nativeLayer);
 
 async function nativeRpc() {
