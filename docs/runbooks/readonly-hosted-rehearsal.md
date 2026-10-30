@@ -1,5 +1,14 @@
 # First Read-Only Cloudflare Rehearsal
 
+**Latest result:** the [30 October attempt](../evidence/readonly-hosted/accepted-replay-20261030-075551.md)
+stopped before route exposure after orchestration missed the activation cutoff.
+Cloudflare is private with expired admission and an empty fresh-session ledger;
+Active off was saved and verified after manual Mac unlock. Shutdown was late, so
+this was not a successfully bounded rehearsal. No comment, redelivery or execution
+occurred. Correct the preparation/clock sequence before a separately approved run.
+
+## Earlier Evidence
+
 Status: signed GitHub delivery, durable alarm execution, terminal `Succeeded`
 (`v22.23.4`) and stopped-container readback verified on 29 October 2026. The
 public route is removed and admission expired. GitHub webhook delivery is disabled

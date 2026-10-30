@@ -1,5 +1,12 @@
 # Ceirean Tunnel Preparation
 
+**Latest result:** the [30 October attempt](../../docs/evidence/readonly-hosted/accepted-replay-20261030-075551.md)
+ended private with expired admission and no new job. Webhook Active off was saved
+and verified after manual Mac unlock, but shutdown was late. Teardown is complete;
+the bounded rehearsal did not pass. No further activation without fresh approval.
+
+The following records earlier verified infrastructure and rehearsal work.
+
 The workspace also contains a separate, **privately deployed**, read-only Worker/DO
 composition. Signed GitHub delivery, durable alarm execution, terminal runtime
 success and stopped-container readback were verified on 29 October. The route is
