@@ -1,6 +1,6 @@
 # Pinned FoldKit Manifest Report
 
-Status: proposed; implementation awaits design approval.
+Status: approved by the owner; implementation has not started.
 
 ## Intent And Approach
 
