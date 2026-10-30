@@ -12,8 +12,8 @@ export function main(argv: ReadonlyArray<string>) {
   const program = runCli(argv);
   return program.pipe(Effect.map(emit));
 }
-const decodeExitCode = Schema.decodeUnknownResult(Schema.Literals([1, 2, 64]));
-const teardown: Runtime.Teardown = (exit, onExit) => {
+const decodeExitCode = Schema.decodeUnknownResult(Schema.Literals([0, 1, 2, 64]));
+export const replayTeardown: Runtime.Teardown = (exit, onExit) => {
   function completed(value: unknown) {
     const code = decodeExitCode(value).pipe(Result.getOrElse(() => 1));
     onExit(code);
@@ -23,7 +23,7 @@ const teardown: Runtime.Teardown = (exit, onExit) => {
 function launch() {
   const args = Bun.argv.slice(2);
   const program = main(args);
-  BunRuntime.runMain(program, { disableErrorReporting: true, teardown });
+  BunRuntime.runMain(program, { disableErrorReporting: true, teardown: replayTeardown });
 }
 const entrypoint = Match.value(import.meta.main).pipe(
   Match.when(true, launch),

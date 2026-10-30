@@ -56,9 +56,12 @@ Moon 2.5.4, TypeScript, oxlint and oxfmt. No new dependencies.
   using the real main/teardown pair and a fake pinned source.
 - `docs/runbooks/pinned-manifest-report.md` and
   `docs/evidence/manifest-report/baseline-1183e3c.md`: usage and local evidence;
-  `docs/evidence/manifest-report/baseline-1183e3c.json`: generated report artifact.
+  `docs/evidence/manifest-report/baseline-1183e3c.jsonl`: exact generated stdout;
+  JSON-lines extension prevents formatter changes to the hashed artifact.
 
 ## Task 1: Pure Dependency Declaration Report
+
+Completed: `575865b`; 232 domain tests, domain typecheck and root check passed.
 
 **Files:** create the two domain source files and two domain tests above; modify
 `packages/domain/src/index.ts` with explicit exports rather than a wildcard.
@@ -83,7 +86,7 @@ Moon 2.5.4, TypeScript, oxlint and oxfmt. No new dependencies.
 - Error codes: `InvalidSource`, `InvalidManifest`, `InvalidCatalog`,
   `MissingCatalog`. Schema-derived types and inferred Result channels only.
 
-- [ ] Write example tests for all four dependency sections, literals/ranges,
+- [x] Write example tests for all four dependency sections, literals/ranges,
       aliases, workspace declarations, default/named catalogs, and separate entries
       for the same dependency in multiple sections. Assert original declaration,
       catalog provenance and stable ordinal sorting by path, section, then name.
@@ -100,29 +103,31 @@ Moon 2.5.4, TypeScript, oxlint and oxfmt. No new dependencies.
   });
   ```
 
-- [ ] Add tests for malformed manifests/sections, non-string declarations,
+- [x] Add tests for malformed manifests/sections, non-string declarations,
       missing names, missing catalogs, malformed catalog shape, recursive catalog
       references, duplicate paths, invalid IDs and missing root. Assert finite codes.
       Accept unrelated ordinary package fields; never evaluate scripts or exports.
-- [ ] Add a regression with both unnamed and named `default` catalogs carrying
+- [x] Add a regression with both unnamed and named `default` catalogs carrying
       different versions; assert each reference resolves from its own map.
-- [ ] Add Effect Arbitrary laws using the existing `tests/properties.ts` runner:
+- [x] Add Effect Arbitrary laws using the existing `tests/properties.ts` runner:
       permutation of document/key order produces identical reports; adding unrelated
       fields preserves the dependency projection. A separate changed-byte fixture
       changes its supplied digest, so do not claim whole-report byte invariance.
-- [ ] Run `moon run domain:test --concurrency 1`; observe new assertions fail
+- [x] Run `moon run domain:test --concurrency 1`; observe new assertions fail
       because the implementation is absent, not because the runner is broken.
-- [ ] Implement schemas and `inspectManifestDocuments` with Schema/Result and
+- [x] Implement schemas and `inspectManifestDocuments` with Schema/Result and
       existing domain conventions. Strip unrelated package fields from the report;
       strictly validate the emitted report, not the whole npm manifest vocabulary.
       Missing dependency sections become empty collections. Reject unsupported
       catalog indirection; do not interpret semver or infer resolved installations.
       Sort engine keys too, and assert encoded JSON equality for the ordering law.
-- [ ] Run `moon run domain:test domain:typecheck --concurrency 1` and root
+- [x] Run `moon run domain:test domain:typecheck --concurrency 1` and root
       lint/format; require exit 0. Commit only Task 1 files as
       `feat: inspect pinned manifest dependency declarations`.
 
 ## Task 2: Bounded Local Git Source Adapter
+
+Completed: `3bae228`; 18 replay tests, replay typecheck and root check passed.
 
 **Files:** create `manifest-baseline.ts`, `manifest-git-source.ts` and
 `manifest-source.test.ts` in the paths above.
@@ -140,14 +145,14 @@ Moon 2.5.4, TypeScript, oxlint and oxfmt. No new dependencies.
   `MissingObject`, `InvalidTreeEntry`, `InvalidEncoding`, `SourceTooLarge`,
   `InvalidSource`. The Task 3 operation owns the overall timeout.
 
-- [ ] Write adapter tests with fake child-process services for exact argv and
+- [x] Write adapter tests with fake child-process services for exact argv and
       environment, missing commits/blobs, wrong tree paths/IDs, symlink/submodule
       modes, malformed UTF-8 and source limits at/over each threshold. Assert
       aggregate accounting uses bytes, not JavaScript string length.
-- [ ] Add cancellation and oversized stdout/stderr tests: finalizers complete,
+- [x] Add cancellation and oversized stdout/stderr tests: finalizers complete,
       no child remains owned after return, and native diagnostic sentinels never
       enter returned errors. Add controls proving the valid boundary size succeeds.
-- [ ] Add a temporary local Git-repository integration fixture. Commit regular
+- [x] Add a temporary local Git-repository integration fixture. Commit regular
       manifests, inspect that exact commit, then dirty/delete worktree manifests and
       move its branch; assert identical committed bytes/digests are still read.
       Test a replacement-object/config sentinel and a missing promised-object fake;
@@ -160,8 +165,8 @@ Moon 2.5.4, TypeScript, oxlint and oxfmt. No new dependencies.
   expect(after.commit).toBe(fixtureCommit);
   ```
 
-- [ ] Run `moon run replay:test --concurrency 1`; record the expected new failures.
-- [ ] Implement the reader with `effect/process` and bounded Stream collection,
+- [x] Run `moon run replay:test --concurrency 1`; record the expected new failures.
+- [x] Implement the reader with `effect/process` and bounded Stream collection,
       following `preparation-process.ts` as an idiom without importing probe code or
       creating a generic arbitrary-command runner. Use `/usr/bin/git`, `shell: false`,
       ignored stdin, cleared inherited environment, `PATH=/usr/bin:/bin`, C locale,
@@ -172,11 +177,11 @@ Moon 2.5.4, TypeScript, oxlint and oxfmt. No new dependencies.
       read that blob without filters/textconv. Bound metadata output too. SHA-1 of
       the Git blob header plus content must match the selected blob ID; SHA-256
       records raw content. Use Bun.CryptoHasher, as the existing replay reader does.
-- [ ] Keep all spawned handles scoped and stdout/stderr consumed concurrently;
+- [x] Keep all spawned handles scoped and stdout/stderr consumed concurrently;
       require successful exit and exact expected byte counts. Enforce read-time caps
       even after metadata checks. Convert fatal UTF-8/JSON failures into finite codes;
       do not leak root paths, stderr or raw exceptions. Provision no runtime here.
-- [ ] Run `moon run replay:test replay:typecheck --concurrency 1` and root
+- [x] Run `moon run replay:test replay:typecheck --concurrency 1` and root
       lint/format. Require exit 0; commit only Task 2 files as
       `feat: read bounded manifest evidence from pinned Git objects`.
 
@@ -204,7 +209,7 @@ design status. Do not modify package dependencies or hosted infrastructure.
 - Export the existing main teardown as internal `replayTeardown` for the static
   subprocess test harness, so that it exercises the same exit decoder as launch.
 
-- [ ] Write workflow tests for valid report, refusal propagation, invalid output,
+- [x] Write workflow tests for valid report, refusal propagation, invalid output,
       byte cap, sanitized defects and acquisition/work cancellation. Assert no
       partial stdout. Include malformed argv proving the adapter is never called.
 
@@ -218,20 +223,20 @@ design status. Do not modify package dependencies or hosted infrastructure.
   expect(successProcess.stderr).toBe('');
   ```
 
-- [ ] Add real subprocess regressions: successful mocked-source entrypoint exits
+- [x] Add real subprocess regressions: successful mocked-source entrypoint exits
       0, invalid arguments exit 64, unavailable local repository emits only finite
       failure JSON, import remains quiet, sentinel `.env` is not loaded and argv
       cannot supply a different SHA. Never run repository scripts in the harness.
       Use a test-only statically imported harness around the real main function with
       spied source reads and `replayTeardown`, not a public CLI test selector. The
       harness invokes `BunRuntime.runMain` with that real main/teardown pair.
-- [ ] Run `moon run replay:test --concurrency 1`; observe expected new failures,
+- [x] Run `moon run replay:test --concurrency 1`; observe expected new failures,
       including the current entrypoint's missing 0 in its exit decoder.
-- [ ] Implement CLI composition/encoding and add 0 to `main.ts`'s exit decoder.
+- [x] Implement CLI composition/encoding and add 0 to `main.ts`'s exit decoder.
       Allow only the exact operation above; keep old `inspect` tests unchanged.
       If process seams require adjustment, keep them internal and inferred rather
       than exposing arbitrary commands or adding lint exceptions.
-- [ ] Run the full affected suites and workspace gates from the checkout:
+- [x] Run the full affected suites and workspace gates from the checkout:
 
   ```sh
   moon run domain:test replay:test --concurrency 1
@@ -242,7 +247,7 @@ design status. Do not modify package dependencies or hosted infrastructure.
 
   All commands must exit 0. Do not invoke observer-canary real-process tests.
 
-- [ ] Run the actual local report without implicit dotenv or dependency install:
+- [x] Run the actual local report without implicit dotenv or dependency install:
 
   ```sh
   /Users/alancurrie/.proto/tools/bun/1.4.2/bun --no-env-file --no-install apps/replay/src/main.ts manifests --repository /Users/alancurrie/Projects/fold-kit-experiments
@@ -255,7 +260,7 @@ design status. Do not modify package dependencies or hosted infrastructure.
   Git plumbing. Retain the sanitized JSON artifact and its SHA-256 beside the
   evidence Markdown, within the approved output budget.
 
-- [ ] Document usage, limits, exact coverage, local-object provenance, failure
+- [x] Document usage, limits, exact coverage, local-object provenance, failure
       codes, verification commands/results and cooperative deadline caveat. Mark
       the spec implemented only after these gates. State explicitly that hosted
       execution and baseline/browser qualification have not occurred.

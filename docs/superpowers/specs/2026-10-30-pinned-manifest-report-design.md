@@ -1,6 +1,6 @@
 # Pinned FoldKit Manifest Report
 
-Status: approved by the owner; implementation has not started.
+Status: locally implemented and verified; hosted execution remains unapproved.
 
 ## Intent And Approach
 

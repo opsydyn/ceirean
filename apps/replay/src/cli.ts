@@ -1,7 +1,8 @@
 import { Digest, ReplayInspection, inspectReplayRequest } from '@ceirean/domain';
 import { BunFileSystem } from '@effect/platform-bun';
-import { Effect, Match, Result, Schema } from 'effect';
+import { Effect, Match, Option, Result, Schema } from 'effect';
 
+import { ManifestArguments, runManifestReport } from './manifest-cli.ts';
 import { readDraftProfile } from './reader.ts';
 
 const InspectionReport = Schema.TaggedStruct('InspectionReport', {
@@ -72,6 +73,10 @@ function inspect() {
 }
 
 export function runCli(argv: ReadonlyArray<string>) {
+  const manifestPath = Schema.decodeUnknownResult(ManifestArguments)(argv).pipe(
+    Result.map((args) => args[2]),
+    Result.getSuccess,
+  );
   const supported = argv.length === 1 && argv.includes('inspect');
   const program = Match.value(supported).pipe(
     Match.when(true, inspect),
@@ -80,5 +85,5 @@ export function runCli(argv: ReadonlyArray<string>) {
     ),
   );
   const provided = Effect.provide(program, BunFileSystem.layer);
-  return provided;
+  return Option.match(manifestPath, { onSome: runManifestReport, onNone: () => provided });
 }
