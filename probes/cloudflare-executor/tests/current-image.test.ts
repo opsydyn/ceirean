@@ -27,7 +27,7 @@ async function fixedPreparation() {
     _tag: 'CurrentBaselinePreparation',
     activation: 'Blocked',
     image: 'Unbuilt',
-    sourceSha: '1183e3c067f873fdd29f14f06030515929c1b956',
+    sourceSha: 'be0427e2aba2cf951ef4dbbbe9296e307ed41ad3',
     requiredChecks: 16,
     browserCases: 4,
   });
@@ -42,7 +42,7 @@ async function fixedPreparation() {
     'FinalImageUnbuilt',
     'LinuxBaselineUnqualified',
     'PreviewServersUnqualified',
-    'ThreeBrowserSandboxConflict',
+    'NativeSandboxUnqualified',
     'HostedActivationBlocked',
   ]);
   expect(report.recipeSha256).toBe(await Effect.runPromise(sha256(recipe)));

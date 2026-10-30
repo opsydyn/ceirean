@@ -8,7 +8,7 @@ function approvedChecks() {
   const contract = currentBaseline();
   expect(contract.source).toEqual({
     repository: 'opsydyn/fold-kit-experiments',
-    sha: '1183e3c067f873fdd29f14f06030515929c1b956',
+    sha: 'be0427e2aba2cf951ef4dbbbe9296e307ed41ad3',
     lockSha256: '9b8f226992603213059977d39abb58acd399bfc2256d70d2890a0dfe6365cd89',
   });
   expect(contract.checks.map((check) => check.id)).toEqual([
@@ -48,6 +48,7 @@ function approvedChecks() {
     '--config',
     'playwright.config.ts',
   ]);
+  expect(contract.checks[15]?.cwd).toBe('/opt/ceirean/browser-harness/browser');
   expect(contract.browserCases).toEqual([
     'desktop/carousel',
     'desktop/line',
@@ -65,6 +66,10 @@ function refusesDrift() {
   const contract = currentBaseline();
   for (const input of [
     { ...contract, extra: 'SECRET_SENTINEL' },
+    {
+      ...contract,
+      source: { ...contract.source, sha: '1183e3c067f873fdd29f14f06030515929c1b956' },
+    },
     { ...contract, execution: 'Approved' },
     { ...contract, image: 'Built' },
     {

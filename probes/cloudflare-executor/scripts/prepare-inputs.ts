@@ -1,11 +1,12 @@
 import { BunRuntime, BunServices } from '@effect/platform-bun';
 import { Console, Effect, Exit, Match, Result, Schema, type Runtime } from 'effect';
 
+import { prepareCurrentPayloadInputs } from '../src/current-inputs.ts';
 import { preparePayloadInputs } from '../src/payload-preparer.ts';
 
 const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
 const Args = Schema.Tuple([
-  Schema.Literal('--source-repository'),
+  Schema.Literals(['--source-repository', '--current-source-repository']),
   Schema.String.check(Schema.isPattern(/^\//)),
 ]);
 const decodeArgs = Schema.decodeUnknownResult(Args);
@@ -22,8 +23,12 @@ function failure() {
 function prepare(args: ReadonlyArray<string>) {
   const decoded = decodeArgs(args);
   function* run() {
-    const [, repository] = yield* Effect.fromResult(decoded);
-    const report = yield* preparePayloadInputs(repository);
+    const [mode, repository] = yield* Effect.fromResult(decoded);
+    const preparation = Match.value(mode).pipe(
+      Match.when('--current-source-repository', () => prepareCurrentPayloadInputs(repository)),
+      Match.orElse(() => preparePayloadInputs(repository)),
+    );
+    const report = yield* preparation;
     yield* Console.log(encode(report));
     return 2;
   }

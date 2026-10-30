@@ -51,8 +51,10 @@ toolchain, image and cleanup identities attached.
       four browser cases and source/toolchain identity.
 - [x] Prepare the pinned Linux image recipe and strict preparation validator;
       [inputs remain Pending and the image Unbuilt](runbooks/current-foldkit-baseline.md).
-- [ ] Resolve the pinned 3D helper's default `--no-sandbox` launch conflict without
-      dropping its suite, weakening sandbox policy or silently changing the SHA.
+- [x] Resolve the 3D helper's default `--no-sandbox` option through the explicit
+      sandbox-only descendant `be0427e`; preserve every check and the unchanged lock.
+- [x] Materialize and independently read back local source/harness-source candidates;
+      [exact identities and remaining blockers](evidence/current-baseline/sandbox-inputs-20261030.md).
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,

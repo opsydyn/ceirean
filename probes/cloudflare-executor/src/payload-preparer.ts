@@ -30,9 +30,8 @@ function localBlob(path: string, text: string) {
   return workflow;
 }
 
-export function preparePayloadInputs(repository: string) {
+export function prepareHarnessSource() {
   function* prepare() {
-    const source = yield* packSourceFiles(yield* readPinnedSource(repository));
     const harness = [];
     const directory = new URL('../', import.meta.url);
     for (const path of harnessPaths) {
@@ -47,6 +46,16 @@ export function preparePayloadInputs(repository: string) {
     });
     harness.push(yield* localBlob('package.json', manifest));
     const browser = yield* packSourceFiles(harness);
+    return browser;
+  }
+  const workflow = Effect.gen(prepare);
+  return workflow;
+}
+
+export function preparePayloadInputs(repository: string) {
+  function* prepare() {
+    const source = yield* packSourceFiles(yield* readPinnedSource(repository));
+    const browser = yield* prepareHarnessSource();
     const fs = yield* FileSystem.FileSystem;
     const output = yield* fs.makeTempDirectory({
       directory: '/private/tmp',

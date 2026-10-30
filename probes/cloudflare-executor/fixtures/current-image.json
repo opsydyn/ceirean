@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "profileId": "foldkit-0170-baseline",
   "platform": "linux/amd64",
-  "sourceSha": "1183e3c067f873fdd29f14f06030515929c1b956",
+  "sourceSha": "be0427e2aba2cf951ef4dbbbe9296e307ed41ad3",
   "lockSha256": "9b8f226992603213059977d39abb58acd399bfc2256d70d2890a0dfe6365cd89",
-  "contractSha256": "928f9451a7522fcae93db4c312358072ae5f929a99e2350929d8050ca5832e25",
-  "recipeSha256": "a28e577719b00c3feb86c180c8273e91c259745cf881eadbff6818ccfc98792f",
+  "contractSha256": "487b4fa0a24dde7de46d41cbbc349b1b1103f4da41ce9c630b69554b617c50be",
+  "recipeSha256": "96698fb63e3434a0a4c61f86d9cb1c973317f65ff7142e8b847de773b7257c4b",
   "activation": "Blocked",
   "image": "Unbuilt",
   "images": {

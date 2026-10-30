@@ -61,9 +61,13 @@ toolchain choices. Do not spend another slice designing a manifest transport.
       [the current preparation runbook](../runbooks/current-foldkit-baseline.md).
 - [ ] Materialize the exact current source, Bun/npm caches, harness and trusted
       baseline worker; enforce complete byte identities and safe archive custody.
-- [ ] Resolve the concrete 3D launch conflict: pinned Playwright adds
-      `--no-sandbox` because the unchanged helper omits `chromiumSandbox: true`.
-      No source substitution or sandbox-policy weakening is approved.
+- [x] Materialize current source and harness-source candidates, with inventories
+      and full archive-byte readback. Linux caches, complete harness closure and
+      trusted worker are still pending; this does not complete the previous item.
+- [x] Resolve the static 3D launch conflict with `be0427e`, a sandbox-only direct
+      descendant of `1183e3c`. The lock/checks are unchanged; native launch remains
+      unqualified. The amendment and config-cwd correction are explicit in
+      [input evidence](../evidence/current-baseline/sandbox-inputs-20261030.md).
 - [ ] Obtain the exact bounded acquisition/build scope; then build and retain the
       final immutable image digest. Base-image digests are not the final image.
 - [ ] Run unchanged source checks and real browser journeys with their sandbox

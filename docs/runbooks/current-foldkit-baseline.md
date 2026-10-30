@@ -6,11 +6,21 @@ browser cases. This is separate from the historical `b7484cb` replay. Hosted
 activation and image build/publication remain blocked; this slice prepares their
 inputs, not a passing baseline.
 
+The approved sandbox fix amends the active source to
+`be0427e2aba2cf951ef4dbbbe9296e307ed41ad3`, a direct descendant changing only the
+3D launch option and its regression test. The lockfile is unchanged; all 16 checks
+and four cases remain required. The newer target checkout is not the baseline.
+See [amendment/input evidence](../evidence/current-baseline/sandbox-inputs-20261030.md).
+
 ## Prepared Files
 
 - `probes/cloudflare-executor/fixtures/current-baseline.json`: strict current
   source/lock/toolchain, ordered commands, servers, cases and finite budgets.
 - `src/current-baseline.ts`: independent scope validator and fresh command plan.
+- `src/current-inputs.ts`: fixed Git-tree/blob and lock verification, local source
+  and harness-source archives, inventories and contract bytes. Failure/interruption
+  owns partial-output cleanup, logging a sanitized tag if cleanup is unconfirmed;
+  successful output is retained for the next staging step.
 - `current-image/Dockerfile` and `.dockerignore`: narrowed Linux amd64 candidate.
 - `fixtures/current-image.json` and `src/current-image.ts`: exact input metadata
   and recipe validation, always preparation-only while payloads are Pending.
@@ -74,21 +84,24 @@ The recipe copies and checks these inputs but performs no dependency install,
 repository script or extraction. It starts as non-root with a sleeping entrypoint
 for the controller to own execution later. It is **not runnable as a complete
 baseline yet**: the trusted worker, current payloads and extraction/custody remain
-unmaterialized. A checksum list alone does not establish safe source membership,
+not yet assembled into a complete image context. Local source/harness-source
+candidates now exist, but Linux dependency closure and the worker remain absent.
+A checksum list alone does not establish safe source membership,
 archive paths or complete input coverage; the trusted preparer must enforce those
 before any approved build. No generic observer programme is needed to state this.
 
-## Concrete Execution Conflict
+## Sandbox Fix And Remaining Qualification
 
-At the fixed source, `packages/effect-three-foldkit/e2e/support/server.ts` calls
+At the original `1183e3c` source, `packages/effect-three-foldkit/e2e/support/server.ts` calls
 `chromium.launch` without `chromiumSandbox: true`. The pinned Playwright 1.64.1
 implementation adds `--no-sandbox` unless that option is true. The accepted
-contract requires sandboxed Chromium, so the 3D check is **not yet admissible**.
+contract requires sandboxed Chromium. The active `be0427e` amendment explicitly
+sets that option; a launch-boundary regression test observed RED then GREEN without
+starting Chromium. This resolves the static conflict, not native sandbox launch.
 
 Do not remove that check, alter source while retaining its SHA, or disable the
-sandbox policy. Resolve this explicitly through a source fix/new accepted SHA or
-a reviewed trusted launch-enforcement approach, with actual native evidence. No
-such change was made by image preparation. Other version/preview/kernel problems
+sandbox policy. Native sandbox/runtime compatibility still needs measured evidence.
+Other version/preview/kernel problems
 may still be discovered when a real image runs.
 
 ## Verification And Next Delivery
@@ -105,8 +118,21 @@ They are not consumer execution or image qualification.
 See [the local verification record](../evidence/current-baseline/preparation-20261030.md)
 for the exact checks and retained limits.
 
-Next: resolve the sandbox conflict and materialize only the accepted current
-payloads/trusted worker, then request one exact build/Linux baseline scope with
+Prepare the fixed source candidates without repository execution:
+
+```sh
+cd probes/cloudflare-executor
+bun --no-env-file --no-install scripts/prepare-inputs.ts --current-source-repository /absolute/local/repository
+```
+
+Exit 2 means preparation succeeded but build/activation blockers remain. The
+repository path locates Git objects; it does not select a branch/revision. There
+is no revision override. Historical `--source-repository` behavior is unchanged.
+The harness config remains under `browser/`, and its command cwd now matches
+`/opt/ceirean/browser-harness/browser`. The global activation guard is unchanged.
+
+Next: materialize the Linux dependency closure and trusted baseline worker, then
+complete exact-byte image staging and request one build/Linux baseline scope with
 input hashes, resource/spend limits and cleanup ownership. After measured success,
 wire typed results/artifact export and persisted baseline deadlines into the
 existing private job path. Do not repeat a hosted manifest-only milestone.

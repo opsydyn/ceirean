@@ -24,7 +24,7 @@ RUN ln -sf /usr/local/bin/node /usr/bin/node \
 COPY --chown=pwuser:pwuser input/source.tar input/bun-cache.tar input/npm-cache.tar input/browser-harness.tar input/baseline-worker.mjs input/baseline-contract.json input/SHA256SUMS /opt/ceirean/input/
 RUN cd /opt/ceirean/input \
     && sha256sum --strict -c SHA256SUMS \
-    && printf '%s\n' '928f9451a7522fcae93db4c312358072ae5f929a99e2350929d8050ca5832e25  baseline-contract.json' | sha256sum --strict -c -
+    && printf '%s\n' '487b4fa0a24dde7de46d41cbbc349b1b1103f4da41ce9c630b69554b617c50be  baseline-contract.json' | sha256sum --strict -c -
 
 WORKDIR /workspace
 USER pwuser

@@ -33,7 +33,7 @@ const checkPlan = [
   },
   {
     id: 'BrowserJourneys',
-    cwd: '/opt/ceirean/browser-harness',
+    cwd: '/opt/ceirean/browser-harness/browser',
     argv: [
       'bun',
       '--no-env-file',
@@ -102,7 +102,7 @@ export const CurrentBaseline = Schema.Struct({
   profileId: Schema.Literal('foldkit-0170-baseline'),
   source: Schema.Struct({
     repository: Schema.Literal('opsydyn/fold-kit-experiments'),
-    sha: Schema.Literal('1183e3c067f873fdd29f14f06030515929c1b956'),
+    sha: Schema.Literal('be0427e2aba2cf951ef4dbbbe9296e307ed41ad3'),
     lockSha256: Schema.Literal('9b8f226992603213059977d39abb58acd399bfc2256d70d2890a0dfe6365cd89'),
   }),
   platform: Schema.Literal('linux/amd64'),

@@ -24,6 +24,8 @@ for (const args of [
   ['--deploy'],
   ['--source-repository', 'relative'],
   ['--source-repository', '/tmp', '--run'],
+  ['--current-source-repository', '/tmp', '--run'],
+  ['--current-source-repository', 'relative'],
 ]) {
   test(`input preparer rejects unsupported argv ${args}`, async () => {
     const result = await invoke(args);
@@ -32,6 +34,15 @@ for (const args of [
 }
 test('missing pinned source refuses without emitting a partial payload or raw Git diagnostics', async () => {
   const result = await invoke(['--source-repository', '/private/tmp']);
+  expect(result).toEqual({
+    code: 1,
+    stdout: '',
+    stderr: '{"_tag":"PayloadPreparationRefused","activation":"Blocked"}\n',
+  });
+});
+
+test('missing current source has the same sanitized refusal without a revision override', async () => {
+  const result = await invoke(['--current-source-repository', '/private/tmp']);
   expect(result).toEqual({
     code: 1,
     stdout: '',

@@ -5,8 +5,8 @@ import { reviewedInputs } from './pins.ts';
 import { PreparationError, preparationCondition, sha256 } from './preparation.ts';
 
 const candidate = {
-  recipeSha256: 'a28e577719b00c3feb86c180c8273e91c259745cf881eadbff6818ccfc98792f',
-  contractSha256: '928f9451a7522fcae93db4c312358072ae5f929a99e2350929d8050ca5832e25',
+  recipeSha256: '96698fb63e3434a0a4c61f86d9cb1c973317f65ff7142e8b847de773b7257c4b',
+  contractSha256: '487b4fa0a24dde7de46d41cbbc349b1b1103f4da41ce9c630b69554b617c50be',
   bunImage:
     'docker.io/oven/bun@sha256:c017a211c49a21adc0e49dda7b60ac8112887c3d9465e01427f434ed107c830e',
 } as const;
@@ -69,7 +69,7 @@ export function validateCurrentImagePreparation(input: unknown, recipe: string) 
         'FinalImageUnbuilt',
         'LinuxBaselineUnqualified',
         'PreviewServersUnqualified',
-        'ThreeBrowserSandboxConflict',
+        'NativeSandboxUnqualified',
         'HostedActivationBlocked',
       ],
     };

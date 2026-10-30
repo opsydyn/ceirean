@@ -66,6 +66,13 @@ export function reconstructSourceTree(input: unknown) {
 }
 
 export function readPinnedSource(repository: string) {
+  return readSourceAt(repository, sourcePins);
+}
+
+export function readSourceAt(
+  repository: string,
+  pins: { readonly revision: string; readonly tree: string },
+) {
   function* read() {
     const fs = yield* FileSystem.FileSystem;
     const home = yield* fs.makeTempDirectoryScoped({ prefix: 'ceirean-source-reader-' });
@@ -90,8 +97,8 @@ export function readPinnedSource(repository: string) {
         maximum,
       );
     }
-    const tree = yield* decodeText(yield* git(['rev-parse', `${sourcePins.revision}^{tree}`], 128));
-    yield* requirePayload(tree.trim() === sourcePins.tree);
+    const tree = yield* decodeText(yield* git(['rev-parse', `${pins.revision}^{tree}`], 128));
+    yield* requirePayload(tree.trim() === pins.tree);
     const listing = yield* decodeText(
       yield* git(
         [
@@ -99,7 +106,7 @@ export function readPinnedSource(repository: string) {
           '-r',
           '-z',
           '--format=%(objectmode)%x09%(objecttype)%x09%(objectname)%x09%(objectsize)%x09%(path)',
-          sourcePins.revision,
+          pins.revision,
         ],
         2097152,
       ),
@@ -118,7 +125,7 @@ export function readPinnedSource(repository: string) {
     yield* requirePayload(entries.reduce((sum, entry) => sum + entry.size, 0) <= 33554432);
     yield* validateSourceInventory(entries.map(({ path }) => ({ path, kind: 'File' })));
     const reconstructed = yield* reconstructSourceTree(entries);
-    yield* requirePayload(reconstructed === sourcePins.tree);
+    yield* requirePayload(reconstructed === pins.tree);
     const files = yield* Effect.forEach(
       entries,
       (entry) =>
