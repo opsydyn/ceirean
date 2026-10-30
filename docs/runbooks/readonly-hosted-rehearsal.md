@@ -1,11 +1,13 @@
 # First Read-Only Cloudflare Rehearsal
 
-**Prepared, not activated:** a [fixed 08:35-08:40 UK window](../evidence/readonly-hosted/scheduled-replay-20261030-0835.md)
-is privately staged and remotely verified. Final click-specific consent and
-verified shutdown controls are still required. No relative clock or automatic
-activation is created by this preparation.
+**Scheduled preparation closed without activation:** the
+[fixed 08:35-08:40 UK window](../evidence/readonly-hosted/scheduled-replay-20261030-0835.md)
+qualified future-policy readiness and owned keep-awake assertions. Final consent
+did not arrive before its activation cutoff; the policy was expired and the lease
+released. Webhook and routing stayed off. This is preparation evidence, not replay
+proof, and the old prompt/window must not be reused.
 
-**Latest result:** the [30 October attempt](../evidence/readonly-hosted/accepted-replay-20261030-075551.md)
+**Previous live attempt:** the [30 October attempt](../evidence/readonly-hosted/accepted-replay-20261030-075551.md)
 stopped before route exposure after orchestration missed the activation cutoff.
 Cloudflare is private with expired admission and an empty fresh-session ledger;
 Active off was saved and verified after manual Mac unlock. Shutdown was late, so

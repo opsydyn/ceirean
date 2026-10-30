@@ -1,6 +1,10 @@
 # Scheduled Replay Preparation: 30 October 2026
 
-**Status: privately staged; activation is not authorized by this preparation.**
+**Status: preparation qualified; window closed without activation.**
+
+Final click-specific consent did not arrive before the 08:37 activation cutoff.
+The staged policy was explicitly expired, not extended or silently rescheduled.
+No route, webhook, comment, redelivery, job or container was activated.
 
 The owner approved pre-staging a scheduled window and addressing shutdown
 reliability after the [earlier abort](accepted-replay-20261030-075551.md). No
@@ -80,19 +84,50 @@ controls makes a locked desktop safe to ignore or proves fully unattended shutdo
 - [x] Start the bounded keep-awake process late enough to cover the whole window;
       verify its process identity and OS power assertions. Stop it after verified
       teardown, or let the approved ten-minute lease expire; never extend silently.
-- [ ] Recheck the saved-off native controls and exact-route absence.
+- [x] Recheck the saved-off native controls and exact-route absence.
 - [ ] At/after 08:35, obtain immediate confirmation for Active + Save changes,
       the exact route, one comment/redelivery and shutdown by the fixed 08:40 deadline.
       No enable action may precede that confirmation or the scheduled start.
 - [ ] If approved and controls are ready, arm the independent watchdog, use the
       unchanged prepared policy for route-only activation, then exercise the existing
       one-job contract. No private policy deployment belongs inside this window.
-- [ ] Stop new work by 08:37:30 and begin teardown by 08:38, reserving two minutes
+- [x] Stop new work by 08:37:30 and begin teardown by 08:38, reserving two minutes
       for UI/provider cleanup. Never relax the helper's 08:37 activation cutoff or
       send an extra comment/redelivery to rescue incomplete evidence.
-- [ ] Verify saved Active off, no matching route, expired admission, durable result
+- [x] Verify saved Active off, no matching route, expired admission, durable result
       and no active container; record partial evidence honestly if anything fails.
 
 This preparation authorizes no activation, comment, redelivery or execution.
 If final consent does not arrive in time, the private future policy simply ages
 out; it cannot open a route, enable the webhook or dispatch a job by itself.
+
+## Closure Without Activation
+
+The route-only plan was inspected at 08:35:52 UTC: one expected Worker update,
+all DO/container resources unchanged. It was not applied. The final confirmation
+prompt was issued only after 08:35; no affirmative reply arrived before the
+08:37 activation cutoff, so no enable or execution action was attempted.
+
+Private expiry completed at 08:37:50.163 UTC. Final deployment
+`831ac424-ab88-4ceb-b82a-7a0ba5549d1b`, created at
+`2026-10-30T08:37:47.629303Z`, uses version
+`c551ad68-b2bf-443f-99a0-4a9297fcdd41` at 100%. The final authenticated operator
+check returned the same identities/session, `opensAtMs: 0`, `closesAtMs: 300000`,
+`readonly-policy-v1` and `job: null`.
+
+Native settings again showed Active off and SSL verification on. Management
+readback found no matching route, public URLs off and only the original stopped
+instance, with no next page. The route watchdog remained unarmed because there
+was no authorized exposure to guard.
+
+After verifying private expiry and the saved-off control, PID `31998` was checked
+as the owned caffeinate command and deliberately terminated. Its parent joined
+with expected exit 143; a subsequent OS assertion read showed no assertion owned
+by that PID and idle-display prevention returned to its earlier zero state. No
+other power assertion or setting was changed. No keep-awake session remains for
+this preparation.
+
+This proves future-policy private preparation and bounded owned idle-sleep
+protection, not a successful hosted replay or fully unattended GitHub shutdown.
+The expired window and pending old prompt must not be reused. Another activation
+needs a fresh coordinated window and its own immediate click-specific consent.

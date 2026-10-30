@@ -1,5 +1,10 @@
 # Ceirean Tunnel Preparation
 
+The later [scheduled preparation](../../docs/evidence/readonly-hosted/scheduled-replay-20261030-0835.md)
+qualified future-policy readiness and bounded owned keep-awake assertions. It was
+not activated: final consent did not arrive before the cutoff. Policy is expired,
+webhook/routing remain off and the temporary power assertion was released.
+
 **Latest result:** the [30 October attempt](../../docs/evidence/readonly-hosted/accepted-replay-20261030-075551.md)
 ended private with expired admission and no new job. Webhook Active off was saved
 and verified after manual Mac unlock, but shutdown was late. Teardown is complete;
