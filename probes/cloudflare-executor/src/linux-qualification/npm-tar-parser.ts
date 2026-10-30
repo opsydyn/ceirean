@@ -26,7 +26,7 @@ export function limitsFit(limits: ArchiveLimits) {
     )
   );
 }
-function safePath(path: string, directory: boolean, maximum: number) {
+function safePath(path: string, directory: boolean, maximum: number, root: string) {
   const name = path.replace(/\/$/, '');
   const parts = name.split('/');
   function safeCharacter(character: string) {
@@ -38,7 +38,7 @@ function safePath(path: string, directory: boolean, maximum: number) {
     new TextEncoder().encode(path).length <= maximum &&
     path.normalize('NFC') === path &&
     safeCharacters &&
-    parts[0] === 'package' &&
+    parts[0] === root &&
     (directory || parts.length > 1) &&
     parts.every(
       (part) => part.length > 0 && part !== '.' && part !== '..' && !/^[\s]|[\s.]$/u.test(part),
@@ -113,6 +113,7 @@ function parserState(
   limits: ArchiveLimits,
   budget: ArchiveBudget,
   ownership?: InertArchiveOwnership,
+  legacyRoot?: string,
 ) {
   const inert = isInertArchiveOwnership(ownership);
   const allowedId = (id: number | undefined) =>
@@ -132,12 +133,15 @@ function parserState(
   const destinations = new Map<string, 'File' | 'Directory'>();
   const parents = new Set<string>();
   const paths: string[] = [];
+  let archiveRoot: string | undefined;
   function filter(path: string, entry: ReadEntry) {
     const header = entry.header;
     const directory = entry.type === 'Directory';
     const canonical = Buffer.alloc(512);
     const extended = new Header({ ...header, type: entry.type }).encode(canonical);
     const name = path.replace(/\/$/, '').toLowerCase();
+    const root = path.split('/')[0]!;
+    const permittedRoot = root === 'package' || (inert && root === legacyRoot);
     const parts = name.split('/');
     const ancestors = parts.slice(0, -1).map((_, index) => parts.slice(0, index + 1).join('/'));
     const allowed =
@@ -146,7 +150,9 @@ function parserState(
       !extended &&
       equivalentHeader(block, canonical) &&
       (entry.type === 'File' || directory) &&
-      safePath(path, directory, limits.pathBytes) &&
+      permittedRoot &&
+      (archiveRoot === undefined || archiveRoot === root) &&
+      safePath(path, directory, limits.pathBytes, root) &&
       allowedId(header.uid) &&
       allowedId(header.gid) &&
       !header.uname &&
@@ -170,6 +176,7 @@ function parserState(
       return false;
     }
     count++;
+    archiveRoot = root;
     budget.entries++;
     destinations.set(name, directory ? 'Directory' : 'File');
     for (const ancestor of ancestors) parents.add(ancestor);
@@ -263,8 +270,9 @@ export function makeArchiveInspector(
   limits: ArchiveLimits,
   budget: ArchiveBudget,
   ownership?: InertArchiveOwnership,
+  legacyRoot?: string,
 ) {
-  const state = parserState(limits, budget, ownership);
+  const state = parserState(limits, budget, ownership, legacyRoot);
   const inflate = new InflateRaw({ chunkSize: 512 });
   let position = 0;
   let invalid = false;

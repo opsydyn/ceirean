@@ -8,6 +8,7 @@ import {
   Fiber,
   Match,
   Option,
+  Order,
   Path,
   Ref,
   Result,
@@ -19,6 +20,7 @@ import { ChildProcess } from 'effect/process';
 import { makeLoopbackListener } from '../scripts/linux-replay-platform.ts';
 import { readCacheBlob } from './cache-candidate.ts';
 import { currentArchivePins } from './current-archive-preflight.ts';
+import { fromCurrentBunLock } from './current-dependencies.ts';
 import { validateCurrentLinuxRuntime } from './current-linux-cache.ts';
 import { readCurrentNpmSnapshot } from './current-npm-frozen.ts';
 import { currentNpmProfiles, fromCurrentNpmLock } from './current-npm-profiles.ts';
@@ -30,6 +32,7 @@ import {
   sealCache,
   verifySealedCache,
 } from './linux-qualification/cache.ts';
+import { makeWorkerCases } from './linux-qualification/cases.ts';
 import { startReplayOn } from './linux-qualification/registry.ts';
 import { digestBytes } from './payload.ts';
 import { sha256, validateSourceInventory } from './preparation.ts';
@@ -62,6 +65,7 @@ const FailureCode = Schema.Struct({
     'WorkspaceRefused',
     'EvidenceRefused',
     'StopFailed',
+    'EvidenceIncomplete',
   ]),
 });
 export function sanitizeCacheOnlyFailure(error: unknown) {
@@ -253,6 +257,19 @@ type Command = {
 export function currentLinuxWorkerCommands() {
   const install = ['install', '--frozen-lockfile', '--ignore-scripts', '--backend=copyfile'];
   return {
+    lockReadback: {
+      executable: '/usr/local/bin/bun',
+      argv: [
+        '--no-env-file',
+        '--no-install',
+        '--no-macros',
+        '--config=/work/empty.bunfig.toml',
+        '--eval',
+        'console.log(JSON.stringify(Bun.JSON5.parse(await Bun.file("/work/warmup/source/bun.lock").text())))',
+      ],
+      cwd: '/work',
+      cache: '/work/runtime-cache',
+    },
     runtime: [
       {
         executable: '/tools/node',
@@ -353,6 +370,7 @@ function runChild(command: Command) {
       cwd: command.cwd,
       env: {
         HOME: '/work/home',
+        XDG_CONFIG_HOME: '/work/home',
         TMPDIR: '/work/tmp',
         PATH: '/tools:/usr/local/bin:/usr/bin:/bin',
         LANG: 'C',
@@ -590,6 +608,65 @@ function verifyLock(directory: string) {
   const workflow = Effect.gen(verify);
   return workflow;
 }
+export function auditCurrentBunInstallation(directory: string, input: unknown) {
+  function* audit() {
+    const catalog = yield* fromCurrentBunLock(input);
+    const Lock = Schema.Struct({ workspaces: Schema.Record(Schema.String, Schema.Unknown) });
+    const lock = yield* Schema.decodeUnknownEffect(Lock)(input);
+    const expected = new Set(['']);
+    for (const entry of catalog.workspaces) {
+      const relative = entry.identity.slice(entry.key.length + '@workspace:'.length);
+      expected.add(relative);
+      const Workspace = Schema.Struct({ name: Schema.Literal(entry.key) });
+      yield* Schema.decodeUnknownEffect(Workspace)(lock.workspaces[relative]);
+    }
+    const keys = Object.keys(lock.workspaces);
+    yield* requireWorker(
+      keys.length === expected.size && keys.every((key) => expected.has(key)),
+      'InputChanged',
+    );
+    const result = yield* makeWorkerCases().auditInstalled(directory, {
+      ...catalog,
+      workspaces: lock.workspaces,
+    });
+    yield* requireWorker(result.installed.length > 0, 'InputChanged');
+    function relative(path: string) {
+      return path.slice(directory.length + 1);
+    }
+    const installed = result.installed.map((entry) => ({
+      identity: entry.identity,
+      path: relative(entry.path),
+    }));
+    installed.sort((a, b) => Order.String(a.path, b.path));
+    const links = result.links.map((entry) => ({
+      path: relative(entry.path),
+      target: relative(entry.target),
+    }));
+    links.sort((a, b) => Order.String(a.path, b.path));
+    const direct = result.direct.map((entry) => ({
+      identity: entry.identity,
+      path: relative(entry.path),
+    }));
+    direct.sort((a, b) => Order.String(a.path, b.path));
+    const normalized = {
+      installed,
+      links,
+      direct,
+      exclusions: result.exclusions,
+      frozenPlatformExclusions: result.frozenPlatformExclusions,
+    };
+    return {
+      status: 'Checked' as const,
+      installedPackages: installed.length,
+      directDependencies: direct.length,
+      links: links.length,
+      exclusions: result.exclusions.length,
+      identitiesSha256: yield* sha256(encode(normalized)),
+    };
+  }
+  const workflow = Effect.gen(audit);
+  return workflow;
+}
 const ArtifactInventory = Schema.fromJsonString(
   Schema.Struct({
     artifacts: Schema.Array(
@@ -664,16 +741,27 @@ export function runCurrentLinuxCacheOnly(
       yield* fs.makeDirectory(`/work/${path}`, { mode: 0o700 });
     }
     yield* fs.writeFileString('/work/empty.npmrc', '', { flag: 'wx', mode: 0o600 });
+    yield* fs.writeFileString('/work/empty.bunfig.toml', 'preload = []\n', {
+      flag: 'wx',
+      mode: 0o600,
+    });
     const commands = currentLinuxWorkerCommands();
     yield* Ref.set(progress, 'RuntimeReadback');
     const readbacks = yield* Effect.forEach(commands.runtime, runChild, { concurrency: 1 });
     const runtime = yield* validateCacheOnlyRuntime(readbacks.map(({ stdout }) => stdout));
     yield* Ref.set(progress, 'SourceWarmup');
     const sourceFiles = yield* stageSource(commands.warmup.cwd);
+    yield* Ref.set(progress, 'BunLockReadback');
+    yield* requireWorker((yield* fs.readDirectory('/work/home')).length === 0, 'InputChanged');
+    const lockReadback = yield* runChild(commands.lockReadback);
+    const bunLock = yield* decodeJson(lockReadback.stdout);
+    yield* verifyLock(commands.warmup.cwd);
     const artifacts = yield* readReplayArtifacts();
     const replay = startReplayOn(artifacts, makeLoopbackListener(4873));
     yield* Ref.set(progress, 'ReplayWarmup');
     const warmup = yield* withCacheOnlyReplay(replay, warmBunCache(commands.warmup));
+    yield* Ref.set(progress, 'WarmupIdentityReadback');
+    const warmupIdentities = yield* auditCurrentBunInstallation(commands.warmup.cwd, bunLock);
     yield* Ref.set(progress, 'SealBunCache');
     const seed = yield* sealCache('/work/bun-seed');
     const freshCache = yield* copyCaseCache(seed, commands.fresh.cache);
@@ -682,6 +770,9 @@ export function runCurrentLinuxCacheOnly(
     yield* Ref.set(progress, 'DefaultRegistryInstall');
     const fresh = yield* runChild(commands.fresh);
     yield* verifyLock(commands.fresh.cwd);
+    yield* Ref.set(progress, 'FreshIdentityReadback');
+    const freshIdentities = yield* auditCurrentBunInstallation(commands.fresh.cwd, bunLock);
+    yield* requireWorker(encode(warmupIdentities) === encode(freshIdentities), 'InputChanged');
     yield* verifySealedCache(seed);
     yield* inspectOutputTree('/work');
     const snapshot = yield* readCurrentNpmSnapshot();
@@ -762,7 +853,7 @@ export function runCurrentLinuxCacheOnly(
         seedSha256: seed.sha256,
         warmupOutputBytes: warmup.outputBytes,
         freshOutputBytes: fresh.outputBytes,
-        installedIdentities: 'NotCheckedBunJsoncParserUnavailable',
+        installedIdentities: { warmup: warmupIdentities, fresh: freshIdentities },
       },
       npm: profiles,
     } as const;

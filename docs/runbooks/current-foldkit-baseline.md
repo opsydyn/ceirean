@@ -207,6 +207,11 @@ ownership authority from its Linux process and admitted 240 archives before
 refusing `@types/argparse@1.0.38`'s legacy `argparse/` root. No installer ran;
 containers/volumes were removed and the VM stopped. See
 [attempt evidence and remaining gates](../evidence/current-baseline/linux-preflight-20261030.md).
-Do not skip/repack packages or silently weaken the root policy. The worker's Bun
-installed-identity readback remains incomplete; cache-only success is not app,
-browser, image or hosted qualification.
+The [offline follow-up](../evidence/current-baseline/legacy-roots-identities-20261030.md)
+adds identity-derived single-root admission behind genuine inert ownership and
+checks warm-up/fresh Bun installed identities using the existing auditor. These
+paths are locally tested, not Linux-install qualified. Synthetic retained replay
+now stops at 241/909 on the named owner `runner` in `@types/aria-query@5.0.4`.
+Do not skip/repack packages or widen that policy without approval. Complete
+offline admission before another VM window; cache-only success would still not
+be app, browser, image or hosted qualification.

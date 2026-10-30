@@ -189,6 +189,14 @@ test(
 
 async function oneSuccessfulReport() {
   const fake = attemptFixture();
+  const identities = {
+    status: 'Checked' as const,
+    installedPackages: 1,
+    directDependencies: 1,
+    links: 0,
+    exclusions: 0,
+    identitiesSha256: 'b'.repeat(64),
+  };
   const receipt: Effect.Success<ReturnType<typeof runCurrentLinuxCacheOnly>> = {
     status: 'CacheOnlyCompleted',
     activation: 'Blocked',
@@ -203,7 +211,7 @@ async function oneSuccessfulReport() {
       seedSha256: 'a'.repeat(64),
       warmupOutputBytes: 0,
       freshOutputBytes: 0,
-      installedIdentities: 'NotCheckedBunJsoncParserUnavailable',
+      installedIdentities: { warmup: identities, fresh: identities },
     },
     npm: [],
   };
@@ -465,6 +473,19 @@ test(
 
 function fixedCommands() {
   const commands = currentLinuxWorkerCommands();
+  expect(commands.lockReadback).toEqual({
+    executable: '/usr/local/bin/bun',
+    argv: [
+      '--no-env-file',
+      '--no-install',
+      '--no-macros',
+      '--config=/work/empty.bunfig.toml',
+      '--eval',
+      'console.log(JSON.stringify(Bun.JSON5.parse(await Bun.file("/work/warmup/source/bun.lock").text())))',
+    ],
+    cwd: '/work',
+    cache: '/work/runtime-cache',
+  });
   expect(commands.warmup.executable).toBe('/usr/local/bin/bun');
   expect(commands.warmup.argv).toEqual([
     'install',

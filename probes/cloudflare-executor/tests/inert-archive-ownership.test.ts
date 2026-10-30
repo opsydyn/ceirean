@@ -63,6 +63,115 @@ async function gatedOwnership() {
   await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform));
 }
 test('legacy IDs are inert only behind an unforgeable verified nonroot capability', gatedOwnership);
+async function legacyArchiveRoots() {
+  function* run() {
+    const fs = yield* FileSystem.FileSystem;
+    const root = yield* fs.makeTempDirectoryScoped();
+    const kernel = `${root}/status`;
+    yield* fs.writeFileString(kernel, status);
+    const withKernel = Effect.provideService(FileSystem.FileSystem, {
+      ...fs,
+      readFileString: () => fs.readFileString(kernel),
+    });
+    const authority = yield* getInertArchiveOwnership().pipe(withKernel);
+    const bytes = yield* Effect.promise(() =>
+      gzip(
+        tar([
+          { path: 'argparse/LICENSE', content: 'license' },
+          {
+            path: 'argparse/package.json',
+            content: '{"name":"@types/argparse","version":"1.0.38"}',
+          },
+        ]),
+      ),
+    );
+    const inspect = (owner?: typeof authority, legacyRoot?: string) =>
+      inspectArchive([bytes], bytes.length, undefined, undefined, owner, legacyRoot);
+    const admitted = yield* inspect(authority, 'argparse').pipe(Effect.result);
+    expect(Result.isSuccess(admitted)).toBe(true);
+    for (const [owner, name] of [
+      [undefined, 'argparse'],
+      [authority, undefined],
+      [authority, 'other'],
+    ] as const) {
+      const refused = yield* inspect(owner, name).pipe(Effect.result);
+      expect(Result.isFailure(refused)).toBe(true);
+    }
+    for (const entries of [
+      [{ path: 'argparse/a' }, { path: 'package/b' }],
+      [{ path: 'argparse/a' }, { path: 'other/b' }],
+      [{ path: 'argparse/../outside' }],
+      [{ path: '/argparse/a' }],
+      [{ path: 'argparse/a', type: 'SymbolicLink', linkpath: '/outside' }],
+      [{ path: 'argparse/a', type: 'Link', linkpath: 'argparse/b' }],
+      [{ path: 'argparse/a', mode: 0o4644 }],
+      [{ path: 'argparse/a', uname: 'root' }],
+    ]) {
+      const unsafe = yield* Effect.promise(() => gzip(tar(entries)));
+      const result = yield* inspectArchive(
+        [unsafe],
+        unsafe.length,
+        undefined,
+        undefined,
+        authority,
+        'argparse',
+      ).pipe(Effect.result);
+      expect(Result.isFailure(result)).toBe(true);
+    }
+    const idSchema = Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 999999 }));
+    const roots = Arbitrary.schema(idSchema);
+    function rootLaw(id: number) {
+      function* check() {
+        const legacyRoot = `pkg-${id}`;
+        const bytes = yield* Effect.promise(() => gzip(tar([{ path: `${legacyRoot}/a` }])));
+        const actual = yield* inspectArchive(
+          [bytes],
+          bytes.length,
+          undefined,
+          undefined,
+          authority,
+          legacyRoot,
+        );
+        expect(actual.paths).toEqual([`${legacyRoot}/a`]);
+        const strict = yield* inspectArchive(
+          [bytes],
+          bytes.length,
+          undefined,
+          undefined,
+          authority,
+        ).pipe(Effect.result);
+        expect(Result.isFailure(strict)).toBe(true);
+        const mixed = yield* Effect.promise(() =>
+          gzip(tar([{ path: `${legacyRoot}/a` }, { path: 'package/b' }])),
+        );
+        const refused = yield* inspectArchive(
+          [mixed],
+          mixed.length,
+          undefined,
+          undefined,
+          authority,
+          legacyRoot,
+        ).pipe(Effect.result);
+        expect(Result.isFailure(refused)).toBe(true);
+        return true;
+      }
+      const workflow = Effect.gen(check);
+      return workflow;
+    }
+    const checked = yield* Arbitrary.checkEffect(roots, rootLaw, {
+      seed: 241,
+      runs: 100,
+      maxShrinks: 100,
+    });
+    expect(checked).toMatchObject({ _tag: 'Passed', runs: 100 });
+  }
+  const workflow = Effect.gen(run);
+  await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform));
+}
+test(
+  'legacy roots require verified ownership and never admit mixed roots or unsafe entries',
+  legacyArchiveRoots,
+);
 async function inertIdLaw() {
   function* run() {
     const fs = yield* FileSystem.FileSystem;

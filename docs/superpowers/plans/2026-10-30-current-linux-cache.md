@@ -55,3 +55,38 @@ ownership cases), all 12 workspace typechecks, strict lint/format and the other
 workspace test tasks passed. Independent review repairs cover pre-write admission,
 evidence ownership, cleanup defects and reporting after cancellation. The repaired
 source was not rerun in the VM. The cache-only outcome remains refused, not complete.
+
+## Approved Offline Follow-Up
+
+- [x] Add identity-derived legacy roots only behind verified inert ownership.
+      Accept literal `package` or the registry identity's exact basename, with
+      one consistent root per archive. Preserve all existing refusal rules and
+      default strict behavior; do not rewrite authenticated bytes.
+- [x] Reuse the installed-package auditor for current Bun workspaces. Parse the
+      unchanged lock using a fixed invocation of the already-pinned Bun parser;
+      audit warm-up and fresh installs independently, compare normalized summaries,
+      and replace the explicit unchecked result. No new parser dependency.
+- [x] Exercise real temporary filesystem fixtures, adversarial and seeded cases,
+      then replay retained archive data offline where available. A mocked process
+      status in a test is synthetic parser evidence, not Linux isolation proof.
+- [x] Independently review, run executor tests, lint/format and all typechecks,
+      document remaining gates and commit. Preserve unrelated observer work.
+
+Ruling: this approval covers the offline policy/identity slice, not another VM
+attempt. Colima, builds, publication, provider calls and hosted activation stay off.
+
+Ruling: the retained synthetic replay now admits 241/909, then refuses a `runner`
+uname on `@types/aria-query@5.0.4`. Named-owner metadata was not approved; keep that
+rule and all limits unchanged. Require a complete offline admission pass before
+requesting another runtime window. [Evidence and parser-isolation ruling](../../evidence/current-baseline/legacy-roots-identities-20261030.md).
+
+Final review: fixed parser isolation with explicit trusted config, private
+HOME/XDG_CONFIG_HOME and actual subprocess regression (preload control RED,
+data-only production invocation GREEN). Ruling: `--config=PATH` is required by
+the verified invocation; the separated form treated the TOML path as an entry
+and produced no parsed JSON. Unsupported no-autoload switches were not retained.
+
+Offline slice verification: 739 executor tests passed, 0 failed, across 65 files
+and 29,887 assertions. All 12 typechecks and strict lint/format passed. Logs:
+`/private/tmp/ceirean-legacy-tests-final.log` and
+`/private/tmp/ceirean-legacy-types-final.log`. No VM or hosted rehearsal ran.

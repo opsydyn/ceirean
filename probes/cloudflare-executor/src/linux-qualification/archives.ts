@@ -33,14 +33,21 @@ export function inspectArchive(
   limits: ArchiveLimits = archiveLimits,
   budget: ArchiveBudget = { raw: 0, expanded: 0, entries: 0 },
   ownership?: InertArchiveOwnership,
+  legacyRoot?: string,
 ) {
   function* inspect() {
     yield* requireArchive(ownership === undefined || isInertArchiveOwnership(ownership));
     yield* requireArchive(
+      legacyRoot === undefined ||
+        (isInertArchiveOwnership(ownership) &&
+          legacyRoot.length <= limits.pathBytes &&
+          /^[A-Za-z0-9_][A-Za-z0-9._-]*$/.test(legacyRoot)),
+    );
+    yield* requireArchive(
       limitsFit(limits) && Number.isSafeInteger(size) && size >= 18 && size <= limits.artifactBytes,
     );
     const acquiring = Effect.try({
-      try: () => makeArchiveInspector(size, limits, budget, ownership),
+      try: () => makeArchiveInspector(size, limits, budget, ownership, legacyRoot),
       catch: refused,
     });
     const inspector = yield* Effect.acquireRelease(acquiring, (value) => Effect.sync(value.close));

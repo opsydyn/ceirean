@@ -1,7 +1,7 @@
 import { Effect, FileSystem, Match, Result, Schema } from 'effect';
 
 import { readCacheBlob } from './cache-candidate.ts';
-import { requireInventory } from './dependency-inventory.ts';
+import { registryIdentity, requireInventory } from './dependency-inventory.ts';
 import type { InertArchiveOwnership } from './inert-archive-ownership.ts';
 import { archiveLimits, inspectArchive } from './linux-qualification/archives.ts';
 import { digestBytes } from './payload.ts';
@@ -53,9 +53,19 @@ export function inspectCurrentOfflineArchives(root: string, ownership?: InertArc
         sha256 === item.sha256,
       ].every(Boolean);
       yield* requireInventory(unchanged, 'InputChanged');
-      const checking = inspectArchive([bytes], bytes.length, archiveLimits, budget, ownership).pipe(
-        Effect.result,
+      const identity = yield* registryIdentity(item.identity);
+      const legacyRoot = Match.value(ownership).pipe(
+        Match.when(undefined, () => undefined),
+        Match.orElse(() => identity.name.split('/').at(-1)),
       );
+      const checking = inspectArchive(
+        [bytes],
+        bytes.length,
+        archiveLimits,
+        budget,
+        ownership,
+        legacyRoot,
+      ).pipe(Effect.result);
       const result = yield* checking;
       firstIdentity = Result.match(result, {
         onSuccess: () => undefined,
