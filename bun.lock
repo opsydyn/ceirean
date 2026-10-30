@@ -96,6 +96,7 @@
       "name": "@ceirean/cloudflare-executor-probe",
       "dependencies": {
         "@effect/platform-bun": "4.0.5",
+        "@effect/platform-node": "4.0.5",
         "@playwright/test": "1.64.1",
         "effect": "4.0.5",
         "npm": "10.9.9",

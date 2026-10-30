@@ -1,6 +1,7 @@
 import { InflateRaw } from '../../node_modules/npm/node_modules/minizlib/dist/esm/index.js';
 import { Header } from '../../node_modules/npm/node_modules/tar/dist/esm/header.js';
 import { Parser, type ReadEntry } from '../../node_modules/npm/node_modules/tar/dist/esm/parse.js';
+import { isInertArchiveOwnership, type InertArchiveOwnership } from '../inert-archive-ownership.ts';
 
 export const archiveLimits = {
   artifactBytes: 67108864,
@@ -108,7 +109,16 @@ function equivalentHeader(raw: Buffer, canonical: Buffer) {
   }
   return normalized.equals(canonical);
 }
-function parserState(limits: ArchiveLimits, budget: ArchiveBudget) {
+function parserState(
+  limits: ArchiveLimits,
+  budget: ArchiveBudget,
+  ownership?: InertArchiveOwnership,
+) {
+  const inert = isInertArchiveOwnership(ownership);
+  const allowedId = (id: number | undefined) =>
+    id === undefined ||
+    id === 0 ||
+    (inert && Number.isSafeInteger(id) && id >= 0 && id <= 4294967294);
   let invalid = false;
   let expanded = 0;
   let crc = 0xffffffff;
@@ -137,8 +147,8 @@ function parserState(limits: ArchiveLimits, budget: ArchiveBudget) {
       equivalentHeader(block, canonical) &&
       (entry.type === 'File' || directory) &&
       safePath(path, directory, limits.pathBytes) &&
-      (header.uid === undefined || header.uid === 0) &&
-      (header.gid === undefined || header.gid === 0) &&
+      allowedId(header.uid) &&
+      allowedId(header.gid) &&
       !header.uname &&
       !header.gname &&
       !header.linkpath &&
@@ -248,8 +258,13 @@ function parserState(limits: ArchiveLimits, budget: ArchiveBudget) {
 }
 
 // Synchronous streaming codec adapter; the owning Effect acquires/releases its native handle.
-export function makeArchiveInspector(size: number, limits: ArchiveLimits, budget: ArchiveBudget) {
-  const state = parserState(limits, budget);
+export function makeArchiveInspector(
+  size: number,
+  limits: ArchiveLimits,
+  budget: ArchiveBudget,
+  ownership?: InertArchiveOwnership,
+) {
+  const state = parserState(limits, budget, ownership);
   const inflate = new InflateRaw({ chunkSize: 512 });
   let position = 0;
   let invalid = false;

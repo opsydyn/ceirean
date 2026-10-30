@@ -26,6 +26,7 @@ export type FixtureEntry = {
   size?: number;
   mode?: number;
   uid?: number;
+  gid?: number;
   uname?: string;
   linkpath?: string;
 };
@@ -37,7 +38,7 @@ export function tar(entries: readonly FixtureEntry[], tail = new Uint8Array(1024
       type: entry.type ?? 'File',
       mode: entry.mode ?? 0o644,
       uid: entry.uid ?? 0,
-      gid: 0,
+      gid: entry.gid ?? 0,
       uname: entry.uname ?? '',
       gname: '',
       size: entry.size ?? data.length,

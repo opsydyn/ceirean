@@ -2,6 +2,7 @@ import { Effect, FileSystem, Match, Result, Schema } from 'effect';
 
 import { readCacheBlob } from './cache-candidate.ts';
 import { requireInventory } from './dependency-inventory.ts';
+import type { InertArchiveOwnership } from './inert-archive-ownership.ts';
 import { archiveLimits, inspectArchive } from './linux-qualification/archives.ts';
 import { digestBytes } from './payload.ts';
 import { sha256 } from './preparation.ts';
@@ -18,7 +19,7 @@ const Item = Schema.Struct({
   integrity: Schema.String,
 });
 const Inventory = Schema.fromJsonString(Schema.Struct({ artifacts: Schema.Array(Item) }));
-export function inspectCurrentOfflineArchives(root: string) {
+export function inspectCurrentOfflineArchives(root: string, ownership?: InertArchiveOwnership) {
   function* inspect() {
     const fs = yield* FileSystem.FileSystem;
     yield* requireInventory(
@@ -52,7 +53,7 @@ export function inspectCurrentOfflineArchives(root: string) {
         sha256 === item.sha256,
       ].every(Boolean);
       yield* requireInventory(unchanged, 'InputChanged');
-      const checking = inspectArchive([bytes], bytes.length, archiveLimits, budget).pipe(
+      const checking = inspectArchive([bytes], bytes.length, archiveLimits, budget, ownership).pipe(
         Effect.result,
       );
       const result = yield* checking;

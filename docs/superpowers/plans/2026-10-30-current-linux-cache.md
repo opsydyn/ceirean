@@ -24,21 +24,34 @@ Host preflight: both default and eh-containment Colima profiles were stopped.
 Default has 2 CPUs, 4 GiB RAM, 20 GiB disk. Separate approval requested for starting
 default, acquiring only the two pinned tool images if absent, and stopping afterward.
 
-Progress: existing source/caches remain unchanged. Pure command/runtime contracts
-and a read-only fixed-inventory preflight are implemented; no native worker was
-built or executed. Compatibility fixes for missing ownership/device fields and
+Initial progress: existing source/caches remained unchanged. Pure command/runtime contracts
+and a read-only fixed-inventory preflight were implemented. Compatibility fixes for missing ownership/device fields and
 valid octal padding observed RED then GREEN with all old safety cases retained.
 
 Independent review: checksum decoder crossed its field into the typeflag. Fixed
 with exact eight-byte checksum validation; reproducer RED then GREEN plus 300
 seeded cases. No deferred code finding or lint exception.
 
-Ruling: stop before installation at the real nonzero-owner policy case,
-`@emmetio/stream-reader-utils@0.1.0` UID 501/GID 20, after 94 admitted archives.
-This is explicitly prohibited by the prior extraction policy; do not silently
-expand it or build an execution path that assumes approval. A combined scoped
-policy/VM rehearsal question supersedes the VM-only request. Native tasks remain
-pending; this plan is not complete. Verified preflight work is committed separately.
+Owner subsequently approved the scoped inert numeric ownership policy and bounded
+default Colima rehearsal. The Node/Effect worker is implemented with fixed commands,
+runtime/source pins, replay finalizers, finite output/runtime budgets, cache seals,
+default-registry fresh-install phase and output ownership checks. Bun installed
+identity readback is explicitly incomplete and cannot count as qualified.
+
+Actual attempt: Linux amd64 under QEMU on the aarch64 VM admitted 240/909 archives
+then refused `@types/argparse@1.0.38`, whose legacy root is `argparse/` rather than
+`package/`. No installer ran. All owned containers/volumes were removed, both VM
+profiles are stopped, and the watchdog was terminated after cleanup. See the
+updated evidence report for exact controls/times. No image build or hosted work ran.
+
+This plan is not complete. Next approval must cover a narrowly tested legacy-root
+policy, remaining Bun identity validation, and a fresh bounded runtime attempt.
 
 Verification: 710 executor tests, 12 workspace typechecks and strict lint/format
 passed. See `docs/evidence/current-baseline/linux-preflight-20261030.md`.
+
+Follow-up verification: 734 executor tests (including 18 worker and 100 seeded
+ownership cases), all 12 workspace typechecks, strict lint/format and the other
+workspace test tasks passed. Independent review repairs cover pre-write admission,
+evidence ownership, cleanup defects and reporting after cancellation. The repaired
+source was not rerun in the VM. The cache-only outcome remains refused, not complete.

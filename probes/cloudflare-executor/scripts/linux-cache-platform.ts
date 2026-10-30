@@ -16,5 +16,7 @@ export async function lstatMetadata(path: string) {
     dev: info.dev,
     ino: info.ino,
     nlink: info.nlink,
+    uid: Number(info.uid),
+    gid: Number(info.gid),
   };
 }

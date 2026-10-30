@@ -1,5 +1,6 @@
 import { Data, Effect, FileSystem, Match, Option, Result, Schema } from 'effect';
 
+import { isInertArchiveOwnership, type InertArchiveOwnership } from '../inert-archive-ownership.ts';
 import {
   archiveLimits,
   limitsFit,
@@ -31,13 +32,15 @@ export function inspectArchive(
   size: number,
   limits: ArchiveLimits = archiveLimits,
   budget: ArchiveBudget = { raw: 0, expanded: 0, entries: 0 },
+  ownership?: InertArchiveOwnership,
 ) {
   function* inspect() {
+    yield* requireArchive(ownership === undefined || isInertArchiveOwnership(ownership));
     yield* requireArchive(
       limitsFit(limits) && Number.isSafeInteger(size) && size >= 18 && size <= limits.artifactBytes,
     );
     const acquiring = Effect.try({
-      try: () => makeArchiveInspector(size, limits, budget),
+      try: () => makeArchiveInspector(size, limits, budget, ownership),
       catch: refused,
     });
     const inspector = yield* Effect.acquireRelease(acquiring, (value) => Effect.sync(value.close));

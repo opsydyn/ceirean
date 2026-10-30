@@ -1,12 +1,14 @@
 # Linux Cache Rehearsal Preflight
 
-**Native rehearsal has not run.** No VM/container was started, no image acquired,
-no package installed and no repository script executed. Image builds/publication,
-webhooks/public routes and hosted activation were not changed.
+**The bounded cache-only rehearsal ran and refused before installation.**
+Linux amd64 ran through QEMU on the default aarch64 Colima VM, not a physical
+amd64 host. No package installer or repository script ran. Image builds/publication,
+browser/app checks, provider calls, webhooks/public routes and hosted activation
+remained blocked.
 
 ## Runtime And Scope
 
-Both existing Colima profiles (`default`, `eh-containment`) were stopped. Default
+At initial preflight, both Colima profiles (`default`, `eh-containment`) were stopped. Default
 is configured for aarch64 with 2 CPUs, 4 GiB RAM and a 20 GiB disk. Both Docker
 endpoints were unavailable; the named endpoint was retried outside the filesystem
 sandbox to distinguish access denial from a stopped daemon. Image availability
@@ -75,12 +77,64 @@ Partial counters include the refused archive's consumed prefix:
 105,587,053 compressed bytes, 503,887,935 expanded bytes, 14,002 entries. These
 are not complete inventory or extraction/native-install evidence.
 
-Proposed owner decision, **not implemented**: allow inert numeric UID/GID metadata
-only inside a non-root, capability-dropped installer with no ownership restoration,
-verify resulting file ownership, and retain all path/link/mode/size/checksum rules.
-Raw bytes/SRI must remain unchanged; do not omit, repack or silently rewrite the
-package to get a passing result. Native worker implementation/execution remains
-pending that decision and runtime authority.
+## Approved Contained Attempt
+
+The owner approved inert numeric UID/GID metadata only for the verified non-root,
+capability-dropped worker, output ownership checks, temporary default-VM startup
+and the two fixed tool images. The authority is derived from `/proc/self/status`,
+not environment/arguments: all four UIDs/GIDs are 1000, all capability sets zero,
+and NoNewPrivs is 1. A process-local WeakSet refuses forged authority objects.
+The default archive policy still refuses nonzero IDs; names and every other
+path/link/mode/size/checksum rule remain unchanged. Nothing restores ownership.
+
+The default VM ran from 21:47:51 to 22:03:34 UTC on 30 October, before the fixed
+22:12:51 cleanup deadline. The pinned Bun image was acquired; Node was already
+cached. Isolated tool readbacks were Bun 1.4.3, Node v22.23.4 and npm 10.9.9.
+The worker ran as 1000:1000 with network `none`, all capabilities dropped,
+no-new-privileges, read-only root, 2 CPUs, 3 GiB RAM, 128 PIDs and a 720-second
+outer timeout. Inputs/tools were read-only named volumes, work was writable;
+there were no host/socket/credential mounts or published ports. Staging alone
+used a temporary CAP_CHOWN helper on the empty work volume, never an installer.
+
+The worker started at 21:59:50 and exited 1 at 22:01:48. It admitted **240/909**
+archives, stopping at **`@types/argparse@1.0.38`**. The unchanged archive SHA-256 is
+`00756b3f06b5c1a50b9508fd57f190afbc712cd29e453164e12654b083056b4c`.
+Read-only `tar -tvzf` shows four regular files rooted at `argparse/`, not the
+required literal `package/` root. Numeric ownership is zero. This is the next
+archive-layout policy incompatibility, not an installer or Cloudflare failure.
+Counters including the refused prefix: 289,712,680 compressed bytes,
+1,004,941,385 expanded bytes and 23,583 entries. No cache was materialized.
+
+Retained local evidence:
+
+- `/private/tmp/ceirean-linux-214751-evidence/result.json`: CacheOnlyFailed,
+  phase ArchiveAdmission, qualified false, activation Blocked. The sanitized
+  reason is UnclassifiedFailure; the container log supplies the refused identity.
+- `/private/tmp/ceirean-linux-214751-controls.json`: launch controls (captured
+  while running, not shutdown evidence), SHA-256
+  `a7d1c45a0e277635e21ff72f156eefcca3a36f35cb38cacc1ddbaf8e58752d58`.
+- Executed worker bundle SHA-256
+  `0f930bff4a810a5e5b8aec7be0fab1dfa146788ef7dd4c6fb9018b385d0d46c6`.
+
+Both lease containers and all three exact lease volumes were removed. No unrelated
+container was running; existing stopped resources were left untouched. `colima list`
+confirmed default and eh-containment stopped; the independent watchdog exited 130
+after confirmed manual shutdown. Acquired immutable images remain cached.
+
+Independent review identified pre-write workspace admission and failure-evidence
+ownership gaps, plus cleanup defects bypassing typed-error reporting. These were
+repaired and regression-tested offline; the executed bundle hash above is
+the earlier attempt, not native evidence for subsequent source changes. The new
+tests are registered in both standard baseline-preparation task lists. Unrelated
+observer experiments and their suppression comments are excluded from this slice.
+
+Next bounded work: test-first admission of legacy single-top-directory npm layouts,
+without changing authenticated bytes or allowing traversal, mixed roots, links or
+special entries. That policy change and another VM run need separate approval.
+The worker's Bun path currently verifies the unchanged lock and output ownership,
+but reports installed identities as unchecked; complete identity readback remains
+required before claiming cache qualification. The npm path checks lock-selected
+installed identities. Neither path reached installation in this attempt.
 
 ## Verification
 
@@ -90,3 +144,18 @@ Full test log: `/private/tmp/ceirean-linux-preflight-tests-final.log`.
 This proves the local compatibility/security fixes and command/preflight contracts,
 not Linux cache materialization or the app/browser baseline. Unrelated observer
 experiments remain excluded; no merge or push is part of this slice.
+
+Contained-worker follow-up: **734 executor tests passed, 0 failed**, across
+64 files and 29,461 assertions, including 100 seeded inert UID/GID cases and
+18 worker tests. Root admission precedes writes; owner-bound exclusive no-follow
+evidence writes refuse replaced directories. Full-exit reporting observes cleanup
+defects and external interruption after finalizers; a joined, interruptible owned
+child bounds evidence I/O without inheriting the parent's pending interrupt.
+No new native boundary or lint suppression was added.
+
+All 12 workspace typechecks, strict lint/format and the other workspace test targets
+(12 Moon tasks including the native operator-test dependency) passed. Logs:
+`/private/tmp/ceirean-linux-live-tests-verified.log` and
+`/private/tmp/ceirean-linux-other-workspace-tests.log`. Independent follow-up review
+found no residual important finding in the repaired boundary. These are local
+code/contract results; no second VM run, cache success or hosted readiness is claimed.

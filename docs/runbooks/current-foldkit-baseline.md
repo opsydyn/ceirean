@@ -201,7 +201,12 @@ bun --no-env-file --no-install scripts/check-current-archives.ts --inspect /abso
 
 It authenticates the fixed inventory and each compressed blob, parses without
 extracting, and stops at the first policy refusal. Exit 2 is archive-data inspection
-only, not native cache readiness. The current run stops after 94 archives on
-`@emmetio/stream-reader-utils@0.1.0` UID 501/GID 20. See the
-[local preflight evidence and pending owner decision](../evidence/current-baseline/linux-preflight-20261030.md).
-Do not skip/repack the package or start the rehearsal under a silently weakened policy.
+only, not native cache readiness. The strict host policy stops after 94 archives
+on nonzero numeric ownership. A separately approved contained worker derives inert
+ownership authority from its Linux process and admitted 240 archives before
+refusing `@types/argparse@1.0.38`'s legacy `argparse/` root. No installer ran;
+containers/volumes were removed and the VM stopped. See
+[attempt evidence and remaining gates](../evidence/current-baseline/linux-preflight-20261030.md).
+Do not skip/repack packages or silently weaken the root policy. The worker's Bun
+installed-identity readback remains incomplete; cache-only success is not app,
+browser, image or hosted qualification.
