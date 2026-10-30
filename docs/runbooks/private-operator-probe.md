@@ -182,10 +182,11 @@ this does not establish server-side preview-token revocation.
 
 ## Next Bounded Decision
 
-The private target update and authenticated readiness/status check are complete.
-Keep the command disabled and preserve the consumed ledger. Accepted-duplicate
-delivery without reexecution remains the next bounded hosted proof: select a
-fresh session and timebox, prepare it privately, then check that exact desired
-policy before any separately approved route/webhook activation. The preview
-token's lifetime/revocation limitation remains explicit. This runbook authorizes
-no further operation.
+The private target update, authenticated operator and
+[accepted-replay checkpoint](../evidence/readonly-hosted/accepted-replay-20261030-084800.md)
+are complete for the trusted runtime smoke. Keep the command disabled and preserve
+the successful ledgers. Next is a trusted pinned FoldKit manifest/dependency
+report, not another runtime smoke or automatic repository execution. Any further
+hosted operation still needs its own scope, exact-policy readiness and activation
+consent. Preview-token lifetime/revocation remains unverified; this runbook
+authorizes no further operation.

@@ -1,11 +1,21 @@
 # Ceirean Tunnel Preparation
 
+**Latest result: accepted replay verified.** The
+[08:48-08:53 run](../../docs/evidence/readonly-hosted/accepted-replay-20261030-084800.md)
+accepted two deliveries, preserved one identical successful job and observed one
+alarm request/fresh container execution. Delivery/routing were disabled and
+admission expired before the deadline. Zero active containers remain; successful
+ledger and stopped history are preserved. This is trusted runtime smoke evidence,
+not FoldKit baseline/browser or untrusted-code execution qualification.
+
+## Earlier Preparation
+
 The later [scheduled preparation](../../docs/evidence/readonly-hosted/scheduled-replay-20261030-0835.md)
 qualified future-policy readiness and bounded owned keep-awake assertions. It was
 not activated: final consent did not arrive before the cutoff. Policy is expired,
 webhook/routing remain off and the temporary power assertion was released.
 
-**Latest result:** the [30 October attempt](../../docs/evidence/readonly-hosted/accepted-replay-20261030-075551.md)
+**Earlier attempt:** the [30 October attempt](../../docs/evidence/readonly-hosted/accepted-replay-20261030-075551.md)
 ended private with expired admission and no new job. Webhook Active off was saved
 and verified after manual Mac unlock, but shutdown was late. Teardown is complete;
 the bounded rehearsal did not pass. No further activation without fresh approval.
@@ -17,12 +27,13 @@ composition. Signed GitHub delivery, durable alarm execution, terminal runtime
 success and stopped-container readback were verified on 29 October. The route is
 removed, GitHub webhook delivery is disabled and teardown is verified.
 Private protocol/policy readiness was verified in a subsequent authenticated
-check; accepted-duplicate replay remains open. See the
+check; accepted replay was later verified in the bounded run linked above. See the
 [hosted rehearsal runbook](../../docs/runbooks/readonly-hosted-rehearsal.md).
 The follow-up adds private protocol/policy readiness, fail-closed ingress
 guards and a signed-bridge accepted-replay regression. Source `5f122fe` is now
 privately deployed; one real operator check observed the exact expired policy
-and unchanged successful ledger. Live accepted-duplicate replay remains unproven.
+and unchanged successful ledger. The separate later run supplies hosted replay
+evidence without relabelling this earlier observation as replay proof.
 A later [replay attempt](../../docs/evidence/readonly-hosted/accepted-replay-20261029-231248.md)
 passed fresh-session readiness but stopped at the browser action-time approval
 gate. It ended private, expired and with an empty ledger; no new execution occurred.

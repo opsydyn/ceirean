@@ -185,3 +185,8 @@ check succeeded against the same expired policy and consumed ledger. See
 [private readiness, 29 October](private-readiness-20261029.md) for the exact
 source, deployment, observation and post-run limits. This adds no public delivery
 or accepted-duplicate replay evidence to the original rehearsal.
+
+The separate [30 October 08:48 run](accepted-replay-20261030-084800.md) later
+verified two accepted deliveries and no observed reexecution within its fixed
+window. That new session closes the replay gate; it does not change this original
+rehearsal's first-refused/second-accepted history.

@@ -15,6 +15,11 @@ was aborted at the browser's action-time confirmation gate. Private readiness an
 teardown succeeded; no GitHub delivery or execution occurred. Unchecked proof
 steps remain unproven, not authority to resume this expired window.
 
+**Later completion:** the separately confirmed
+[30 October 08:48 scheduled run](../../evidence/readonly-hosted/accepted-replay-20261030-084800.md)
+completed accepted replay and bounded teardown. The unchecked steps below describe
+the original aborted attempt, not remaining work or permission to rerun it.
+
 ## Authority And Fixed Scope
 
 - This document is a plan only. No new cloud read, update, probe, comment, route, webhook or execution was performed while preparing it.

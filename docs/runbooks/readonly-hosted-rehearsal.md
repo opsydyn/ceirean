@@ -1,5 +1,15 @@
 # First Read-Only Cloudflare Rehearsal
 
+**Latest result: accepted replay verified.** The
+[08:48-08:53 UK run](../evidence/readonly-hosted/accepted-replay-20261030-084800.md)
+accepted the original and sole redelivery, returned the identical terminal job,
+and observed one alarm request and one fresh stopped instance. Webhook shutdown,
+route removal and expired admission were verified before the deadline. All public
+access is off; preserve the successful ledger. This completes the trusted runtime
+smoke, not FoldKit baseline/browser or arbitrary repository execution.
+
+## Earlier Attempts
+
 **Scheduled preparation closed without activation:** the
 [fixed 08:35-08:40 UK window](../evidence/readonly-hosted/scheduled-replay-20261030-0835.md)
 qualified future-policy readiness and owned keep-awake assertions. Final consent
@@ -19,11 +29,12 @@ occurred. Correct the preparation/clock sequence before a separately approved ru
 Status: signed GitHub delivery, durable alarm execution, terminal `Succeeded`
 (`v22.23.4`) and stopped-container readback verified on 29 October 2026. The
 public route is removed and admission expired. GitHub webhook delivery is disabled
-and verified after reload; teardown is complete. Accepted-duplicate replay remains open.
+and verified after reload; teardown was complete. Accepted replay was still open
+at that point; the separate 30 October run above closes that bounded proof.
 The follow-up readiness guard is now privately deployed. One authenticated
 readiness/status check verified the exact expired policy and unchanged retained
 job; see the [private follow-up evidence](../evidence/readonly-hosted/private-readiness-20261029.md).
-The accepted-replay regression remains local evidence, not hosted replay proof.
+The signed-bridge regression is local evidence; the new hosted record is separate.
 The [23:12 UTC replay attempt](../evidence/readonly-hosted/accepted-replay-20261029-231248.md)
 passed private readiness but was aborted when the browser approval control refused
 the webhook-enable click. Its route was removed and policy expired; no comment,
@@ -143,14 +154,17 @@ The local signed-bridge regression uses the real Alchemy storage wrapper over
 the transactional native-storage fake: stale policy and probe/enqueue skew write
 nothing; one accepted job executes and cleans up once; a second accepted signed
 delivery after success returns the identical terminal job without changing its
-ledger or alarm history. This is local evidence, not the missing hosted replay.
+ledger or alarm history. This remains local evidence; the separate 30 October
+hosted run now corroborates accepted replay for the trusted deployed smoke.
 
 ## One Bounded Activation Decision
 
-The next attempt has a concrete
-[accepted-duplicate rehearsal plan](../superpowers/plans/2026-10-29-accepted-replay-rehearsal.md).
-It is planning only: activation, the fresh session and the relative five-minute
-clock still require separate execution/start confirmation.
+The retained [accepted-duplicate plan](../superpowers/plans/2026-10-29-accepted-replay-rehearsal.md)
+and chronological evidence explain the completed checkpoint. They authorize no
+additional run. Future attempts need fresh scope, a fixed scheduled window, private
+policy preparation/readiness before that window, verified shutdown controls and
+immediate consent for Active + Save changes. Never start/rebase a clock after UI
+actions or reuse an expired approval.
 
 Before the next external operation, agree one combined deployment/rehearsal scope:
 
@@ -158,12 +172,13 @@ Before the next external operation, agree one combined deployment/rehearsal scop
    exact plan, image-copy mechanism, spend allowance and necessary token scopes.
    No custom canary image build, Linux qualification suite or tracer is needed.
 2. Select the existing test issue, numeric operator/installation/repository IDs,
-   a fresh session and five-minute window. Prepare the exact
+   a fresh session and immutable scheduled five-minute window. Prepare the exact
    `ceirean-hooks.opsydyn.xyz/webhook` Worker route. The stack remains private by
    default; the owner approved the bounded rehearsal on 2026-10-28. That approval
    does not broaden credential permissions or begin the five-minute window.
-3. Deploy, verify the private resource/image bindings and current DO policy/version,
-   then activate that route
+3. Prepare privately and verify resource/image bindings and the exact desired
+   policy before the scheduled start. Then obtain immediate click-specific consent
+   and activate that route
    and the App webhook for the bounded window. Send one allowed comment and
    redeliver that delivery once. Check the private `status` RPC or structured
    Worker result log: the same job must be returned and the runtime must stop.
@@ -200,11 +215,13 @@ execute the Worker or discover the actual deployment plan.
 Cloudflare image preparation, private provisioning, real signed delivery,
 durable alarm execution and a persisted terminal success log have now been
 verified. Independent native-instance readback confirmed stopped state and exit
-code 0. The first delivery was refused, so accepted-duplicate/no-reexecution
-proof remains open. This trusted smoke does not prove untrusted-code isolation.
-Deployment uses the protected operational state, an explicit profile/stage and
-an explicit Colima `DOCKER_HOST` for the pinned image copy; no custom image build
-is needed.
+code 0. The original 29 October attempt did not prove accepted replay; the separate
+30 October run now observed two accepted deliveries, the same successful job,
+one alarm request and unchanged fresh-instance start/stop history. This bounded
+trusted smoke does not prove untrusted-code isolation or future fault behavior.
+Initial image copy used protected state, an explicit profile/stage and Colima
+`DOCKER_HOST`; subsequent policy/route updates reused the prepared image without
+Docker/Colima or a custom image build.
 
 Next product increment after this smoke: inspect a pinned FoldKit manifest using
 trusted code and export its dependency report. Then add fixed baseline commands
