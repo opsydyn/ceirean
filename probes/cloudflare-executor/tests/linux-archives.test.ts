@@ -3,6 +3,7 @@ import { expect, test } from 'bun:test';
 import { BunFileSystem } from '@effect/platform-bun';
 import { Arbitrary, Effect, FileSystem, Match, Result, Schema } from 'effect';
 
+import { Header } from '../node_modules/npm/node_modules/tar/dist/esm/header.js';
 import {
   admitArchives,
   inspectArchive,
@@ -11,6 +12,13 @@ import {
 import { goodTar, gzip, join, stage, tar } from './linux-archive-fixtures.ts';
 
 const withTestPlatform = Effect.provide(BunFileSystem.layer);
+const ChecksumFlag = Schema.Struct({ cksumValid: Schema.Boolean });
+const readChecksumFlag = Schema.decodeUnknownSync(ChecksumFlag);
+function libraryChecksumValid(bytes: Uint8Array) {
+  const block = Buffer.from(bytes.subarray(0, 512));
+  const header = new Header(block);
+  return readChecksumFlag(header).cksumValid;
+}
 async function inspect(
   raw: Uint8Array,
   limits: Parameters<typeof inspectArchive>[2] = archiveLimits,
@@ -39,6 +47,114 @@ async function completeAdmission() {
   await Effect.runPromise(workflow.pipe(Effect.scoped, withTestPlatform));
 }
 test('admits only complete archives and exposes no extracted files', completeAdmission);
+
+async function unspecifiedOwnership() {
+  const bytes = goodTar();
+  const parsed = new Header(Buffer.from(bytes.subarray(0, 512)));
+  const header = new Header({ ...parsed, uid: undefined, gid: undefined });
+  const block = Buffer.alloc(512);
+  header.encode(block);
+  bytes.set(block, 0);
+  expect(new Header(block).uid).toBeUndefined();
+  expect(new Header(block).gid).toBeUndefined();
+  expect(Result.isSuccess(await inspect(bytes))).toBe(true);
+}
+test(
+  'admits canonical npm archives with absent rather than zero ownership IDs',
+  unspecifiedOwnership,
+);
+
+function headerChecksum(bytes: Uint8Array) {
+  let checksum = 0;
+  for (let index = 0; index < 512; index++) {
+    const checksumField = index >= 148 && index < 156;
+    checksum += Match.value(checksumField).pipe(
+      Match.when(true, () => 32),
+      Match.orElse(() => bytes[index]!),
+    );
+  }
+  return checksum;
+}
+function updateChecksum(bytes: Uint8Array) {
+  const checksum = headerChecksum(bytes);
+  bytes.set(new TextEncoder().encode(checksum.toString(8).padStart(6, '0') + ' \0'), 148);
+  return bytes;
+}
+function replaceSizeField(field: string) {
+  const bytes = goodTar();
+  bytes.set(new TextEncoder().encode(field), 124);
+  return updateChecksum(bytes);
+}
+async function standardOctalPadding() {
+  const bytes = replaceSizeField('00000000005 ');
+  expect(libraryChecksumValid(bytes)).toBe(true);
+  expect(Result.isSuccess(await inspect(bytes))).toBe(true);
+  for (const field of ['0000000005x ', '0000000005 7']) {
+    expect(Result.isFailure(await inspect(replaceSizeField(field)))).toBe(true);
+  }
+}
+test(
+  'admits standard octal padding without accepting numeric junk or digits after terminators',
+  standardOctalPadding,
+);
+
+async function absentDeviceFields() {
+  const bytes = goodTar();
+  bytes.fill(0, 329, 345);
+  expect(Result.isSuccess(await inspect(updateChecksum(bytes)))).toBe(true);
+  bytes.set(new TextEncoder().encode('0000001\0'), 329);
+  expect(Result.isFailure(await inspect(updateChecksum(bytes)))).toBe(true);
+}
+test(
+  'absent device fields are equivalent to zero but nonzero wire device metadata is refused',
+  absentDeviceFields,
+);
+
+function ambiguousChecksum(id: number) {
+  const candidates = Array.from({ length: 8 }, (_, index) =>
+    tar([{ path: `package/a-${id}-${index}`, content: 'hello' }]),
+  );
+  const bytes = candidates.find((candidate) => headerChecksum(candidate) % 8 === 0)!;
+  const checksum = headerChecksum(bytes);
+  const field = (checksum / 8).toString(8).padStart(8, '0');
+  const encoded = new TextEncoder().encode(field);
+  bytes.set(encoded, 148);
+  return bytes;
+}
+async function checksumFieldWidth() {
+  const bytes = ambiguousChecksum(0);
+  expect(libraryChecksumValid(bytes)).toBe(true);
+  expect(Result.isFailure(await inspect(bytes))).toBe(true);
+}
+test(
+  'rejects an eight-byte checksum that only validates by consuming the following typeflag',
+  checksumFieldWidth,
+);
+
+for (const seed of [0, 1, 148]) {
+  async function exactChecksumLaw() {
+    const idSchema = Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 2000 }));
+    const ids = Arbitrary.schema(idSchema);
+    function rejectsAmbiguity(id: number) {
+      const bytes = ambiguousChecksum(id);
+      const codecAccepts = libraryChecksumValid(bytes);
+      const compressing = Effect.promise(() => gzip(bytes));
+      return compressing.pipe(
+        Effect.flatMap((compressed) => inspectArchive([compressed], compressed.length)),
+        Effect.result,
+        Effect.map((result) => codecAccepts && Result.isFailure(result)),
+      );
+    }
+    const checking = Arbitrary.checkEffect(ids, rejectsAmbiguity, {
+      seed,
+      runs: 100,
+      maxShrinks: 100,
+    });
+    const result = await Effect.runPromise(checking);
+    expect(result).toMatchObject({ _tag: 'Passed', runs: 100 });
+  }
+  test(`checksum admission uses exactly eight wire bytes; seed ${seed}`, exactChecksumLaw);
+}
 
 for (const path of [
   '../outside',

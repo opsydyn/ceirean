@@ -67,6 +67,8 @@ toolchain, image and cleanup identities attached.
       reusing the original 897 and replaying all four npm locks offline.
 - [ ] Materialize Bun's native cache on pinned Linux; qualify offline installs
       and native worker/control admission. Portable caches are not installation proof.
+      [Preflight currently stops on legacy UID/GID metadata](evidence/current-baseline/linux-preflight-20261030.md);
+      the owner decision and bounded VM/image authority remain pending.
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,

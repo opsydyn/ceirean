@@ -192,3 +192,16 @@ Immediate remaining work: one controlled, pinned Linux cache-only warm-up and
 offline-reinstall with scripts disabled, then native worker/control admission and
 exact-byte image staging. No image pull/build, target scripts, browser or hosted
 activation is authorized by this preparer.
+
+Before provisioning that runtime, run the read-only archive preflight:
+
+```sh
+bun --no-env-file --no-install scripts/check-current-archives.ts --inspect /absolute/composed-output-root
+```
+
+It authenticates the fixed inventory and each compressed blob, parses without
+extracting, and stops at the first policy refusal. Exit 2 is archive-data inspection
+only, not native cache readiness. The current run stops after 94 archives on
+`@emmetio/stream-reader-utils@0.1.0` UID 501/GID 20. See the
+[local preflight evidence and pending owner decision](../evidence/current-baseline/linux-preflight-20261030.md).
+Do not skip/repack the package or start the rehearsal under a silently weakened policy.

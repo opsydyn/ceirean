@@ -74,6 +74,8 @@ toolchain choices. Do not spend another slice designing a manifest transport.
       and replay complete locks offline. No package installation ran here.
 - [ ] Perform one pinned Linux cache warm-up/offline-reinstall, with scripts off,
       to materialize Bun's actual native cache and qualify cache consumption.
+      Read-only preflight now identifies a [specific ownership-policy stop](../evidence/current-baseline/linux-preflight-20261030.md),
+      not an installer/Cloudflare failure. No VM or native install has started.
 - [x] Prepare the guarded worker bundle for the accepted checks and case count.
       Default native admission refuses; no command, browser or image was run.
       [Worker evidence and native limits](../evidence/current-baseline/worker-20261030.md).

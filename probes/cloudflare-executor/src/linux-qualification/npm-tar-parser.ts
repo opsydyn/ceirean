@@ -54,6 +54,60 @@ function crc32(crc: number, bytes: Uint8Array) {
   }
   return next >>> 0;
 }
+function strictOctalField(bytes: Uint8Array) {
+  let terminated = false;
+  let digits = 0;
+  for (const byte of bytes) {
+    if (byte === 0 || byte === 32) terminated = true;
+    else if (!terminated && byte >= 48 && byte <= 55) digits++;
+    else return false;
+  }
+  return digits > 0 || bytes.every((byte) => byte === 0 || byte === 32);
+}
+function octalFieldValue(bytes: Buffer) {
+  if (bytes.every((byte) => byte === 0 || byte === 32)) return 0;
+  return Number.parseInt(bytes.toString('ascii'), 8);
+}
+function exactChecksum(raw: Buffer) {
+  const field = raw.subarray(148, 156);
+  if (!strictOctalField(field)) return false;
+  let checksum = 0;
+  for (let index = 0; index < 512; index++) {
+    checksum += index >= 148 && index < 156 ? 32 : raw[index]!;
+  }
+  return octalFieldValue(field) === checksum;
+}
+// USTAR permits different octal widths/padding. Keep every nonnumeric byte exact.
+function equivalentHeader(raw: Buffer, canonical: Buffer) {
+  if (!exactChecksum(raw)) return false;
+  if (raw.equals(canonical)) return true;
+  const normalized = Buffer.from(raw);
+  const fields = [
+    [100, 8],
+    [108, 8],
+    [116, 8],
+    [124, 12],
+    [136, 12],
+    [148, 8],
+    [329, 8],
+    [337, 8],
+  ] as const;
+  for (const [offset, length] of fields) {
+    const actual = raw.subarray(offset, offset + length);
+    const expected = canonical.subarray(offset, offset + length);
+    if (!actual.equals(expected)) {
+      if (!strictOctalField(actual)) return false;
+      // A directory's nonzero wire size must not disappear through codec normalization.
+      if (offset !== 148) {
+        const value = octalFieldValue(actual);
+        const canonicalValue = octalFieldValue(expected);
+        if (!Number.isSafeInteger(value) || value !== canonicalValue) return false;
+      }
+      canonical.copy(normalized, offset, offset, offset + length);
+    }
+  }
+  return normalized.equals(canonical);
+}
 function parserState(limits: ArchiveLimits, budget: ArchiveBudget) {
   let invalid = false;
   let expanded = 0;
@@ -80,11 +134,11 @@ function parserState(limits: ArchiveLimits, budget: ArchiveBudget) {
       !invalid &&
       nullBlocks === 0 &&
       !extended &&
-      block.equals(canonical) &&
+      equivalentHeader(block, canonical) &&
       (entry.type === 'File' || directory) &&
       safePath(path, directory, limits.pathBytes) &&
-      header.uid === 0 &&
-      header.gid === 0 &&
+      (header.uid === undefined || header.uid === 0) &&
+      (header.gid === undefined || header.gid === 0) &&
       !header.uname &&
       !header.gname &&
       !header.linkpath &&
