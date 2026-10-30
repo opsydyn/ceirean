@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "profileId": "foldkit-0170-baseline",
+  "source": {
+    "repository": "opsydyn/fold-kit-experiments",
+    "sha": "1183e3c067f873fdd29f14f06030515929c1b956",
+    "lockSha256": "9b8f226992603213059977d39abb58acd399bfc2256d70d2890a0dfe6365cd89"
+  },
+  "platform": "linux/amd64",
+  "execution": "Blocked",
+  "image": "Unbuilt",
+  "toolchain": {
+    "bun": "1.4.3",
+    "node": "22.23.4",
+    "git": "2.43.0",
+    "playwright": "1.64.1",
+    "chromium": "156.0.8078.4",
+    "chromiumRevision": "1248"
+  },
+  "checks": [
+    { "id": "Install", "cwd": ".", "argv": ["bun", "install", "--frozen-lockfile"] },
+    { "id": "Check", "cwd": ".", "argv": ["bun", "run", "check"] },
+    { "id": "Typecheck", "cwd": ".", "argv": ["bun", "typecheck"] },
+    { "id": "Test", "cwd": ".", "argv": ["bun", "run", "test"] },
+    { "id": "Build", "cwd": ".", "argv": ["bun", "run", "build"] },
+    { "id": "Storybook", "cwd": "apps/web", "argv": ["bun", "run", "build-storybook"] },
+    {
+      "id": "PackCore",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three", "pack:check"]
+    },
+    {
+      "id": "PackFoldkit",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-foldkit", "pack:check"]
+    },
+    {
+      "id": "PackRapier",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-rapier", "pack:check"]
+    },
+    {
+      "id": "PackTroika",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-troika", "pack:check"]
+    },
+    {
+      "id": "ApiCore",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three", "api:check"]
+    },
+    {
+      "id": "ApiFoldkit",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-foldkit", "api:check"]
+    },
+    {
+      "id": "ApiRapier",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-rapier", "api:check"]
+    },
+    {
+      "id": "ApiTroika",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-troika", "api:check"]
+    },
+    {
+      "id": "ThreeBrowser",
+      "cwd": ".",
+      "argv": ["bun", "run", "--filter", "@opsydyn/effect-three-foldkit", "test:e2e"]
+    },
+    {
+      "id": "BrowserJourneys",
+      "cwd": "/opt/ceirean/browser-harness",
+      "argv": [
+        "bun",
+        "--no-env-file",
+        "--no-install",
+        "x",
+        "--no-install",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.config.ts"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "id": "Web",
+      "cwd": "apps/web",
+      "origin": "http://127.0.0.1:4321",
+      "argv": [
+        "bun",
+        "--no-env-file",
+        "--no-install",
+        "x",
+        "--no-install",
+        "astro",
+        "preview",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "4321"
+      ]
+    },
+    {
+      "id": "Promo",
+      "cwd": "apps/promo",
+      "origin": "http://127.0.0.1:4322",
+      "argv": [
+        "bun",
+        "--no-env-file",
+        "--no-install",
+        "x",
+        "--no-install",
+        "astro",
+        "preview",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "4322"
+      ]
+    }
+  ],
+  "browserCases": ["desktop/carousel", "desktop/line", "mobile/carousel", "mobile/line"],
+  "browserPolicy": {
+    "chromiumSandbox": true,
+    "externalNetwork": "Denied",
+    "desktop": { "width": 1440, "height": 900 },
+    "mobile": { "width": 390, "height": 844 }
+  },
+  "limits": {
+    "admissionMs": 300000,
+    "executionMs": 2700000,
+    "cleanupMs": 900000,
+    "commandOutputBytes": 10485760,
+    "artifactBytes": 536870912,
+    "artifactCount": 64
+  }
+}
