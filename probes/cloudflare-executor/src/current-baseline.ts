@@ -111,6 +111,7 @@ export const CurrentBaseline = Schema.Struct({
   toolchain: Schema.Struct({
     bun: Schema.Literal('1.4.3'),
     node: Schema.Literal('22.23.4'),
+    npm: Schema.Literal('10.9.9'),
     git: Schema.Literal('2.43.0'),
     playwright: Schema.Literal('1.64.1'),
     chromium: Schema.Literal('156.0.8078.4'),

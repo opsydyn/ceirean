@@ -47,7 +47,12 @@ toolchain, image and cleanup identities attached.
 - [x] Inventory a current fixed source without executing repository code.
 - [x] Reconcile the old executor preparation with the current source and record
       [the concrete readiness gaps](assessments/foldkit-baseline-readiness-20261030.md).
-- [ ] Freeze one baseline acceptance contract and source/toolchain identity.
+- [x] Freeze the approved `1183e3c` baseline acceptance contract, all 16 checks,
+      four browser cases and source/toolchain identity.
+- [x] Prepare the pinned Linux image recipe and strict preparation validator;
+      [inputs remain Pending and the image Unbuilt](runbooks/current-foldkit-baseline.md).
+- [ ] Resolve the pinned 3D helper's default `--no-sandbox` launch conflict without
+      dropping its suite, weakening sandbox policy or silently changing the SHA.
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,

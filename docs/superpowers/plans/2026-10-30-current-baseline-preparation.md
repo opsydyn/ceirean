@@ -48,17 +48,17 @@ straight-through implementation rather than another design/approval round.
 consumer toolchain, ordered check/server commands, browser cases and finite budgets.
 `currentBaseline` returns a fresh decoded contract, not a mutable authority object.
 
-- [ ] Write failing tests: the real fixture decodes; changed source/lock/Bun,
+- [x] Write failing tests: the real fixture decodes; changed source/lock/Bun,
       omitted/reordered/extra checks, substituted commands, altered browser cases,
       unknown fields and Approved/Built status claims refuse with finite errors.
       Assert the resulting runnable command plan includes root checks, Storybook,
       four pack/API checks and 3D E2E, not just a metadata success tag.
-- [ ] Run the new test and observe the missing implementation failure.
-- [ ] Implement fixed schemas and the separate JSON fixture. Preserve CI command
+- [x] Run the new test and observe the missing implementation failure.
+- [x] Implement fixed schemas and the separate JSON fixture. Preserve CI command
       arrays; installed browser binaries replace only acquisition, not the E2E check.
       Add seeded Effect property tests mutating command positions/args so weakening
       cannot pass. Preserve consumer toolchain and controller distinctions.
-- [ ] Run focused tests, workspace typechecks and root check; commit Task 1.
+- [x] Run focused tests, workspace typechecks and root check; commit Task 1 (`347bce4`).
 
 ## Task 2: Prepare The Current Image Recipe
 
@@ -70,24 +70,24 @@ consumer toolchain, ordered check/server commands, browser cases and finite budg
 returns an inferred Effect of preparation-only evidence with exact recipe digest,
 source/lock and required unresolved payloads. It never calls a builder or provider.
 
-- [ ] Write failing tests: accepted fixed recipe/input identity returns blocked
+- [x] Write failing tests: accepted fixed recipe/input identity returns blocked
       preparation with all payloads unmaterialized; changed recipe/status/image/source,
       caller matching digest, floating tag or unknown field refuses. Include immutable
       pin ownership and historical-contract negative controls.
-- [ ] Run the new tests and observe failure before implementation.
-- [ ] Prepare a Linux amd64 Playwright-base/Node/Bun multi-stage recipe with fixed
+- [x] Run the new tests and observe failure before implementation.
+- [x] Prepare a Linux amd64 Playwright-base/Node/Bun multi-stage recipe with fixed
       digest references, explicit binary version assertions, non-root user and exact
       payload copy list. No target install/scripts or downloads in build instructions.
       Omit the unused Sandbox SDK helper: the proven native container path does not
       need it. Keep the existing image/harness files untouched.
-- [ ] Bind recipe hash independently in source and fixture; validate with existing
+- [x] Bind recipe hash independently in source and fixture; validate with existing
       `sha256`/PreparationError helpers. Missing current source/cache/harness payloads,
       builder approval, final image and real sandbox/runtime proofs stay blockers.
-- [ ] Run new tests plus the existing executor suite excluding retained dirty
+- [x] Run new tests plus the existing executor suite excluding retained dirty
       observer research, all typechecks, root check and whitespace validation. Obtain
       one fresh read-only review of both tasks; fix confirmed important issues with
       RED/GREEN before committing Task 2 and verified corrections.
-- [ ] Document exact pins, commands, evidence limits and the next actual payload/
+- [x] Document exact pins, commands, evidence limits and the next actual payload/
       build step. Record that no image or repository baseline has executed.
 
 ## Completion
@@ -95,3 +95,9 @@ source/lock and required unresolved payloads. It never calls a builder or provid
 Commit verified work and report actual tests/pins. Do not introduce a manifest
 transport milestone. The next delivery is materialized current-source inputs and
 one explicitly scoped image build/Linux baseline run, then private hosted wiring.
+
+Evidence: [local preparation results](../../evidence/current-baseline/preparation-20261030.md).
+All 604 selected executor tests, 12 typechecks, strict lint/format and the focused
+9-test preparation task passed. Independent read-only review found no important
+issues. The pinned 3D helper's sandbox conflict is recorded, not bypassed; source
+payloads, trusted worker, image build and hosted activation remain blocked.

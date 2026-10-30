@@ -36,29 +36,34 @@ Repository scripts are execution, even during install/typecheck or fixture setup
 - Preserve successful smoke ledgers and historical profiles; new baseline work
   must not reset records or reinterpret `runtime: v22...` as a baseline result.
 
-## A. Freeze The Executable Contract: Immediate Slice
+## A. Freeze The Executable Contract: Prepared
 
 - [x] Inspect fixed current source and existing runtime/image/harness preparation:
       [readiness assessment](../assessments/foldkit-baseline-readiness-20261030.md).
-- [ ] Explicitly accept a baseline revision. Recommended planning candidate:
-      `1183e3c067f873fdd29f14f06030515929c1b956`, already inventoried. Its approval
-      for inventory did not silently replace historical execution approval for
-      `b7484cb46e66b162c8afddcfba235c9507b4f0ab`.
-- [ ] Freeze source/lock hashes, exact consumer toolchain, command ordering,
-      generated-consumer requirements, Linux dependencies and browser versions.
-- [ ] Preserve root CI checks and Storybook; decide explicitly how the current
-      separate effect-three CI job fits the acceptance contract. No omitted job
-      may be reported as repository-wide CI parity.
-- [ ] Bind server commands/ports, the four browser cases and evidence assertions
-      to that revision without editing its protected tests or scripts.
+- [x] Explicitly accept `1183e3c067f873fdd29f14f06030515929c1b956` as the current
+      baseline revision (owner approval 2026-10-30). Preserve historical preparation
+      for `b7484cb46e66b162c8afddcfba235c9507b4f0ab` independently.
+- [x] Freeze source/lock hashes, exact consumer toolchain, command ordering and
+      browser versions in the strict current contract. Linux dependency closure
+      and generated-consumer inputs remain unmaterialized under B.
+- [x] Preserve root CI checks, Storybook and the complete effect-three pack/API/E2E
+      job. The contract requires 16 ordered commands; omitted checks cannot decode.
+- [x] Bind built-preview commands/ports and four browser cases to the revision
+      without editing protected source tests/scripts. Native compatibility is unproven.
 
 Exit: one implementable versioned baseline contract with no unresolved source or
 toolchain choices. Do not spend another slice designing a manifest transport.
 
 ## B. Make That Baseline Runnable On Linux
 
-- [ ] Prepare a bounded trusted recipe/input set for the accepted contract, using
-      the existing recipe as a starting point rather than treating it as measured.
+- [x] Prepare the digest-pinned Linux amd64 recipe and strict image metadata,
+      using existing preparation rather than treating it as measured. See
+      [the current preparation runbook](../runbooks/current-foldkit-baseline.md).
+- [ ] Materialize the exact current source, Bun/npm caches, harness and trusted
+      baseline worker; enforce complete byte identities and safe archive custody.
+- [ ] Resolve the concrete 3D launch conflict: pinned Playwright adds
+      `--no-sandbox` because the unchanged helper omits `chromiumSandbox: true`.
+      No source substitution or sandbox-policy weakening is approved.
 - [ ] Obtain the exact bounded acquisition/build scope; then build and retain the
       final immutable image digest. Base-image digests are not the final image.
 - [ ] Run unchanged source checks and real browser journeys with their sandbox

@@ -5,6 +5,12 @@ reset. No consumer commands, installs, image builds, provider calls or hosted
 activation were performed. The findings below come from fixed Git objects and
 current Ceirean source, not from executing a baseline.
 
+Preparation update: the owner subsequently approved `1183e3c` with all root,
+Storybook, 3D and four custom browser checks. The strict contract and pinned recipe
+are now implemented; [the runbook](../runbooks/current-foldkit-baseline.md) records
+their limits. The original read-only findings below remain the assessment record,
+not a claim that the image, payloads or baseline have run.
+
 ## Decision
 
 **Pursue the real baseline/browser vertical slice. Park hosted manifest-only

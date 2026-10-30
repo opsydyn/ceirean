@@ -1,0 +1,12 @@
+**
+!Dockerfile
+!.dockerignore
+!input/
+input/**
+!input/source.tar
+!input/bun-cache.tar
+!input/npm-cache.tar
+!input/browser-harness.tar
+!input/baseline-worker.mjs
+!input/baseline-contract.json
+!input/SHA256SUMS

@@ -55,6 +55,7 @@ function approvedChecks() {
     'mobile/line',
   ]);
   expect(contract.toolchain.bun).toBe('1.4.3');
+  expect(contract.toolchain.npm).toBe('10.9.9');
   expect(contract.execution).toBe('Blocked');
   expect(contract.image).toBe('Unbuilt');
 }

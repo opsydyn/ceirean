@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "profileId": "foldkit-0170-baseline",
+  "platform": "linux/amd64",
+  "sourceSha": "1183e3c067f873fdd29f14f06030515929c1b956",
+  "lockSha256": "9b8f226992603213059977d39abb58acd399bfc2256d70d2890a0dfe6365cd89",
+  "contractSha256": "928f9451a7522fcae93db4c312358072ae5f929a99e2350929d8050ca5832e25",
+  "recipeSha256": "a28e577719b00c3feb86c180c8273e91c259745cf881eadbff6818ccfc98792f",
+  "activation": "Blocked",
+  "image": "Unbuilt",
+  "images": {
+    "node": "docker.io/library/node@sha256:ea11b74b986d520137cdef9a5346e447a00f275ecc4abc0055b7151226231e09",
+    "bun": "docker.io/oven/bun@sha256:c017a211c49a21adc0e49dda7b60ac8112887c3d9465e01427f434ed107c830e",
+    "playwright": "mcr.microsoft.com/playwright@sha256:d65108d1a8095d8b0c4a5e32bf1807a40a5ce90ff0c78473e1116b1c243235e8"
+  },
+  "inputs": {
+    "source": { "path": "input/source.tar", "status": "Pending" },
+    "bunCache": { "path": "input/bun-cache.tar", "status": "Pending" },
+    "npmCache": { "path": "input/npm-cache.tar", "status": "Pending" },
+    "browserHarness": { "path": "input/browser-harness.tar", "status": "Pending" },
+    "baselineWorker": { "path": "input/baseline-worker.mjs", "status": "Pending" }
+  }
+}
