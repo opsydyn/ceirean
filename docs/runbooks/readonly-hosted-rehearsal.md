@@ -1,5 +1,10 @@
 # First Read-Only Cloudflare Rehearsal
 
+**Prepared, not activated:** a [fixed 08:35-08:40 UK window](../evidence/readonly-hosted/scheduled-replay-20261030-0835.md)
+is privately staged and remotely verified. Final click-specific consent and
+verified shutdown controls are still required. No relative clock or automatic
+activation is created by this preparation.
+
 **Latest result:** the [30 October attempt](../evidence/readonly-hosted/accepted-replay-20261030-075551.md)
 stopped before route exposure after orchestration missed the activation cutoff.
 Cloudflare is private with expired admission and an empty fresh-session ledger;
