@@ -9,3 +9,9 @@ export * from './live-admission.ts';
 export * from './live-admission-policy.ts';
 export * from './replay-profile.ts';
 export * from './replay-inspection.ts';
+export {
+  ManifestDeclarationReport,
+  ManifestInspectionError,
+  ManifestInspectionInput,
+} from './manifest-report.ts';
+export { inspectManifestDocuments } from './manifest-inspection.ts';
