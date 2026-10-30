@@ -90,3 +90,40 @@ Offline slice verification: 739 executor tests passed, 0 failed, across 65 files
 and 29,887 assertions. All 12 typechecks and strict lint/format passed. Logs:
 `/private/tmp/ceirean-legacy-tests-final.log` and
 `/private/tmp/ceirean-legacy-types-final.log`. No VM or hosted rehearsal ran.
+
+## Approved Inert Names And Cohort Check
+
+- [x] Test-first, allow bounded printable ASCII uname/gname as inert USTAR
+      metadata only with genuine verified ownership authority. Defaults remain
+      strict; nothing restores names, ownership or special permissions.
+- [x] Check all 909 retained blobs, not only a prefix. Keep admission fail-closed;
+      diagnostic continuation must not grant replay authority or hide aggregate
+      budget exhaustion. Authenticate every blob and preserve refusal identities.
+- [x] Record the complete offline outcome, independently review, verify and commit.
+      No VM, installer, build, publication, provider or hosted action is authorized.
+
+Ruling: owner names are inert metadata, not paths or principals to restore.
+Accept only printable ASCII fitting the existing 32-byte USTAR field; all other
+archive protections and budgets stay unchanged. Non-ASCII/control metadata still
+refuses, which may block additional compatible archives rather than silently widen policy.
+
+The complete diagnostic checked all 909 and found one remaining refusal, the
+`node v22.19/` root in `@types/node@22.19.19`. The owner then separately approved
+that exact identity-bound layout. Ruling: add only that reviewed pair, not a
+generic versioned-root pattern; future versions may require another compatibility
+review. Default-strict and mixed-root/traversal rules remain unchanged.
+
+The all-or-nothing preflight then passed **909/909**, under the original cumulative
+limits: 429,561,867 raw bytes, 1,677,200,384 expanded bytes, 70,170 entries.
+This uses synthetic kernel authority in a local fixture, not Linux isolation or
+native installation. [Complete evidence](../../evidence/current-baseline/archive-admission-20261030.md).
+
+Verification: 740 executor tests passed, 0 failed, across 65 files and 30,206
+assertions, including 100 seeded owner-name pairs. All 12 typechecks and strict
+lint/format passed. Logs: `/private/tmp/ceirean-owner-tests-final.log` and
+`/private/tmp/ceirean-owner-types-final.log`. Independent review found no security
+or correctness finding. No runtime attempt, installation or hosted activity ran.
+
+Final: minor (deferred): no dedicated negative end-to-end identity-map test in
+the ordinary suite. Literal-root mismatch cases and the frozen cohort's positive
+end-to-end preflight are covered; no test-only production export was introduced.

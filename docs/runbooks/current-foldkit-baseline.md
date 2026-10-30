@@ -210,8 +210,10 @@ containers/volumes were removed and the VM stopped. See
 The [offline follow-up](../evidence/current-baseline/legacy-roots-identities-20261030.md)
 adds identity-derived single-root admission behind genuine inert ownership and
 checks warm-up/fresh Bun installed identities using the existing auditor. These
-paths are locally tested, not Linux-install qualified. Synthetic retained replay
-now stops at 241/909 on the named owner `runner` in `@types/aria-query@5.0.4`.
-Do not skip/repack packages or widen that policy without approval. Complete
-offline admission before another VM window; cache-only success would still not
-be app, browser, image or hosted qualification.
+paths are locally tested, not Linux-install qualified. Subsequent separately
+approved inert names and the exact `@types/node@22.19.19` versioned root cleared
+the remaining policy refusals: [all 909 retained archives pass offline inspection](../evidence/current-baseline/archive-admission-20261030.md)
+under unchanged cumulative budgets. This uses a synthetic kernel fixture; the
+real worker must still obtain genuine ownership authority. A separately approved
+Linux cache run is next. Do not skip/repack packages or infer VM, CI, image,
+app/browser or hosted authority from this data-only result.

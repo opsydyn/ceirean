@@ -78,8 +78,9 @@ toolchain choices. Do not spend another slice designing a manifest transport.
       [legacy npm archive root](../evidence/current-baseline/linux-preflight-20261030.md).
       No installer ran; owned runtime resources were removed and the VM stopped.
       [Legacy roots and Bun identity readback are now implemented offline](../evidence/current-baseline/legacy-roots-identities-20261030.md),
-      not measured by a Linux install. Synthetic replay next refuses a named owner
-      at 241/909; resolve that policy and complete offline admission before another VM attempt.
+      not measured by a Linux install. [Complete offline admission now passes 909/909](../evidence/current-baseline/archive-admission-20261030.md),
+      after separately approved inert owner names and one exact versioned root.
+      Real Linux cache consumption remains unqualified; no runtime attempt was authorized by that offline slice.
 - [x] Prepare the guarded worker bundle for the accepted checks and case count.
       Default native admission refuses; no command, browser or image was run.
       [Worker evidence and native limits](../evidence/current-baseline/worker-20261030.md).

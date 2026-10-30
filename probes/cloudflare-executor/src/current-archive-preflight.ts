@@ -19,6 +19,8 @@ const Item = Schema.Struct({
   integrity: Schema.String,
 });
 const Inventory = Schema.fromJsonString(Schema.Struct({ artifacts: Schema.Array(Item) }));
+// Reviewed DefinitelyTyped layout, bound to this exact frozen registry identity.
+const reviewedLegacyRoots = new Map([['@types/node@22.19.19', 'node v22.19']]);
 export function inspectCurrentOfflineArchives(root: string, ownership?: InertArchiveOwnership) {
   function* inspect() {
     const fs = yield* FileSystem.FileSystem;
@@ -56,7 +58,9 @@ export function inspectCurrentOfflineArchives(root: string, ownership?: InertArc
       const identity = yield* registryIdentity(item.identity);
       const legacyRoot = Match.value(ownership).pipe(
         Match.when(undefined, () => undefined),
-        Match.orElse(() => identity.name.split('/').at(-1)),
+        Match.orElse(
+          () => reviewedLegacyRoots.get(identity.identity) ?? identity.name.split('/').at(-1),
+        ),
       );
       const checking = inspectArchive(
         [bytes],

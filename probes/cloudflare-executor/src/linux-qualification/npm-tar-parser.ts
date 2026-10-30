@@ -120,6 +120,8 @@ function parserState(
     id === undefined ||
     id === 0 ||
     (inert && Number.isSafeInteger(id) && id >= 0 && id <= 4294967294);
+  const allowedOwnerName = (name: string | undefined) =>
+    !name || (inert && name.length <= 32 && !/[^\x20-\x7e]/.test(name));
   let invalid = false;
   let expanded = 0;
   let crc = 0xffffffff;
@@ -155,8 +157,8 @@ function parserState(
       safePath(path, directory, limits.pathBytes, root) &&
       allowedId(header.uid) &&
       allowedId(header.gid) &&
-      !header.uname &&
-      !header.gname &&
+      allowedOwnerName(header.uname) &&
+      allowedOwnerName(header.gname) &&
       !header.linkpath &&
       !header.devmaj &&
       !header.devmin &&

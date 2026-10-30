@@ -89,6 +89,26 @@ async function legacyArchiveRoots() {
       inspectArchive([bytes], bytes.length, undefined, undefined, owner, legacyRoot);
     const admitted = yield* inspect(authority, 'argparse').pipe(Effect.result);
     expect(Result.isSuccess(admitted)).toBe(true);
+    for (const [path, permittedRoot, expected] of [
+      ['node v22.19/index.d.ts', 'node v22.19', true],
+      ['node v22.20/index.d.ts', 'node v22.20', false],
+      ['node v22.19/index.d.ts', 'node', false],
+      ['node v22.20/index.d.ts', 'node v22.19', false],
+      ['node v22.19/../outside', 'node v22.19', false],
+    ] as const) {
+      const bytes = yield* Effect.promise(() => gzip(tar([{ path }])));
+      const result = yield* inspectArchive(
+        [bytes],
+        bytes.length,
+        undefined,
+        undefined,
+        authority,
+        permittedRoot,
+      ).pipe(Effect.result);
+      expect(Result.isSuccess(result)).toBe(expected);
+      const strict = yield* inspectArchive([bytes], bytes.length).pipe(Effect.result);
+      expect(Result.isFailure(strict)).toBe(true);
+    }
     for (const [owner, name] of [
       [undefined, 'argparse'],
       [authority, undefined],
@@ -105,7 +125,7 @@ async function legacyArchiveRoots() {
       [{ path: 'argparse/a', type: 'SymbolicLink', linkpath: '/outside' }],
       [{ path: 'argparse/a', type: 'Link', linkpath: 'argparse/b' }],
       [{ path: 'argparse/a', mode: 0o4644 }],
-      [{ path: 'argparse/a', uname: 'root' }],
+      [{ path: 'argparse/a', uname: 'root\n' }],
     ]) {
       const unsafe = yield* Effect.promise(() => gzip(tar(entries)));
       const result = yield* inspectArchive(
@@ -191,7 +211,7 @@ async function inertIdLaw() {
         for (const entry of [
           { path: 'package/a', uid, gid: uid },
           { path: 'package/../outside', uid, gid: uid },
-          { path: 'package/a', uid, gid: uid, uname: 'root' },
+          { path: 'package/a', uid, gid: uid, uname: 'root\n' },
         ]) {
           const bytes = yield* Effect.promise(() => gzip(tar([entry])));
           const result = yield* inspectArchive(
@@ -222,6 +242,82 @@ async function inertIdLaw() {
   await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform));
 }
 test('seeded inert numeric IDs never relax paths, names or the strict default', inertIdLaw);
+async function inertOwnerNames() {
+  function* run() {
+    const fs = yield* FileSystem.FileSystem;
+    const root = yield* fs.makeTempDirectoryScoped();
+    const kernel = `${root}/status`;
+    yield* fs.writeFileString(kernel, status);
+    const withKernel = Effect.provideService(FileSystem.FileSystem, {
+      ...fs,
+      readFileString: () => fs.readFileString(kernel),
+    });
+    const authority = yield* getInertArchiveOwnership().pipe(withKernel);
+    const idSchema = Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 1000000 }));
+    const names = Arbitrary.schema(idSchema);
+    function nameLaw(id: number) {
+      function* check() {
+        const bytes = yield* Effect.promise(() =>
+          gzip(
+            tar([
+              {
+                path: 'package/a',
+                uname: `runner-${id}`,
+                gname: `build-${id}`,
+                uid: 1001,
+                gid: 127,
+              },
+            ]),
+          ),
+        );
+        const actual = yield* inspectArchive(
+          [bytes],
+          bytes.length,
+          undefined,
+          undefined,
+          authority,
+        ).pipe(Effect.result);
+        expect(Result.isSuccess(actual)).toBe(true);
+        const strict = yield* inspectArchive([bytes], bytes.length).pipe(Effect.result);
+        expect(Result.isFailure(strict)).toBe(true);
+        const forged = yield* inspectArchive([bytes], bytes.length, undefined, undefined, {
+          ...authority,
+        }).pipe(Effect.result);
+        expect(Result.isFailure(forged)).toBe(true);
+        return true;
+      }
+      const workflow = Effect.gen(check);
+      return workflow;
+    }
+    const checked = yield* Arbitrary.checkEffect(names, nameLaw, {
+      seed: 127,
+      runs: 100,
+      maxShrinks: 100,
+    });
+    expect(checked).toMatchObject({ _tag: 'Passed', runs: 100 });
+    for (const name of ['root\n', '\u001b[31mroot', 'r\u00f8\u00f8t', 'root\u0000other']) {
+      for (const field of ['uname', 'gname']) {
+        const bytes = yield* Effect.promise(() =>
+          gzip(tar([{ path: 'package/a', [field]: name }])),
+        );
+        const result = yield* inspectArchive(
+          [bytes],
+          bytes.length,
+          undefined,
+          undefined,
+          authority,
+        ).pipe(Effect.result);
+        expect(Result.isFailure(result)).toBe(true);
+      }
+    }
+  }
+  const workflow = Effect.gen(run);
+  await Effect.runPromise(workflow.pipe(Effect.scoped, withPlatform));
+}
+test(
+  '100 inert owner-name pairs require genuine authority and never admit unsafe metadata',
+  inertOwnerNames,
+);
 for (const bad of [
   status.replaceAll('1000', '0'),
   status.replace('CapEff:\t0000000000000000', 'CapEff:\t0000000000000001'),

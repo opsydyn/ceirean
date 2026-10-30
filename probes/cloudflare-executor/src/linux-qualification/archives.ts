@@ -17,6 +17,12 @@ export class ArchiveError extends Data.TaggedError('ArchiveError')<{
 const refused = () => new ArchiveError({ code: 'ArchiveRefused' });
 const isFile = Schema.is(Schema.Literal('File'));
 const isRegistry = Schema.is(Schema.Literal('https://registry.npmjs.org'));
+const isLegacyRoot = Schema.is(
+  Schema.Union([
+    Schema.String.check(Schema.isPattern(/^[A-Za-z0-9_][A-Za-z0-9._-]*$/)),
+    Schema.Literal('node v22.19'),
+  ]),
+);
 function requireArchive(valid: boolean, code: ArchiveError['code'] = 'ArchiveRefused') {
   const result = Result.succeed(true).pipe(
     Result.filterOrFail(
@@ -41,7 +47,7 @@ export function inspectArchive(
       legacyRoot === undefined ||
         (isInertArchiveOwnership(ownership) &&
           legacyRoot.length <= limits.pathBytes &&
-          /^[A-Za-z0-9_][A-Za-z0-9._-]*$/.test(legacyRoot)),
+          isLegacyRoot(legacyRoot)),
     );
     yield* requireArchive(
       limitsFit(limits) && Number.isSafeInteger(size) && size >= 18 && size <= limits.artifactBytes,
