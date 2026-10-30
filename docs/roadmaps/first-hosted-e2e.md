@@ -65,8 +65,12 @@ toolchain choices. Do not spend another slice designing a manifest transport.
       and full archive-byte readback. Linux caches, complete harness closure and
       admitted native worker are still pending; this does not complete the previous item.
 - [x] Acquire 897 current registry candidates with frozen SRI checks and independent
-      archive/npm-content-store readback. Generated npm resolution, metadata replay
-      and native Bun cache layout remain unqualified, not silently substituted.
+      archive/npm-content-store readback. Native Bun cache layout remains unqualified.
+- [x] Freeze four current npm profile locks, bind their inert projections to source,
+      and replay complete locks with only minimal metadata and native network
+      tripwires. [Metadata evidence and exact 12-archive delta](../evidence/current-baseline/npm-20261030.md).
+- [ ] Acquire/read back that archive delta without reacquiring the existing 897;
+      compose and qualify Linux offline caches. No package installation ran here.
 - [x] Prepare the guarded worker bundle for the accepted checks and case count.
       Default native admission refuses; no command, browser or image was run.
       [Worker evidence and native limits](../evidence/current-baseline/worker-20261030.md).

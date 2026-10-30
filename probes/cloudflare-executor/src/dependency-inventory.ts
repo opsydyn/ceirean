@@ -148,15 +148,15 @@ const NpmRecord = Schema.Struct({
   cpu: Schema.optionalKey(Constraint),
   libc: Schema.optionalKey(Constraint),
 });
-const localLink = Schema.Struct({
-  link: Schema.Literal(true),
-  resolved: Schema.Literal('vendor/foldkit-viz'),
-});
-const localPackage = Schema.Struct({
-  name: Schema.Literal('@opsydyn/foldkit-viz'),
-  version: Schema.Literals(['0.9.0', '0.10.0']),
-});
 export function fromNpmLock(input: unknown) {
+  return fromNpmLockWithVendors(input, [
+    { path: 'vendor/foldkit-viz', name: '@opsydyn/foldkit-viz', versions: ['0.9.0', '0.10.0'] },
+  ]);
+}
+export function fromNpmLockWithVendors(
+  input: unknown,
+  vendors: readonly { path: string; name: string; versions: readonly string[] }[],
+) {
   function* read() {
     const lock = yield* Schema.decodeUnknownEffect(NpmLock)(input);
     const keys = Object.keys(lock.packages).sort();
@@ -165,6 +165,8 @@ export function fromNpmLock(input: unknown) {
     const local: { key: string; kind: string }[] = [];
     for (const key of keys) {
       const raw = lock.packages[key];
+      const vendorRule = vendors.find(({ path }) => path === key);
+      const linkRule = vendors.find(({ name }) => `node_modules/${name}` === key);
       function* external() {
         const item = yield* Schema.decodeUnknownEffect(NpmRecord)(raw);
         const name = item.name ?? key.split('node_modules/').at(-1) ?? '';
@@ -178,17 +180,36 @@ export function fromNpmLock(input: unknown) {
         yield* Effect.void;
       }
       function* vendor() {
-        yield* Schema.decodeUnknownEffect(localPackage)(raw);
+        const versions = vendorRule?.versions ?? [];
+        const localPackage = Schema.Struct({
+          name: Schema.Literal(vendorRule?.name ?? ''),
+          version: Schema.optionalKey(Schema.String),
+        });
+        const item = yield* Schema.decodeUnknownEffect(localPackage)(raw);
+        yield* requireInventory(
+          (versions.length === 0 && item.version === undefined) ||
+            versions.includes(item.version ?? ''),
+        );
         local.push({ key, kind: 'MetadataOnlyVendor' });
       }
       function* link() {
+        const localLink = Schema.Struct({
+          link: Schema.Literal(true),
+          resolved: Schema.Literal(linkRule?.path ?? ''),
+        });
         yield* Schema.decodeUnknownEffect(localLink)(raw);
         local.push({ key, kind: 'MetadataOnlyLink' });
       }
       const action = Match.value(key).pipe(
         Match.when('', () => Effect.gen(root)),
-        Match.when('vendor/foldkit-viz', () => Effect.gen(vendor)),
-        Match.when('node_modules/@opsydyn/foldkit-viz', () => Effect.gen(link)),
+        Match.when(
+          () => vendorRule !== undefined,
+          () => Effect.gen(vendor),
+        ),
+        Match.when(
+          () => linkRule !== undefined,
+          () => Effect.gen(link),
+        ),
         Match.orElse(() => Effect.gen(external)),
       );
       yield* action;

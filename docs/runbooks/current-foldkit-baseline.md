@@ -97,10 +97,11 @@ before any approved build. No generic observer programme is needed to state this
 
 The next preparation produced [897 verified registry candidates](../evidence/current-baseline/registry-20261030.md)
 and [a guarded worker bundle](../evidence/current-baseline/worker-20261030.md).
-Neither changes the image manifest to Ready. The npm content store lacks current
-generated-consumer metadata, and no Linux Bun install has materialized its native
-cache layout. Worker native admission and the harness activation guard still
-refuse execution. Keep the distinction between candidate bytes and runnable inputs.
+Neither changes the image manifest to Ready. Subsequent
+[current npm lock/metadata replay](../evidence/current-baseline/npm-20261030.md)
+freezes four separate consumer profiles, but does not merge the candidate caches
+or materialize the Linux Bun layout. Worker native admission and the harness
+activation guard still refuse execution. Candidate bytes are not runnable inputs.
 
 ## Sandbox Fix And Remaining Qualification
 
@@ -149,6 +150,25 @@ input hashes, resource/spend limits and cleanup ownership. After measured succes
 wire typed results/artifact export and persisted baseline deadlines into the
 existing private job path. Do not repeat a hosted manifest-only milestone.
 
-Immediate remaining work is current generated-consumer npm resolution/metadata,
-Linux offline cache composition and native worker/control admission. Reuse the
-already acquired candidate bytes; do not download the same set merely to relabel it.
+Current generated-consumer npm metadata is frozen in `fixtures/current-npm.json`
+and checksum-validated by `src/current-npm-frozen.ts`. Replay tests construct fresh
+metadata-only caches and reject empty/missing/tampered inputs. This is reviewed
+version-cohort resolution on the local host, not Linux install qualification or
+a claim about moving-latest npm resolution.
+
+The explicit metadata-only preparer is:
+
+```sh
+cd probes/cloudflare-executor
+bun --no-env-file --no-install scripts/prepare-current-npm.ts /absolute/source/repository /absolute/node
+```
+
+It reads fixed Git objects, obtains bounded public registry metadata, and runs
+npm 10.9.9 package-lock-only with scripts disabled and native network tripwires.
+Exit 2 is successful preparation, not readiness; 1 is sanitized refusal and 64
+is invalid arguments. It has no build or activation mode. Replacing the committed
+snapshot or its pin requires review, not automatic capture promotion.
+
+Immediate remaining work: acquire/read back only the 12 additional archive
+identities listed in the evidence, compose Linux offline caches, and qualify
+native worker/control admission. Reuse already acquired candidate bytes.

@@ -59,8 +59,11 @@ toolchain, image and cleanup identities attached.
       within existing budgets, without installing or executing them.
 - [x] Prepare the [guarded fixed-plan worker candidate](evidence/current-baseline/worker-20261030.md),
       with failure, cancellation, deadline and output-budget tests; native entry stays disabled.
-- [ ] Complete generated-consumer npm metadata/replay, Linux Bun cache composition
-      and native worker/control admission. Candidate bytes alone do not close these gaps.
+- [x] Freeze all four current generated/packed npm consumer locks and prove
+      [metadata-only offline replay](evidence/current-baseline/npm-20261030.md),
+      preserving the packed adapter's older explicit pins.
+- [ ] Acquire the exact 12-archive npm delta, compose Linux Bun/npm caches and
+      qualify native worker/control admission. Metadata replay is not installation proof.
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,
