@@ -8,7 +8,14 @@ import {
 
 const RootPath = Schema.Literal('package.json');
 const Text = Schema.String.check(Schema.isMinLength(1), Schema.isMaxLength(4096));
-const Declarations = Schema.Record(Text, Text);
+const validKey = Schema.is(Text);
+function validKeys(record: Readonly<Record<string, unknown>>) {
+  return Object.keys(record).every(validKey);
+}
+const Declarations = Schema.Record(Schema.String, Text).check(Schema.makeFilter(validKeys));
+const NamedCatalogs = Schema.Record(Schema.String, Declarations).check(
+  Schema.makeFilter(validKeys),
+);
 const Package = Schema.Struct({
   name: Text,
   dependencies: Schema.optionalKey(Declarations),
@@ -20,7 +27,7 @@ const Package = Schema.Struct({
 });
 const CatalogMaps = Schema.Struct({
   catalog: Schema.optionalKey(Declarations),
-  catalogs: Schema.optionalKey(Schema.Record(Text, Declarations)),
+  catalogs: Schema.optionalKey(NamedCatalogs),
 });
 const CatalogRoot = Schema.Struct({
   workspaces: Schema.optionalKey(Schema.Union([Schema.Array(Text), CatalogMaps])),

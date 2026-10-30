@@ -152,3 +152,41 @@ function detachedReport() {
   expect(rootOnly.manifests[0]?.dependencies).toEqual([]);
 }
 test('ignores unrelated fields, omits scripts and keeps returned objects detached', detachedReport);
+
+function malformedRecordKeys() {
+  const boundary = manifestInput();
+  Reflect.set(boundary.manifests[0]?.document ?? {}, 'dependencies', { ['x'.repeat(4096)]: '1' });
+  const control = inspectManifestDocuments(boundary).pipe(Result.getOrThrow);
+  expect(control.manifests[0]?.dependencies[0]?.name).toHaveLength(4096);
+  for (const key of ['', 'x'.repeat(4097)]) {
+    for (const section of [
+      'dependencies',
+      'devDependencies',
+      'optionalDependencies',
+      'peerDependencies',
+      'engines',
+    ]) {
+      const input = manifestInput();
+      const document = input.manifests[0]?.document ?? {};
+      Reflect.set(document, section, { [key]: '1', ok: '2' });
+      expect(inspectManifestDocuments(input).pipe(Result.getFailure)).toMatchObject({
+        value: { code: 'InvalidManifest' },
+      });
+    }
+    for (const workspaces of [
+      { catalog: { [key]: '1', ok: '2' } },
+      { catalogs: { named: { [key]: '1', ok: '2' } } },
+      { catalogs: { [key]: { ok: '2' } } },
+    ]) {
+      const input = manifestInput();
+      Reflect.set(input.manifests[0]?.document ?? {}, 'workspaces', workspaces);
+      expect(inspectManifestDocuments(input).pipe(Result.getFailure)).toMatchObject({
+        value: { code: 'InvalidCatalog' },
+      });
+    }
+  }
+}
+test(
+  'malformed dependency, engine and catalog keys refuse rather than silently disappearing',
+  malformedRecordKeys,
+);

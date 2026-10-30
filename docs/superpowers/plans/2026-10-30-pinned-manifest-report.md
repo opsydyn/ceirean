@@ -113,7 +113,7 @@ Completed: `575865b`; 232 domain tests, domain typecheck and root check passed.
       permutation of document/key order produces identical reports; adding unrelated
       fields preserves the dependency projection. A separate changed-byte fixture
       changes its supplied digest, so do not claim whole-report byte invariance.
-- [x] Run `moon run domain:test --concurrency 1`; observe new assertions fail
+- [x] Run targeted Bun manifest domain tests; observe new assertions fail
       because the implementation is absent, not because the runner is broken.
 - [x] Implement schemas and `inspectManifestDocuments` with Schema/Result and
       existing domain conventions. Strip unrelated package fields from the report;
@@ -165,7 +165,7 @@ Completed: `3bae228`; 18 replay tests, replay typecheck and root check passed.
   expect(after.commit).toBe(fixtureCommit);
   ```
 
-- [x] Run `moon run replay:test --concurrency 1`; record the expected new failures.
+- [x] Run the targeted Bun manifest-source test; record the expected new failure.
 - [x] Implement the reader with `effect/process` and bounded Stream collection,
       following `preparation-process.ts` as an idiom without importing probe code or
       creating a generic arbitrary-command runner. Use `/usr/bin/git`, `shell: false`,
@@ -186,6 +186,11 @@ Completed: `3bae228`; 18 replay tests, replay typecheck and root check passed.
       `feat: read bounded manifest evidence from pinned Git objects`.
 
 ## Task 3: CLI, Exact Baseline Evidence And Handoff
+
+Completed: `6a98b9b`; final review correction rejects malformed record keys.
+Final affected suite: 233 domain tests and 28 replay tests, with all 12 workspace
+typechecks and root check passing. See the retained evidence for the deferred
+minor native-termination coverage gap.
 
 **Files:** create `apps/replay/src/manifest-cli.ts`, the two remaining replay
 tests and the runbook/evidence files; modify `cli.ts`, `main.ts` and the approved
@@ -230,7 +235,7 @@ design status. Do not modify package dependencies or hosted infrastructure.
       Use a test-only statically imported harness around the real main function with
       spied source reads and `replayTeardown`, not a public CLI test selector. The
       harness invokes `BunRuntime.runMain` with that real main/teardown pair.
-- [x] Run `moon run replay:test --concurrency 1`; observe expected new failures,
+- [x] Run targeted Bun manifest CLI/process tests; observe expected new failures,
       including the current entrypoint's missing 0 in its exit decoder.
 - [x] Implement CLI composition/encoding and add 0 to `main.ts`'s exit decoder.
       Allow only the exact operation above; keep old `inspect` tests unchanged.
@@ -264,12 +269,23 @@ design status. Do not modify package dependencies or hosted infrastructure.
       codes, verification commands/results and cooperative deadline caveat. Mark
       the spec implemented only after these gates. State explicitly that hosted
       execution and baseline/browser qualification have not occurred.
-- [ ] Re-run root format/whitespace checks after docs/evidence. Review the full
+- [x] Re-run root format/whitespace checks after docs/evidence. Review the full
       branch diff against this plan; if no independent reviewer tool is available,
       report self-review honestly rather than claiming independent review. Commit
       only Task 3 files as `feat: export pinned FoldKit manifest report`.
 
 ## Completion Handoff
+
+Execution decisions: shared fixture helpers were added for domain and replay
+tests; an optional internal platform-layer parameter enables acquisition tests;
+the CLI exposes neither seam. Exact stdout uses `.jsonl` to prevent formatting
+changes. Targeted Bun tests supplied the RED runs; full affected Moon suites
+supplied GREEN verification. These change no runtime authority or dependency.
+Hosted behavior, observer research, remote ownership attestation and installed
+compatibility remain excluded/unclaimed, so later hosted qualification still
+needs its own evidence. The fresh review's Important silent-key-loss finding
+was reproduced and fixed; native OS-termination coverage remains a deferred
+minor, not an observed leak.
 
 Report task commits, actual test/typecheck/lint results, artifact path/digest and
 remaining dirty observer research. Recommend the next bounded hosted manifest

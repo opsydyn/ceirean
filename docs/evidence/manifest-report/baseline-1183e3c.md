@@ -42,7 +42,7 @@ compared with the fixed-SHA source, not a working-tree package manifest.
 
 ## Verification
 
-Local verification passed: 232 domain tests, 28 replay tests, all 12 workspace
+Local verification passed: 233 domain tests, 28 replay tests, all 12 workspace
 typechecks, root lint/format and whitespace checks. This is local implementation
 evidence, not hosted qualification.
 
@@ -50,6 +50,18 @@ The actual entrypoint regression first emitted valid manifest JSON but exited 1
 because its exit-code schema omitted 0. After adding 0, the same subprocess
 regression passed. Deadline tests cover acquisition, work and delayed disposal;
 uninterruptible cleanup is joined rather than reported as an instant kill.
+
+An independent read-only review confirmed the baseline artifact and found a
+decoder issue: refined record-key schemas could silently omit empty/oversized
+dependency, engine or catalog keys. The regression failed before the fix and
+passed after switching to unfiltered record keys with explicit whole-key
+validation. Valid keys at the 4096-character boundary remain present. The
+retained valid-baseline report is byte-for-byte unchanged by this correction.
+
+Deferred minor: fake process finalizer tests demonstrate scope cleanup, not
+direct native OS-process termination. No production leak was observed. A future
+controlled live-child cancellation/overflow test is still useful; this evidence
+does not claim that native termination qualification.
 
 ## Boundaries
 
