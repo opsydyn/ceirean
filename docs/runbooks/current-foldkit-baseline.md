@@ -169,6 +169,26 @@ Exit 2 is successful preparation, not readiness; 1 is sanitized refusal and 64
 is invalid arguments. It has no build or activation mode. Replacing the committed
 snapshot or its pin requires review, not automatic capture promotion.
 
-Immediate remaining work: acquire/read back only the 12 additional archive
-identities listed in the evidence, compose Linux offline caches, and qualify
-native worker/control admission. Reuse already acquired candidate bytes.
+The next completed slice acquired only that 12-archive delta and composed
+[909 independently verified portable registry/npm inputs](../evidence/current-baseline/offline-cache-20261030.md).
+All four npm locks replay from the composed cache; original input pins remain
+unchanged. The real Bun-native Linux layout has not been fabricated or qualified.
+
+The explicit cache-input preparer supports only inspection and preparation:
+
+```sh
+cd probes/cloudflare-executor
+bun --no-env-file --no-install scripts/prepare-current-cache.ts --inspect /absolute/source/repository /absolute/retained-registry-candidate /absolute/node
+bun --no-env-file --no-install scripts/prepare-current-cache.ts --prepare /absolute/source/repository /absolute/retained-registry-candidate /absolute/node
+```
+
+The retained input inventory and receipt must match their compiled pins and the
+regenerated fixed-source inventory. Initial source/blob drift refuses before downloads.
+Preparation reuses local bytes and downloads only absent exact artifacts within
+the unchanged combined budgets. It never overwrites the retained input or an
+existing output. Exit 2 means preparation only, 1 sanitized refusal, 64 bad argv.
+
+Immediate remaining work: one controlled, pinned Linux cache-only warm-up and
+offline-reinstall with scripts disabled, then native worker/control admission and
+exact-byte image staging. No image pull/build, target scripts, browser or hosted
+activation is authorized by this preparer.

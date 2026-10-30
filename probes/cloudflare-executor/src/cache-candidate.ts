@@ -23,9 +23,15 @@ export function persistCache(
   artifacts: readonly Artifact[],
   metadata: readonly Metadata[],
   request: (url: string, init: RequestInit) => Promise<Response>,
+  reservedBytes = 0,
 ) {
   function* persist() {
     yield* requireInventory(artifacts.length > 0 && artifacts.length <= 1024);
+    yield* requireInventory(
+      Number.isSafeInteger(reservedBytes) &&
+        reservedBytes >= 0 &&
+        reservedBytes <= cacheLimits.totalBytes,
+    );
     const fs = yield* FileSystem.FileSystem;
     const artifactDirectory = fs.makeDirectory(`${output}/artifacts`, { mode: 0o700 });
     const npmDirectory = fs.makeDirectory(`${output}/npm-cache`, { mode: 0o700 });
@@ -33,7 +39,7 @@ export function persistCache(
     yield* Effect.uninterruptible(npmDirectory);
     const approved = artifacts.map((entry) => entry.url);
     yield* requireInventory(new Set(approved).size === artifacts.length);
-    const spent = yield* Ref.make(0);
+    const spent = yield* Ref.make(reservedBytes);
     const entries = [];
     for (const [index, artifact] of artifacts.entries()) {
       const fetched = yield* fetchArtifact(request, artifact, approved, spent);
@@ -49,18 +55,28 @@ export function persistCache(
   const workflow = Effect.gen(persist);
   return workflow;
 }
-function readBlob(path: string) {
+export function readCacheBlob(path: string) {
   function* read() {
     const fs = yield* FileSystem.FileSystem;
     const file = yield* fs.open(path, { flag: 'r', noFollow: true });
     const info = yield* file.stat;
-    const valid = isFile(info.type) && info.size > 0n && info.size <= BigInt(cacheLimits.blobBytes);
+    const valid = [
+      isFile(info.type),
+      info.size > 0n,
+      info.size <= BigInt(cacheLimits.blobBytes),
+      Option.contains(1n)(info.nlink),
+    ].every(Boolean);
     yield* requireInventory(valid, 'InputChanged');
     const data = yield* file.readAlloc(Number(info.size) + 1);
     const bytes = Option.getOrElse(data, () => new Uint8Array());
     const tail = yield* file.readAlloc(1);
+    const after = yield* file.stat;
+    const independentAfter = Option.contains(1n)(after.nlink);
     const complete = bytes.length === Number(info.size) && Option.isNone(tail);
-    yield* requireInventory(complete, 'InputChanged');
+    yield* requireInventory(
+      complete && independentAfter && after.size === info.size,
+      'InputChanged',
+    );
     return bytes;
   }
   const workflow = Effect.gen(read);
@@ -117,7 +133,7 @@ export function verifyCache(
     let registryBytes = 0;
     for (const [index, artifact] of artifacts.entries()) {
       const path = blobName(index);
-      const bytes = yield* readBlob(`${output}/${path}`);
+      const bytes = yield* readCacheBlob(`${output}/${path}`);
       const integrity = 'sha512-' + new Bun.CryptoHasher('sha512').update(bytes).digest('base64');
       yield* requireInventory(integrity === artifact.integrity, 'InputChanged');
       const sha256 = yield* digestBytes(bytes);

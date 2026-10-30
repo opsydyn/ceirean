@@ -1,8 +1,9 @@
-import { Console, Effect, Ref, Schema, Stream } from 'effect';
+import { Effect, Ref, Schema, Stream } from 'effect';
 
 import { InventoryError, requireInventory } from './dependency-inventory.ts';
 import { digestBytes } from './payload.ts';
 import { validateRegistryRequest } from './preparation.ts';
+import { releaseRegistryResponse } from './registry-response.ts';
 
 export const cacheLimits = {
   blobBytes: 67108864,
@@ -16,7 +17,7 @@ export function fetchArtifact(
   spent: Ref.Ref<number>,
   limits: { blobBytes: number; totalBytes: number; requestMs: number } = cacheLimits,
 ) {
-  function* fetch() {
+  function* fetch(confirmed: Ref.Ref<boolean>) {
     yield* requireInventory(
       Object.entries(limits).every(
         ([key, value]) =>
@@ -33,9 +34,7 @@ export function fetchArtifact(
     });
     const acquiring = Effect.interruptible(requesting);
     const response = yield* Effect.acquireRelease(acquiring, (response) =>
-      Effect.tryPromise(() => response.body?.cancel() ?? Promise.resolve()).pipe(
-        Effect.catch(() => Console.warn('{"_tag":"CacheBodyCancellationFailed"}')),
-      ),
+      releaseRegistryResponse(response, confirmed),
     );
     const noResponseUrl = Schema.is(Schema.Literal(''));
     const validResponse =
@@ -83,8 +82,14 @@ export function fetchArtifact(
     yield* requireInventory(actual === artifact.integrity, 'InputChanged');
     return { bytes, sha256: yield* digestBytes(bytes) };
   }
-  const workflow = Effect.gen(fetch);
-  const bounded = workflow.pipe(Effect.timeout(limits.requestMs));
-  const scoped = Effect.scoped(bounded);
-  return scoped;
+  function* run() {
+    const confirmed = yield* Ref.make(false);
+    const fetching = Effect.gen(() => fetch(confirmed));
+    const scoped = fetching.pipe(Effect.timeout(limits.requestMs), Effect.scoped);
+    const result = yield* scoped;
+    yield* requireInventory(yield* Ref.get(confirmed), 'ResolutionRefused');
+    return result;
+  }
+  const workflow = Effect.gen(run);
+  return workflow;
 }

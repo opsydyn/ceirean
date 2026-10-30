@@ -62,8 +62,11 @@ toolchain, image and cleanup identities attached.
 - [x] Freeze all four current generated/packed npm consumer locks and prove
       [metadata-only offline replay](evidence/current-baseline/npm-20261030.md),
       preserving the packed adapter's older explicit pins.
-- [ ] Acquire the exact 12-archive npm delta, compose Linux Bun/npm caches and
-      qualify native worker/control admission. Metadata replay is not installation proof.
+- [x] Acquire the exact 12-archive npm delta and compose/read back
+      [909 portable registry/npm cache inputs](evidence/current-baseline/offline-cache-20261030.md),
+      reusing the original 897 and replaying all four npm locks offline.
+- [ ] Materialize Bun's native cache on pinned Linux; qualify offline installs
+      and native worker/control admission. Portable caches are not installation proof.
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,

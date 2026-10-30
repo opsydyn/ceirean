@@ -69,8 +69,11 @@ toolchain choices. Do not spend another slice designing a manifest transport.
 - [x] Freeze four current npm profile locks, bind their inert projections to source,
       and replay complete locks with only minimal metadata and native network
       tripwires. [Metadata evidence and exact 12-archive delta](../evidence/current-baseline/npm-20261030.md).
-- [ ] Acquire/read back that archive delta without reacquiring the existing 897;
-      compose and qualify Linux offline caches. No package installation ran here.
+- [x] Acquire/read back that archive delta without reacquiring the existing 897;
+      compose [909 portable registry/npm inputs](../evidence/current-baseline/offline-cache-20261030.md)
+      and replay complete locks offline. No package installation ran here.
+- [ ] Perform one pinned Linux cache warm-up/offline-reinstall, with scripts off,
+      to materialize Bun's actual native cache and qualify cache consumption.
 - [x] Prepare the guarded worker bundle for the accepted checks and case count.
       Default native admission refuses; no command, browser or image was run.
       [Worker evidence and native limits](../evidence/current-baseline/worker-20261030.md).

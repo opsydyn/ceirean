@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { Arbitrary, Effect, Ref, Result, Schema } from 'effect';
+import { Arbitrary, Deferred, Effect, Fiber, Ref, Result, Schema } from 'effect';
 
 import { cacheLimits, fetchArtifact } from '../src/cache-download.ts';
 
@@ -109,6 +109,44 @@ async function requestOptionsAndDeadline() {
   expect(observed?.signal?.aborted).toBe(true);
 }
 test('fetch has fixed safe options and its deadline aborts the request', requestOptionsAndDeadline);
+
+async function boundedResponseCleanup() {
+  const cancelling = Deferred.makeUnsafe<void>();
+  let finish = () => {};
+  function request() {
+    const body = new ReadableStream<Uint8Array>({
+      cancel() {
+        Deferred.doneUnsafe(cancelling, Effect.void);
+        return new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      },
+    });
+    return Promise.resolve(new Response(body, { status: 302 }));
+  }
+  function* run() {
+    const checking = fetchArtifact(request, artifact, [artifact.url], Ref.makeUnsafe(0)).pipe(
+      Effect.result,
+    );
+    const fiber = yield* Effect.forkScoped(checking);
+    yield* Deferred.await(cancelling).pipe(Effect.timeout('1 second'));
+    yield* Effect.sleep('1200 millis');
+    const completedBeforeRelease = yield* Effect.sync(() => fiber.pollUnsafe() !== undefined);
+    yield* Effect.sync(finish);
+    const result = yield* Fiber.join(fiber);
+    return { completedBeforeRelease, result };
+  }
+  const workflow = Effect.gen(run);
+  const scoped = Effect.scoped(workflow);
+  const result = await Effect.runPromise(scoped);
+  expect(result.completedBeforeRelease).toBe(true);
+  expect(result.result._tag).toBe('Failure');
+}
+test(
+  'archive response cancellation has a fixed bound instead of holding scope forever',
+  boundedResponseCleanup,
+  5000,
+);
 function boundedLaw(seed: number) {
   async function run() {
     const Size = Schema.Number.check(

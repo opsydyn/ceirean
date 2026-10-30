@@ -1,10 +1,11 @@
-import { Console, Effect, Match, Order, Ref, Schema, Stream } from 'effect';
+import { Effect, Match, Order, Ref, Schema, Stream } from 'effect';
 
 import { InventoryError, registryIdentity, requireInventory } from './dependency-inventory.ts';
 import { encodeInventory } from './frozen-dependencies.ts';
 import { readCachedMetadata } from './npm-cache-store.ts';
 import { digestBytes } from './payload.ts';
 import { sha256, validateRegistryRequest } from './preparation.ts';
+import { releaseRegistryResponse } from './registry-response.ts';
 
 const strings = Schema.Record(Schema.String, Schema.String);
 const platform = Schema.Union([Schema.String, Schema.Array(Schema.String)]);
@@ -35,14 +36,6 @@ const MetadataInput = Schema.Struct({
 });
 const decodeMetadata = Schema.decodeUnknownEffect(Schema.fromJsonString(MetadataInput));
 export type CurrentVersionRecord = typeof CurrentVersion.Type;
-function cancelMetadataResponse(response: Response, confirmed: Ref.Ref<boolean>) {
-  const cancelling = Effect.tryPromise(() => response.body?.cancel() ?? Promise.resolve());
-  const bounded = cancelling.pipe(Effect.timeout('1 second'), Effect.interruptible);
-  return bounded.pipe(
-    Effect.andThen(Ref.set(confirmed, true)),
-    Effect.catch(() => Console.warn('{"_tag":"MetadataBodyCancellationUnconfirmed"}')),
-  );
-}
 export function fetchCurrentVersion(
   artifact: { identity: string; integrity?: string },
   request: (url: string, init: RequestInit) => Promise<Response>,
@@ -59,7 +52,7 @@ export function fetchCurrentVersion(
     });
     const acquiring = Effect.interruptible(requesting);
     const response = yield* Effect.acquireRelease(acquiring, (response) =>
-      cancelMetadataResponse(response, confirmed),
+      releaseRegistryResponse(response, confirmed),
     );
     const validResponse = [
       response.status === 200,
