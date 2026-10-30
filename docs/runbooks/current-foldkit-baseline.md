@@ -24,6 +24,11 @@ See [amendment/input evidence](../evidence/current-baseline/sandbox-inputs-20261
 - `current-image/Dockerfile` and `.dockerignore`: narrowed Linux amd64 candidate.
 - `fixtures/current-image.json` and `src/current-image.ts`: exact input metadata
   and recipe validation, always preparation-only while payloads are Pending.
+- `src/current-dependencies.ts` and `scripts/prepare-current-registry.ts`: current
+  fixed-source Linux registry candidates, with the old inventory policy preserved.
+- `src/current-worker.ts` and `scripts/current-baseline-worker.ts`: fixed-plan
+  worker and a deliberately disabled native entry; candidate bytes are retained
+  locally, not promoted to an assembled image context.
 
 The consumer uses Bun 1.4.3; Ceirean's controller stays on Bun 1.4.2 and Effect
 4.0.5. Node 22.23.4, npm 10.9.9 and Git 2.43.0 are exact expected image readbacks,
@@ -90,6 +95,13 @@ A checksum list alone does not establish safe source membership,
 archive paths or complete input coverage; the trusted preparer must enforce those
 before any approved build. No generic observer programme is needed to state this.
 
+The next preparation produced [897 verified registry candidates](../evidence/current-baseline/registry-20261030.md)
+and [a guarded worker bundle](../evidence/current-baseline/worker-20261030.md).
+Neither changes the image manifest to Ready. The npm content store lacks current
+generated-consumer metadata, and no Linux Bun install has materialized its native
+cache layout. Worker native admission and the harness activation guard still
+refuse execution. Keep the distinction between candidate bytes and runnable inputs.
+
 ## Sandbox Fix And Remaining Qualification
 
 At the original `1183e3c` source, `packages/effect-three-foldkit/e2e/support/server.ts` calls
@@ -136,3 +148,7 @@ complete exact-byte image staging and request one build/Linux baseline scope wit
 input hashes, resource/spend limits and cleanup ownership. After measured success,
 wire typed results/artifact export and persisted baseline deadlines into the
 existing private job path. Do not repeat a hosted manifest-only milestone.
+
+Immediate remaining work is current generated-consumer npm resolution/metadata,
+Linux offline cache composition and native worker/control admission. Reuse the
+already acquired candidate bytes; do not download the same set merely to relabel it.

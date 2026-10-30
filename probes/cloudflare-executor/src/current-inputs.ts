@@ -116,3 +116,13 @@ export function prepareCurrentPayloadInputs(repository: string) {
   const workflow = Effect.gen(prepare);
   return workflow.pipe(Effect.timeout('2 minutes'), Effect.scoped);
 }
+
+export function readCurrentSource(repository: string) {
+  function* read() {
+    yield* requirePayload(currentBaseline().source.sha === currentSourcePins.revision);
+    const source = yield* readSourceAt(repository, currentSourcePins);
+    return yield* inspectCurrentSourceFiles(source);
+  }
+  const workflow = Effect.gen(read);
+  return workflow;
+}

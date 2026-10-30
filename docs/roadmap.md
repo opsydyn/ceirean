@@ -55,6 +55,12 @@ toolchain, image and cleanup identities attached.
       sandbox-only descendant `be0427e`; preserve every check and the unchanged lock.
 - [x] Materialize and independently read back local source/harness-source candidates;
       [exact identities and remaining blockers](evidence/current-baseline/sandbox-inputs-20261030.md).
+- [x] Acquire and read back [897 current registry candidates](evidence/current-baseline/registry-20261030.md)
+      within existing budgets, without installing or executing them.
+- [x] Prepare the [guarded fixed-plan worker candidate](evidence/current-baseline/worker-20261030.md),
+      with failure, cancellation, deadline and output-budget tests; native entry stays disabled.
+- [ ] Complete generated-consumer npm metadata/replay, Linux Bun cache composition
+      and native worker/control admission. Candidate bytes alone do not close these gaps.
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,

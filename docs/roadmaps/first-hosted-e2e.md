@@ -63,7 +63,13 @@ toolchain choices. Do not spend another slice designing a manifest transport.
       baseline worker; enforce complete byte identities and safe archive custody.
 - [x] Materialize current source and harness-source candidates, with inventories
       and full archive-byte readback. Linux caches, complete harness closure and
-      trusted worker are still pending; this does not complete the previous item.
+      admitted native worker are still pending; this does not complete the previous item.
+- [x] Acquire 897 current registry candidates with frozen SRI checks and independent
+      archive/npm-content-store readback. Generated npm resolution, metadata replay
+      and native Bun cache layout remain unqualified, not silently substituted.
+- [x] Prepare the guarded worker bundle for the accepted checks and case count.
+      Default native admission refuses; no command, browser or image was run.
+      [Worker evidence and native limits](../evidence/current-baseline/worker-20261030.md).
 - [x] Resolve the static 3D launch conflict with `be0427e`, a sandbox-only direct
       descendant of `1183e3c`. The lock/checks are unchanged; native launch remains
       unqualified. The amendment and config-cwd correction are explicit in

@@ -99,6 +99,12 @@ const NpmLock = Schema.Struct({
   packages: Schema.Record(Schema.String, Schema.Unknown),
 });
 export function fromBunLock(input: unknown) {
+  return fromBunLockWithWorkspaces(input, sourceWorkspaces);
+}
+export function fromBunLockWithWorkspaces(
+  input: unknown,
+  allowedWorkspaces: ReadonlyMap<string, string>,
+) {
   function* read() {
     const lock = yield* Schema.decodeUnknownEffect(BunLock)(input);
     const keys = Object.keys(lock.packages).sort();
@@ -109,7 +115,7 @@ export function fromBunLock(input: unknown) {
       const raw = lock.packages[key] ?? [];
       function* workspace() {
         const [identity] = yield* Schema.decodeUnknownEffect(WorkspaceTuple)(raw);
-        yield* requireInventory(sourceWorkspaces.get(key) === identity);
+        yield* requireInventory(allowedWorkspaces.get(key) === identity);
         workspaces.push({ key, identity });
       }
       function* external() {
