@@ -124,6 +124,8 @@ export function makeCurrentCiPorts(implementationRoot: string) {
     { readonly dev: bigint; readonly ino: bigint; readonly uid: number | undefined }
   >();
   const outputs = new Set<string>();
+  const unconfirmedRoots = new Set<string>();
+  const pendingAcquisitions = new Map<string, Set<string>>();
   function directory(owner: string) {
     return `${implementationRoot}/.local/current-ci-${owner}`;
   }
@@ -134,6 +136,20 @@ export function makeCurrentCiPorts(implementationRoot: string) {
       return result.stdout;
     }
     const workflow = Effect.gen(run);
+    return workflow;
+  }
+  function acquireResource(owner: string, name: string, argv: readonly string[]) {
+    function* acquire() {
+      yield* requireSupervisor(owned.has(owner), 'CleanupUnknown');
+      const pending = pendingAcquisitions.get(owner) ?? new Set<string>();
+      yield* requireSupervisor(!pending.has(name), 'CleanupUnknown');
+      pendingAcquisitions.set(owner, pending);
+      // An absent listing cannot settle an interrupted daemon-side create.
+      pending.add(name);
+      yield* command(owner, argv);
+      pending.delete(name);
+    }
+    const workflow = Effect.gen(acquire);
     return workflow;
   }
   function* prepareOwned(owner: string) {
@@ -148,9 +164,11 @@ export function makeCurrentCiPorts(implementationRoot: string) {
     yield* requireSupervisor((yield* fs.realPath(local)) === local, 'InputChanged');
     const root = directory(owner);
     function* claim() {
+      unconfirmedRoots.add(owner);
       yield* fs.makeDirectory(root, { mode: 0o700 });
       const info = yield* metadata.lstat(root);
       owned.set(owner, { dev: info.dev, ino: info.ino, uid: info.uid });
+      unconfirmedRoots.delete(owner);
     }
     const claiming = Effect.gen(claim);
     yield* claiming.pipe(Effect.uninterruptible);
@@ -264,7 +282,13 @@ export function makeCurrentCiPorts(implementationRoot: string) {
     function* create() {
       const name = currentCiNames(owner)[kind];
       yield* requireSupervisor(!(yield* exists(owner, 'volume', name)), 'InputChanged');
-      yield* command(owner, ['volume', 'create', '--label', `ceirean.current=${owner}`, name]);
+      yield* acquireResource(owner, name, [
+        'volume',
+        'create',
+        '--label',
+        `ceirean.current=${owner}`,
+        name,
+      ]);
     }
     const workflow = Effect.gen(create);
     return workflow;
@@ -272,7 +296,7 @@ export function makeCurrentCiPorts(implementationRoot: string) {
   function stage(owner: string) {
     function* run() {
       const names = currentCiNames(owner);
-      yield* command(owner, [
+      yield* acquireResource(owner, names.stager, [
         'create',
         '--name',
         names.stager,
@@ -327,7 +351,11 @@ export function makeCurrentCiPorts(implementationRoot: string) {
   }
   function createConsumer(owner: string) {
     function* create() {
-      yield* command(owner, currentCiConsumerArguments(owner));
+      yield* acquireResource(
+        owner,
+        currentCiNames(owner).consumer,
+        currentCiConsumerArguments(owner),
+      );
       const state = yield* readConsumer(owner);
       yield* requireSupervisor(!state.Running, 'BlockedControls');
     }
@@ -462,6 +490,7 @@ export function makeCurrentCiPorts(implementationRoot: string) {
       const fs = yield* FileSystem.FileSystem;
       const metadata = yield* CacheMetadata;
       const names = currentCiNames(owner);
+      yield* requireSupervisor(!unconfirmedRoots.has(owner), 'CleanupUnknown');
       const hasRoot = Effect.succeed(owned.has(owner));
       function* removeResources() {
         const cleaned = [];
@@ -469,6 +498,11 @@ export function makeCurrentCiPorts(implementationRoot: string) {
           cleaned.push(yield* removeOwned(owner, 'container', name).pipe(Effect.exit));
         for (const name of [names.work, names.tools, names.inputs])
           cleaned.push(yield* removeOwned(owner, 'volume', name).pipe(Effect.exit));
+        yield* requireSupervisor(cleaned.every(Exit.isSuccess), 'CleanupUnknown');
+        yield* requireSupervisor(
+          (pendingAcquisitions.get(owner)?.size ?? 0) === 0,
+          'CleanupUnknown',
+        );
         const root = directory(owner);
         const rootInfo = yield* metadata.lstat(root);
         const expected = yield* Effect.fromNullishOr(owned.get(owner));
@@ -496,8 +530,6 @@ export function makeCurrentCiPorts(implementationRoot: string) {
           yield* descending.pipe(Effect.when(directoryPresent));
         }
         yield* fs.remove(root, { recursive: true });
-        owned.delete(owner);
-        yield* requireSupervisor(cleaned.every(Exit.isSuccess), 'CleanupUnknown');
         function* evidence() {
           yield* fs.writeFileString(
             `${implementationRoot}/qualification-output/cleanup.json`,
@@ -514,6 +546,8 @@ export function makeCurrentCiPorts(implementationRoot: string) {
         const writing = Effect.gen(evidence);
         const outputPresent = Effect.succeed(outputs.has(owner));
         yield* writing.pipe(Effect.when(outputPresent));
+        owned.delete(owner);
+        pendingAcquisitions.delete(owner);
       }
       const removing = Effect.gen(removeResources);
       yield* removing.pipe(Effect.when(hasRoot));

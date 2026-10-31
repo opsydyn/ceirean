@@ -55,6 +55,14 @@ labels, attempts each owned resource and independently confirms removal. Unknown
 cleanup prevents a pass. It never prunes unrelated resources or images. Export
 or upload failure is failure, even after a zero-exit installer.
 
+Each create request is recorded before dispatch and settled only on a successful
+client acknowledgement. Cancellation/nonzero exit leaves it ambiguous: even an
+empty name listing cannot prove a late daemon request will not create it.
+Cleanup removes observed owned objects, but retains scratch and authority and
+reports unknown until that ambiguity is explicitly reconciled. Failed removals
+also retain ownership for subsequent cleanup; they never turn into a later
+no-op success. A directory claim without captured identity refuses deletion.
+
 ## Verification And Limits
 
 ```sh

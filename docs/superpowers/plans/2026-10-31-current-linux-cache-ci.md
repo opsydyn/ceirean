@@ -69,7 +69,7 @@
 - [x] Test manual-only trigger, fixed implementation/source pins, exact budgets/permissions, no secrets/cache/retry/parameters, only fixed evidence/seed paths and inactive location. Missing publication/run fields block rather than use a branch tip.
 - [x] Write the thin workflow and worksheet around Task 3. Verify SHA-pinned checkout/upload action metadata. The official controller checksum lookup failed; record it as a publication blocker, not an invented value.
 - [x] Keep overall acceptance dependent on seed export/upload and cleanup. The draft is deliberately inspection-only and refuses before acquisition. Worksheet lists operational-entry/outcome persistence, aggregate artifact checks and unified bootstrap/acquisition timing as publication prerequisites, not completed Linux behavior.
-- [ ] Independently review the entire local slice, fix important findings RED-to-GREEN, run full executor suite, lint/format, all typechecks and contract tests. Commit `docs: prepare manual current cache CI handoff`.
+- [x] Independently review the entire local slice, fix important findings RED-to-GREEN, run full executor suite, lint/format, all typechecks and contract tests. Commit the handoff, then the verified ownership fixes.
 
 ## Publication And Execution Gates
 
@@ -116,3 +116,12 @@ Ruling: the current CLI remains inspection-only, as required by Task 3. Do not
 silently add a runnable switch while implementation/tool/publication pins are
 absent. The worksheet explicitly lists the reviewed live-entry and fixed outcome
 persistence handoff required before publication. The template always refuses.
+
+Final review: one fresh-context reviewer found two cleanup ownership defects;
+both were reproduced RED and fixed GREEN in one pass. A related directory-claim
+failure also received a RED-to-GREEN regression. Final suite: 762 passed, zero
+failed; all 12 typechecks and root lint/format passed. No minor findings deferred.
+See [the complete local evidence and rulings](../../evidence/current-baseline/current-ci-local-20261031.md).
+Ruling: retain unknown acquisitions and failed-removal ownership rather than
+inferring cleanup from absence. Cost: a failed bounded run can require explicit
+manual reconciliation and retain owned scratch; it cannot report a false pass.
