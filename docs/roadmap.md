@@ -1,6 +1,6 @@
 # Ceirean Roadmap
 
-Updated 2026-10-30. This is the active product delivery map. Historical records
+Updated 2026-10-31. This is the active product delivery map. Historical records
 live in [the previous roadmap](roadmap-history-20261027.md); checkboxes record
 evidence, not permission to execute. The local folder may remain `Leviathan`.
 
@@ -67,8 +67,14 @@ toolchain, image and cleanup identities attached.
       reusing the original 897 and replaying all four npm locks offline.
 - [ ] Materialize Bun's native cache on pinned Linux; qualify offline installs
       and native worker/control admission. Portable caches are not installation proof.
-      [Preflight currently stops on legacy UID/GID metadata](evidence/current-baseline/linux-preflight-20261030.md);
-      the owner decision and bounded VM/image authority remain pending.
+      [All 909 archives now pass offline admission](evidence/current-baseline/archive-admission-20261030.md)
+      after approved inert ownership metadata and exact legacy-root compatibility.
+      Prepare the current cache-only worker for a bounded Linux CI job instead of
+      another local Colima run. Exact-source handoff, workflow publication and CI
+      execution remain separate gates; no image build or hosted activity is authorized.
+      [Current CI preparation design](superpowers/specs/2026-10-31-current-linux-cache-ci-design.md)
+      uses the selected pinned public-source route; local implementation is approved,
+      with [four verified tasks](superpowers/plans/2026-10-31-current-linux-cache-ci.md).
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,
