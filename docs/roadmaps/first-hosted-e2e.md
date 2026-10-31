@@ -81,6 +81,11 @@ toolchain choices. Do not spend another slice designing a manifest transport.
       not measured by a Linux install. [Complete offline admission now passes 909/909](../evidence/current-baseline/archive-admission-20261030.md),
       after separately approved inert owner names and one exact versioned root.
       Real Linux cache consumption remains unqualified; no runtime attempt was authorized by that offline slice.
+- [x] Prepare durable portable seed descriptors, worker retention/phase cleanup,
+      fixed-source CI reconstruction and the bounded supervisor locally. The
+      [inactive workflow/run worksheet](../runbooks/current-linux-cache-ci.md)
+      stays outside Actions, with unresolved controller provenance and a deliberately
+      inspection-only application entry. Publication and one run remain separate approvals.
 - [x] Prepare the guarded worker bundle for the accepted checks and case count.
       Default native admission refuses; no command, browser or image was run.
       [Worker evidence and native limits](../evidence/current-baseline/worker-20261030.md).

@@ -1,0 +1,76 @@
+name: Current Linux Cache Preparation (Unpublished)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  CEIREAN_IMPLEMENTATION_SHA: ''
+  CONTROLLER_BUN_SHA256: ''
+  FOLDKIT_SOURCE_SHA: be0427e2aba2cf951ef4dbbbe9296e307ed41ad3
+jobs:
+  cache:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Publication And One-Run Gate
+        shell: bash
+        run: |
+          [[ "$CEIREAN_IMPLEMENTATION_SHA" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          [[ "$CONTROLLER_BUN_SHA256" =~ ^[a-f0-9]{64}$ ]] || exit 1
+          [[ "$GITHUB_SHA" == "$CEIREAN_IMPLEMENTATION_SHA" ]] || exit 1
+          printf '%s\n' 'BLOCKED: unpublished worksheet; operational CLI is intentionally absent. Separate publication and one-run reviews must replace this gate.'
+          exit 1
+      - name: Exact Trusted Implementation
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.CEIREAN_IMPLEMENTATION_SHA }}
+          persist-credentials: false
+          submodules: false
+          lfs: false
+          fetch-depth: 1
+      - name: Pinned Controller Preparation And Inspection Only
+        id: controller
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$RUNNER_TEMP/ceirean-tool"
+          curl --fail --location --max-time 60 --output "$RUNNER_TEMP/ceirean-tool/bun.zip" https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64.zip
+          printf '%s  %s\n' "$CONTROLLER_BUN_SHA256" "$RUNNER_TEMP/ceirean-tool/bun.zip" | sha256sum --check --strict
+          unzip -q "$RUNNER_TEMP/ceirean-tool/bun.zip" -d "$RUNNER_TEMP/ceirean-tool"
+          sudo install -d -m 755 /opt/ceirean-controller
+          sudo install -m 755 "$RUNNER_TEMP/ceirean-tool/bun-linux-x64/bun" /opt/ceirean-controller/bun
+          /opt/ceirean-controller/bun --no-env-file install --frozen-lockfile --ignore-scripts
+          /opt/ceirean-controller/bun --no-env-file --no-install probes/cloudflare-executor/scripts/current-cache-ci.ts --check
+      - name: Retain Fixed Sanitized Evidence After Cleanup
+        id: evidence
+        if: ${{ always() && (steps.controller.outcome == 'success' || steps.controller.outcome == 'failure') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: current-cache-evidence
+          path: |
+            qualification-output/host.json
+            qualification-output/worker.json
+            qualification-output/control.json
+            qualification-output/cleanup.json
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
+          compression-level: 0
+      - name: Retain Verified Portable Seed
+        id: seed
+        if: ${{ success() && steps.controller.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: current-cache-seed
+          path: qualification-output/seed.tar.gz
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: false
+          compression-level: 0
+      - name: Retention Is Mandatory
+        if: ${{ always() && steps.controller.outcome == 'success' }}
+        shell: bash
+        run: |
+          test '${{ steps.evidence.outcome }}' = success
+          test '${{ steps.seed.outcome }}' = success

@@ -74,7 +74,11 @@ toolchain, image and cleanup identities attached.
       execution remain separate gates; no image build or hosted activity is authorized.
       [Current CI preparation design](superpowers/specs/2026-10-31-current-linux-cache-ci-design.md)
       uses the selected pinned public-source route; local implementation is approved,
-      with [four verified tasks](superpowers/plans/2026-10-31-current-linux-cache-ci.md).
+      with [the four-task plan](superpowers/plans/2026-10-31-current-linux-cache-ci.md).
+      Local descriptors, worker retention and bounded CI adapters are implemented;
+      the [inactive workflow and run worksheet](runbooks/current-linux-cache-ci.md)
+      still refuse execution. Resolve the controller checksum and reviewed run-entry
+      handoff before requesting publication, then separately approve one Linux attempt.
 - [ ] Prepare the actual executor inputs/image and demonstrate the unchanged
       baseline plus required browser journeys on controlled Linux.
 - [ ] Connect the proven private job path to that executor with durable deadlines,

@@ -66,9 +66,9 @@
 
 **Files:** create `qualification/current-linux-cache.workflow.yml`, `qualification/current-linux-cache-run-worksheet.md`, `docs/runbooks/current-linux-cache-ci.md`, workflow contract tests; update roadmap and active baseline map. Keep old workflow template unchanged.
 
-- [ ] Test manual-only trigger, fixed implementation/source pins, exact budgets/permissions, no secrets/cache/retry/parameters, only fixed evidence/seed paths and inactive location. Missing publication/run fields must block rather than use a branch tip.
-- [ ] Write the thin workflow and worksheet around Task 3. SHA-pin acquisition/upload actions and tool provenance using authoritative metadata; read-only online verification may be needed, but no artifact download or workflow activation. Record unresolved pins as publication blockers, not invented values.
-- [ ] Require seed export/upload success for overall acceptance; upload bounded failure evidence after cleanup without reinterpreting it as a pass. Record actual runner/tool identities and all cleanup/readback outcomes.
+- [x] Test manual-only trigger, fixed implementation/source pins, exact budgets/permissions, no secrets/cache/retry/parameters, only fixed evidence/seed paths and inactive location. Missing publication/run fields block rather than use a branch tip.
+- [x] Write the thin workflow and worksheet around Task 3. Verify SHA-pinned checkout/upload action metadata. The official controller checksum lookup failed; record it as a publication blocker, not an invented value.
+- [x] Keep overall acceptance dependent on seed export/upload and cleanup. The draft is deliberately inspection-only and refuses before acquisition. Worksheet lists operational-entry/outcome persistence, aggregate artifact checks and unified bootstrap/acquisition timing as publication prerequisites, not completed Linux behavior.
 - [ ] Independently review the entire local slice, fix important findings RED-to-GREEN, run full executor suite, lint/format, all typechecks and contract tests. Commit `docs: prepare manual current cache CI handoff`.
 
 ## Publication And Execution Gates
@@ -107,3 +107,12 @@ and must never be restored by later intake. Independent archive readback caught
 the permission mismatch before this change.
 Ruling: keep the exact inventory fixture out of formatting to preserve its
 approved byte hash. All source lint rules remain universal.
+
+Task 3 commit: `26721eb`.
+Task 4: inactive manual template, guard regression, worksheet, runbook and product
+map updated. Local checks do not establish CI transport, actual installer behavior
+or retention-service success. Final whole-slice review and gates follow.
+Ruling: the current CLI remains inspection-only, as required by Task 3. Do not
+silently add a runnable switch while implementation/tool/publication pins are
+absent. The worksheet explicitly lists the reviewed live-entry and fixed outcome
+persistence handoff required before publication. The template always refuses.
