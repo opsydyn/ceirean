@@ -37,8 +37,11 @@ declare module '*npm/node_modules/tar/dist/esm/parse.js' {
     type: string;
     size: number;
     remain: number;
+    mode: number;
+    linkpath?: string;
     resume(): void;
     on(event: 'end', callback: () => void): this;
+    on(event: 'data', callback: (bytes: Uint8Array) => void): this;
   }
   export class Parser {
     constructor(options: {
@@ -46,7 +49,8 @@ declare module '*npm/node_modules/tar/dist/esm/parse.js' {
       maxMetaEntrySize: number;
       brotli: false;
       zstd: false;
-      filter(path: string, entry: ReadEntry): boolean;
+      filter?(path: string, entry: ReadEntry): boolean;
+      onReadEntry?(entry: ReadEntry): void;
     });
     on(
       event: 'error' | 'warn' | 'ignoredEntry' | 'meta' | 'nullBlock' | 'eof' | 'end',
@@ -54,7 +58,24 @@ declare module '*npm/node_modules/tar/dist/esm/parse.js' {
     ): this;
     write(bytes: Uint8Array): boolean;
     end(): this;
+    abort(error: Error): void;
   }
+}
+declare module '*npm/node_modules/tar/dist/esm/create.js' {
+  export interface Pack extends AsyncIterable<Uint8Array> {
+    destroy(): void;
+  }
+  export function create(
+    options: {
+      cwd: string;
+      gzip: true;
+      portable: false;
+      follow: false;
+      noMtime: true;
+      strict: true;
+    },
+    paths: string[],
+  ): Pack;
 }
 declare module '*npm/node_modules/minizlib/dist/esm/index.js' {
   export class InflateRaw {

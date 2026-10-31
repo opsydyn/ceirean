@@ -55,12 +55,12 @@
 
 **Interfaces:** `readCurrentCiInventory()` validates exact compiled inventory pin. `prepareCurrentCiInputs(repository, destination, request)` reads pinned Git blobs, checks source-inventory hash, recreates 909 raw/npm cache inputs from frozen GETs and metadata, compares complete readback to the frozen inventory, and emits a fresh receipt (909 downloads/0 reuses). No original local receipt is fabricated. Inferred controller ports cover fixed Docker/process operations, clock, files and preparation; real implementations use existing Effect APIs. `runCurrentCiCache(request, ports)` owns each created resource before start and returns only bounded verified evidence plus a verified portable-export candidate or a sanitized failure.
 
-- [ ] Write failing tests for bad inventory/source/hash, request allowlist/SRI/redirect/overflow/cancellation, no destination overwrite and Linux paths without tar extraction. Use small transport fixtures plus fixed-manifest/source checks; no live fetches.
-- [ ] Implement direct source-file staging with the original inventory sort/field order; reuse `persistCache` and frozen npm metadata; apply explicit input readability without adding unrelated files or credentials. Check storage capacity before acquisition.
-- [ ] Write supervisor fake tests for fixed image/argv/mount controls, ownership-before-start, deadline/overflow/interruption at every resource boundary, stop-before-export, verified seed descriptor/intake, cleanup failure and unknown Docker state. No arbitrary Docker args or shell execution interface.
-- [ ] Implement the bounded adapter and fixed, sanitized outputs. Preserve portable mode/link metadata during export using the pinned tar library; bounded readback compares descriptor and actual content, not only archive self-hash. Invalid or oversized export refuses.
-- [ ] CLI defaults to `--check`; all other unsupported argv refuse. Live entry remains blocked by unpublished run worksheet/implementation pins. Ordinary tests exercise only check/fakes and own temporary files/processes.
-- [ ] Run focused tests plus all tracked executor tests, root checks and all types. Commit `feat: prepare bounded Linux CI cache rehearsal`.
+- [x] Write failing tests for bad inventory/source/hash, no destination overwrite and Linux paths without tar extraction. Reuse the existing transport allowlist/SRI/redirect/overflow/cancellation tests; no live fetches.
+- [x] Implement direct source-file staging with the original inventory sort/field order; reuse `persistCache` and frozen npm metadata; apply explicit input readability without adding unrelated files or credentials. Check storage capacity before acquisition.
+- [x] Write supervisor fake tests for fixed image/argv/mount controls, deadline/interruption at every resource boundary, stop-before-export, verified seed descriptor/intake and cleanup failure. Native Docker command/transport behavior remains Linux evidence, not local qualification.
+- [x] Implement the bounded adapter and fixed, sanitized outputs. Preserve portable mode/link metadata during export using the pinned tar library; bounded readback compares descriptor and actual content, not only archive self-hash. Invalid or oversized export refuses.
+- [x] CLI defaults to `--check`; all other unsupported argv refuse. Live entry remains blocked by unpublished run worksheet/implementation pins. Ordinary tests exercise only check/fakes and own temporary files/processes.
+- [x] Run focused tests plus all tracked executor tests, root checks and all types. Commit `feat: prepare bounded Linux CI cache rehearsal`.
 
 ## Task 4: Inactive Workflow, Worksheet And Runbook
 
@@ -94,3 +94,16 @@ executor tests passed, zero failed. All types and lint/format checked. Logs:
 Ruling: use the existing cache inode-checked reader for 64 MiB descriptors; do
 not increase the unrelated runner-input reader's 2 MiB ceiling. Phase output
 audits precede deletion; actual full-worker ordering still requires the Linux run.
+
+Task 2 commit: `098b245`.
+Task 3: 758 executor tests passed, zero failed, including actual fixed-source
+staging, 100 seeded manifest substitutions, 300 seeded Docker control mutations,
+ten cancellation boundaries, phase deadlines and real inspection-only CLI exits.
+All 12 types and root lint/format pass. Logs:
+`/private/tmp/ceirean-ci-task3-{tests,types,check}.log`.
+Ruling: tar's `portable` option adds owner-write bits, so it cannot preserve
+CacheModesV1. Export uses normal mode-preserving tar; UID/GID metadata is inert
+and must never be restored by later intake. Independent archive readback caught
+the permission mismatch before this change.
+Ruling: keep the exact inventory fixture out of formatting to preserve its
+approved byte hash. All source lint rules remain universal.

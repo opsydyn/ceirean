@@ -8,6 +8,7 @@
   "sortImports": true,
   "ignorePatterns": [
     "bun.lock",
+    "probes/cloudflare-executor/fixtures/current-cache-inventory.json",
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
