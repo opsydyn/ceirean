@@ -486,6 +486,19 @@ export function verifySealedCache(seed: SealedCache) {
   return workflow;
 }
 export const portableDescriptorLimits = { bytes: 67108864 } as const;
+export function readPortableCacheDescriptor(path: string) {
+  function* read() {
+    const metadata = yield* CacheMetadata;
+    const info = yield* metadata.lstat(path);
+    const bytes = yield* readBytes(path, info, portableDescriptorLimits.bytes);
+    return yield* Effect.try({
+      try: () => new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes),
+      catch: () => new CacheError({ code: 'InputChanged' }),
+    });
+  }
+  const workflow = Effect.gen(read);
+  return workflow;
+}
 const Digest = Schema.String.check(Schema.isPattern(/^[a-f0-9]{64}$/));
 const BoundedInventory = Schema.Array(CacheEntry).check(
   Schema.isMinLength(1),

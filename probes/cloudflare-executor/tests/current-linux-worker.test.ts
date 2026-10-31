@@ -27,6 +27,7 @@ import {
   attemptCurrentLinuxCacheOnly,
   runCurrentLinuxCacheOnly,
 } from '../src/current-linux-worker.ts';
+import * as Worker from '../src/current-linux-worker.ts';
 import { CacheError, CacheMetadata, makeCacheMetadata } from '../src/linux-qualification/cache.ts';
 
 const withPlatform = Effect.provide(NodeServices.layer);
@@ -120,9 +121,36 @@ function attemptFixture(
     const workflow = Effect.sync(() => actual);
     return workflow;
   }
+  function readDirectory(path: string) {
+    const children = [...nodes.keys()]
+      .filter(
+        (entry) => entry.startsWith(`${path}/`) && !entry.slice(path.length + 1).includes('/'),
+      )
+      .map((entry) => entry.slice(path.length + 1));
+    const entries = Match.value(path).pipe(
+      Match.when('/work', () => initial),
+      Match.orElse(() => children),
+    );
+    const workflow = Effect.sync(() => entries);
+    return workflow;
+  }
+  function chmod(path: string, mode: number) {
+    function change() {
+      calls.push(`chmod:${path}:${mode}`);
+      const node = nodes.get(path)!;
+      nodes.set(path, { ...node, mode });
+    }
+    const workflow = Effect.sync(change);
+    return workflow;
+  }
   const fs = FileSystem.makeNoop({
     realPath,
-    readDirectory: () => Effect.sync(() => initial),
+    readDirectory,
+    chmod,
+    remove: (path) =>
+      Effect.sync(() => {
+        calls.push(`remove:${path}`);
+      }),
     makeDirectory,
     open,
   });
@@ -160,6 +188,59 @@ function attemptFixture(
     closed: () => closed,
   };
 }
+
+async function phaseCleanupIsOwned() {
+  expect(typeof Worker.releaseCurrentCachePhase).toBe('function');
+  for (const candidate of [
+    '/work/fresh',
+    '/work/portable-bun-seed',
+    '/work/evidence',
+    '/work/fresh/../evidence',
+    '/inputs',
+    '/work',
+  ]) {
+    const fake = attemptFixture();
+    function execute(_progress: Ref.Ref<string>, owner: Worker.CurrentLinuxWorkspace) {
+      function* check() {
+        const directory = fake.nodes.get('/work')!;
+        fake.nodes.set('/work/fresh', { ...directory, mode: 0o500 });
+        fake.nodes.set('/work/fresh/child', { ...directory, mode: 0o500 });
+        const outcome = yield* Worker.releaseCurrentCachePhase(owner, candidate).pipe(
+          Effect.result,
+        );
+        const expected = Match.value(candidate).pipe(
+          Match.when('/work/fresh', () => ({
+            tag: 'Success' as const,
+            deleted: ['remove:/work/fresh'],
+          })),
+          Match.orElse(() => ({ tag: 'Failure' as const, deleted: [] })),
+        );
+        expect(outcome._tag).toBe(expected.tag);
+        const deletion = fake.calls.filter((call) => call.startsWith('remove:'));
+        expect(deletion).toEqual(expected.deleted);
+        const forged = yield* Worker.releaseCurrentCachePhase({ ...owner }, '/work/fresh').pipe(
+          Effect.result,
+        );
+        expect(forged._tag).toBe('Failure');
+        return yield* Effect.fail(new CurrentLinuxWorkerError({ code: 'InputChanged' }));
+      }
+      const workflow = Effect.gen(check);
+      return workflow;
+    }
+    await Effect.runPromise(
+      attemptCurrentLinuxCacheOnly(['--run-cache-only'], execute).pipe(
+        fake.provide,
+        fake.provideMetadata,
+        fake.provideConsole,
+        withPlatform,
+      ),
+    );
+  }
+}
+test(
+  'phase cleanup accepts only owned exact scratch roots and cannot remove retained output',
+  phaseCleanupIsOwned,
+);
 
 async function wrapperUsageIsInert() {
   for (const args of [[], ['--worker'], ['--run-cache-only', 'extra'], ['--activate']]) {
@@ -209,6 +290,11 @@ async function oneSuccessfulReport() {
     lockSha256: '9b8f226992603213059977d39abb58acd399bfc2256d70d2890a0dfe6365cd89',
     bun: {
       seedSha256: 'a'.repeat(64),
+      portableSeedSha256: 'c'.repeat(64),
+      descriptorSha256: 'd'.repeat(64),
+      descriptorBytes: 1234,
+      seedPath: '/work/portable-bun-seed',
+      descriptorPath: '/work/bun-seed-descriptor.json',
       warmupOutputBytes: 0,
       freshOutputBytes: 0,
       installedIdentities: { warmup: identities, fresh: identities },

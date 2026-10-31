@@ -3,6 +3,7 @@ import { expect, test } from 'bun:test';
 import { BunServices } from '@effect/platform-bun';
 import { Arbitrary, Effect, FileSystem, Match, Result, Schema } from 'effect';
 
+import * as Seed from '../src/current-bun-seed.ts';
 import * as Cache from '../src/linux-qualification/cache.ts';
 import { digestBytes } from '../src/payload.ts';
 
@@ -246,4 +247,38 @@ async function rejectsFilesystemShapes() {
 test(
   'fresh intake rejects missing/extra entries, special modes, absolute/escaping links and root aliases',
   rejectsFilesystemShapes,
+);
+
+async function workerSeedHandoff() {
+  expect(Seed).toHaveProperty('preparePortableBunSeed', expect.any(Function));
+  function* run() {
+    const { fs, parent, source } = yield* fixture();
+    const descriptorPath = `${parent}/bun-seed-descriptor.json`;
+    const prepared = yield* Seed.preparePortableBunSeed(source, {
+      root: `${parent}/worker-seed`,
+      descriptorPath,
+    });
+    expect(prepared.sourceSha256).toBe(source.sha256);
+    expect(prepared.descriptor.path).toBe(descriptorPath);
+    const bytes = yield* fs.readFile(descriptorPath);
+    expect(prepared.descriptor.sha256).toBe(yield* digestBytes(bytes));
+    expect(prepared.descriptor.bytes).toBe(bytes.length);
+    expect((yield* fs.stat(descriptorPath)).mode & 0o777).toBe(0o600);
+    expect((yield* Cache.verifySealedCache(prepared.seed)).sha256).toBe(prepared.seed.sha256);
+    expect(yield* fs.readLink(`${prepared.seed.root}/absolute`)).toBe('nested/data');
+    const existing = `${parent}/existing.json`;
+    yield* fs.writeFileString(existing, 'do not overwrite');
+    const failure = yield* Seed.preparePortableBunSeed(source, {
+      root: `${parent}/another-seed`,
+      descriptorPath: existing,
+    }).pipe(Effect.result);
+    expect(Result.isFailure(failure)).toBe(true);
+    expect(yield* fs.readFileString(existing)).toBe('do not overwrite');
+  }
+  const workflow = Effect.gen(run);
+  await Effect.runPromise(workflow.pipe(Effect.scoped, withMetadata, withPlatform));
+}
+test(
+  'worker seed handoff persists a private descriptor and never overwrites an existing file',
+  workerSeedHandoff,
 );

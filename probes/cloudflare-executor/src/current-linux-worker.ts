@@ -20,6 +20,7 @@ import { ChildProcess } from 'effect/process';
 import { makeLoopbackListener } from '../scripts/linux-replay-platform.ts';
 import { readCacheBlob } from './cache-candidate.ts';
 import { currentArchivePins } from './current-archive-preflight.ts';
+import { preparePortableBunSeed } from './current-bun-seed.ts';
 import { fromCurrentBunLock } from './current-dependencies.ts';
 import { validateCurrentLinuxRuntime } from './current-linux-cache.ts';
 import { readCurrentNpmSnapshot } from './current-npm-frozen.ts';
@@ -453,10 +454,10 @@ function inspectOutputTree(root: string) {
     const pathService = yield* Path.Path;
     const pending = [root];
     let entries = 0;
+    const Ownership = Schema.Struct({ uid: Schema.Number, gid: Schema.Number });
     while (pending.length > 0) {
       const path = pending.pop()!;
       const info = yield* metadata.lstat(path);
-      const Ownership = Schema.Struct({ uid: Schema.Number, gid: Schema.Number });
       const ownership = yield* Schema.decodeUnknownEffect(Ownership)(info);
       yield* validateOutputMetadata({ ...info, ...ownership });
       entries++;
@@ -484,6 +485,52 @@ function inspectOutputTree(root: string) {
     return entries;
   }
   const workflow = Effect.gen(inspect);
+  return workflow;
+}
+export function releaseCurrentCachePhase(owner: CurrentLinuxWorkspace, root: string) {
+  function* release() {
+    yield* verifyCurrentLinuxWorkspace(owner);
+    const allowed = [
+      '/work/warmup/source',
+      '/work/bun-seed',
+      '/work/fresh',
+      '/work/npm-seed',
+      ...currentNpmProfiles.map((profile) => `/work/npm/${profile.id}`),
+    ];
+    yield* requireWorker(allowed.includes(root), 'WorkspaceRefused');
+    const fs = yield* FileSystem.FileSystem;
+    const metadata = yield* CacheMetadata;
+    yield* requireWorker((yield* fs.realPath(root)) === root, 'WorkspaceRefused');
+    const rootInfo = yield* metadata.lstat(root);
+    yield* requireWorker(isDirectory(rootInfo.type), 'WorkspaceRefused');
+    const pending = [root];
+    let entries = 0;
+    const Ownership = Schema.Struct({ uid: Schema.Number, gid: Schema.Number });
+    while (pending.length > 0) {
+      const path = pending.pop()!;
+      const info = yield* metadata.lstat(path);
+      const ownership = yield* Schema.decodeUnknownEffect(Ownership)(info);
+      yield* validateOutputMetadata({ ...info, ...ownership });
+      entries++;
+      yield* requireWorker(entries <= 200000, 'OwnershipRefused');
+      function* directory() {
+        // Only owned directories gain traversal/write permission; links are never followed.
+        yield* fs.chmod(path, info.mode | 0o700);
+        for (const name of yield* fs.readDirectory(path)) {
+          yield* requireWorker(
+            name.length > 0 && !['.', '..'].includes(name) && !/[/\\\0]/.test(name),
+            'OwnershipRefused',
+          );
+          pending.push(`${path}/${name}`);
+        }
+      }
+      const walking = Effect.gen(directory);
+      const directoryPresent = Effect.succeed(isDirectory(info.type));
+      yield* walking.pipe(Effect.when(directoryPresent));
+    }
+    yield* fs.remove(root, { recursive: true });
+  }
+  const workflow = Effect.gen(release);
   return workflow;
 }
 const SourceRecord = Schema.Struct({
@@ -762,8 +809,17 @@ export function runCurrentLinuxCacheOnly(
     const warmup = yield* withCacheOnlyReplay(replay, warmBunCache(commands.warmup));
     yield* Ref.set(progress, 'WarmupIdentityReadback');
     const warmupIdentities = yield* auditCurrentBunInstallation(commands.warmup.cwd, bunLock);
+    yield* inspectOutputTree('/work');
+    yield* releaseCurrentCachePhase(workspace, commands.warmup.cwd);
     yield* Ref.set(progress, 'SealBunCache');
-    const seed = yield* sealCache('/work/bun-seed');
+    const original = yield* sealCache('/work/bun-seed');
+    const portable = yield* preparePortableBunSeed(original, {
+      root: '/work/portable-bun-seed',
+      descriptorPath: '/work/bun-seed-descriptor.json',
+    });
+    yield* verifySealedCache(original);
+    yield* releaseCurrentCachePhase(workspace, original.root);
+    const seed = portable.seed;
     const freshCache = yield* copyCaseCache(seed, commands.fresh.cache);
     yield* admitCaseCache(seed, freshCache);
     yield* stageSource(commands.fresh.cwd);
@@ -774,6 +830,8 @@ export function runCurrentLinuxCacheOnly(
     const freshIdentities = yield* auditCurrentBunInstallation(commands.fresh.cwd, bunLock);
     yield* requireWorker(encode(warmupIdentities) === encode(freshIdentities), 'InputChanged');
     yield* verifySealedCache(seed);
+    yield* inspectOutputTree('/work/fresh');
+    yield* releaseCurrentCachePhase(workspace, '/work/fresh');
     yield* inspectOutputTree('/work');
     const snapshot = yield* readCurrentNpmSnapshot();
     yield* Ref.set(progress, 'NpmCacheCopy');
@@ -829,14 +887,16 @@ export function runCurrentLinuxCacheOnly(
         );
         yield* requireWorker(`${item.name}@${item.version}` === entry.identity, 'InputChanged');
       }
-      yield* inspectOutputTree('/work');
+      yield* inspectOutputTree(parent);
       yield* verifySealedCache(npmSeed);
       profiles.push({
         id: profile.id,
         selected: selected.selected.length,
         outputBytes: result.outputBytes,
       });
+      yield* releaseCurrentCachePhase(workspace, parent);
     }
+    yield* releaseCurrentCachePhase(workspace, npmSeedRoot);
     yield* verifySealedCache(seed);
     yield* Ref.set(progress, 'Evidence');
     const result = {
@@ -850,7 +910,12 @@ export function runCurrentLinuxCacheOnly(
       sourceInventorySha256: currentLinuxWorkerPins.sourceInventorySha256,
       lockSha256: currentLinuxWorkerPins.lockSha256,
       bun: {
-        seedSha256: seed.sha256,
+        seedSha256: portable.sourceSha256,
+        portableSeedSha256: seed.sha256,
+        descriptorSha256: portable.descriptor.sha256,
+        descriptorBytes: portable.descriptor.bytes,
+        seedPath: '/work/portable-bun-seed',
+        descriptorPath: '/work/bun-seed-descriptor.json',
         warmupOutputBytes: warmup.outputBytes,
         freshOutputBytes: fresh.outputBytes,
         installedIdentities: { warmup: warmupIdentities, fresh: freshIdentities },

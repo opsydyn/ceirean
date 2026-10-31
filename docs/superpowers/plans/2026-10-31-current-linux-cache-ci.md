@@ -44,10 +44,10 @@
 
 **Interfaces:** worker result adds original/portable seed and descriptor identities plus fixed export paths. Persist descriptor outside the seed tree before exit; keep it out of the 4 MiB diagnostic payload. Fresh positive consumption uses an independent copy of the described portable seed, not an untested export transformation.
 
-- [ ] Write failing tests for phase ordering, source-to-portable binding, fresh identity equality, persisted descriptor hashes, cleanup confined to owned phase paths and no result acceptance after export failure.
-- [ ] Normalize links with `copyCaseCache`, seal the portable root, describe it, then run the existing fresh/default-registry case and verify that portable seal unchanged. Preserve original-seed verification before releasing it; never call stale authority after deletion.
-- [ ] Audit phase output roots before deleting scratch. Release warm-up source before creating extra cache copies; release fresh workspace/cache only after its audits and portable-seed verification. Keep remaining `/work` ownership checks and per-cache limits unchanged. Release completed npm profile scratch after its checks; retain only portable seed/descriptor/evidence.
-- [ ] Update typed test receipts and fixed paths; run all current worker/cache/identity tests and gates. Commit `feat: retain verified portable Bun seeds from cache runs`.
+- [x] Write failing tests for source-to-portable binding, persisted descriptor hashes and cleanup confined to owned phase paths. Existing identity and evidence-write tests retained; whole-worker native ordering remains CI evidence, not claimed from local fakes.
+- [x] Normalize links with `copyCaseCache`, seal the portable root, describe it, then run the existing fresh/default-registry case and verify that portable seal unchanged. Preserve original-seed verification before releasing it; never call stale authority after deletion.
+- [x] Audit phase output roots before deleting scratch. Release warm-up source before creating extra cache copies; release fresh workspace/cache only after its audits and portable-seed verification. Keep remaining `/work` ownership checks and per-cache limits unchanged. Release completed npm profile scratch after its checks; retain portable seed/descriptor/evidence and small runtime scratch.
+- [x] Update typed test receipts and fixed paths; run all current worker/cache/identity tests and gates. Commit `feat: retain verified portable Bun seeds from cache runs`.
 
 ## Task 3: Public Input Rehydration And Linux Supervisor
 
@@ -86,3 +86,11 @@ suite (0 failed), all 12 typechecks, lint/format and diff checks. Logs:
 Ruling: case roots are already reserved; `sealPortableCase(source, copy)` verifies
 live copy authority and consumes the writable handle before registering its new
 seal. Do not weaken ordinary root reservation checks to promote a copy.
+
+Task 1 commit: `2d7d5a3`.
+Task 2: RED-to-GREEN descriptor persistence and owned-phase cleanup; 746 tracked
+executor tests passed, zero failed. All types and lint/format checked. Logs:
+`/private/tmp/ceirean-ci-task2-{tests,types,check,focused}.log`.
+Ruling: use the existing cache inode-checked reader for 64 MiB descriptors; do
+not increase the unrelated runner-input reader's 2 MiB ceiling. Phase output
+audits precede deletion; actual full-worker ordering still requires the Linux run.
