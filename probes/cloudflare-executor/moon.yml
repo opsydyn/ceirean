@@ -12,7 +12,7 @@ tasks:
     command: bun --no-env-file --no-install scripts/prepare.ts --check
     options: { cache: false, retryCount: 0, envFile: false }
   baseline-preparation-test:
-    command: bun --no-env-file --no-install test tests/current-baseline.test.ts tests/current-image.test.ts tests/current-inputs.test.ts tests/current-dependencies.test.ts tests/current-worker.test.ts tests/current-worker-cli.test.ts tests/current-registry-cli.test.ts tests/current-preview.test.ts tests/current-npm.test.ts tests/current-npm-metadata.test.ts tests/current-npm-replay.test.ts tests/current-npm-cli.test.ts tests/current-cache.test.ts tests/current-cache-composition.test.ts tests/current-cache-cli.test.ts tests/current-linux-cache.test.ts tests/current-archive-preflight.test.ts tests/inert-archive-ownership.test.ts tests/current-linux-worker.test.ts tests/current-bun-installation.test.ts
+    command: bun --no-env-file --no-install test tests/current-baseline.test.ts tests/current-image.test.ts tests/current-inputs.test.ts tests/current-dependencies.test.ts tests/current-worker.test.ts tests/current-worker-cli.test.ts tests/current-registry-cli.test.ts tests/current-preview.test.ts tests/current-npm.test.ts tests/current-npm-metadata.test.ts tests/current-npm-replay.test.ts tests/current-npm-cli.test.ts tests/current-cache.test.ts tests/current-cache-composition.test.ts tests/current-cache-cli.test.ts tests/current-linux-cache.test.ts tests/current-archive-preflight.test.ts tests/inert-archive-ownership.test.ts tests/current-linux-worker.test.ts tests/current-bun-installation.test.ts tests/portable-cache.test.ts
     options: { cache: false, retryCount: 0, envFile: false }
   native-fs-test:
     command: sh scripts/test-linux-fs-boundary.sh

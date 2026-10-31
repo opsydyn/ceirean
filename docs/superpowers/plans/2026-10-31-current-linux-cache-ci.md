@@ -34,9 +34,9 @@
 
 **Interfaces:** `describePortableCache(seed, source)` returns canonical descriptor text and SHA-256, requiring live valid seals and exact normalized source-to-portable inventory correspondence. Descriptor carries `CacheModesV1`, original/portable digests, sealed and materialized inventories, not inode/capability state. `admitPortableCache(root, text, expectedDescriptorSha256)` validates bounded strict JSON, transforms/inventory digests and actual readonly portable contents, then establishes a new seal with fresh filesystem identities. Extract common inventory construction from `sealCache` only as needed; preserve historical semantics.
 
-- [ ] Write real filesystem tests: original absolute internal link becomes relative through existing `copyCaseCache`; describe/seal succeeds; fresh copied root re-admits with matching hash and independent inodes; malformed/hash-mismatched descriptors, external/absolute portable links, special modes, missing/extra/changed files and mutations refuse. Seed JSON alone cannot satisfy existing WeakMap APIs. Include seeded payload mutations.
-- [ ] Run the new file and observe RED, then implement strict descriptor serialization (64 MiB) and read-only fresh re-admission using existing scan/hash/mode machinery, without chmod during intake.
-- [ ] Run new and existing cache tests; verify lint/format and probe types. Commit `feat: add durable portable cache descriptors`.
+- [x] Write real filesystem tests: original absolute internal link becomes relative through existing `copyCaseCache`; describe/seal succeeds; fresh copied root re-admits with matching hash and independent inodes; malformed/hash-mismatched descriptors, external/absolute portable links, special modes, missing/extra/changed files and mutations refuse. Seed JSON alone cannot satisfy existing WeakMap APIs. Include seeded payload mutations.
+- [x] Run the new file and observe RED, then implement strict descriptor serialization (64 MiB) and read-only fresh re-admission using existing scan/hash/mode machinery, without chmod during intake.
+- [x] Run new and existing cache tests; verify lint/format and probe types. Commit `feat: add durable portable cache descriptors`.
 
 ## Task 2: Worker Portable Seed And Phase-Owned Cleanup
 
@@ -79,3 +79,10 @@ Local completion is not publication approval. Later: separately approve publishi
 
 Inline execution in the existing `codex/linux-cleanup-budget` linked worktree.
 Ruling: a fresh CI receipt may reference the historical inventory anchors but must report its own retrieval/custody; it cannot impersonate the Mac-local preparation receipt. Ruling: persisted inventories are data; only actual fresh filesystem verification can mint a new seal. Task completion entries and verified commit ranges follow below.
+
+Task 1: verified RED-to-GREEN, 24 focused tests and the complete 744-test executor
+suite (0 failed), all 12 typechecks, lint/format and diff checks. Logs:
+`/private/tmp/ceirean-ci-task1-tests.log`, `/private/tmp/ceirean-ci-task1-types.log`.
+Ruling: case roots are already reserved; `sealPortableCase(source, copy)` verifies
+live copy authority and consumes the writable handle before registering its new
+seal. Do not weaken ordinary root reservation checks to promote a copy.

@@ -414,12 +414,24 @@ function setModes(root: string, inventory: readonly CacheEntry[]) {
   const workflow = Effect.gen(apply);
   return workflow;
 }
-export function sealCache(root: string, limits: CacheLimits = cacheLimits) {
-  function* seal() {
-    yield* requireCache(
-      ![...roots].some((reserved) => overlap(reserved, root)),
-      'DestinationRefused',
+function writableInventory(root: string, materialized: readonly CacheEntry[]) {
+  function* derive() {
+    const path = yield* Path.Path;
+    return transformedInventory(materialized, true).map((entry) =>
+      Match.value(entry).pipe(
+        Match.when({ type: 'SymbolicLink' }, (value) => ({
+          ...value,
+          target: path.relative(path.dirname(`${root}/${value.path}`), `${root}/${value.resolved}`),
+        })),
+        Match.orElse((value) => value),
+      ),
     );
+  }
+  const workflow = Effect.gen(derive);
+  return workflow;
+}
+function sealRoot(root: string, limits: CacheLimits) {
+  function* seal() {
     const before = yield* scan(root, limits);
     const materializedInventory = freezeInventory(before.entries);
     const expected = transformedInventory(materializedInventory, false);
@@ -429,16 +441,7 @@ export function sealCache(root: string, limits: CacheLimits = cacheLimits) {
       encodeInventory(after.entries) === encodeInventory(expected),
       'InputChanged',
     );
-    const path = yield* Path.Path;
-    const writable = transformedInventory(materializedInventory, true).map((entry) =>
-      Match.value(entry).pipe(
-        Match.when({ type: 'SymbolicLink' }, (value) => ({
-          ...value,
-          target: path.relative(path.dirname(`${root}/${value.path}`), `${root}/${value.resolved}`),
-        })),
-        Match.orElse((value) => value),
-      ),
-    );
+    const writable = yield* writableInventory(root, materializedInventory);
     const seed: SealedCache = Object.freeze({
       root,
       policy: 'CacheModesV1',
@@ -450,6 +453,17 @@ export function sealCache(root: string, limits: CacheLimits = cacheLimits) {
     seals.set(seed, { limits: Object.freeze({ ...limits }), identities: after.identities });
     roots.add(root);
     return seed;
+  }
+  const workflow = Effect.gen(seal);
+  return workflow;
+}
+export function sealCache(root: string, limits: CacheLimits = cacheLimits) {
+  function* seal() {
+    yield* requireCache(
+      ![...roots].some((reserved) => overlap(reserved, root)),
+      'DestinationRefused',
+    );
+    return yield* sealRoot(root, limits);
   }
   const workflow = Effect.gen(seal);
   return workflow;
@@ -469,6 +483,118 @@ export function verifySealedCache(seed: SealedCache) {
     return { sha256: seed.sha256 };
   }
   const workflow = Effect.gen(verify);
+  return workflow;
+}
+export const portableDescriptorLimits = { bytes: 67108864 } as const;
+const Digest = Schema.String.check(Schema.isPattern(/^[a-f0-9]{64}$/));
+const BoundedInventory = Schema.Array(CacheEntry).check(
+  Schema.isMinLength(1),
+  Schema.isMaxLength(cacheLimits.entries),
+);
+const PortableDescriptor = Schema.Struct({
+  schemaVersion: Schema.Literal(1),
+  policy: Schema.Literal('CacheModesV1'),
+  sourceSha256: Digest,
+  sha256: Digest,
+  materializedInventory: BoundedInventory,
+  inventory: BoundedInventory,
+});
+const DescriptorJson = Schema.fromJsonString(PortableDescriptor);
+const encodeDescriptor = Schema.encodeSync(DescriptorJson);
+function requireRelativeLinks(inventory: readonly CacheEntry[]) {
+  function* inspect() {
+    const path = yield* Path.Path;
+    const portable = inventory.every((entry) =>
+      Match.value(entry).pipe(
+        Match.when({ type: 'SymbolicLink' }, (link) => !path.isAbsolute(link.target)),
+        Match.orElse(() => true),
+      ),
+    );
+    yield* requireCache(portable, 'InputChanged');
+  }
+  const workflow = Effect.gen(inspect);
+  return workflow;
+}
+export function describePortableCache(seed: SealedCache, source: SealedCache) {
+  function* describe() {
+    yield* verifySealedCache(source);
+    yield* verifySealedCache(seed);
+    yield* requireRelativeLinks(seed.inventory);
+    const normalizedSource = transformedInventory(source.caseInventory, false);
+    yield* requireCache(
+      encodeInventory(normalizedSource) === encodeInventory(seed.inventory),
+      'InputChanged',
+    );
+    const text = encodeDescriptor({
+      schemaVersion: 1,
+      policy: seed.policy,
+      sourceSha256: source.sha256,
+      sha256: seed.sha256,
+      materializedInventory: seed.materializedInventory,
+      inventory: seed.inventory,
+    });
+    const bytes = new TextEncoder().encode(text);
+    yield* requireCache(bytes.length <= portableDescriptorLimits.bytes, 'CacheRefused');
+    return { text, sha256: yield* hash(bytes) };
+  }
+  const workflow = Effect.gen(describe);
+  return workflow;
+}
+export function sealPortableCase(source: SealedCache, copy: CaseCache) {
+  function* promote() {
+    yield* admitCaseCache(source, copy);
+    yield* requireRelativeLinks(copy.inventory);
+    const state = yield* Effect.fromNullishOr(seals.get(source));
+    const seed = yield* sealRoot(copy.root, state.limits);
+    copies.delete(copy);
+    return seed;
+  }
+  const workflow = Effect.gen(promote);
+  return workflow;
+}
+export function admitPortableCache(root: string, text: string, expectedDescriptorSha256: string) {
+  function* admit() {
+    const bytes = new TextEncoder().encode(text);
+    yield* requireCache(bytes.length > 0 && bytes.length <= portableDescriptorLimits.bytes);
+    yield* Schema.decodeUnknownEffect(Digest)(expectedDescriptorSha256);
+    yield* requireCache((yield* hash(bytes)) === expectedDescriptorSha256, 'InputChanged');
+    const descriptor = yield* Schema.decodeUnknownEffect(DescriptorJson, {
+      onExcessProperty: 'error',
+    })(text);
+    yield* requireCache(
+      ![...roots].some((reserved) => overlap(reserved, root)),
+      'DestinationRefused',
+    );
+    yield* requireRelativeLinks(descriptor.inventory);
+    const readonly = transformedInventory(descriptor.materializedInventory, false);
+    yield* requireCache(
+      encodeInventory(readonly) === encodeInventory(descriptor.inventory),
+      'InputChanged',
+    );
+    yield* requireCache(
+      (yield* inventoryHash(descriptor.inventory)) === descriptor.sha256,
+      'InputChanged',
+    );
+    const actual = yield* scan(root, cacheLimits);
+    yield* requireCache(
+      encodeInventory(actual.entries) === encodeInventory(descriptor.inventory),
+      'InputChanged',
+    );
+    const writable = yield* writableInventory(root, descriptor.materializedInventory);
+    const seed: SealedCache = Object.freeze({
+      root,
+      policy: descriptor.policy,
+      sha256: descriptor.sha256,
+      materializedInventory: freezeInventory(descriptor.materializedInventory),
+      inventory: freezeInventory(actual.entries),
+      caseInventory: freezeInventory(writable),
+    });
+    // Only the fresh scan establishes authority; serialized metadata carries no identities.
+    seals.set(seed, { limits: Object.freeze({ ...cacheLimits }), identities: actual.identities });
+    roots.add(root);
+    return seed;
+  }
+  const workflow = Effect.gen(admit);
   return workflow;
 }
 function freshDestination(seed: SealedCache, destination: string) {
