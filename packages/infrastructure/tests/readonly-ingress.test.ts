@@ -28,8 +28,12 @@ function payload(operator = 50) {
     installation: { id: 10 },
     repository: { id: 30, name: 'fold-kit-experiments', owner: { id: 20, login: 'opsydyn' } },
     issue: { id: 400, number: 40 },
-    comment: { id: 55, body: '/ceirean assess', user: { id: operator, type: 'User' } },
-    sender: { id: operator, type: 'User' },
+    comment: {
+      id: 55,
+      body: '/ceirean assess',
+      user: { id: operator, type: 'User', login: 'operator' },
+    },
+    sender: { id: operator, type: 'User', login: 'operator' },
   };
 }
 function policy() {

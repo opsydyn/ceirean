@@ -4,6 +4,7 @@ import {
   VerifiedCommand,
   type NonAdmittedDecision,
 } from '@ceirean/domain';
+import { isBotAuthor } from '@ceirean/vendor-factory/github/bots.ts';
 import { Match, Result, Schema } from 'effect';
 
 const native = Schema.Struct({
@@ -22,9 +23,9 @@ const native = Schema.Struct({
   comment: Schema.Struct({
     id: GitHubId,
     body: Schema.String,
-    user: Schema.Struct({ id: GitHubId, type: Schema.String }),
+    user: Schema.Struct({ id: GitHubId, type: Schema.String, login: Schema.String }),
   }),
-  sender: Schema.Struct({ id: GitHubId, type: Schema.String }),
+  sender: Schema.Struct({ id: GitHubId, type: Schema.String, login: Schema.String }),
 });
 function refused(
   reason: NonAdmittedDecision['reason'],
@@ -81,8 +82,16 @@ export function normaliseGitHubDelivery(input: {
         () => 'pull_request' in value.issue,
         () => refused('PullRequestComment', 'Ignored'),
       ),
+      // `type` alone is not sufficient. GitHub reports App accounts as `Bot`,
+      // but a classic bot running on a plain user account is reported as
+      // `User` and is otherwise indistinguishable from a human in a webhook.
+      // The login test is the vendored factory's `isBotAuthor`, which exists
+      // because upstream hit exactly that case; without it a bot comment
+      // reading `/ceirean assess` would be admitted as an operator command.
       Match.when(
-        () => !isUser(value.sender.type) || !isUser(value.comment.user.type),
+        () =>
+          [value.sender.type, value.comment.user.type].some((type) => !isUser(type)) ||
+          [value.sender.login, value.comment.user.login].some(isBotAuthor),
         () => refused('BotActor', 'Ignored'),
       ),
       Match.when(

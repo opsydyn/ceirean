@@ -421,8 +421,12 @@ async function signedReplayRequest() {
       owner: { id: candidate.ownerId, login: 'opsydyn' },
     },
     issue: { id: 400, number: candidate.issueNumber },
-    comment: { id: 55, body: '/ceirean assess', user: { id: candidate.operatorId, type: 'User' } },
-    sender: { id: candidate.operatorId, type: 'User' },
+    comment: {
+      id: 55,
+      body: '/ceirean assess',
+      user: { id: candidate.operatorId, type: 'User', login: 'operator' },
+    },
+    sender: { id: candidate.operatorId, type: 'User', login: 'operator' },
   };
   const bytes = new TextEncoder().encode(encodePayload(payload));
   const key = await crypto.subtle.importKey(

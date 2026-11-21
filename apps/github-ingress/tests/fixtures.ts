@@ -95,8 +95,12 @@ export function payload(commentId = 55, operatorId = 66) {
     installation: { id: 11 },
     repository: { id: 22, name: 'repository', owner: { id: 33, login: 'owner' } },
     issue: { id: 44, number: 1 },
-    comment: { id: commentId, body: '/ceirean assess', user: { id: operatorId, type: 'User' } },
-    sender: { id: operatorId, type: 'User' },
+    comment: {
+      id: commentId,
+      body: '/ceirean assess',
+      user: { id: operatorId, type: 'User', login: 'operator' },
+    },
+    sender: { id: operatorId, type: 'User', login: 'operator' },
   };
 }
 export async function webhook(
