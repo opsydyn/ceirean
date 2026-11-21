@@ -1,0 +1,68 @@
+Narrow two Worker environment signatures to the fields they read.
+
+Upstream types both as WorkerEnv from src/env.ts, which imports every
+capability coordinator and contract. Structural typing makes that
+unnecessary, and narrowing is what reduces the vendored closure from 48
+files to 12. Apply onto a pristine copy of withastro/factory.
+
+--- a/src/github/client.ts
++++ b/src/github/client.ts
+@@ -1,14 +1,26 @@
+ import { App, type Octokit } from 'octokit';
+-import type { WorkerEnv } from '../env.ts';
+ 
+ export interface GitHubCredentials {
+ 	appId: string;
+ 	privateKey: string;
+ }
+ 
++/**
++ * The two fields of the Worker environment this module actually reads.
++ *
++ * Upstream types this as `WorkerEnv` from `../env.ts`, which imports every
++ * capability coordinator and contract in the factory. Structural typing makes
++ * that unnecessary: narrowing the parameter here is what lets these twelve
++ * files be vendored without the other thirty-six.
++ */
++export interface GitHubAppEnv {
++	GITHUB_APP_ID: string;
++	GITHUB_APP_PRIVATE_KEY: string;
++}
++
+ export type InstallationClient = Octokit;
+ 
+-export function credentialsFromWorkerEnv(env: WorkerEnv): GitHubCredentials {
++export function credentialsFromWorkerEnv(env: GitHubAppEnv): GitHubCredentials {
+ 	return {
+ 		appId: requiredValue('GITHUB_APP_ID', env.GITHUB_APP_ID),
+ 		privateKey: normalizePrivateKey(
+--- a/src/triage/sandbox.ts
++++ b/src/triage/sandbox.ts
+@@ -21,7 +21,6 @@
+ import { getSandbox, type Sandbox } from '@cloudflare/sandbox';
+ import type { SandboxFactory } from '@flue/runtime';
+ import { cloudflareSandbox } from '@flue/runtime/cloudflare';
+-import type { WorkerEnv } from '../env.ts';
+ import type { SkillSnapshot } from '../github/skill.ts';
+ import {
+ 	agentCommandTimeoutNote,
+@@ -58,7 +57,18 @@
+ 	success: boolean;
+ }
+ 
+-export function getTriageSandbox(env: WorkerEnv, id: string): TriageSandbox {
++/**
++ * The one binding this module reads. Narrowed from upstream's `WorkerEnv` for
++ * the reason given in `../github/client.ts`.
++ */
++export interface TriageSandboxEnv {
++	TRIAGE_SANDBOX: DurableObjectNamespace<Sandbox>;
++}
++
++export function getTriageSandbox(
++	env: TriageSandboxEnv,
++	id: string,
++): TriageSandbox {
+ 	return getSandbox(env.TRIAGE_SANDBOX, id, {
+ 		sleepAfter: '1h',
+ 		enableDefaultSession: false,

@@ -36,20 +36,20 @@ two edits.
 
 Twelve files, 2,005 lines, at `withastro/factory@3a01af8`:
 
-| File | Lines | Why |
-| --- | --- | --- |
-| `src/coordination/queue-coordinator.ts` | 233 | Per-entity serialisation, dedup by delivery id, alarm reconciliation. The single most valuable file in the tree |
-| `src/triage/sandbox.ts` | 450 | Hardened clone, credential handling, bounded commands, commit/push, teardown |
-| `src/triage/sandbox-utils.ts` | 182 | Identifier and ref assertions, shell quoting, command bounding, token redaction |
-| `src/github/issues.ts` | 473 | Issue, comment and label operations against the API |
-| `src/github/skill.ts` | 160 | Skill directory validation and snapshotting from maintainer-controlled content |
-| `src/github/client.ts` | 78 | App auth and scoped short-lived installation tokens |
-| `src/github/content.ts` | 62 | Repository file reads pinned to a ref |
-| `src/github/bots.ts` | 23 | Bot-author detection; prevents self-trigger loops |
-| `src/triage/labels.ts` | 155 | Label state vocabulary |
-| `src/triage/fsm.ts` | 92 | Event plus current label to action, with the live-state gate |
-| `src/models.ts` | 79 | Model specifier validation |
-| `src/thinking.ts` | 18 | Thinking-level vocabulary |
+| File                                    | Lines | Why                                                                                                             |
+| --------------------------------------- | ----- | --------------------------------------------------------------------------------------------------------------- |
+| `src/coordination/queue-coordinator.ts` | 233   | Per-entity serialisation, dedup by delivery id, alarm reconciliation. The single most valuable file in the tree |
+| `src/triage/sandbox.ts`                 | 450   | Hardened clone, credential handling, bounded commands, commit/push, teardown                                    |
+| `src/triage/sandbox-utils.ts`           | 182   | Identifier and ref assertions, shell quoting, command bounding, token redaction                                 |
+| `src/github/issues.ts`                  | 473   | Issue, comment and label operations against the API                                                             |
+| `src/github/skill.ts`                   | 160   | Skill directory validation and snapshotting from maintainer-controlled content                                  |
+| `src/github/client.ts`                  | 78    | App auth and scoped short-lived installation tokens                                                             |
+| `src/github/content.ts`                 | 62    | Repository file reads pinned to a ref                                                                           |
+| `src/github/bots.ts`                    | 23    | Bot-author detection; prevents self-trigger loops                                                               |
+| `src/triage/labels.ts`                  | 155   | Label state vocabulary                                                                                          |
+| `src/triage/fsm.ts`                     | 92    | Event plus current label to action, with the live-state gate                                                    |
+| `src/models.ts`                         | 79    | Model specifier validation                                                                                      |
+| `src/thinking.ts`                       | 18    | Thinking-level vocabulary                                                                                       |
 
 Plus `Dockerfile` (36 lines) as a starting point, not as a pin: it installs
 pnpm 10 globally, which a Bun target does not want.
@@ -138,14 +138,14 @@ copied.
 
 ## Toolchain
 
-| Concern | Decision |
-| --- | --- |
-| Package manager | Bun 1.4.2 as pinned. Factory's pnpm is not inherited |
-| Build | One Moon project at `vendor/factory`, `typecheck` and `test` tasks only |
-| Lint and format | Vendored paths excluded from oxlint and oxfmt. Our code is not |
-| Schema | Valibot arrives as a real dependency of the vendored files. Do not convert them to Effect Schema; keep Valibot at the vendored boundary and Effect Schema in our own code |
-| New dependencies | `octokit`, `valibot`, `js-yaml`, `@cloudflare/sandbox`, `@flue/runtime`. The first four are new to this repository |
-| Install default | Factory's `pnpm install --no-frozen-lockfile` default is explicitly not inherited: the frozen lockfile is part of our acceptance contract |
+| Concern          | Decision                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package manager  | Bun 1.4.2 as pinned. Factory's pnpm is not inherited                                                                                                                      |
+| Build            | One Moon project at `vendor/factory`, `typecheck` and `test` tasks only                                                                                                   |
+| Lint and format  | Vendored paths excluded from oxlint and oxfmt. Our code is not                                                                                                            |
+| Schema           | Valibot arrives as a real dependency of the vendored files. Do not convert them to Effect Schema; keep Valibot at the vendored boundary and Effect Schema in our own code |
+| New dependencies | `octokit`, `valibot`, `js-yaml`, `@cloudflare/sandbox`, `@flue/runtime`. The first four are new to this repository                                                        |
+| Install default  | Factory's `pnpm install --no-frozen-lockfile` default is explicitly not inherited: the frozen lockfile is part of our acceptance contract                                 |
 
 ## Upstream Tracking
 

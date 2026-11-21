@@ -15,7 +15,7 @@ and no GitHub write. Nothing was added to this repository's dependency graph.
 Alchemy claims are of two kinds and are labelled as such. **Verified** claims
 were read from the source of the `alchemy@2.0.0-beta.83` already installed in
 this repository's Bun store, under `src/Cloudflare/`. **Docs-only** claims were
-read from `alchemy.run` on 2026-11-21 via a fetch subagent and are *not*
+read from `alchemy.run` on 2026-11-21 via a fetch subagent and are _not_
 verified; where the published docs and the installed package disagree, the
 installed package wins and the disagreement is recorded. No Alchemy command was
 run: nothing here was deployed, planned or applied.
@@ -24,20 +24,20 @@ This assessment is not approval to fork, vendor, install, deploy or publish.
 
 ## What Factory Is
 
-| Property | Observed |
-| --- | --- |
-| Licence | MIT |
-| Size | 194 tracked files; 31,614 lines of TypeScript |
-| Tests | 51 Vitest files, 9,173 lines, `environment: 'node'` |
-| Runtime | Cloudflare Worker, Hono ingress, Node >= 22.19.0 |
-| Package manager | pnpm 10.28.0 |
-| Quality tooling | Biome 2.6.2 |
-| Validation | Valibot 1.4.2 |
-| Agents | `@flue/runtime` and `@flue/github` 2.3.0 |
-| Isolation | `@cloudflare/sandbox` 0.12.5, container built from a Dockerfile |
-| Durable Objects | 12 bindings, 10 migration tags (`v1`..`v10`) |
-| Workflows | 8 |
-| Model access | One provider only: `cloudflare-ai-gateway` |
+| Property        | Observed                                                        |
+| --------------- | --------------------------------------------------------------- |
+| Licence         | MIT                                                             |
+| Size            | 194 tracked files; 31,614 lines of TypeScript                   |
+| Tests           | 51 Vitest files, 9,173 lines, `environment: 'node'`             |
+| Runtime         | Cloudflare Worker, Hono ingress, Node >= 22.19.0                |
+| Package manager | pnpm 10.28.0                                                    |
+| Quality tooling | Biome 2.6.2                                                     |
+| Validation      | Valibot 1.4.2                                                   |
+| Agents          | `@flue/runtime` and `@flue/github` 2.3.0                        |
+| Isolation       | `@cloudflare/sandbox` 0.12.5, container built from a Dockerfile |
+| Durable Objects | 12 bindings, 10 migration tags (`v1`..`v10`)                    |
+| Workflows       | 8                                                               |
+| Model access    | One provider only: `cloudflare-ai-gateway`                      |
 
 Its README states it is "**not a general-purpose tool** for anyone to install —
 the package is private by design", and directs other projects to "**fork this
@@ -48,20 +48,20 @@ repository**". There is no release, no version and no published package.
 Each row is a thing [milestones B and C](../roadmaps/first-hosted-e2e.md) were
 going to build, set against what Factory already runs.
 
-| Parked Ceirean work | Factory equivalent |
-| --- | --- |
-| Signed GitHub admission | `@flue/github` channel with webhook-secret verification |
-| Deterministic command routing | `src/router.ts`, 907 lines, pure rule table, data in / data out |
-| Single-flight per target, dedup, restart recovery | `QueueCoordinator` Durable Object: one active and one pending entry, dedup by delivery id, 60s alarm reconciling against the Workflows API |
-| Durable run lifecycle | 8 Cloudflare Workflows, one per capability |
-| Immutable executor image | `@cloudflare/sandbox` container, image pinned to the SDK version |
-| 909-archive offline cache, mount policy, strace observer | Not needed in this shape: the sandbox is a managed container, not a host-local Docker lifecycle we own |
-| No credentials in repository processes | Public repos clone anonymously and blobless; private repos clone with a one-shot `http.extraHeader` token and then `origin` is removed; push injects a contents-only token into a single command, never into git config |
-| Bounded execution | Every sandbox command wrapped in `GIT_TERMINAL_PROMPT=0 timeout -k 5 <n>`; the Flue bash tool is wrapped so a model that omits a timeout still gets one |
-| Teardown | `destroy()` raced against a 10s timer, failures tolerated because the sandbox sleeps on its own |
-| Evidence export to a reviewed recipient | R2 report buckets, private and public output paths |
-| Separately approved draft PR, never auto-merge | Personas never merge; the fix branch is force-pushed, the PR is separate |
-| Per-repository policy from maintainer-controlled content | `.github/factory.yml`, read only from the default branch or the PR target branch, "never from PR heads or forks" |
+| Parked Ceirean work                                      | Factory equivalent                                                                                                                                                                                                      |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Signed GitHub admission                                  | `@flue/github` channel with webhook-secret verification                                                                                                                                                                 |
+| Deterministic command routing                            | `src/router.ts`, 907 lines, pure rule table, data in / data out                                                                                                                                                         |
+| Single-flight per target, dedup, restart recovery        | `QueueCoordinator` Durable Object: one active and one pending entry, dedup by delivery id, 60s alarm reconciling against the Workflows API                                                                              |
+| Durable run lifecycle                                    | 8 Cloudflare Workflows, one per capability                                                                                                                                                                              |
+| Immutable executor image                                 | `@cloudflare/sandbox` container, image pinned to the SDK version                                                                                                                                                        |
+| 909-archive offline cache, mount policy, strace observer | Not needed in this shape: the sandbox is a managed container, not a host-local Docker lifecycle we own                                                                                                                  |
+| No credentials in repository processes                   | Public repos clone anonymously and blobless; private repos clone with a one-shot `http.extraHeader` token and then `origin` is removed; push injects a contents-only token into a single command, never into git config |
+| Bounded execution                                        | Every sandbox command wrapped in `GIT_TERMINAL_PROMPT=0 timeout -k 5 <n>`; the Flue bash tool is wrapped so a model that omits a timeout still gets one                                                                 |
+| Teardown                                                 | `destroy()` raced against a 10s timer, failures tolerated because the sandbox sleeps on its own                                                                                                                         |
+| Evidence export to a reviewed recipient                  | R2 report buckets, private and public output paths                                                                                                                                                                      |
+| Separately approved draft PR, never auto-merge           | Personas never merge; the fix branch is force-pushed, the PR is separate                                                                                                                                                |
+| Per-repository policy from maintainer-controlled content | `.github/factory.yml`, read only from the default branch or the PR target branch, "never from PR heads or forks"                                                                                                        |
 
 The code quality is high and the comments carry the reasoning, not just the
 what. `src/triage/fsm.ts` gates every mutating action on the issue's live state
@@ -109,18 +109,18 @@ installed source for API.
 Coverage for everything Factory's `wrangler.jsonc` declares, verified in the
 installed source unless marked docs-only:
 
-| Factory needs | Alchemy resource (docs) |
-| --- | --- |
-| Worker + Hono fetch handler | `Cloudflare.Worker(name, { main: "./src/worker.ts" })`; `main` is a plain module path and the async-Worker path takes an ordinary `async fetch` handler |
-| Durable Objects | `bindings: { Name: Cloudflare.DurableObject<Class>("Name", { className }) }`, where `className` matches "the exported `DurableObject` subclass in your worker source file". Defaults to the namespace name. `Cloudflare.InferEnv` types the handler's `env` |
-| DO migration tags | Driven by Alchemy, not by us: the provider emits `{ new_tag: "alchemy:v1", new_sqlite_classes }` on first deploy, then diffs deployed against declared classes and emits `new_sqlite_classes` / `deleted_classes` under a bumped tag |
-| Workflows | `Workflow(name, { className })` props-only form, which "carries just enough metadata to emit the `workflow` binding for an async Worker"; plus `workflowName`, `limits`, `schedules` |
-| Container from a Dockerfile | `alchemy/Cloudflare/Containers`: `dockerfile?: string \| InlineDockerfile`, image refs resolved by digest in the provider. We already drive `ContainerClient`, `ContainerProcess`, `ContainerExecOptions` and `ContainerStartupOptions` from this package |
-| Worker Loader | `alchemy/Cloudflare/Workers/WorkerLoader` exists in the installed tree |
-| R2 buckets | `Cloudflare.R2.Bucket` *(docs-only)* |
-| Secrets | `Config.Redacted("NAME")` bound as `secret_text`, sourced from the stack's secrets option — dotenv, Doppler or Infisical *(docs-only)* |
-| Queues | `Cloudflare.Queues.Queue`, `WriteQueue`, `Consumer`; at most one Worker consumer per queue *(docs-only)* |
-| Zone, DNS, custom domain | `Cloudflare.Zone.Zone`, `Cloudflare.DNS.Record`, `Worker({ domain })`, `Workers.WorkerRoute` *(docs-only, though `DNS` and `Tunnel` are already imported by our stacks)*; `adopt(true)` for pre-existing ones, which we already use |
+| Factory needs               | Alchemy resource (docs)                                                                                                                                                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Worker + Hono fetch handler | `Cloudflare.Worker(name, { main: "./src/worker.ts" })`; `main` is a plain module path and the async-Worker path takes an ordinary `async fetch` handler                                                                                                     |
+| Durable Objects             | `bindings: { Name: Cloudflare.DurableObject<Class>("Name", { className }) }`, where `className` matches "the exported `DurableObject` subclass in your worker source file". Defaults to the namespace name. `Cloudflare.InferEnv` types the handler's `env` |
+| DO migration tags           | Driven by Alchemy, not by us: the provider emits `{ new_tag: "alchemy:v1", new_sqlite_classes }` on first deploy, then diffs deployed against declared classes and emits `new_sqlite_classes` / `deleted_classes` under a bumped tag                        |
+| Workflows                   | `Workflow(name, { className })` props-only form, which "carries just enough metadata to emit the `workflow` binding for an async Worker"; plus `workflowName`, `limits`, `schedules`                                                                        |
+| Container from a Dockerfile | `alchemy/Cloudflare/Containers`: `dockerfile?: string \| InlineDockerfile`, image refs resolved by digest in the provider. We already drive `ContainerClient`, `ContainerProcess`, `ContainerExecOptions` and `ContainerStartupOptions` from this package   |
+| Worker Loader               | `alchemy/Cloudflare/Workers/WorkerLoader` exists in the installed tree                                                                                                                                                                                      |
+| R2 buckets                  | `Cloudflare.R2.Bucket` _(docs-only)_                                                                                                                                                                                                                        |
+| Secrets                     | `Config.Redacted("NAME")` bound as `secret_text`, sourced from the stack's secrets option — dotenv, Doppler or Infisical _(docs-only)_                                                                                                                      |
+| Queues                      | `Cloudflare.Queues.Queue`, `WriteQueue`, `Consumer`; at most one Worker consumer per queue _(docs-only)_                                                                                                                                                    |
+| Zone, DNS, custom domain    | `Cloudflare.Zone.Zone`, `Cloudflare.DNS.Record`, `Worker({ domain })`, `Workers.WorkerRoute` _(docs-only, though `DNS` and `Tunnel` are already imported by our stacks)_; `adopt(true)` for pre-existing ones, which we already use                         |
 
 ### The pivotal question, resolved
 
@@ -164,11 +164,11 @@ Effect 4.0.5 is pinned across our probes and is the subject of
 contains no Effect: it is Hono, Valibot and plain `DurableObject` subclasses.
 Three tiers keep both true at once:
 
-| Tier | Language | Rule |
-| --- | --- | --- |
-| Infrastructure | Alchemy stack, Effect | Ours already |
-| Our capability: migration, acceptance contract, ledger | Effect 4, Effect Schema, XState | Ours, written as we write everything else |
-| Inherited substrate: router, coordinators, sandbox, channels | Plain TypeScript, Valibot | **Do not rewrite to Effect** |
+| Tier                                                         | Language                        | Rule                                      |
+| ------------------------------------------------------------ | ------------------------------- | ----------------------------------------- |
+| Infrastructure                                               | Alchemy stack, Effect           | Ours already                              |
+| Our capability: migration, acceptance contract, ledger       | Effect 4, Effect Schema, XState | Ours, written as we write everything else |
+| Inherited substrate: router, coordinators, sandbox, channels | Plain TypeScript, Valibot       | **Do not rewrite to Effect**              |
 
 The third rule is the load-bearing one. Rewriting 31,614 lines into Effect
 discards exactly what makes Factory worth having — the paid-for reasoning in its
@@ -203,14 +203,14 @@ that revises ADR-0001, not an implementation detail.
 
 ## Toolchain Collision
 
-| Concern | Ceirean | Factory |
-| --- | --- | --- |
-| Runtime and package manager | Bun 1.4.2 (pinned via `.prototools`) | pnpm 10.28.0, Node >= 22.19.0 |
-| Monorepo | Moon 2.5.4 | none |
-| Lint and format | oxlint 1.88.0, oxfmt 0.73.0 | Biome 2.6.2 |
-| Schema | Effect Schema | Valibot |
-| Tests | Bun test, Effect Arbitrary property tests | Vitest, `environment: 'node'` |
-| Build | Moon tasks | Vite 8 + `@cloudflare/vite-plugin` |
+| Concern                     | Ceirean                                   | Factory                            |
+| --------------------------- | ----------------------------------------- | ---------------------------------- |
+| Runtime and package manager | Bun 1.4.2 (pinned via `.prototools`)      | pnpm 10.28.0, Node >= 22.19.0      |
+| Monorepo                    | Moon 2.5.4                                | none                               |
+| Lint and format             | oxlint 1.88.0, oxfmt 0.73.0               | Biome 2.6.2                        |
+| Schema                      | Effect Schema                             | Valibot                            |
+| Tests                       | Bun test, Effect Arbitrary property tests | Vitest, `environment: 'node'`      |
+| Build                       | Moon tasks                                | Vite 8 + `@cloudflare/vite-plugin` |
 
 None of this is fatal and none of it is free. A vendored subtree can keep its
 own Vitest and Biome configuration behind one Moon task; what it cannot do is

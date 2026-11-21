@@ -9,6 +9,7 @@
   "ignorePatterns": [
     "bun.lock",
     "probes/cloudflare-executor/fixtures/current-cache-inventory.json",
+    "vendor/**",
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
