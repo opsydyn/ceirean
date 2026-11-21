@@ -262,15 +262,23 @@ Each of these is bounded, and the first two are prerequisites, not nice-to-haves
    `worker-configuration.d.ts` first; it generates offline, and that is why the
    vendored subset takes published `@cloudflare/workers-types` instead of
    upstream's generated `Env`.
-3. **Read the triage pipeline end to end.** `src/triage/workflow.ts` is 1,840
-   lines and is the closest thing in the tree to our migration loop. This
-   assessment read its sandbox, FSM and coordinator, not the workflow itself.
+3. **Read the triage pipeline end to end.** Done 2026-11-21; see
+   [the read](../evidence/factory-substrate/triage-pipeline-read-20261121.md).
+   Nine decisions worth taking, led by coordination-with-rollback,
+   per-phase retry reasons and re-provisioning a replaced container. One to
+   refuse outright: the verdict is the model's own `fixed` boolean and the
+   config has no test command, so with `autoPrOnFix` enabled nothing
+   independently verifies a fix. That is the concrete reason our acceptance
+   contract is not redundant.
 4. **Container economics.** `instance_type: standard-2`, `max_instances: 10`,
    `sleepAfter: '1h'`. A FoldKit install and full suite per candidate, against
    bounded cost, needs a number before a hosted run is approved.
-5. **Alchemy gaps.** Confirm against the installed package, not the docs:
-   fail-fast on missing secrets, and whether a container image can be pinned by
-   digest rather than rebuilt.
+5. **Alchemy gaps.** Done 2026-11-21; see
+   [the findings](../evidence/factory-substrate/alchemy-gaps-20261121.md). No
+   equivalent of `secrets.required` exists and a missing secret fails during
+   apply rather than at plan, so that check is ours to reproduce. Container
+   images are always deployed digest-pinned: an embedded digest is used as-is
+   and a tag is resolved to one at deploy time.
 
 ## What This Does Not Change
 
