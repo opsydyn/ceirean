@@ -10,11 +10,17 @@ import { Clock, Effect, Match, Option, Result, Schema } from 'effect';
 
 import { RunSnapshot, type CommitResult } from './contracts.ts';
 import { CandidateVerifier, RunRepository } from './ports.ts';
+import { PlanRefusal } from './verification-plan.ts';
+import { decodePlanRefusedReply } from './verifier-reply.ts';
 
 export const QualificationOutcome = Schema.Union([
   Schema.TaggedStruct('Qualified', { snapshot: RunSnapshot }),
   Schema.TaggedStruct('Refused', {
-    refusal: Schema.Union([QualificationRefusal, Schema.TaggedStruct('RunNotFound', {})]),
+    refusal: Schema.Union([
+      QualificationRefusal,
+      PlanRefusal,
+      Schema.TaggedStruct('RunNotFound', {}),
+    ]),
   }),
   Schema.TaggedStruct('Conflict', { runId: RunId, expectedRevision: NonNegativeSafeInteger }),
 ]);
@@ -24,6 +30,19 @@ function refused(
   refusal: Extract<QualificationOutcome, { _tag: 'Refused' }>['refusal'],
 ): QualificationOutcome {
   return { _tag: 'Refused', refusal };
+}
+
+/**
+ * Read a verifier's reply: a plan-refusal envelope carries its own reason, and
+ * anything else is a receipt for the domain to decode. See
+ * {@link decodePlanRefusedReply} for why the port's `unknown` needs this.
+ */
+function readVerifierReply(reply: unknown) {
+  const envelope = decodePlanRefusedReply(reply);
+  return Result.match(envelope, {
+    onSuccess: ({ refusal }) => Result.fail(refusal),
+    onFailure: () => decodeReceipt(reply),
+  });
 }
 
 function committed(result: CommitResult): QualificationOutcome {
@@ -65,7 +84,7 @@ export function qualifyRun(runId: RunId) {
               contract,
             }),
           )
-          .pipe(Effect.map(decodeReceipt)),
+          .pipe(Effect.map(readVerifierReply)),
     });
     const receipt = yield* verification;
     const finalTime = yield* Clock.currentTimeMillis;

@@ -148,11 +148,58 @@ which recommends `Effect.fn`: `no-effect-fn-generator` forbids it, and
 types its examples use. Neither is wrong as a house rule; both are surprising
 if you arrive from the upstream docs, as I did.
 
+## Wired To The Coordinator
+
+`qualifyRun` now drives the capability. The join needed one decision, because
+the `CandidateVerifier` port promises `unknown`: a verifier may be any
+implementation, and the coordinator decodes whatever arrives.
+
+That is honest but lossy. A capability that refused before running anything —
+because the plan did not cover the contract — has something specific to say,
+and an undecodable receipt would reach the domain as a bare `InvalidReceipt`.
+Three options were open: conflate the refusal with an operational failure
+(wrong — it is a decision about evidence, not a broken verifier), let it arrive
+as `InvalidReceipt` (loses the reason), or change the port to return a proper
+union (correct, and it rewrites all eighteen existing verifier stubs for a
+seam with no production caller yet).
+
+`verifier-reply.ts` takes the fourth path: it narrows the port's `unknown` in
+exactly one direction. A reply may be a plan-refusal envelope; anything else is
+a receipt, decoded exactly as before. No existing verifier changed, no stub
+moved, and `QualificationOutcome` gained the plan refusal alongside the
+domain's own refusals and `RunNotFound`, which it already carried. The module
+says in its own comment that the `unknown` is the real wart and that the port
+should take a union when a second real verifier exists.
+
+`candidateVerifierFromSandbox` is the adapter: a projection hands over the
+receipt itself, a refusal travels as the envelope.
+
+`packages/engine/tests/coordinator-sandbox.test.ts`, 3 tests, and these are the
+ones that matter most in the slice because nothing before them showed the two
+halves joined:
+
+- A run qualifies on evidence the sandbox produced, with all three commands
+  issued in order and the sandbox released.
+- A failing check refuses the run with **the domain's** reason —
+  `IncompleteVerification / NonPassingCheck` — not with anything the capability
+  decided, and the third command never issues.
+- A plan refusal reaches the outcome as `PlanCoverage / MissingCheck` naming
+  the absent check, with the sandbox never prepared.
+
+Engine totals: 362 passing.
+
 ## Still Ahead
 
-The `CandidateVerifier` wiring that lets `qualifyRun` use this: the port's
-driver signature is promise-shaped and this capability is Effect-native, so one
-of the two has to give. Nothing here is wired into the coordinator yet, and no
-real sandbox implements the port — the vendored module is the obvious
-implementation, and connecting them needs a container, which is its own
-approval.
+No real sandbox implements the port. The vendored module is the obvious
+implementation and connecting them needs a container, which is its own
+approval. Until then the capability is exercised only against the scripted
+fake, and nothing in this repository has run a real migration.
+
+## A Pre-Existing Fragility Worth Naming
+
+`migration-storage:test`'s native refinement law is budgeted at 180 seconds and
+takes about 144 standalone on this machine. Under the full suite's parallel
+load it exceeded the budget and failed once during this slice, then passed on
+its own. It is not caused by anything here — the law predates this work — but
+the headroom is thin enough that added load tips it, and the budget or the run
+count is a decision someone should take deliberately rather than discover.

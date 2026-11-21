@@ -31,6 +31,7 @@ import {
   type SandboxCommand,
   type SandboxExecution,
 } from './migration-sandbox-port.ts';
+import { CandidateVerifier } from './ports.ts';
 import {
   PlanRefusal,
   projectReceipt,
@@ -178,6 +179,38 @@ export function makeSandboxVerifier(resolvePlan: PlanResolver) {
     }
 
     return { verify };
+  }
+  const acquisition = Effect.gen(acquire);
+  return acquisition;
+}
+
+/**
+ * What the `CandidateVerifier` port receives. A projection hands over the
+ * receipt itself, so every existing verifier and the coordinator's decode path
+ * stay exactly as they were. A refusal travels as the envelope, so its reason
+ * survives instead of arriving as an undecodable receipt.
+ */
+function replyOf(verification: SandboxVerification): unknown {
+  return Match.value(verification).pipe(
+    Match.tag('Projected', ({ receipt }) => receipt),
+    Match.tag('PlanRefused', ({ refusal }) => ({ _tag: 'PlanRefused' as const, refusal })),
+    Match.exhaustive,
+  );
+}
+
+/**
+ * The sandbox capability as the `CandidateVerifier` the run coordinator
+ * already depends on, so `qualifyRun` can drive it without knowing a sandbox
+ * exists.
+ */
+export function candidateVerifierFromSandbox(resolvePlan: PlanResolver) {
+  function* acquire() {
+    const verifier = yield* makeSandboxVerifier(resolvePlan);
+    function verify(request: VerificationRequest) {
+      const program = verifier.verify(request);
+      return program.pipe(Effect.map(replyOf));
+    }
+    return CandidateVerifier.of({ verify });
   }
   const acquisition = Effect.gen(acquire);
   return acquisition;
