@@ -188,7 +188,7 @@ Each slice ends in evidence, and none of them deploys anything.
    could reach admission by posting the command. Closed with the vendored
    `isBotAuthor`, plus six bot-login cases, three human controls, two
    malformed-login cases and two property laws.
-4. **Our capability, offline.** Partly done 2026-11-21; see
+4. **Our capability, offline.** Done 2026-11-21; see
    [the migration capability](../../evidence/factory-substrate/migration-capability-20261121.md).
    The acceptance contract was already built — `VerificationContract`,
    `validateReceipt` and `decideQualification` — so the gap was the middle.
