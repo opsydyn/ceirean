@@ -1,8 +1,11 @@
 # Ceirean Roadmap
 
-Updated 2026-10-31. This is the active product delivery map. Historical records
+Updated 2026-11-20. This is the active product delivery map. Historical records
 live in [the previous roadmap](roadmap-history-20261027.md); checkboxes record
 evidence, not permission to execute. The local folder may remain `Leviathan`.
+The owned executor runtime is parked as of 2026-11-18; see
+[the parking record](#parked-owned-executor-runtime-2026-11-18) before planning
+another runtime slice.
 
 ## Product Outcome
 
@@ -37,7 +40,11 @@ Preview-token revocation/lifetime remains an explicit transport limitation.
 
 ## Delivery Order
 
-### 1. Real FoldKit Baseline And Browser Evidence: Now
+### 1. Real FoldKit Baseline And Browser Evidence: Parked 2026-11-18
+
+Its unchecked items are deferred, not scheduled. The migration pilot in the
+parking record below replaces them as the next approval. Delivered items remain
+accurate records of what was proven.
 
 **User result:** one manually requested private job returns a reviewable bundle
 from actual repository checks and desktop/mobile interactions, with source,
@@ -91,6 +98,11 @@ hosted manifest/stdin demo for this milestone. No new hosted run is approved her
 
 ### 2. Useful Migration Patch: Next
 
+While the runtime is parked, this milestone runs as the FoldKit migration pilot:
+the patch comes from a human-triggered agent and the verdict comes from the
+repository's own CI, not from the owned worker or the baseline contract rerun.
+Substitute those two steps; keep the scope, evidence and acceptance requirements.
+
 - [ ] Select one real dependency/source-API upgrade, exact targets and allowed paths.
 - [ ] Give Flue only the existing restricted worker tools and approved model budget.
 - [ ] Freeze a scope-valid patch and independently rerun the baseline contract.
@@ -116,6 +128,71 @@ No model key, provider call or repository write is authorized by this roadmap.
 - [ ] Evaluate useful repairs and maintainer effort before wider rollout.
 
 ## Focus And Guardrails
+
+### Parked: Owned Executor Runtime (2026-11-18)
+
+Park the owned executor runtime: the unbuilt baseline image, the inactive Linux
+cache CI job, the observer/tracer candidates and the private hosted actuation
+sequence in milestones B and C of
+[the execution path](roadmaps/first-hosted-e2e.md). Its milestone D repair loop
+becomes the pilot below. This is sequencing, not a verdict on that work or on
+its recorded evidence.
+
+Reason: `opsydyn/fold-kit-experiments` already runs the acceptance surface those
+milestones would rebuild. Its committed `ci.yml` performs a frozen-lockfile
+install, lint/format, typecheck, tests and build, then package checks via
+publint/attw, public-API report drift, Playwright Chromium browser/visual tests
+with golden-diff artifacts, package tarball and clean npm consumer checks, and a
+real ELK layout check. Reconstructing that inside a bespoke immutable image adds
+custody and isolation, not verification signal, for a pilot the maintainer
+triggers against a repository they own.
+
+Replacement next approval: one FoldKit migration pilot against committed `main`,
+not the dirty local checkout or the October container baseline. Use a
+human-triggered agent for the patch and the repository's existing CI for the
+verdict, comparing an unchanged base with the candidate under the same checks.
+Cap harness setup at half an engineering day; do not cap the migration itself,
+because an upgrade small enough to fit that cap cannot test the value claim.
+Never modify FoldKit tests, acceptance thresholds or release workflows to obtain
+a pass. No auto-merge and no release. The pilot requires a genuine breaking
+upgrade: if none is available on demand, record that outcome instead of
+manufacturing one, because the absence is itself evidence about demand.
+
+Measure the maintainer's active review and rework time against a comparable
+manual upgrade, and record it. Routine version bumps belong to a dependency bot,
+trying Dependabot's Bun support on this one repository first and Renovate only if
+that falls short; neither is yet proven against the root catalog, published
+version literals and `bun.lock` conventions. Dependabot is currently configured
+for GitHub Actions only.
+
+Retain the merged runtime work at `c4058a2` and every existing evidence record;
+it is deferred, not deleted. Owned isolation remains the prerequisite for running
+untrusted agent-produced patches against repositories the maintainer does not
+own, which is the Repeatable Service outcome. Reopen this runtime for that
+outcome, or for a concrete gap the pilot exposes in the simpler workflow, with a
+bounded question and an exit condition.
+
+Substrate when reopening: fork `withastro/factory` (MIT) rather than resume the
+image, cache and observer programme. It runs Astro's own triage and review
+automation in production on the architecture these milestones were building:
+Cloudflare Worker webhook ingress, a deterministic router, one Durable Object per
+issue or pull request for serialisation, Flue agents, and Cloudflare Sandbox
+containers with credential-free hardened clones and bounded install/build
+commands. Cloudflare Sandbox in particular displaces the unbuilt immutable image,
+the 909-archive offline cache and the mount policy. Only the Cloudflare AI Gateway
+provider is bundled there, which constrains any inherited credential boundary.
+
+Factory does not supply the product. It has no dependency upgrade, migration or
+codemod capability, and no acceptance gate: its triage loop ends with the issue
+reporter confirming a fix, which has no analogue for a migration whose only
+verdict is the target suite. The acceptance contract and the migration capability
+stay ours. Factory is also young, has no releases and is private by design, so
+its own suggested path for other projects is a fork; adopting it means owning
+that code, not depending on it. Before committing to a fork, read `src/router.ts`
+and the triage skill in the source. This assessment rests on one truncated page
+fetch with a model-summarised tail, not on the source.
+
+### Standing Guardrails
 
 Park the standalone hosted manifest-report run, custom observer/tracer programme,
 generic cache-qualification expansion, Alchemy upgrade, Rust rewrite, dashboards,

@@ -56,6 +56,10 @@ toolchain choices. Do not spend another slice designing a manifest transport.
 
 ## B. Make That Baseline Runnable On Linux
 
+Parked 2026-11-18 with milestone C; see the roadmap's
+[parking record](../roadmap.md#parked-owned-executor-runtime-2026-11-18).
+Completed items stay as evidence; unchecked ones are deferred, not scheduled.
+
 - [x] Prepare the digest-pinned Linux amd64 recipe and strict image metadata,
       using existing preparation rather than treating it as measured. See
       [the current preparation runbook](../runbooks/current-foldkit-baseline.md).
@@ -106,6 +110,9 @@ general Internet access, skipped suites or changed expectations. Do not revive
 the generic observer/cache programme unless a specific required control needs it.
 
 ## C. Deliver It Through The Private Hosted Job
+
+Parked 2026-11-18 with milestone B; see the roadmap's
+[parking record](../roadmap.md#parked-owned-executor-runtime-2026-11-18).
 
 - [ ] Extend the existing hosted job with a typed baseline operation/result;
       preserve the smoke protocol/history and reject mixed operation identities.
