@@ -13,3 +13,4 @@ projects:
   cloudflare-ledger: probes/cloudflare-ledger
   cloudflare-executor: probes/cloudflare-executor
   vendor-factory: vendor/factory
+  factory-binding: probes/factory-binding

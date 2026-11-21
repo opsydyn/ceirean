@@ -2,6 +2,9 @@
   "name": "@ceirean/vendor-factory",
   "private": true,
   "type": "module",
+  "exports": {
+    "./*": "./src/*"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },

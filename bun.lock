@@ -120,6 +120,19 @@
         "effect": "4.0.5",
       },
     },
+    "probes/factory-binding": {
+      "name": "@ceirean/factory-binding-probe",
+      "dependencies": {
+        "@ceirean/vendor-factory": "workspace:*",
+        "@cloudflare/sandbox": "0.12.5",
+        "alchemy": "2.0.0-beta.83",
+        "effect": "4.0.5",
+        "valibot": "1.5.0",
+      },
+      "devDependencies": {
+        "@cloudflare/workers-types": "5.20261021.1",
+      },
+    },
     "probes/github-admission": {
       "name": "@ceirean/github-admission-probe",
       "dependencies": {
@@ -218,6 +231,8 @@
     "@ceirean/domain": ["@ceirean/domain@workspace:packages/domain"],
 
     "@ceirean/engine": ["@ceirean/engine@workspace:packages/engine"],
+
+    "@ceirean/factory-binding-probe": ["@ceirean/factory-binding-probe@workspace:probes/factory-binding"],
 
     "@ceirean/github-adapter": ["@ceirean/github-adapter@workspace:packages/github-adapter"],
 

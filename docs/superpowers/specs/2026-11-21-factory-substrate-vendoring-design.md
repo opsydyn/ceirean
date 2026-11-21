@@ -165,14 +165,21 @@ lines no longer earn their provenance overhead.
 
 Each slice ends in evidence, and none of them deploys anything.
 
-1. **Vendor and prove.** Copy the twelve files, write `LICENSE` and
-   `PROVENANCE.md`, apply patch 0001, port the seven test files, get them green
-   under Bun and typechecking under Moon. Evidence: test and typecheck output,
-   the patch series, per-file SHAs. Nothing of ours is written yet.
-2. **Bind it.** An Alchemy stack declaring one `QueueCoordinator` subclass and
-   `@cloudflare/sandbox`'s `Sandbox` as plain DO classes, with an `async fetch`
-   Worker. Typecheck only. Evidence: the stack typechecks and `InferEnv` resolves
-   with a class we do not author. No deploy, no account.
+1. **Vendor and prove.** Done 2026-11-21. Twelve files under `vendor/factory`
+   with `LICENSE` and `PROVENANCE.md`, patches 0001 and 0002, the seven tests
+   ported to `bun:test` and green at 59 tests and 144 assertions, `tsc --noEmit`
+   clean. Three new dependencies, not five: `valibot` and `@flue/runtime` were
+   already here at compatible versions.
+2. **Bind it.** Done 2026-11-21 as `probes/factory-binding`; see
+   [the binding probe](../../evidence/factory-substrate/binding-probe-20261121.md).
+   A plain `DurableObject` subclass, a plain `WorkflowEntrypoint` subclass and
+   `@cloudflare/sandbox`'s own `Sandbox` hosting a pinned-image container all
+   bind by class name on an async Worker's `env`, and `InferEnv` resolves them
+   for an ordinary `async fetch` handler. Typecheck only; no deploy, no account.
+   Three corrections to this document came out of it: the prop is `env`, not the
+   documented `bindings`; `Cloudflare.Workflow` takes one type parameter, its
+   params; and an `image`-based container binds on an async Worker while a
+   `main`-based one explicitly does not.
 3. **Our router.** Our own rule table for our own events, bot filtering taken
    from `isBotAuthor`, with property tests. Evidence: tests, and a written note
    of which of Factory's routing decisions we deliberately did not copy.
