@@ -196,9 +196,11 @@ Each slice ends in evidence, and none of them deploys anything.
    17 tests including a law joining the projection to `decideQualification`.
    The Effect capability was withdrawn once and then landed in the same
    session, with a scripted fake sandbox and tests for ordering, halting at the
-   first failure and release on every path: 25 tests in all. Still ahead: the
-   `CandidateVerifier` wiring, whose driver signature is promise-shaped while
-   this capability is Effect-native, and a real sandbox behind the port.
+   first failure and release on every path. The `CandidateVerifier` wiring then
+   landed too, so `qualifyRun` drives the capability and a plan refusal reaches
+   the outcome by its own reason rather than as an undecodable receipt: 28
+   tests across the slice. Still ahead: a real sandbox behind the port, which
+   needs a container and its own approval.
 5. **Separately approved.** Anything that runs a container, touches Cloudflare,
    installs a GitHub App or uses a credential. Each its own gate.
 
