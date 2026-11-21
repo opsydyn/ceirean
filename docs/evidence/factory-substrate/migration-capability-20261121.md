@@ -195,11 +195,24 @@ implementation and connecting them needs a container, which is its own
 approval. Until then the capability is exercised only against the scripted
 fake, and nothing in this repository has run a real migration.
 
-## A Pre-Existing Fragility Worth Naming
+## A Pre-Existing Fragility, Now Fixed
 
-`migration-storage:test`'s native refinement law is budgeted at 180 seconds and
-takes about 144 standalone on this machine. Under the full suite's parallel
-load it exceeded the budget and failed once during this slice, then passed on
-its own. It is not caused by anything here — the law predates this work — but
-the headroom is thin enough that added load tips it, and the budget or the run
-count is a decision someone should take deliberately rather than discover.
+`migration-storage`'s native refinement law ran three seeds inside one test
+against a single 180-second budget, taking about 144 seconds standalone. Under
+the full suite's parallel load the accumulated time crossed the budget and the
+law failed once during this slice for a reason that had nothing to do with the
+property, then passed on its own. The law predates this work; the added load
+tipped it.
+
+Fixed by splitting it into one test per seed, which changes no coverage — same
+seeds, same 1000 runs, same fresh databases — and gives each seed its own
+150-second budget against a standalone cost of about 41 seconds. Measured under
+full-suite load afterwards: 49.2s, 45.6s and 47.2s, so roughly a third of each
+budget, where before a 27% slowdown was enough to fail. A failure now also
+names the seed in the test title rather than only in the diagnostic, and the
+per-seed `elapsedMs` log is no longer cumulative, so the next person reading it
+gets three honest numbers instead of a running total.
+
+Two consecutive full-suite runs passed afterwards. No other test in the
+repository is near its own budget: the only durations above twenty seconds are
+per-project task totals, not individual tests.

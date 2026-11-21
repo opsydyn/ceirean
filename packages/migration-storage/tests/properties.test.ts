@@ -201,32 +201,41 @@ function refinement(input: Input) {
   return scoped;
 }
 
-async function nativeLaw() {
+/**
+ * One seed per test, rather than three seeds inside one.
+ *
+ * The three seeds together take about 144 seconds on a developer machine
+ * against what used to be a single 180-second budget, so under the full
+ * suite's parallel load the accumulated time crossed it and the law failed for
+ * a reason that had nothing to do with the property. Splitting changes no
+ * coverage — same seeds, same 1000 runs, same fresh databases — and gives each
+ * seed its own budget with roughly three times its standalone cost, so load
+ * has to triple before a pass becomes a failure. A failure now also names the
+ * seed in the test title rather than only in the diagnostic.
+ */
+async function nativeLawForSeed(seed: number) {
   const started = performance.now();
-  for (const seed of [0, 1, 163]) {
-    const checking = Arbitrary.checkEffect(arbitrary, refinement, {
-      seed,
-      runs: 1000,
-      size: 50,
-      maxShrinks: 1000,
-      maxDiscards: 10000,
-    });
-    function verify(value: Arbitrary.CheckResult<unknown, unknown>) {
-      const validation = validateCheckResult('native refinement', seed, value, 1000);
-      const program = Effect.fromResult(validation);
-      return program;
-    }
-    const verified = checking.pipe(Effect.tap(verify));
-    const provided = Effect.provide(verified, platform);
-    const result = await Effect.runPromise(provided);
-    expect(result).toMatchObject({ _tag: 'Passed', runs: 1000 });
-    console.log(
-      `native refinement seed=${seed} runs=1000 elapsedMs=${Math.round(performance.now() - started)}`,
-    );
+  const checking = Arbitrary.checkEffect(arbitrary, refinement, {
+    seed,
+    runs: 1000,
+    size: 50,
+    maxShrinks: 1000,
+    maxDiscards: 10000,
+  });
+  function verify(value: Arbitrary.CheckResult<unknown, unknown>) {
+    const validation = validateCheckResult('native refinement', seed, value, 1000);
+    const program = Effect.fromResult(validation);
+    return program;
   }
+  const verified = checking.pipe(Effect.tap(verify));
+  const provided = Effect.provide(verified, platform);
+  const result = await Effect.runPromise(provided);
+  expect(result).toMatchObject({ _tag: 'Passed', runs: 1000 });
+  const elapsedMs = Math.round(performance.now() - started);
+  console.log(`native refinement seed=${seed} runs=1000 elapsedMs=${elapsedMs}`);
 }
-test(
-  'native refinement; seeds 0/1/163 x 1000 fresh databases; eight commands; 180s total',
-  nativeLaw,
-  180000,
+test.each([0, 1, 163])(
+  'native refinement; seed %s; 1000 fresh databases; eight commands; 150s budget',
+  nativeLawForSeed,
+  150000,
 );
