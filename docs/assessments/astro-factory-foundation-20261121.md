@@ -253,9 +253,15 @@ Each of these is bounded, and the first two are prerequisites, not nice-to-haves
    `@cloudflare/sandbox`'s `Sandbox` in an Alchemy stack here and typecheck it.
    No deploy, no account. The API is confirmed; this confirms the generics and
    `InferEnv` behave with a class we do not author.
-2. **Factory's own suite, locally.** `pnpm install` and `vitest run` in the
-   scratchpad clone, to establish the 51 test files pass outside Astro's CI
-   before we rely on any of them. Requires external acquisition approval.
+2. **Factory's own suite, locally.** Done 2026-11-21; see
+   [the upstream suite record](../evidence/factory-substrate/upstream-suite-20261121.md).
+   All 51 files and 460 tests pass in 742ms with a frozen lockfile and
+   lifecycle scripts blocked, which confirms the suite is pure unit tests and
+   that porting the covering seven to `bun:test` was right. Upstream's own
+   typecheck needs `wrangler types` to generate a gitignored
+   `worker-configuration.d.ts` first; it generates offline, and that is why the
+   vendored subset takes published `@cloudflare/workers-types` instead of
+   upstream's generated `Env`.
 3. **Read the triage pipeline end to end.** `src/triage/workflow.ts` is 1,840
    lines and is the closest thing in the tree to our migration loop. This
    assessment read its sandbox, FSM and coordinator, not the workflow itself.

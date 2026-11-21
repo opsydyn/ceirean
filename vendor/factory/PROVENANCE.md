@@ -42,6 +42,14 @@ repositories.
 As of 2026-11-21, on Bun 1.4.4: `tsc --noEmit` clean, and `bun test` green at
 59 tests and 144 assertions across 7 files.
 
+Upstream's own suite was also run at this commit, outside Astro's CI: 51 files
+and 460 tests passing, with `tsc --noEmit` clean after `wrangler types`
+generates the gitignored `worker-configuration.d.ts`. See
+[the record](../../docs/evidence/factory-substrate/upstream-suite-20261121.md).
+The vendored files are not re-verified by that run — they are a subset under a
+patch series and a different test runner — but it establishes that the tree
+they came from is sound at this commit.
+
 ## Applied Patches
 
 | Patch | Touches | Why |
