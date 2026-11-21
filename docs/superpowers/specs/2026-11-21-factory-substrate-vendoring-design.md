@@ -204,6 +204,15 @@ Each slice ends in evidence, and none of them deploys anything.
 5. **Separately approved.** Anything that runs a container, touches Cloudflare,
    installs a GitHub App or uses a credential. Each its own gate.
 
+   One requirement carried into it from
+   [reading upstream's workflow](../../evidence/factory-substrate/triage-pipeline-read-20261121.md):
+   the Workflow that enqueues runs through the vendored `QueueCoordinator` must
+   register coordination as a step with a rollback that calls `complete`.
+   Without it a crashed run holds that entity's queue slot until the
+   60-second alarm reconciles. It cannot be closed before the Workflow exists,
+   and it is the kind of thing that is invisible until a run dies, so it belongs
+   in the plan rather than in someone's memory.
+
 Slices 1 to 4 are local and reversible. Slice 1 needs external acquisition
 approval for the new dependencies and nothing else.
 

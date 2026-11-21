@@ -43,6 +43,17 @@ export class MigrationSandboxError extends Data.TaggedError('MigrationSandboxErr
 export interface MigrationSandboxDriver {
   readonly runId: RunId;
   readonly prepare: () => Promise<void>;
+  /**
+   * Whether the checkout the plan runs in still exists.
+   *
+   * A durable run outlives its container: the platform may replace the one
+   * underneath it between steps, and the new one has no checkout. The
+   * capability asks before each step rather than assuming `prepare` happened
+   * once, which is what the upstream factory learned to do — see
+   * `ensureTriageWorkspace` in the vendored sandbox module, which tests for
+   * `/repo/.git` and re-clones.
+   */
+  readonly isPrepared: () => Promise<boolean>;
   readonly exec: (command: SandboxCommand, signal: AbortSignal) => Promise<SandboxExecution>;
   readonly release: () => Promise<void>;
 }
@@ -58,6 +69,15 @@ export function makeMigrationSandbox(driver: MigrationSandboxDriver) {
           code: 'PrepareFailed',
         }),
     }).pipe(Effect.withSpan('MigrationSandbox.prepare')),
+    isPrepared: Effect.tryPromise({
+      try: () => driver.isPrepared(),
+      catch: () =>
+        new MigrationSandboxError({
+          runId: driver.runId,
+          operation: 'prepare',
+          code: 'Unavailable',
+        }),
+    }).pipe(Effect.withSpan('MigrationSandbox.isPrepared')),
     /** A non-zero exit is a result, not a failure: the plan interprets it. */
     exec: (command: SandboxCommand) =>
       Effect.tryPromise({

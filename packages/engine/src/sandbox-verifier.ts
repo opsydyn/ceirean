@@ -21,7 +21,7 @@
  */
 
 import type { VerificationContract } from '@ceirean/domain';
-import { Array, Context, Effect, Match, Option, Result, Schema } from 'effect';
+import { Array, Context, Effect, Match, Option, Result, Schedule, Schema } from 'effect';
 
 import type { VerificationRequest } from './contracts.ts';
 import { CandidateVerifierError } from './errors.ts';
@@ -47,6 +47,31 @@ import {
  * plan from maintainer-controlled repository content happens before this and
  * hands the result in.
  */
+/**
+ * How many times an infrastructure failure is retried, and how long between
+ * attempts.
+ *
+ * Only a `MigrationSandboxError` is retried. A check that exits non-zero is a
+ * *result*, not a failure, so it can never reach this policy — which is the
+ * property that matters: the target suite failing is the signal we are looking
+ * for, and retrying it would waste time and risk reporting a flake as a pass.
+ * The container dying under a check is a different thing, and that is what this
+ * covers.
+ *
+ * The upstream factory draws the same line in prose, on its build step: retried
+ * "not because a failing build is flaky — it isn't — but because the container
+ * underneath it can be". Here it is in the types instead.
+ */
+export const DEFAULT_SANDBOX_RETRIES = {
+  times: 2,
+  schedule: Schedule.spaced('5 seconds'),
+} as const;
+
+export interface SandboxRetries {
+  readonly times: number;
+  readonly schedule: Schedule.Schedule<unknown>;
+}
+
 export type PlanResolver = (
   contract: VerificationContract,
 ) => Result.Result<VerificationPlan, PlanRefusal>;
@@ -123,9 +148,28 @@ function projectedVerification(receipt: unknown): SandboxVerification {
   return { _tag: 'Projected', receipt };
 }
 
-export function makeSandboxVerifier(resolvePlan: PlanResolver) {
+export function makeSandboxVerifier(
+  resolvePlan: PlanResolver,
+  retries: SandboxRetries = DEFAULT_SANDBOX_RETRIES,
+) {
   function* acquire() {
     const sandbox = yield* MigrationSandbox;
+
+    /**
+     * Re-provision when the container was replaced between steps.
+     *
+     * A durable run outlives its container: the platform may swap the one
+     * underneath it, and the replacement has no checkout. Preparing once and
+     * assuming the checkout persists is the mistake the upstream factory
+     * already made and fixed — every one of its container-backed steps begins
+     * by testing for the checkout and re-cloning.
+     */
+    function* ensurePrepared() {
+      const prepared = yield* sandbox.isPrepared;
+      const missing = Effect.succeed(!prepared);
+      yield* Effect.when(sandbox.prepare, missing);
+      return !prepared;
+    }
 
     /**
      * A plan refusal is returned, not raised: it is a decision about evidence
@@ -140,12 +184,13 @@ export function makeSandboxVerifier(resolvePlan: PlanResolver) {
         function runPlan(plan: VerificationPlan) {
           function fold(progress: PlanProgress, step: PlanStep) {
             function* foldOne() {
+              yield* ensurePrepared();
               const runnable = commandsFor(progress, step);
               const executions = yield* Effect.forEach(runnable, sandbox.exec);
               return applied(progress, step, executions);
             }
             const program = Effect.gen(foldOne);
-            return program;
+            return program.pipe(Effect.retry(retries));
           }
           function* execute() {
             yield* Effect.acquireRelease(sandbox.prepare, () => sandbox.release);
@@ -203,9 +248,12 @@ function replyOf(verification: SandboxVerification): unknown {
  * already depends on, so `qualifyRun` can drive it without knowing a sandbox
  * exists.
  */
-export function candidateVerifierFromSandbox(resolvePlan: PlanResolver) {
+export function candidateVerifierFromSandbox(
+  resolvePlan: PlanResolver,
+  retries: SandboxRetries = DEFAULT_SANDBOX_RETRIES,
+) {
   function* acquire() {
-    const verifier = yield* makeSandboxVerifier(resolvePlan);
+    const verifier = yield* makeSandboxVerifier(resolvePlan, retries);
     function verify(request: VerificationRequest) {
       const program = verifier.verify(request);
       return program.pipe(Effect.map(replyOf));

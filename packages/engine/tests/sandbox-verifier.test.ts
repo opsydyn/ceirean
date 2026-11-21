@@ -6,7 +6,7 @@ import {
   type CandidateIdentity,
   type VerificationContract,
 } from '@ceirean/domain';
-import { Effect, Layer, Result, Schema } from 'effect';
+import { Effect, Layer, Result, Schedule, Schema } from 'effect';
 
 import { makeEvidenceCase } from '../../domain/tests/fixtures.ts';
 import { MigrationSandbox, TIMEOUT_EXIT_CODE } from '../src/migration-sandbox-port.ts';
@@ -29,13 +29,16 @@ function planFor(contract: VerificationContract): VerificationPlan {
 const resolveMatching = (contract: VerificationContract) => Result.succeed(planFor(contract));
 
 /** Workflow only: the capability as an Effect that still needs a sandbox. */
+/** Same shape as the default policy, without the five-second waits. */
+const FAST_RETRIES = { times: 2, schedule: Schedule.spaced('1 millis') };
+
 function verificationProgram(
   resolve: (contract: VerificationContract) => Result.Result<VerificationPlan, never>,
   identity: CandidateIdentity,
   contract: VerificationContract,
 ) {
   function* program() {
-    const verifier = yield* makeSandboxVerifier(resolve);
+    const verifier = yield* makeSandboxVerifier(resolve, FAST_RETRIES);
     return yield* verifier.verify({ identity, contract });
   }
   const effect = Effect.gen(program);
@@ -172,3 +175,43 @@ async function releaseAfterExecFailure() {
   expect(log).toMatchObject({ prepared: 1, released: 1 });
 }
 test('a sandbox is released even when a command fails outright', releaseAfterExecFailure);
+
+async function recoversFromAContainerSwap() {
+  // The container is replaced after the first command, so the second step
+  // finds no checkout and the capability has to re-provision before running.
+  const { exit, log } = await runVerifier(
+    { exitCodes: [0, 0, 0], swapContainerAfter: [0] },
+    resolveMatching,
+  );
+  const verification = Result.getOrThrow(exit);
+  expect(isProjected(verification)).toBe(true);
+  expect(log.commands).toEqual(['bun run lint', 'bun run types', 'bun run tests']);
+  // Once to start, once to recover.
+  expect(log.prepared).toBe(2);
+  expect(log.readinessChecks).toBe(3);
+}
+test('a replaced container is re-provisioned mid-plan', recoversFromAContainerSwap);
+
+async function retriesATransientSandboxFailure() {
+  const { exit, log } = await runVerifier(
+    { exitCodes: [0, 0, 0], failExecAttempts: 1 },
+    resolveMatching,
+  );
+  const verification = Result.getOrThrow(exit);
+  expect(isProjected(verification)).toBe(true);
+  // Four attempts for three commands: the first threw and was retried.
+  expect(log.execAttempts).toBe(4);
+  expect(log.commands).toEqual(['bun run lint', 'bun run types', 'bun run tests']);
+}
+test('a transient sandbox failure is retried', retriesATransientSandboxFailure);
+
+async function neverRetriesAFailingCheck() {
+  const { exit, log } = await runVerifier({ exitCodes: [0, 1] }, resolveMatching);
+  const verification = Result.getOrThrow(exit);
+  expect(isProjected(verification)).toBe(true);
+  // Two commands, two attempts. A non-zero exit is a result, so the retry
+  // policy cannot see it; a third entry here would mean the suite was re-run.
+  expect(log.commands).toEqual(['bun run lint', 'bun run types']);
+  expect(log.execAttempts).toBe(2);
+}
+test('a check that fails is never retried', neverRetriesAFailingCheck);

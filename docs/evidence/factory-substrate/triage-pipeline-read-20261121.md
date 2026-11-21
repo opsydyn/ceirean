@@ -108,6 +108,34 @@ Also not taken, for smaller reasons: labels as the state machine (our ledger is
 the state), personas and PR handoff, the auto-PR path, and the comment and
 conversation trimming, which is issue-timeline specific.
 
+## What Has Since Been Closed
+
+Two of the three gaps this read exposed are now closed in the capability, with
+tests; the third cannot be closed yet and is recorded instead.
+
+**Re-provisioning after a container swap — closed.** The sandbox port gained
+`isPrepared`, and every step now begins by asking, re-preparing when the
+checkout is gone. The test replaces the container after the first command and
+asserts the plan still runs all three commands, with `prepared` at two and three
+readiness checks: one per step.
+
+**Retry the container, never the check — closed, and in the types rather than
+in prose.** A `MigrationSandboxError` is retried under a bounded policy; a
+non-zero exit is a _result_, so the retry policy cannot see it. Three tests pin
+this: a transient sandbox failure takes four exec attempts for three commands, a
+failing check takes exactly two attempts for two commands — a third would mean
+the suite had been re-run — and the policy is injectable so tests exercise it
+without five-second waits.
+
+**Coordination rollback — not closed, and not closable here.** The rollback
+belongs to the Workflow step that registers coordination, and we have no
+Workflow: `qualifyRun` goes through `RunRepository` and `CandidateVerifier`, not
+through the vendored `QueueCoordinator`. Whatever eventually enqueues runs
+through that coordinator has to register with a rollback that calls
+`complete`, or a crashed run will hold an entity's slot until the 60-second
+alarm reconciles it. It is written into the vendoring design as a requirement on
+slice 5 rather than left in this record.
+
 ## What This Read Does Not Establish
 
 Nothing here was executed. The read covers the workflow's own file; the agent
