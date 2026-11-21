@@ -180,9 +180,14 @@ Each slice ends in evidence, and none of them deploys anything.
    documented `bindings`; `Cloudflare.Workflow` takes one type parameter, its
    params; and an `image`-based container binds on an async Worker while a
    `main`-based one explicitly does not.
-3. **Our router.** Our own rule table for our own events, bot filtering taken
-   from `isBotAuthor`, with property tests. Evidence: tests, and a written note
-   of which of Factory's routing decisions we deliberately did not copy.
+3. **Our router.** Done 2026-11-21; see
+   [the router differences](../../evidence/factory-substrate/router-differences-20261121.md).
+   The rule table already existed as `normaliseGitHubDelivery`, so the slice
+   became a comparison, and the comparison found a defect: a classic bot on a
+   plain user account, which GitHub reports as `User`, passed the actor gate and
+   could reach admission by posting the command. Closed with the vendored
+   `isBotAuthor`, plus six bot-login cases, three human controls, two
+   malformed-login cases and two property laws.
 4. **Our capability, offline.** The migration capability and the acceptance
    contract in Effect, exercised against a fake sandbox. Evidence: tests. This is
    where the real work is, and it is ours.
