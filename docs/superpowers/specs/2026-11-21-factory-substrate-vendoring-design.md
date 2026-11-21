@@ -188,9 +188,16 @@ Each slice ends in evidence, and none of them deploys anything.
    could reach admission by posting the command. Closed with the vendored
    `isBotAuthor`, plus six bot-login cases, three human controls, two
    malformed-login cases and two property laws.
-4. **Our capability, offline.** The migration capability and the acceptance
-   contract in Effect, exercised against a fake sandbox. Evidence: tests. This is
-   where the real work is, and it is ours.
+4. **Our capability, offline.** Partly done 2026-11-21; see
+   [the migration capability](../../evidence/factory-substrate/migration-capability-20261121.md).
+   The acceptance contract was already built — `VerificationContract`,
+   `validateReceipt` and `decideQualification` — so the gap was the middle.
+   Delivered: the pure plan, the receipt projection and the sandbox port, under
+   17 tests including a law joining the projection to `decideQualification`.
+   Withdrawn rather than committed: the Effect capability that composes them,
+   which typechecked but could not be made to satisfy this repository's Effect
+   lint policy inside the slice. Still ahead: that capability, a fake sandbox
+   driver, release-on-every-path tests and the `CandidateVerifier` wiring.
 5. **Separately approved.** Anything that runs a container, touches Cloudflare,
    installs a GitHub App or uses a credential. Each its own gate.
 
