@@ -194,10 +194,11 @@ Each slice ends in evidence, and none of them deploys anything.
    `validateReceipt` and `decideQualification` — so the gap was the middle.
    Delivered: the pure plan, the receipt projection and the sandbox port, under
    17 tests including a law joining the projection to `decideQualification`.
-   Withdrawn rather than committed: the Effect capability that composes them,
-   which typechecked but could not be made to satisfy this repository's Effect
-   lint policy inside the slice. Still ahead: that capability, a fake sandbox
-   driver, release-on-every-path tests and the `CandidateVerifier` wiring.
+   The Effect capability was withdrawn once and then landed in the same
+   session, with a scripted fake sandbox and tests for ordering, halting at the
+   first failure and release on every path: 25 tests in all. Still ahead: the
+   `CandidateVerifier` wiring, whose driver signature is promise-shaped while
+   this capability is Effect-native, and a real sandbox behind the port.
 5. **Separately approved.** Anything that runs a container, touches Cloudflare,
    installs a GitHub App or uses a credential. Each its own gate.
 

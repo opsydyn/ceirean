@@ -14,6 +14,7 @@ export * from './live-admission-service.ts';
 export * from './run-coordinator.ts';
 export * from './verification-plan.ts';
 export * from './migration-sandbox-port.ts';
+export * from './sandbox-verifier.ts';
 export * from './worker-contracts.ts';
 export * from './worker-errors.ts';
 export * from './worker-service-factories.ts';

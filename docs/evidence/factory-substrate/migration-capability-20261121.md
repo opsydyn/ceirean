@@ -2,9 +2,10 @@
 
 Recorded 2026-11-21. Slice 4 of
 [the vendoring design](../../superpowers/specs/2026-11-21-factory-substrate-vendoring-design.md).
-**Partly delivered.** The pure core and the sandbox port are in and tested; the
-Effect capability that drives them is not, for a reason worth recording rather
-than hiding.
+**Delivered.** The pure core, the sandbox port and the Effect capability that
+drives them are all in, under 25 tests. The capability was withdrawn once
+before landing; why, and what it cost, is recorded at the end rather than
+tidied away.
 
 ## What Was Already There
 
@@ -80,42 +81,78 @@ reported a shrunk counterexample and a replay seed.
 Gates: oxlint, oxfmt over 690 files, 14 typechecks, 17 test tasks, engine at
 351 passing.
 
-## What Is Not In, And Why
+## The Capability
 
-The Effect capability that composes the two — acquire the sandbox, fold the
-plan's steps, stop at the first failure, release on every path, map a sandbox
-failure to `CandidateVerifierError` — was written and typechecked, and then
-withdrawn rather than committed, because it could not be made to satisfy this
-repository's own Effect lint policy within the slice.
+`packages/engine/src/sandbox-verifier.ts` composes the two. `makeSandboxVerifier`
+takes a plan resolver — a pure function, so plan selection cannot do I/O behind
+the contract's back — and yields a service with one method.
 
-The policy is strict and, read together, quite specific about shape. It forbids
-a named function or const that returns an Effect
-(`no-effect-wrapper-alias`), hand-written Effect channel generics
-(`no-manual-effect-channels`), `Effect.fn` generator wrappers
-(`no-effect-fn-generator`, which is the opposite of what Effect's own
-documentation recommends), Effect work inside `Match` or `Option.match`
-branches (`no-match-effect-branch`), a decision taken inside an object literal
-(`no-branch-in-object`), nested Effect construction (`no-call-tower`) and
-multi-step anonymous callbacks (`prefer-extracted-concept`). The accepted shape
-exists — `live-admission-service.ts` and `service-factories.ts` are both inside
-it — but arriving at it by iteration cost more than the slice had, and
-committing code that fails the gates was not an option.
+The three properties it exists to hold:
 
-This is a finding about sequencing, not about the design. The three properties
-the capability has to hold are now written down and are what the next attempt
-should be judged against:
+1. **The plan is validated before the sandbox is touched.** A resolver that
+   returns a plan naming another contract, or one missing a required check, is
+   refused with no `prepare` call and no command run. Two tests assert the
+   sandbox log is empty in those cases, which is the only way to show the order
+   rather than assert it.
+2. **Steps stop at the first failure.** The fold carries a `halted` flag; a
+   halted step contributes `Skipped` without executing. The test for this
+   asserts on the _commands the sandbox was asked to run_, not just on the
+   receipt: a third command must never appear after the second exits non-zero.
+3. **The sandbox is released on every path.** `Effect.acquireRelease` owns it,
+   so a command that fails outright still releases — asserted by scripting the
+   fake's `exec` to throw and checking the log shows one prepare and one
+   release.
 
-1. The plan is validated before the sandbox is touched.
-2. Steps stop at the first failure and the remainder are reported `Skipped`,
-   never `Passed`.
-3. The sandbox is released on success, refusal, failure and interruption alike,
-   because `Effect.acquireRelease` owns it rather than the happy path.
+A plan refusal is returned as a value, not raised: it is a decision about
+evidence and the caller records it. Only a sandbox that could not be used at
+all becomes a `CandidateVerifierError`, carrying the run id, which is why
+`MigrationSandboxError` holds one.
 
-The next attempt should start by reading `live-admission-service.ts` closely
-enough to copy its shape — nested named generators, methods as object-literal
-properties, decisions computed into values before any pipeline runs — rather
-than writing the capability first and then negotiating with the linter.
+`packages/engine/tests/fake-sandbox.ts` is the scripted driver: it records what
+it was asked to do, answers with exit codes a test chose, and can be told to
+refuse `prepare` or `exec`. It runs no commands, so a test can state what a
+failing second check does to the third without owning a container.
 
-Not started, and still ahead of it: a fake sandbox driver, tests that the
-sandbox is released on every path, and the `CandidateVerifier` wiring that lets
-`qualifyRun` use any of this.
+`packages/engine/tests/sandbox-verifier.test.ts`, 8 tests: order and release on
+a passing run, the receipt a passing run produces, halting at the first
+failure with the remaining command never issued, a killed command counting as
+failed, a foreign plan and an incomplete plan both refused before the sandbox
+is touched, a sandbox that cannot be prepared surfacing as an operational
+failure rather than a refusal, and release after an outright command failure.
+
+Engine totals: 359 passing, up from 351.
+
+## What The Withdrawal Cost
+
+The capability typechecked on the first attempt and was deleted rather than
+committed, because it violated seven of this repository's Effect lint rules and
+I was discovering them one round trip at a time. Landing it took knowing one
+thing, which is now written down:
+
+> The accepted shape for a function that produces an Effect is a named
+> generator, then **one** const, then `return thatConst.pipe(...)`. Not
+> `return Effect.gen(g).pipe(...)` — the const must exist. Not
+> `const a = ...; const b = a.pipe(...); return b;` — one const, not two.
+> `live-admission-service.ts` and `run-coordinator.ts` are both exactly this.
+
+Everything else followed from reading those two files rather than from
+negotiating with the linter: decisions computed into values before any
+pipeline, `Match`/`Option.match` branches holding single expressions,
+zero-argument nested generators closing over scope instead of
+`Effect.gen(() => f(a, b))` towers, and `Effect.provide` at the test boundary
+rather than inside a helper.
+
+Two rules deserve naming because they contradict Effect's own documentation,
+which recommends `Effect.fn`: `no-effect-fn-generator` forbids it, and
+`no-manual-effect-channels` forbids the explicit `Effect.Effect<...>` return
+types its examples use. Neither is wrong as a house rule; both are surprising
+if you arrive from the upstream docs, as I did.
+
+## Still Ahead
+
+The `CandidateVerifier` wiring that lets `qualifyRun` use this: the port's
+driver signature is promise-shaped and this capability is Effect-native, so one
+of the two has to give. Nothing here is wired into the coordinator yet, and no
+real sandbox implements the port — the vendored module is the obvious
+implementation, and connecting them needs a container, which is its own
+approval.
