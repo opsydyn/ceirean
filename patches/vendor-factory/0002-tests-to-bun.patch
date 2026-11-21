@@ -1,0 +1,208 @@
+Port the covering tests from vitest to bun:test.
+
+Mechanical: the runner import, vi.fn to mock, the hoisted vi.mock blocks
+to mock.module plus a deferred import, toHaveBeenCalledOnce to
+toHaveBeenCalledTimes(1), and one cast where bun infers a narrower mock
+return type than vitest did. client.test.ts takes the narrowed env type
+from patch 0001. triage-workspace.test.ts drops two cases that read
+skills/triage markdown, which is not vendored; the file records why and
+what must be reproduced against our own skill.
+
+tests/queue-coordinator.test.ts is NOT in this patch: it is a rewrite
+against a local subclass, recorded as derived in PROVENANCE.md.
+
+--- a/tests/bots.test.ts
++++ b/tests/bots.test.ts
+@@ -1,4 +1,4 @@
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it } from 'bun:test';
+ import { isBotAuthor, KNOWN_USER_TYPE_BOT_LOGINS } from '../src/github/bots.ts';
+ 
+ describe('isBotAuthor', () => {
+--- a/tests/client.test.ts
++++ b/tests/client.test.ts
+@@ -1,13 +1,15 @@
+-import { describe, expect, it } from 'vitest';
+-import type { WorkerEnv } from '../src/env.ts';
+-import { credentialsFromWorkerEnv } from '../src/github/client.ts';
++import { describe, expect, it } from 'bun:test';
++import {
++	credentialsFromWorkerEnv,
++	type GitHubAppEnv,
++} from '../src/github/client.ts';
+ 
+ describe('credentialsFromWorkerEnv', () => {
+ 	it('normalizes escaped private-key line breaks', () => {
+ 		const credentials = credentialsFromWorkerEnv({
+ 			GITHUB_APP_ID: '123456',
+ 			GITHUB_APP_PRIVATE_KEY: 'first\\nsecond',
+-		} as WorkerEnv);
++		} as GitHubAppEnv);
+ 
+ 		expect(credentials).toEqual({
+ 			appId: '123456',
+@@ -17,7 +19,7 @@
+ 
+ 	it('reports a missing private-key binding', () => {
+ 		expect(() =>
+-			credentialsFromWorkerEnv({ GITHUB_APP_ID: '123456' } as WorkerEnv),
++			credentialsFromWorkerEnv({ GITHUB_APP_ID: '123456' } as GitHubAppEnv),
+ 		).toThrow('GITHUB_APP_PRIVATE_KEY is required.');
+ 	});
+ });
+--- a/tests/sandbox.test.ts
++++ b/tests/sandbox.test.ts
+@@ -1,19 +1,22 @@
+-import { beforeEach, describe, expect, it, vi } from 'vitest';
++import { beforeEach, describe, expect, it, mock } from 'bun:test';
+ 
+-const mocks = vi.hoisted(() => ({ exec: vi.fn() }));
++// Upstream hoists this block with the vitest helper of that name. Bun does not
++// hoist `mock.module`, so the mocks are registered first and the module under
++// test is imported afterwards, with a top-level await, to stop the real
++// `@cloudflare/sandbox` from loading.
++const mocks = { exec: mock() };
+ 
+-vi.mock('@cloudflare/sandbox', () => ({ getSandbox: vi.fn() }));
+-vi.mock('@flue/runtime/cloudflare', () => ({
+-	cloudflareSandbox: vi.fn(() => ({
+-		createSandbox: vi.fn(async () => ({ exec: mocks.exec })),
++mock.module('@cloudflare/sandbox', () => ({ getSandbox: mock() }));
++mock.module('@flue/runtime/cloudflare', () => ({
++	cloudflareSandbox: mock(() => ({
++		createSandbox: mock(async () => ({ exec: mocks.exec })),
+ 	})),
+ }));
+ 
++const { ensureTriageWorkspace, triageAgentSandbox } = await import(
++	'../src/triage/sandbox.ts'
++);
+ import {
+-	ensureTriageWorkspace,
+-	triageAgentSandbox,
+-} from '../src/triage/sandbox.ts';
+-import {
+ 	AGENT_COMMAND_MAX_TIMEOUT_SECONDS,
+ 	AGENT_COMMAND_TIMEOUT_SECONDS,
+ 	BUILD_TIMEOUT_SECONDS,
+@@ -84,12 +87,13 @@
+ 	});
+ 
+ 	it('keeps an existing checkout when a bootstrap step retries', async () => {
+-		const exec = vi
+-			.fn()
+-			.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+-		const setup = vi.fn();
++		const exec = mock(async () => ({ exitCode: 0, stdout: '', stderr: '' }));
++		const setup = mock();
+ 
+-		expect(await ensureTriageWorkspace({ exec }, setup)).toBe(false);
++		expect(await ensureTriageWorkspace(
++				{ exec } as unknown as Parameters<typeof ensureTriageWorkspace>[0],
++				setup,
++			)).toBe(false);
+ 		expect(exec).toHaveBeenCalledWith(
+ 			expect.stringContaining('test -d /repo/.git'),
+ 		);
+@@ -97,13 +101,14 @@
+ 	});
+ 
+ 	it('recreates a checkout lost with a replacement container', async () => {
+-		const exec = vi
+-			.fn()
+-			.mockResolvedValue({ exitCode: 1, stdout: '', stderr: '' });
+-		const setup = vi.fn().mockResolvedValue(undefined);
++		const exec = mock(async () => ({ exitCode: 1, stdout: '', stderr: '' }));
++		const setup = mock(async () => undefined);
+ 
+-		expect(await ensureTriageWorkspace({ exec }, setup)).toBe(true);
+-		expect(setup).toHaveBeenCalledOnce();
++		expect(await ensureTriageWorkspace(
++				{ exec } as unknown as Parameters<typeof ensureTriageWorkspace>[0],
++				setup,
++			)).toBe(true);
++		expect(setup).toHaveBeenCalledTimes(1);
+ 	});
+ 
+ 	it('redacts push tokens and clone auth headers from error output', () => {
+--- a/tests/triage-fsm.test.ts
++++ b/tests/triage-fsm.test.ts
+@@ -1,4 +1,4 @@
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it } from 'bun:test';
+ import { normalizeIssueState } from '../src/github/issues.ts';
+ import { route } from '../src/triage/fsm.ts';
+ import {
+--- a/tests/triage-labels.test.ts
++++ b/tests/triage-labels.test.ts
+@@ -1,4 +1,4 @@
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it } from 'bun:test';
+ import {
+ 	allTriageLabels,
+ 	currentTriageLabel,
+--- a/tests/triage-workspace.test.ts
++++ b/tests/triage-workspace.test.ts
+@@ -6,21 +6,19 @@
+  * a relative path inside `/repo`. An agent that resolved that placeholder to
+  * the checkout deleted `/repo/.git`, and the run died at push time with
+  * "not a git repository" after the fix had already been written.
++ *
++ * Upstream this file also asserts two properties of the bundled triage skill
++ * markdown: that it never tells the agent to delete a `.git` directory, and
++ * that it never points the scratch directory at a checkout-relative path.
++ * Those cases are dropped here because `skills/triage/` is not vendored — our
++ * agent skill is our own, written in Effect. Both assertions must be
++ * reproduced against our skill when we write it; they encode a real incident,
++ * not a style preference.
+  */
+ 
+-import { readdirSync, readFileSync } from 'node:fs';
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it } from 'bun:test';
+ import { REPO_DIR, TRIAGE_DIR } from '../src/triage/sandbox-utils.ts';
+ 
+-// Read the markdown from disk: the `.md` imports in default-skill.ts are
+-// resolved by the Worker build's vite plugin and aren't available here.
+-const SKILL_DIR = 'skills/triage';
+-const files = Object.fromEntries(
+-	readdirSync(SKILL_DIR)
+-		.filter((name) => name.endsWith('.md'))
+-		.map((name) => [name, readFileSync(`${SKILL_DIR}/${name}`, 'utf8')]),
+-);
+-
+ describe('triage scratch directory', () => {
+ 	it('is a sibling of the checkout, never nested inside it', () => {
+ 		expect(TRIAGE_DIR.startsWith('/')).toBe(true);
+@@ -28,31 +26,3 @@
+ 		expect(TRIAGE_DIR).not.toBe(REPO_DIR);
+ 	});
+ });
+-
+-describe('bundled triage skill', () => {
+-	it('never instructs deleting a .git directory', () => {
+-		for (const [name, content] of Object.entries(files)) {
+-			const offenders = content
+-				.split('\n')
+-				.filter((line) => /rm\s+-rf?[^\n]*\.git\b/.test(line));
+-			expect(
+-				offenders,
+-				`${name} tells the agent to delete a .git directory`,
+-			).toEqual([]);
+-		}
+-	});
+-
+-	it('does not point the triage directory inside the checkout', () => {
+-		for (const [name, content] of Object.entries(files)) {
+-			// A bare `triage/gh-N` is a relative path, which resolves inside the
+-			// checkout when the agent's shell is cwd'd there.
+-			const offenders = content
+-				.split('\n')
+-				.filter((line) => /(?<![/\w])triage\/(gh-|current|issue-)/.test(line));
+-			expect(
+-				offenders,
+-				`${name} uses a checkout-relative triage directory`,
+-			).toEqual([]);
+-		}
+-	});
+-});

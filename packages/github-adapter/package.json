@@ -13,6 +13,7 @@
   "dependencies": {
     "@ceirean/domain": "workspace:*",
     "@ceirean/engine": "workspace:*",
+    "@ceirean/vendor-factory": "workspace:*",
     "@flue/github": "2.3.0",
     "@flue/runtime": "2.3.0",
     "effect": "4.0.5",

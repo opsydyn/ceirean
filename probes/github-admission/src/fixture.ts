@@ -29,8 +29,8 @@ export async function signedCommandFixture(deliveryId: string) {
     installation: { id: 11 },
     repository: { id: 22, name: 'repository', owner: { id: 33, login: 'owner' } },
     issue: { id: 44, number: 1 },
-    comment: { id: 55, body: '/ceirean assess', user: { id: 66, type: 'User' } },
-    sender: { id: 66, type: 'User' },
+    comment: { id: 55, body: '/ceirean assess', user: { id: 66, type: 'User', login: 'operator' } },
+    sender: { id: 66, type: 'User', login: 'operator' },
   });
   const key = await crypto.subtle.importKey(
     'raw',

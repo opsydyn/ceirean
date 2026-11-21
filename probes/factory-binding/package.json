@@ -1,0 +1,18 @@
+{
+  "name": "@ceirean/factory-binding-probe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ceirean/vendor-factory": "workspace:*",
+    "@cloudflare/sandbox": "0.12.5",
+    "alchemy": "2.0.0-beta.83",
+    "effect": "4.0.5",
+    "valibot": "1.5.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261021.1"
+  }
+}

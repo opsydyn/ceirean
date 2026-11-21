@@ -1,0 +1,6 @@
+toolchains:
+  default: [javascript, bun]
+tasks:
+  typecheck:
+    command: bun --bun --no-env-file --no-install run typecheck
+    options: { cache: false, retryCount: 0, envFile: false }

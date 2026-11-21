@@ -44,6 +44,9 @@ export default defineConfig({
     ],
   },
   ignorePatterns: [
+    // Vendored upstream source: see vendor/factory/PROVENANCE.md. Formatting or
+    // --fix over it would destroy every hunk in patches/vendor-factory/.
+    'vendor/**',
     '**/node_modules/**',
     '**/dist/**',
     '**/coverage/**',

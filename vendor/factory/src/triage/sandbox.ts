@@ -1,0 +1,460 @@
+/**
+ * Triage pipeline sandbox: a Cloudflare Sandbox container holding a real
+ * checkout of the target repository so the pipeline agent can build, test,
+ * and edit code.
+ *
+ * Security model:
+ * - Public repositories clone anonymously (blobless, single branch), so the
+ *   sandbox holds no credentials while the agent runs; lazy blob fetches
+ *   from origin stay anonymous too.
+ * - Private repositories clone with a short-lived contents-read token passed
+ *   as a one-shot `http.extraHeader` — never written to git config — and get
+ *   a *full* single-branch clone so nothing ever needs the network again;
+ *   the origin remote is then removed entirely. Either way, the agent runs
+ *   with zero usable GitHub credentials.
+ * - The push step injects a short-lived, contents-only installation token
+ *   into a single git command and never persists it to git config.
+ * - Every git command runs with GIT_TERMINAL_PROMPT=0 under a hard timeout
+ *   so a hung network operation fails fast instead of eating the run.
+ */
+
+import { getSandbox, type Sandbox } from '@cloudflare/sandbox';
+import type { SandboxFactory } from '@flue/runtime';
+import { cloudflareSandbox } from '@flue/runtime/cloudflare';
+import type { SkillSnapshot } from '../github/skill.ts';
+import {
+	agentCommandTimeoutNote,
+	assertGitRef,
+	assertRepoIdentifier,
+	boundAgentCommand,
+	checkoutCommandScript,
+	commandStageLabel,
+	configureCheckoutScript,
+	REPO_DIR,
+	redactToken,
+	shellQuote,
+	TRIAGE_DIR,
+	tail,
+	triageSandboxId,
+} from './sandbox-utils.ts';
+
+export { REPO_DIR, shellQuote, TRIAGE_DIR, triageSandboxId };
+
+/**
+ * Directories the pipeline writes that must never be committed or pushed.
+ *
+ * Scratch now lives outside the checkout, so this is belt-and-braces for an
+ * agent that writes `triage/` inside the repo anyway.
+ */
+const GIT_EXCLUDES = ['/triage/'];
+
+type TriageSandbox = Sandbox<unknown>;
+
+export interface ExecResult {
+	exitCode: number;
+	stdout: string;
+	stderr: string;
+	success: boolean;
+}
+
+/**
+ * The one binding this module reads. Narrowed from upstream's `WorkerEnv` for
+ * the reason given in `../github/client.ts`.
+ */
+export interface TriageSandboxEnv {
+	TRIAGE_SANDBOX: DurableObjectNamespace<Sandbox>;
+}
+
+export function getTriageSandbox(
+	env: TriageSandboxEnv,
+	id: string,
+): TriageSandbox {
+	return getSandbox(env.TRIAGE_SANDBOX, id, {
+		sleepAfter: '1h',
+		enableDefaultSession: false,
+	});
+}
+
+export interface WorkspaceSetup {
+	owner: string;
+	repo: string;
+	defaultBranch: string;
+	fixBranch: string;
+	skill: SkillSnapshot;
+	/**
+	 * Contents-read installation token; required for private repositories.
+	 * Used once during clone via `http.extraHeader` and never persisted.
+	 */
+	cloneToken?: string;
+}
+
+/**
+ * Prepare `/repo`: staged hardened clone of the default branch, git identity,
+ * the fix branch checked out, skill files seeded, and scratch paths excluded
+ * from git.
+ */
+/**
+ * Flue's Cloudflare sandbox tools for the pipeline agent, with a time limit
+ * on every command. Flue's bash tool only bounds a command when the model
+ * passes `timeout`, so without this a single stuck command can run until the
+ * whole submission times out.
+ */
+export function triageAgentSandbox(sandbox: TriageSandbox): SandboxFactory {
+	const base = cloudflareSandbox(sandbox);
+	return {
+		...base,
+		async createSandbox(createOptions) {
+			const environment = await base.createSandbox(createOptions);
+			return {
+				...environment,
+				async exec(command, execOptions) {
+					const bounded = boundAgentCommand(command, execOptions?.timeoutMs);
+					const result = await environment.exec(bounded.command, {
+						...execOptions,
+						timeoutMs: bounded.timeoutMs,
+					});
+					if (result.exitCode !== 124) return result;
+					const note = agentCommandTimeoutNote(bounded.seconds);
+					return {
+						...result,
+						stderr: result.stderr ? `${result.stderr}\n${note}` : note,
+					};
+				},
+			};
+		},
+	};
+}
+
+export async function setupTriageWorkspace(
+	sandbox: TriageSandbox,
+	setup: WorkspaceSetup,
+): Promise<void> {
+	assertRepoIdentifier(setup.owner);
+	assertRepoIdentifier(setup.repo);
+	assertGitRef(setup.defaultBranch);
+	assertGitRef(setup.fixBranch);
+
+	await execOrThrow(
+		sandbox,
+		'prepare',
+		`rm -rf ${REPO_DIR} ${TRIAGE_DIR} && mkdir -p ${REPO_DIR} ${TRIAGE_DIR}`,
+		30,
+	);
+
+	// Public: blobless single-branch clone — full history for git blame/diff,
+	// blobs fetched anonymously on demand.
+	// Private: full single-branch clone with one-shot header auth, so the
+	// checkout is self-contained and no credential outlives this command.
+	const cloneUrl = `https://github.com/${setup.owner}/${setup.repo}.git`;
+	const authConfig = setup.cloneToken
+		? `-c http.extraHeader=${shellQuote(`Authorization: basic ${btoa(`x-access-token:${setup.cloneToken}`)}`)} `
+		: '';
+	const filterFlags = setup.cloneToken ? '' : '--filter=blob:none ';
+	await execOrThrow(
+		sandbox,
+		'clone',
+		[
+			`git -c http.lowSpeedLimit=1024 -c http.lowSpeedTime=30 ${authConfig}`.trimEnd(),
+			`clone ${filterFlags}--single-branch --no-tags`.trimEnd(),
+			`--branch ${shellQuote(setup.defaultBranch)}`,
+			shellQuote(cloneUrl),
+			REPO_DIR,
+		].join(' '),
+		900,
+	);
+
+	await execOrThrow(
+		sandbox,
+		'configure',
+		configureCheckoutScript({
+			fixBranch: setup.fixBranch,
+			removeOrigin: Boolean(setup.cloneToken),
+		}),
+		60,
+	);
+
+	// Keep pipeline scratch out of git without touching tracked files.
+	const excludes = [...GIT_EXCLUDES, `/${setup.skill.directory}/`].join('\n');
+	await sandbox.writeFile(`${REPO_DIR}/.git/info/exclude`, `${excludes}\n`);
+
+	await mountTriageSkill(sandbox, setup.skill);
+}
+
+export async function mountTriageSkill(
+	sandbox: TriageSandbox,
+	skill: SkillSnapshot,
+): Promise<void> {
+	for (const [path, content] of Object.entries(skill.files)) {
+		await sandbox.writeFile(`${REPO_DIR}/${skill.directory}/${path}`, content);
+	}
+}
+
+/** Recreate the ephemeral checkout when the container was replaced between steps. */
+export async function ensureTriageWorkspace(
+	sandbox: Pick<TriageSandbox, 'exec'>,
+	setup: () => Promise<void>,
+): Promise<boolean> {
+	const checkout = await exec(
+		sandbox,
+		'check workspace',
+		`test -d ${REPO_DIR}/.git`,
+		30,
+	);
+	if (checkout.success) return false;
+
+	await setup();
+	return true;
+}
+
+/**
+ * Run the repository's configured commands in the checkout, in order, before
+ * the agent starts.
+ *
+ * A repository whose dependencies aren't installed, or whose packages resolve
+ * through built output, can't reproduce anything, and the agent shouldn't have
+ * to discover that from its skill. Failure throws, and stops the remaining
+ * commands: a checkout that won't bootstrap is an environment problem, so
+ * triage parks the issue in the re-triageable `failed` state with the failing
+ * command's output in the failure comment, rather than reporting "could not
+ * reproduce" about its own broken workspace.
+ *
+ * Commands should avoid modifying tracked files, or their edits become part of
+ * whatever the agent later commits as the fix.
+ */
+export async function runCheckoutCommands(
+	sandbox: TriageSandbox,
+	stage: string,
+	commands: readonly string[],
+	timeoutSeconds: number,
+): Promise<void> {
+	for (const [index, command] of commands.entries()) {
+		await execOrThrow(
+			sandbox,
+			commandStageLabel(stage, index, commands.length),
+			checkoutCommandScript(command),
+			timeoutSeconds,
+		);
+	}
+}
+
+/** True when the working tree differs from the default branch or is dirty. */
+export async function workspaceHasChanges(
+	sandbox: TriageSandbox,
+	defaultBranch: string,
+): Promise<{ diff: boolean; dirty: boolean }> {
+	assertGitRef(defaultBranch);
+	const status = await execOrThrow(
+		sandbox,
+		'status',
+		`cd ${REPO_DIR} && git status --porcelain`,
+		60,
+	);
+	const diff = await execOrThrow(
+		sandbox,
+		'diff',
+		`cd ${REPO_DIR} && git diff ${shellQuote(defaultBranch)} --stat`,
+		120,
+	);
+	return {
+		diff: diff.stdout.trim().length > 0,
+		dirty: status.stdout.trim().length > 0,
+	};
+}
+
+/**
+ * Stage everything, commit (if the tree is dirty), and force-push the fix
+ * branch. The commit message is written to a file so LLM-authored content
+ * can't be interpreted by the shell; the token appears only in this one
+ * command's remote URL and is never stored in git config.
+ */
+export async function commitAndPush(
+	sandbox: TriageSandbox,
+	options: {
+		owner: string;
+		repo: string;
+		branch: string;
+		message: string;
+		token: string;
+		dirty: boolean;
+	},
+): Promise<{ pushed: boolean; detail: string }> {
+	assertRepoIdentifier(options.owner);
+	assertRepoIdentifier(options.repo);
+	assertGitRef(options.branch);
+
+	if (options.dirty) {
+		await sandbox.writeFile('/tmp/factory-commit-message.txt', options.message);
+		const commit = await exec(
+			sandbox,
+			'commit',
+			`cd ${REPO_DIR} && git add -A && git commit -F /tmp/factory-commit-message.txt`,
+			120,
+		);
+		if (!commit.success) {
+			return {
+				pushed: false,
+				detail: `git commit failed: ${tail(commit.stderr)}`,
+			};
+		}
+	}
+
+	const remote = `https://x-access-token:${options.token}@github.com/${options.owner}/${options.repo}.git`;
+	const push = await exec(
+		sandbox,
+		'push',
+		`cd ${REPO_DIR} && git push -f ${shellQuote(remote)} ${shellQuote(options.branch)}`,
+		300,
+	);
+	if (!push.success) {
+		return {
+			pushed: false,
+			detail: `git push failed: ${redactToken(tail(push.stderr))}`,
+		};
+	}
+	return { pushed: true, detail: 'pushed' };
+}
+
+/**
+ * Commit (if the tree is dirty) and push a branch someone else may also be
+ * pushing to, without ever force-pushing.
+ *
+ * Used by the code author persona, which shares its branch with maintainers:
+ * when the push is rejected because the branch moved, the new commits are
+ * rebased under ours once and the push retried. A conflicting rebase is
+ * aborted and reported instead of resolved, so a human's commits are never
+ * rewritten or discarded. Like {@link commitAndPush}, the token appears only
+ * in single commands and is never stored in git config.
+ */
+export async function commitAndPushFastForward(
+	sandbox: TriageSandbox,
+	options: {
+		owner: string;
+		repo: string;
+		branch: string;
+		message: string;
+		token: string;
+		dirty: boolean;
+	},
+): Promise<{ pushed: boolean; sha: string | null; detail: string }> {
+	assertRepoIdentifier(options.owner);
+	assertRepoIdentifier(options.repo);
+	assertGitRef(options.branch);
+
+	if (options.dirty) {
+		await sandbox.writeFile('/tmp/factory-commit-message.txt', options.message);
+		const commit = await exec(
+			sandbox,
+			'commit',
+			`cd ${REPO_DIR} && git add -A && git commit -F /tmp/factory-commit-message.txt`,
+			120,
+		);
+		if (!commit.success) {
+			return {
+				pushed: false,
+				sha: null,
+				detail: `git commit failed: ${tail(commit.stderr)}`,
+			};
+		}
+	}
+
+	const remote = shellQuote(
+		`https://x-access-token:${options.token}@github.com/${options.owner}/${options.repo}.git`,
+	);
+	const refspec = shellQuote(`HEAD:refs/heads/${options.branch}`);
+	const push = () =>
+		exec(
+			sandbox,
+			'push',
+			`cd ${REPO_DIR} && git push ${remote} ${refspec}`,
+			300,
+		);
+
+	let result = await push();
+	if (!result.success && isRejectedPush(result.stderr)) {
+		const rebase = await exec(
+			sandbox,
+			'rebase',
+			// fetch + rebase rather than `git pull`: pull records its command
+			// line, token URL included, in the reflog.
+			`cd ${REPO_DIR} && git fetch ${remote} ${shellQuote(options.branch)} && git rebase FETCH_HEAD`,
+			300,
+		);
+		if (!rebase.success) {
+			await exec(
+				sandbox,
+				'rebase abort',
+				`cd ${REPO_DIR} && git rebase --abort`,
+				60,
+			);
+			return {
+				pushed: false,
+				sha: null,
+				detail: `the branch moved and the new commits conflict with this change: ${redactToken(tail(rebase.stderr || rebase.stdout))}`,
+			};
+		}
+		result = await push();
+	}
+	if (!result.success) {
+		return {
+			pushed: false,
+			sha: null,
+			detail: `git push failed: ${redactToken(tail(result.stderr))}`,
+		};
+	}
+	const head = await execOrThrow(
+		sandbox,
+		'rev-parse',
+		`cd ${REPO_DIR} && git rev-parse HEAD`,
+		30,
+	);
+	return { pushed: true, sha: head.stdout.trim(), detail: 'pushed' };
+}
+
+function isRejectedPush(stderr: string): boolean {
+	return /\[rejected\]|non-fast-forward|fetch first/i.test(stderr);
+}
+
+/** Destroy the sandbox, tolerating failures — it sleeps on its own anyway. */
+export async function destroyTriageSandbox(
+	sandbox: TriageSandbox,
+): Promise<void> {
+	try {
+		await Promise.race([
+			sandbox.destroy(),
+			new Promise((resolve) => setTimeout(resolve, 10_000)),
+		]);
+	} catch (error) {
+		console.warn('Failed to destroy triage sandbox:', error);
+	}
+}
+
+async function exec(
+	sandbox: Pick<TriageSandbox, 'exec'>,
+	_stage: string,
+	command: string,
+	timeoutSeconds: number,
+): Promise<ExecResult> {
+	const wrapped = `GIT_TERMINAL_PROMPT=0 timeout -k 5 ${timeoutSeconds} sh -c ${shellQuote(command)}`;
+	const result = await sandbox.exec(wrapped);
+	return {
+		exitCode: result.exitCode,
+		stdout: result.stdout ?? '',
+		stderr: result.stderr ?? '',
+		success: result.exitCode === 0,
+	};
+}
+
+async function execOrThrow(
+	sandbox: TriageSandbox,
+	stage: string,
+	command: string,
+	timeoutSeconds: number,
+): Promise<ExecResult> {
+	const result = await exec(sandbox, stage, command, timeoutSeconds);
+	if (!result.success) {
+		throw new Error(
+			`Sandbox ${stage} failed (exit ${result.exitCode}): ${redactToken(tail(result.stderr || result.stdout))}`,
+		);
+	}
+	return result;
+}
