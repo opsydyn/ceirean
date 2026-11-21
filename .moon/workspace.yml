@@ -12,3 +12,4 @@ projects:
   colima-readiness: probes/colima-readiness
   cloudflare-ledger: probes/cloudflare-ledger
   cloudflare-executor: probes/cloudflare-executor
+  vendor-factory: vendor/factory
