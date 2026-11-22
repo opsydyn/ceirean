@@ -221,15 +221,50 @@ whole-branch review with fresh gates. This is local fixture qualification only.
 Models, a public endpoint, worker execution and GitHub writes remain out of scope;
 the CLI-first direction is unchanged.
 
-## Architecture Draft
+## Architecture
 
+[The model](docs/architecture/ceirean.c4) is the current architecture, written in
+LikeC4. Every element carries its real status as a tag, and the tag sets its
+colour, because what this project most needs to communicate is not the shape of
+the pipeline but where the approval gates fall across it: green is built and
+evidenced, indigo is vendored upstream source, orange needs an explicit separate
+approval, red is a known missing check, stone is deliberately parked, and slate
+is not ours. Node text is kept terse so a view reads at a glance.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture/views/index-dark.png">
+  <img alt="Ceirean in context: the maintainer, GitHub, Cloudflare and the model provider" src="docs/architecture/views/index-light.png">
+</picture>
+
+One level down, the amber blocks are the whole of what remains ungated — a
+sandbox, a workflow and a publisher — and the one red block is the missing
+required-secret preflight.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture/views/containers-dark.png">
+  <img alt="Inside Ceirean: ingress, engine, domain, vendored substrate and the gated containers" src="docs/architecture/views/containers-light.png">
+</picture>
+
+[All six views](docs/architecture/README.md), including the admission path, the
+verdict chain and one showing only what sits behind a gate. The images are
+derived; when they and the model disagree, the model is right. Regenerating them
+needs the LikeC4 CLI, which this repository does not depend on, and acquiring it
+is a separate gate. The source validates and all six views lay out under LikeC4
+1.61.0.
+
+The shape itself was settled on 2026-11-21: vendor the Astro Factory substrate,
+keep the acceptance contract and the migration capability ours. See
+[the assessment](docs/assessments/astro-factory-foundation-20261121.md) and
+[the vendoring design](docs/superpowers/specs/2026-11-21-factory-substrate-vendoring-design.md).
+Slices 1 to 4 are delivered and local. Everything that runs a container, touches
+Cloudflare, installs a GitHub App or uses a credential is slice 5, and each of
+those is its own approval gate.
+
+The earlier
 [Internal Upgrade Service Design](docs/superpowers/specs/2026-10-18-internal-upgrade-service-design.md)
-
-The draft proposes a single-owner CLI, isolated workers, separate run and Flue
-storage, immutable qualification and dry-run evidence. Its broader service design
-needs owner review before a service implementation plan. The narrow compatibility
-plan below follows accepted ADR-0001 only. Process-restart recovery is in scope;
-host-loss recovery and GitHub dispatch are deferred.
+is retained as history. It proposed a single-owner CLI, isolated workers,
+separate run and Flue storage, immutable qualification and dry-run evidence; the
+vendoring decision supersedes its substrate, not its safety requirements.
 
 ## Architecture Decisions
 
@@ -302,14 +337,21 @@ deployment, real migration or throughput/scaling proof is claimed.
 .prototools                 Exact Moon, Bun and development-only Node pins
 package.json                Private Bun workspace root
 bun.lock                    One root dependency lockfile
-apps/cli/                   Future CLI and live dependency composition
+apps/github-ingress/        Signed GitHub admission, verification and the operator CLI
+apps/replay/                Replay of a frozen profile against recorded evidence
 packages/domain/            Pure qualification evidence and run decisions
-packages/engine/            Qualification coordinator and inferred ports
-packages/infrastructure/    Gated Alchemy tunnel qualification (not deployable)
-probes/bun-effect-flue/      Private compatibility fixture
-probes/github-admission/     Offline signed-command admission and native recovery probe
+packages/engine/            Qualification coordinator, verification plan and ports
+packages/github-adapter/    GitHub transport behind the engine's ports
+packages/infrastructure/    Gated Alchemy stack declaration (not deployed)
+packages/migration-storage/ Run and migration persistence contracts
+probes/                     Evidence fixtures: bun-effect-flue, cloudflare-executor,
+                            cloudflare-ledger, colima-readiness, factory-binding,
+                            github-admission
+vendor/factory/             Vendored Astro Factory substrate (MIT, provenance recorded)
 patches/                    Version-scoped declaration-only dependency repairs
-docs/                       Decisions, specifications, plans and evidence
+profiles/                   Frozen replay profiles
+qualification/              Inactive CI workflows and run worksheets
+docs/                       Architecture, decisions, specifications, plans and evidence
 ```
 
 The root Moon project owns quality tasks; domain, engine and probe are private workspaces.

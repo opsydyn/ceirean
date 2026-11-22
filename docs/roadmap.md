@@ -1,11 +1,12 @@
 # Ceirean Roadmap
 
-Updated 2026-11-20. This is the active product delivery map. Historical records
+Updated 2026-11-22. This is the active product delivery map. Historical records
 live in [the previous roadmap](roadmap-history-20261027.md); checkboxes record
 evidence, not permission to execute. The local folder may remain `Leviathan`.
 The owned executor runtime is parked as of 2026-11-18; see
 [the parking record](#parked-owned-executor-runtime-2026-11-18) before planning
-another runtime slice.
+another runtime slice. The current architecture, with every approval gate marked,
+is modelled in [`docs/architecture/ceirean.c4`](architecture/ceirean.c4).
 
 ## Product Outcome
 
@@ -27,12 +28,14 @@ durable authority. No framework/platform migration is needed to advance.
 
 ## What Is Actually Proven
 
-| Capability                                                               | Evidence                                                                               | Limit                                                      |
-| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Domain, ledger, worker lifecycle and Flue compatibility foundations      | [Historical delivery record](roadmap-history-20261027.md)                              | Local/offline proof, not a hosted repair run               |
-| Signed GitHub admission, durable execution, accepted replay and teardown | [30 October hosted smoke](evidence/readonly-hosted/accepted-replay-20261030-084800.md) | Fixed `node --version`, not repository checks              |
-| Pinned dependency declaration inventory                                  | [Manifest evidence](evidence/manifest-report/baseline-1183e3c.md)                      | Local Git objects, not installed versions or compatibility |
-| Repository baseline, browser evidence and accepted migration             | Not yet demonstrated                                                                   | This is the remaining product delivery work                |
+| Capability                                                                | Evidence                                                                               | Limit                                                                |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Domain, ledger, worker lifecycle and Flue compatibility foundations       | [Historical delivery record](roadmap-history-20261027.md)                              | Local/offline proof, not a hosted repair run                         |
+| Signed GitHub admission, durable execution, accepted replay and teardown  | [30 October hosted smoke](evidence/readonly-hosted/accepted-replay-20261030-084800.md) | Fixed `node --version`, not repository checks                        |
+| Pinned dependency declaration inventory                                   | [Manifest evidence](evidence/manifest-report/baseline-1183e3c.md)                      | Local Git objects, not installed versions or compatibility           |
+| Vendored Factory substrate, our router, plan, projection and verifier     | [Factory substrate evidence](evidence/factory-substrate/)                              | Local and typecheck-only; no container, deploy or credential         |
+| One accepted breaking upgrade, verified by the target repository's own CI | [The migration pilot](evidence/foldkit-pilot/migration-pilot-20261121.md)              | A human-triggered agent and foreign CI, not Flue or the owned worker |
+| Repository baseline and browser evidence from an owned executor           | Not yet demonstrated                                                                   | Parked; the pilot used the target repository's CI instead            |
 
 The last hosted teardown was verified private/expired. This is retained evidence,
 not a fresh provider-state read. No current roadmap entry authorizes activation.
@@ -103,11 +106,32 @@ the patch comes from a human-triggered agent and the verdict comes from the
 repository's own CI, not from the owned worker or the baseline contract rerun.
 Substitute those two steps; keep the scope, evidence and acceptance requirements.
 
-- [ ] Select one real dependency/source-API upgrade, exact targets and allowed paths.
+- [x] Select one real dependency/source-API upgrade, exact targets and allowed paths.
+      foldkit 0.170.0 to 0.171.0, settled by diffing the published declarations
+      rather than the manifest, which is byte-identical across the two versions;
+      see [the candidate record](evidence/foldkit-pilot/breaking-upgrade-candidate-20261121.md).
 - [ ] Give Flue only the existing restricted worker tools and approved model budget.
-- [ ] Freeze a scope-valid patch and independently rerun the baseline contract.
-- [ ] Return the patch, before/after browser evidence and concise review report.
+      Substituted for the pilot: the patch came from a human-triggered agent. No
+      model key, provider call or budget was used, so this item is untested rather
+      than met.
+- [x] Freeze a scope-valid patch and independently rerun the baseline contract.
+      Substituted for the pilot: the patch is frozen at `d30bbf5a` and the verdict
+      comes from the target repository's own CI, base against candidate under the
+      same checks. Both are green.
+- [x] Return the patch, before/after browser evidence and concise review report.
+      That CI's own Playwright browser and visual checks are the before/after
+      evidence, green on base and candidate alike; the pilot record is the report.
 - [ ] Record maintainer acceptance and active supervision/review effort.
+      Four rework rounds and the maintainer's peer-widening decision are recorded.
+      Acceptance itself is outstanding: all four jobs on
+      [PR 188](https://github.com/opsydyn/fold-kit-experiments/pull/188) pass and
+      the merge decision is the maintainer's.
+
+Status 2026-11-22: the pilot ran and is recorded. Its central finding is that a
+manifest-only patch, which is what a dependency bot produces, fails this
+repository's own consistency checkers twice before reaching a test, because the
+version also lives in skill assets, Markdown prose and generated-starter
+templates. The real patch is 18 files, not the 7 manifests a bot would touch.
 
 Success means an accepted, verified migration, not merely a version bump or a PR.
 No model key, provider call or repository write is authorized by this roadmap.
@@ -163,7 +187,10 @@ manual upgrade, and record it. Routine version bumps belong to a dependency bot,
 trying Dependabot's Bun support on this one repository first and Renovate only if
 that falls short; neither is yet proven against the root catalog, published
 version literals and `bun.lock` conventions. Dependabot is currently configured
-for GitHub Actions only.
+for GitHub Actions only. The pilot sharpened that test: a bot that edits only
+manifests will fail this repository's own checkers, so judge the Bun-ecosystem
+trial on whether it also updates skill assets, prose and starter templates, not
+merely on whether it opens a pull request.
 
 Retain the merged runtime work at `c4058a2` and every existing evidence record;
 it is deferred, not deleted. Owned isolation remains the prerequisite for running
@@ -172,25 +199,42 @@ own, which is the Repeatable Service outcome. Reopen this runtime for that
 outcome, or for a concrete gap the pilot exposes in the simpler workflow, with a
 bounded question and an exit condition.
 
-Substrate when reopening: fork `withastro/factory` (MIT) rather than resume the
-image, cache and observer programme. It runs Astro's own triage and review
-automation in production on the architecture these milestones were building:
-Cloudflare Worker webhook ingress, a deterministic router, one Durable Object per
-issue or pull request for serialisation, Flue agents, and Cloudflare Sandbox
-containers with credential-free hardened clones and bounded install/build
-commands. Cloudflare Sandbox in particular displaces the unbuilt immutable image,
-the 909-archive offline cache and the mount policy. Only the Cloudflare AI Gateway
-provider is bundled there, which constrains any inherited credential boundary.
+Substrate when reopening: vendor `withastro/factory` (MIT) rather than fork it or
+resume the image, cache and observer programme. Settled on 2026-11-21 against the
+source and its own test suite, not a page fetch; see
+[the assessment](assessments/astro-factory-foundation-20261121.md) and
+[the vendoring design](superpowers/specs/2026-11-21-factory-substrate-vendoring-design.md).
+Factory runs Astro's own triage and review automation in production on the
+architecture these milestones were building: Cloudflare Worker webhook ingress, a
+deterministic router, one Durable Object per issue or pull request for
+serialisation, Flue agents, and Cloudflare Sandbox containers with credential-free
+hardened clones and bounded install/build commands. Cloudflare Sandbox in
+particular displaces the unbuilt immutable image, the 909-archive offline cache
+and the mount policy. Only the Cloudflare AI Gateway provider is bundled there,
+which constrains any inherited credential boundary.
+
+Vendoring rather than forking, because a fork makes us the maintainer of seven
+capabilities we will never run. Factory is young, has no releases and is private
+by design, so adopting it means owning the code rather than depending on it,
+which is why only the substrate travels and MIT requires the copyright notice
+travel with it: upstream SHA and path are recorded per file so a later upstream
+fix can be reapplied by hand. Slices 1 to 4 are done and entirely local. Twelve
+files sit under `vendor/factory` with recorded provenance; the bindings typecheck
+against a class we do not author; our router was compared with upstream's and the
+comparison closed a real defect, a classic bot on a plain user account reaching
+admission; and the plan, receipt projection, sandbox port and verifier wiring are
+delivered under 28 tests. All five pre-commitment questions are closed, the last
+on 2026-11-22, and the economics are about $0.13 per candidate. Slice 5 is
+everything that runs a container, touches Cloudflare, installs a GitHub App or
+uses a credential, and each of those is still its own gate.
 
 Factory does not supply the product. It has no dependency upgrade, migration or
 codemod capability, and no acceptance gate: its triage loop ends with the issue
 reporter confirming a fix, which has no analogue for a migration whose only
-verdict is the target suite. The acceptance contract and the migration capability
-stay ours. Factory is also young, has no releases and is private by design, so
-its own suggested path for other projects is a fork; adopting it means owning
-that code, not depending on it. Before committing to a fork, read `src/router.ts`
-and the triage skill in the source. This assessment rests on one truncated page
-fetch with a model-summarised tail, not on the source.
+verdict is the target suite. Worse, with `autoPrOnFix` enabled the verdict is the
+model's own `fixed` boolean and its config carries no test command, so nothing
+independently verifies a fix. That is the concrete reason our acceptance contract
+is not redundant. The acceptance contract and the migration capability stay ours.
 
 ### Standing Guardrails
 

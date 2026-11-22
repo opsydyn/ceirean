@@ -133,13 +133,13 @@ edits the maintainer declined, so it is named here rather than fixed.
 
 **The candidate is green under the same checks as the base.**
 
-| | Base `f5784e68` | Candidate |
-| --- | --- | --- |
-| Phase 1 (`:lint`…`:docs`) | 97 tasks, 5m 17s | 97 tasks, 4m 52s |
-| Phase 2 (`:integration`) | 14 tasks (7 cached), 3m 47s | 14 tasks (7 cached), 2m 45s |
-| Wall clock | 9m 05s | 7m 38s |
-| Recorded exit | `0` | `0` |
-| Non-zero failure counts | none | none |
+|                           | Base `f5784e68`             | Candidate                   |
+| ------------------------- | --------------------------- | --------------------------- |
+| Phase 1 (`:lint`…`:docs`) | 97 tasks, 5m 17s            | 97 tasks, 4m 52s            |
+| Phase 2 (`:integration`)  | 14 tasks (7 cached), 3m 47s | 14 tasks (7 cached), 2m 45s |
+| Wall clock                | 9m 05s                      | 7m 38s                      |
+| Recorded exit             | `0`                         | `0`                         |
+| Non-zero failure counts   | none                        | none                        |
 
 Same task set, same two phases, both green. The duration difference is not a
 performance result: the two runs happened on either side of an idle period and
@@ -152,13 +152,13 @@ comparable manual upgrade". Half of that is available and half is not.
 
 **Rework rounds: four CI runs to green, three of them failures.**
 
-| Run | Duration | Outcome |
-| --- | --- | --- |
-| Base | 9m 05s | green |
-| Candidate 1 | **2s** | `root:skills` — stale versions in skill assets and prose |
-| Candidate 2 | 1m 27s | `promo:test` — stale version in a generated-starter template |
-| Candidate 3 | 2m 06s | `foldkit-zloz-mermaid:integration` — peer-pin conflict |
-| Candidate 4 | 7m 38s | **green** |
+| Run         | Duration | Outcome                                                      |
+| ----------- | -------- | ------------------------------------------------------------ |
+| Base        | 9m 05s   | green                                                        |
+| Candidate 1 | **2s**   | `root:skills` — stale versions in skill assets and prose     |
+| Candidate 2 | 1m 27s   | `promo:test` — stale version in a generated-starter template |
+| Candidate 3 | 2m 06s   | `foldkit-zloz-mermaid:integration` — peer-pin conflict       |
+| Candidate 4 | 7m 38s   | **green**                                                    |
 
 About 20 minutes of CI across five runs, plus one targeted three-suite run used
 to check the untouched test literals rather than assume them.
@@ -173,7 +173,7 @@ measurement of effort and is not reported as one.
 performed, so there is no baseline for review-and-rework time and no claim here
 about whether the agent route was faster or slower than doing it by hand. The
 roadmap's central question is therefore still open. What this pilot produced is
-the *shape* of the work — four rounds, one judgement call, 18 files — which a
+the _shape_ of the work — four rounds, one judgement call, 18 files — which a
 manual attempt could now be measured against.
 
 **Cost note.** The first failure arrived in 2 seconds and the full gate takes

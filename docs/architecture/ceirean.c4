@@ -1,0 +1,341 @@
+// Ceirean's architecture, as a model rather than a picture.
+//
+// Every element carries its real status as a tag, and the tag sets its colour,
+// because the thing this project most needs to communicate is not the shape of
+// the pipeline but where the approval gates fall across it.
+//
+//   #proven    built, tested and evidenced in docs/evidence
+//   #vendored  upstream Astro Factory source, MIT, provenance recorded per file
+//   #gated     designed, not built; needs an explicit separate approval
+//   #gap       a known missing check, named in evidence and not yet written
+//   #parked    deliberately stopped; see the roadmap's parking record
+//   #external  not ours
+//
+// Node text is deliberately terse so a view reads at a glance; the reasoning
+// lives in docs/architecture/README.md and the evidence it links.
+//
+// Nothing in a #gated element has been deployed. The one Cloudflare Worker that
+// ever existed was torn down to an expired, routeless state on 2026-10-30 and
+// verified private.
+
+specification {
+  // Fills chosen dark enough to carry white text, and far enough apart in hue
+  // to stay distinct when the diagram is scaled down into a README.
+  color proven #15803d
+  color vendored #4338ca
+  color gated #b45309
+  color gap #b91c1c
+  color parked #78716c
+  color external #475569
+
+  element person {
+    style {
+      shape: person
+    }
+  }
+  element system
+  element container
+  element component
+  element store {
+    style {
+      shape: storage
+    }
+  }
+
+  tag proven
+  tag vendored
+  tag gated
+  tag gap
+  tag parked
+  tag external
+}
+
+// Status is a property of the thing, so it is coloured once here and every view
+// inherits it. Later rules win, so an element tagged both #vendored and #proven
+// reads as vendored, and one tagged both #external and #gated reads as gated.
+global {
+  styleGroup statuses {
+    style element.tag = #proven {
+      color: proven
+    }
+    style element.tag = #external {
+      color: external
+    }
+    style element.tag = #vendored {
+      color: vendored
+    }
+    style element.tag = #parked {
+      color: parked
+    }
+    style element.tag = #gated {
+      color: gated
+    }
+    style element.tag = #gap {
+      color: gap
+    }
+  }
+}
+
+model {
+  maintainer = person 'Maintainer' {
+    description 'Requests, reviews, owns every merge'
+  }
+
+  github = system 'GitHub' {
+    #external
+    description 'Signed command in, draft PR out'
+  }
+
+  cloudflare = system 'Cloudflare' {
+    #external
+    description 'Nothing deployed here'
+  }
+
+  model_provider = system 'Model provider' {
+    #external #gated
+    description 'No key or budget authorized'
+  }
+
+  ceirean = system 'Ceirean' {
+    description 'Finish an upgrade with less supervision'
+
+    ingress = container 'GitHub ingress' {
+      #proven
+      technology 'Bun, Effect'
+      description 'Verify, route, admit one command'
+
+      signature = component 'Signature' {
+        #proven
+        technology 'HMAC SHA-256'
+        description 'Rejects an unsigned body'
+      }
+      router = component 'Router' {
+        #proven
+        description 'normaliseGitHubDelivery'
+      }
+      actor_gate = component 'Actor gate' {
+        #proven
+        description 'isBotAuthor'
+      }
+      ingress_policy = component 'Policy' {
+        #proven
+        description 'Repository, operators, event'
+      }
+    }
+
+    engine = container 'Engine' {
+      #proven
+      technology 'Effect'
+      description 'Composition and lifetimes. Judges nothing'
+
+      coordinator = component 'Run coordinator' {
+        #proven
+        description 'Drives a run'
+      }
+      plan = component 'Verification plan' {
+        #proven
+        description 'Pure. Must cover the contract exactly'
+      }
+      verifier = component 'Sandbox verifier' {
+        #proven
+        description 'Halts first failure, releases always'
+      }
+      sandbox_port = component 'Sandbox port' {
+        #proven
+        description 'The seam a container sits behind'
+      }
+    }
+
+    domain = container 'Domain' {
+      #proven
+      technology 'Effect Schema'
+      description 'Pure. Durable authority. No I/O'
+
+      contract = component 'Contract' {
+        #proven
+        description 'Which checks must pass'
+      }
+      receipt = component 'Receipt' {
+        #proven
+        description 'Is this receipt well formed'
+      }
+      verdict = component 'Verdict' {
+        #proven
+        description 'Every check zero, or refused'
+      }
+    }
+
+    substrate = container 'Vendored substrate' {
+      #vendored #proven
+      technology 'MIT, upstream SHA per file'
+      description 'Twelve files. The product stays ours'
+
+      queue = component 'Queue coordinator' {
+        #vendored
+        description 'One run per entity'
+      }
+      bot_gate = component 'Bot gate' {
+        #vendored
+        description 'The upstream rule table'
+      }
+      sandbox_modules = component 'Sandbox modules' {
+        #vendored
+        description 'Command and lifecycle handling'
+      }
+    }
+
+    infra = container 'Infrastructure' {
+      technology 'Alchemy 2.0.0-beta.83'
+      description 'Declares the stack'
+
+      stack = component 'CeireanHooks stack' {
+        description 'Declared, never applied'
+      }
+      secret_preflight = component 'Secret preflight' {
+        #gap
+        description 'Not written. Apply fails late'
+      }
+    }
+
+    ledger = store 'Run ledger' {
+      #proven
+      technology 'Durable Object'
+      description 'Durable run authority'
+    }
+
+    run_workflow = container 'Run workflow' {
+      #gated
+      technology 'Cloudflare Workflow'
+      description 'Needs a rollback step'
+    }
+
+    sandbox = container 'Migration sandbox' {
+      #gated
+      technology 'Container, standard-2'
+      description 'About $0.13 per candidate'
+    }
+
+    publisher = container 'Publisher' {
+      #gated
+      description 'Draft PR only. Merge stays human'
+    }
+
+    probes = container 'Probes' {
+      #proven
+      description 'Evidence fixtures, not a path'
+    }
+
+    owned_runtime = container 'Owned executor runtime' {
+      #parked
+      description 'Parked 2026-11-18'
+    }
+  }
+
+  // The admission path, which is built and evidenced.
+  maintainer -> github 'Comments the command'
+  github -> ceirean.ingress.signature 'Signed delivery'
+  ceirean.ingress.signature -> ceirean.ingress.router 'Verified body'
+  ceirean.ingress.router -> ceirean.ingress.actor_gate 'Normalised'
+  ceirean.ingress.actor_gate -> ceirean.ingress.ingress_policy 'Human actor'
+  ceirean.ingress.ingress_policy -> ceirean.engine.coordinator 'Admitted'
+  ceirean.substrate.bot_gate -> ceirean.ingress.actor_gate 'Rule table'
+
+  // The verdict chain: evidence is produced, then judged somewhere else.
+  ceirean.engine.coordinator -> ceirean.ledger 'Records state'
+  ceirean.engine.coordinator -> ceirean.engine.verifier 'Asks for a receipt'
+  ceirean.engine.verifier -> ceirean.engine.plan 'Validates, then projects'
+  ceirean.engine.plan -> ceirean.domain.contract 'Must cover exactly'
+  ceirean.engine.verifier -> ceirean.engine.sandbox_port 'One bounded command'
+  ceirean.engine.plan -> ceirean.domain.receipt 'Decoded'
+  ceirean.engine.coordinator -> ceirean.domain.verdict 'Asks for a verdict'
+  ceirean.domain.verdict -> maintainer 'Reviewable bundle'
+
+  // Everything below here is gated and unbuilt.
+  ceirean.engine.sandbox_port -> ceirean.sandbox 'Checks in a container'
+  ceirean.run_workflow -> ceirean.substrate.queue 'Coordinate, with rollback'
+  ceirean.run_workflow -> ceirean.engine.coordinator 'Enqueues'
+  ceirean.sandbox -> ceirean.substrate.sandbox_modules 'Lifecycle'
+  ceirean.engine.coordinator -> model_provider 'Patch generation'
+  ceirean.domain.verdict -> ceirean.publisher 'Only a qualified run'
+  ceirean.publisher -> github 'Draft PR'
+  ceirean.infra.stack -> cloudflare 'Applies the stack'
+  ceirean.infra.secret_preflight -> ceirean.infra.stack 'Should refuse first'
+}
+
+views {
+  view index {
+    title 'Ceirean in context'
+    global style statuses
+    include *
+  }
+
+  view containers {
+    title 'Inside Ceirean'
+    global style statuses
+    include
+      maintainer,
+      github,
+      cloudflare,
+      model_provider,
+      ceirean,
+      ceirean.*
+  }
+
+  view admission {
+    title 'Admission: signature, router, actor gate, policy'
+    global style statuses
+    include
+      maintainer,
+      github,
+      ceirean.ingress,
+      ceirean.ingress.*,
+      ceirean.engine.coordinator,
+      ceirean.substrate.bot_gate
+  }
+
+  view verdict {
+    title 'The verdict chain'
+    global style statuses
+    include
+      ceirean.engine,
+      ceirean.engine.*,
+      ceirean.domain,
+      ceirean.domain.*,
+      ceirean.ledger,
+      ceirean.sandbox,
+      maintainer
+  }
+
+  view gates {
+    title 'Behind an approval gate'
+    global style statuses
+    autoLayout LeftRight
+    include
+      ceirean.sandbox,
+      ceirean.run_workflow,
+      ceirean.publisher,
+      ceirean.infra,
+      ceirean.infra.*,
+      ceirean.owned_runtime,
+      cloudflare,
+      github,
+      model_provider,
+      ceirean.engine.sandbox_port,
+      ceirean.domain.verdict,
+      ceirean.substrate.queue
+  }
+
+  dynamic view assessment {
+    title 'One assessment, in order'
+    global style statuses
+    autoLayout TopBottom
+
+    maintainer -> github 'Comments the command'
+    github -> ceirean.ingress 'Signed delivery'
+    ceirean.ingress -> ceirean.engine 'Admitted command'
+    ceirean.engine -> ceirean.sandbox 'One bounded command per check'
+    ceirean.sandbox -> ceirean.engine 'Step exit codes'
+    ceirean.engine -> ceirean.domain 'A receipt to judge'
+    ceirean.domain -> maintainer 'Qualified, or refused with a reason'
+  }
+}
