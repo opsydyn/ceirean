@@ -15,24 +15,24 @@ verified published rates and a workload measured locally during
 **About $0.13 per candidate.** The per-run cost is negligible. The real
 exposure is idle time and concurrency, not the workload.
 
-| | standard-2, `sleepAfter: '1h'` |
-| --- | --- |
-| Active time per candidate | ~37 min |
-| Cost per candidate | **$0.1326** |
-| Of which the idle hour | $0.057 — **42%** |
-| Included allowance covers | **2.6 candidates/month** |
-| Ceiling, 10 instances held awake 30 days | **$515–$929/month** |
+|                                          | standard-2, `sleepAfter: '1h'` |
+| ---------------------------------------- | ------------------------------ |
+| Active time per candidate                | ~37 min                        |
+| Cost per candidate                       | **$0.1326**                    |
+| Of which the idle hour                   | $0.057 — **42%**               |
+| Included allowance covers                | **2.6 candidates/month**       |
+| Ceiling, 10 instances held awake 30 days | **$515–$929/month**            |
 
 ## Verified Inputs
 
 Read from Cloudflare's own documentation on 2026-11-22, not from secondary
 summaries. `standard-2` is **1 vCPU, 6 GiB memory, 12 GB disk**.
 
-| Resource | Rate | Basis |
-| --- | --- | --- |
-| Memory | $0.0000025 / GiB-second | **provisioned** size |
-| CPU | $0.000020 / vCPU-second | **active usage only** |
-| Disk | $0.00000007 / GB-second | **provisioned** size |
+| Resource | Rate                    | Basis                 |
+| -------- | ----------------------- | --------------------- |
+| Memory   | $0.0000025 / GiB-second | **provisioned** size  |
+| CPU      | $0.000020 / vCPU-second | **active usage only** |
+| Disk     | $0.00000007 / GB-second | **provisioned** size  |
 
 Billing is in 10 ms increments. Workers Paid is $5/month and includes 25
 GiB-hours memory, 375 vCPU-minutes, and 200 GB-hours disk.
@@ -53,11 +53,11 @@ roughly 21 minutes of serial work is, before any core-speed difference.
 
 Central scenario, `standard-2`, 1h idle:
 
-| Component | Cost | Share |
-| --- | --- | --- |
+| Component                                       | Cost    | Share   |
+| ----------------------------------------------- | ------- | ------- |
 | Memory (6 GiB, provisioned, whole awake window) | $0.0874 | **64%** |
-| CPU (active only) | $0.0445 | 32% |
-| Disk (12 GB, provisioned) | $0.0049 | 4% |
+| CPU (active only)                               | $0.0445 | 32%     |
+| Disk (12 GB, provisioned)                       | $0.0049 | 4%      |
 
 Memory dominates because it is billed on provisioned size for as long as the
 instance is awake — including the idle hour, during which CPU bills nothing.
@@ -72,12 +72,12 @@ candidate in a month, every run is paid.
 Cost per candidate across instance types, holding the measured 2.4x
 parallelism ceiling:
 
-| Type | vCPU | Active | `sleepAfter: '1h'` | `sleepAfter: 1 min` |
-| --- | --- | --- | --- | --- |
-| standard-1 | 0.5 | 69.2m | $0.1212 (**-9%**) | $0.0838 (+10%) |
-| **standard-2** | 1 | 37.1m | $0.1326 | $0.0765 |
-| standard-3 | 2 | 21.0m | $0.1448 (+9%) | $0.0700 (**-8%**) |
-| standard-4 | 4 | 18.4m | $0.1933 (+46%) | $0.0822 (+7%) |
+| Type           | vCPU | Active | `sleepAfter: '1h'` | `sleepAfter: 1 min` |
+| -------------- | ---- | ------ | ------------------ | ------------------- |
+| standard-1     | 0.5  | 69.2m  | $0.1212 (**-9%**)  | $0.0838 (+10%)      |
+| **standard-2** | 1    | 37.1m  | $0.1326            | $0.0765             |
+| standard-3     | 2    | 21.0m  | $0.1448 (+9%)      | $0.0700 (**-8%**)   |
+| standard-4     | 4    | 18.4m  | $0.1933 (+46%)     | $0.0822 (+7%)       |
 
 Two conclusions:
 

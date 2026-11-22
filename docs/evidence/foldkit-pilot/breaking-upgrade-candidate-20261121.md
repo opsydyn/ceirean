@@ -51,11 +51,11 @@ Confirmed empirically rather than inferred, by typechecking the same probe
 against each extracted version with `effect` 4.1.0 and TypeScript from this
 repository:
 
-| Probe | 0.170.0 | 0.171.0 |
-| --- | --- | --- |
-| `messages: [Done]` (control) | compiles | compiles |
-| `messages: []` | compiles | **TS2769** — `[]` not assignable to `ResultMessageSchemas<…>` |
-| `messages: [Schema.Never]` | compiles | compiles |
+| Probe                        | 0.170.0  | 0.171.0                                                       |
+| ---------------------------- | -------- | ------------------------------------------------------------- |
+| `messages: [Done]` (control) | compiles | compiles                                                      |
+| `messages: []`               | compiles | **TS2769** — `[]` not assignable to `ResultMessageSchemas<…>` |
+| `messages: [Schema.Never]`   | compiles | compiles                                                      |
 
 The empty-list rejection reproduces exactly. The `never`-entry rejection the
 declaration comment claims does **not** hold, and this was pinned down rather
@@ -103,14 +103,14 @@ exports in `dist/html/index.d.ts` grew from two to six.
 Checked against `registry.npmjs.org` at the dist-tag `latest`, for every
 `foldkit`-scoped spec in the repository at `f5784e68`:
 
-| Package | Pinned | Latest | Moves? |
-| --- | --- | --- | --- |
-| `foldkit` | 0.170.0 | 0.171.0 | **yes** |
-| `@foldkit/devtools` | 0.170.0 | 0.171.0 | **yes** |
-| `@foldkit/ui` | 0.170.0 | 0.171.0 | **yes** |
-| `@foldkit/vite-plugin` | `^0.29.0` | 0.29.1 | no — caret satisfies |
-| `@foldkit/oxlint-plugin` | `^0.15.3` | 0.15.4 | no — caret satisfies |
-| `@foldkit/devtools-mcp` | 0.26.0 | 0.26.0 | no — already current |
+| Package                  | Pinned    | Latest  | Moves?               |
+| ------------------------ | --------- | ------- | -------------------- |
+| `foldkit`                | 0.170.0   | 0.171.0 | **yes**              |
+| `@foldkit/devtools`      | 0.170.0   | 0.171.0 | **yes**              |
+| `@foldkit/ui`            | 0.170.0   | 0.171.0 | **yes**              |
+| `@foldkit/vite-plugin`   | `^0.29.0` | 0.29.1  | no — caret satisfies |
+| `@foldkit/oxlint-plugin` | `^0.15.3` | 0.15.4  | no — caret satisfies |
+| `@foldkit/devtools-mcp`  | 0.26.0    | 0.26.0  | no — already current |
 
 Three packages move together. `@foldkit/ui` was an open gap in the first draft
 of this record and is now closed: it does have a 0.171.0.
@@ -122,14 +122,14 @@ ceiling a single self-imposed line. That understated it. **Six** packages
 declare a `foldkit` peer range that excludes 0.171.0, and one of them pins the
 exact version:
 
-| Package | `peerDependencies.foldkit` |
-| --- | --- |
-| `packages/astro-foldkit` | `>=0.170.0 <0.171.0` |
-| `packages/effect-three-foldkit` | `>=0.167.0 <0.171.0` |
-| `packages/foldkit-phosphor` | `>=0.170.0 <0.171.0` |
-| `packages/foldkit-viz` | `>=0.167.0 <0.171.0` |
-| `packages/foldkit-zloz` | `>=0.170.0 <0.171.0` |
-| `packages/foldkit-zloz-mermaid` | `0.170.0` (exact) |
+| Package                         | `peerDependencies.foldkit` |
+| ------------------------------- | -------------------------- |
+| `packages/astro-foldkit`        | `>=0.170.0 <0.171.0`       |
+| `packages/effect-three-foldkit` | `>=0.167.0 <0.171.0`       |
+| `packages/foldkit-phosphor`     | `>=0.170.0 <0.171.0`       |
+| `packages/foldkit-viz`          | `>=0.167.0 <0.171.0`       |
+| `packages/foldkit-zloz`         | `>=0.170.0 <0.171.0`       |
+| `packages/foldkit-zloz-mermaid` | `0.170.0` (exact)          |
 
 These remain self-imposed rather than upstream constraints, so widening them is
 still not the break. But every one must be widened for the upgrade to resolve,
