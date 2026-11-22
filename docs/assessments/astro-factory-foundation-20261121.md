@@ -248,11 +248,15 @@ can be reapplied by hand.
 ## Before Anything Is Committed To
 
 Each of these is bounded, and the first two are prerequisites, not nice-to-haves.
+**All five are now closed**, the last on 2026-11-22.
 
-1. **A typecheck-only stack.** Declare one plain `DurableObject` subclass and
-   `@cloudflare/sandbox`'s `Sandbox` in an Alchemy stack here and typecheck it.
-   No deploy, no account. The API is confirmed; this confirms the generics and
-   `InferEnv` behave with a class we do not author.
+1. **A typecheck-only stack.** Done 2026-11-21; see
+   [the binding probe](../evidence/factory-substrate/binding-probe-20261121.md),
+   which was recorded against slice 2 of the vendoring design but answers this
+   item exactly. `probes/factory-binding` declares a plain `DurableObject`
+   subclass and `@cloudflare/sandbox`'s `Sandbox` in an Alchemy stack and
+   typechecks clean, so the generics and `InferEnv` do behave with a class we
+   do not author. No deploy, no account, no credential.
 2. **Factory's own suite, locally.** Done 2026-11-21; see
    [the upstream suite record](../evidence/factory-substrate/upstream-suite-20261121.md).
    All 51 files and 460 tests pass in 742ms with a frozen lockfile and
@@ -270,9 +274,14 @@ Each of these is bounded, and the first two are prerequisites, not nice-to-haves
    config has no test command, so with `autoPrOnFix` enabled nothing
    independently verifies a fix. That is the concrete reason our acceptance
    contract is not redundant.
-4. **Container economics.** `instance_type: standard-2`, `max_instances: 10`,
-   `sleepAfter: '1h'`. A FoldKit install and full suite per candidate, against
-   bounded cost, needs a number before a hosted run is approved.
+4. **Container economics.** Done 2026-11-22; see
+   [the numbers](../evidence/factory-substrate/container-economics-20261122.md).
+   About **$0.13 per candidate** on `standard-2`, of which the `sleepAfter: '1h'`
+   idle window is 42% and memory 64%. The measured task graph parallelises only
+   2.4x, so instance types land within ±10% of each other and `standard-4` is
+   waste; the inactivity timeout, not the instance type, is the knob worth
+   changing. `max_instances: 10` held awake is $515–$929/month and is the only
+   way to spend real money here. A hosted run can be approved on these numbers.
 5. **Alchemy gaps.** Done 2026-11-21; see
    [the findings](../evidence/factory-substrate/alchemy-gaps-20261121.md). No
    equivalent of `secrets.required` exists and a missing secret fails during
