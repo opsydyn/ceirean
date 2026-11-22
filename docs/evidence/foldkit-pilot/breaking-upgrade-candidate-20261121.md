@@ -58,9 +58,18 @@ repository:
 | `messages: [Schema.Never]` | compiles | compiles |
 
 The empty-list rejection reproduces exactly. The `never`-entry rejection the
-declaration comment claims did **not** reproduce in this probe; the comment may
-describe a case the mapped type does not reach through `Schema.Never`. Recorded
-as observed, not as documented.
+declaration comment claims does **not** hold, and this was pinned down rather
+than left open. Two further probes against 0.171.0 establish that:
+
+- `Schema.Schema.Type<typeof Schema.Never>` does resolve to `never`, so the
+  entry is the case the comment describes.
+- `ResultMessageSchemas<[typeof Schema.Never]>[0]` nonetheless does **not**
+  resolve to `never`, so the guard never engages.
+
+The comment therefore overstates what the type enforces: a `Schema.Never`
+entry compiles. That is an upstream documentation or type defect, not something
+this repository must work around, and it does not weaken the first finding —
+the non-empty-tuple constraint is real and does reject `[]`.
 
 A typecheck gate catches this class of break.
 
