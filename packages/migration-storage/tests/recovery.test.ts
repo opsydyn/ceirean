@@ -1,4 +1,4 @@
-import { expect, test } from 'bun:test';
+import { expect } from 'bun:test';
 
 import {
   WorkerIssuerId,
@@ -16,6 +16,7 @@ import { makeCancelledChange, makeSnapshot } from '../../engine/tests/fixtures.t
 import { makeWorkerCase } from '../../engine/tests/worker-fixtures.ts';
 import * as Ledger from '../src/index.ts';
 import {
+  hostTest as test,
   ownedConfig,
   platform,
   childInput,

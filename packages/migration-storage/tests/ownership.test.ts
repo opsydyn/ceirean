@@ -1,4 +1,4 @@
-import { expect, test } from 'bun:test';
+import { expect } from 'bun:test';
 
 import { Data, Effect, Match, Option, Result, Schema } from 'effect';
 
@@ -8,7 +8,7 @@ import {
   initializeMigrationLedger,
   readMigrationLedgerStatus,
 } from '../src/index.ts';
-import { ownedConfig, platform } from './fixtures.ts';
+import { hostTest as test, ownedConfig, platform } from './fixtures.ts';
 
 async function exclusiveOwner() {
   function* scenario() {
