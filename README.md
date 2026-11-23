@@ -2,234 +2,89 @@
 
 ![Ceirean: autonomous repository maintenance, monitoring, updates, improvements and pull requests.](docs/assets/ceirean-banner.jpg)
 
-Guardian of the deep. Autonomous repository repair and PRs.
+Guardian of the deep. Autonomous repository repair and pull requests.
 
-An internal dependency migration service, built to dogfood across Opsydyn
-repositories before considering a broader product.
+Ceirean helps a maintainer finish a dependency or source-API upgrade with less
+supervision. It takes a requested migration, reproduces the target repository at
+an immutable revision, applies the change in isolation, verifies the result
+independently of the agent that produced it, and returns a reviewable patch bound
+to evidence. Producing more version-bump pull requests is not the measure.
 
-Repository direction: a Moon-managed Bun workspace monorepo. The first private
-compatibility probe and pinned workspace configuration are scaffolded.
+It is an internal service, built to dogfood across Opsydyn repositories before
+any broader product is considered. The local checkout may still be named
+`Leviathan`; directory names are not product identity.
 
-## Status
+**Nothing here runs unsupervised.** Every step that reaches outside this
+repository — running a container, calling Cloudflare, installing a GitHub App,
+using a credential, opening a pull request — is a separate approval gate, and
+none of them is open. The [architecture model](docs/architecture/README.md) marks
+each one by colour.
 
-The product and private workspace packages are now Ceirean (`@ceirean/*`).
-The local checkout may remain named `Leviathan`; directory names are not product
-identity. The repository remote is [opsydyn/ceirean](https://github.com/opsydyn/ceirean).
-Git publication is separate from live GitHub App/ingress approval.
-The exact GitHub command is `/ceirean assess`, without a legacy alias.
-The default state root is `$HOME/Library/Application Support/Ceirean`.
-Existing ledgers are never discovered, copied, initialized or migrated implicitly;
-an existing compatible ledger requires explicit configuration and operator approval.
-The on-disk format and ownership identifiers are unchanged.
+## What it does
 
-Historical assessments, source hashes and qualification artifacts retain the
-Leviathan name and qualify only their recorded revisions, not renamed source.
-The local ingress work was merged into main at `4877a8a`; older branch-status
-statements below describe historical checkpoints. A separately approved bounded
-live rehearsal passed admission, replay, restart and local-profile rejection;
-see the [live evidence](docs/evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
-All live controls are now off. Use the
-[rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md) before
-resuming ingress or selecting/changing any real target.
+```text
+Approved request -> pinned repository -> isolated baseline + browser evidence
+  -> Flue migration patch -> independent verification -> maintainer review
+  -> separately authorized draft PR
+```
 
-The first [Fallow report-only audit](docs/assessments/fallow-20261021.md) is
-recorded separately: 29 findings, no removals, suppressions or new CI gate.
-Use the documented clean-snapshot procedure for a secret-free, network-denied
-scan; there is no working-directory convenience command or CI integration.
-The [internal export cleanup](docs/assessments/internal-export-cleanup-20261021.md)
-reduces that report from 29 to five findings while retaining implementations and
-compatibility dependencies; the remaining declarations are not suppressed.
-The subsequent [unused-declaration cleanup](docs/assessments/unused-declaration-cleanup-20261021.md)
-removes those four dead declarations. The current audit exits 0 with only the
-required MCP compatibility-peer warning retained, without suppressions.
-The [security repair](docs/assessments/dependabot-security-20261021.md) updates
-that peer to 1.32.0 for five GitHub alerts and records the additional transitive
-registry findings separately; it does not claim the full graph is vulnerability-free.
+Each arrow is a refusal point rather than a handoff. An unchanged baseline must
+pass before a migration is attempted, so pre-existing failures block
+qualification instead of being absorbed into it. Verification runs the
+maintainer's own acceptance checks against a frozen candidate, and a receipt
+binds the result to the exact source, patch and toolchain. Agent completion is
+not proof of qualification.
 
-Named-tunnel preparation is isolated in
-[`@ceirean/infrastructure`](packages/infrastructure/README.md). It is a guarded
-preparation workspace. The three approved Cloudflare resources are provisioned
-and independently verified, with zero connectors and no active origin. The
-entrypoint refuses registration outside the verified stage, mode and protected
-local directories. Connector/listener/webhook activation requires separate approval.
-Its infrastructure-only third-party
-declaration exception is owner-approved; source remains strict. The
-[offline ownership report](docs/runbooks/alchemy-tunnel-ownership-report.md)
-records the reproduced failures; no connector, listener or webhook was activated.
+## Repository layout
 
-The offline compatibility probe's 36 tests cover pure decisions, real Flue tools
-through Effect, process-kill recovery and distinct read/abort semantics. The
-canonical typecheck passes with strict source checking and the owner-approved
-probe-local vendor declaration policy. This does not qualify production use.
-There is no deployed production application or scheduled job; tunnel-only
-infrastructure preparation is not application activation.
+```text
+.
+├── .github/
+│   ├── actions/setup/         Composite toolchain step: Bun, Moon, frozen install
+│   └── workflows/check.yml    The gate: lint, 14 typechecks, 13 test targets
+├── .moon/                     Project graph, toolchains and task definitions
+├── apps/
+│   ├── github-ingress/        Signed GitHub admission, verification, operator CLI
+│   └── replay/                Replay of a frozen profile against recorded evidence
+├── packages/
+│   ├── domain/                Pure qualification evidence and run decisions
+│   ├── engine/                Qualification coordinator, verification plan, ports
+│   ├── github-adapter/        GitHub transport behind the engine's ports
+│   ├── infrastructure/        Gated Alchemy stack declaration; never deployed
+│   └── migration-storage/     Run and migration persistence contracts
+├── probes/                    Evidence fixtures, one per question asked
+│   ├── bun-effect-flue/       Bun, Effect and Flue compatibility
+│   ├── cloudflare-executor/   Offline payload preparation for a sandbox
+│   ├── cloudflare-ledger/     Durable-object ledger semantics
+│   ├── colima-readiness/      Local container host readiness
+│   ├── factory-binding/       Astro Factory substrate binding
+│   └── github-admission/      Offline `/ceirean assess` command admission
+├── vendor/factory/            Vendored Astro Factory substrate; MIT, provenance per file
+├── patches/                   Version-scoped, declaration-only dependency repairs
+├── profiles/                  Frozen replay profiles
+├── qualification/             Inactive CI workflows and run worksheets
+├── docs/                      Documentation; see the index below
+├── .prototools                Exact Moon, Bun and Node pins
+├── moon.yml                   Root project: lint, format and check tasks
+├── package.json               Private Bun workspace root
+└── bun.lock                   One root lockfile
+```
 
-The new private GitHub channel probe retains strict vendor declaration checking.
-Its owner-approved compatibility repair is tracked in
-[GitHub Channel Compatibility Repair](docs/assessments/github-admission-repair.md),
-including the two declaration-only Bun patches and Google's explicit optional
-MCP type peer. This does not implement the GitHub admission service.
-
-The separately approved [pure GitHub command policy](docs/assessments/github-command-policy.md)
-defines exact command parsing, identity/authority schemas and explicit-time
-preview decisions. It is not an inbox, verified HTTP endpoint or permission to
-execute work.
-
-The reviewed [in-memory command admission contract](docs/assessments/github-inbox-contract.md) adds
-an inferred Effect service and test-only replay/authority fixture. That memory
-result alone does not qualify native SQLite, verified ingress or restart recovery.
-
-The reviewed [local SQLite inbox](docs/assessments/github-sqlite-inbox.md) is
-locally qualified, with scoped handles, native transactions and revision
-history. Same-process close/reopen is not process-kill or host-loss evidence.
-
-The reviewed [verified ingress bridge](docs/assessments/github-verified-ingress.md)
-connects bounded signed fixtures to that inbox through one application runtime.
-It remains an in-process offline harness, not a listening service or live GitHub
-permission integration.
-
-The synthetic qualification-gate tracer is implemented and locally verified:
-119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
-Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect
-races use a test-only in-memory repository, not a durable application adapter.
-Task 4 Step 7 is complete: the whole-branch review is clean through `e7d9d25`,
-and the controller independently passed all nine acceptance commands at that head.
-This remains local-only on `codex/qualification-gate`, not merged to main or pushed.
-
-[Measured qualification-gate evidence](docs/assessments/qualification-gate.md)
-records the exact tested-code commit, lock identities, gates and exclusions.
-
-[Measured compatibility checkpoint](docs/assessments/bun-effect-flue-compatibility.md)
-records exact pins, measured results, dependency declaration limitations and
-excluded systems.
-
-The initial product outcome is a reviewable dependency migration with reproducible
-qualification evidence and less maintainer effort. Producing more version-bump
-pull requests is not the success measure.
-
-## Agreed Direction
-
-- Bun and TypeScript first, with Flue at the core of bounded agent reasoning.
-- Moon owns the monorepo project graph and development tasks; Bun owns workspace
-  dependencies, the lockfile and application execution.
-- Effect for application orchestration, with pure domain decisions and explicit
-  infrastructure adapters, recorded in accepted ADR-0001.
-- A dedicated central service, independent of its consumer repositories.
-- FoldKit experiments first; the postcode client second; wider internal adoption
-  only after successful dogfooding.
-- Keep the public Astro and Viz packages independent of service machinery.
-- Rust is parked pending a measured bottleneck and a separate decision.
-- Alchemy Domain and additional workflow engines are deferred for the pilot.
-- The owner selected `@xstate/effect` for local worker lifecycle orchestration,
-  not another durable coordinator. The written spec and ADR-0002 are approved;
-  execution is approved, and Task 1's exact-cohort gate is committed and reviewed
-  clean at `91c0f01`. All six task reviews are complete and clean through
-  `781c71c`. Final review found I1: normal released ownership was incorrectly
-  reported as ActorFailed. Fix `f38b0e4` has clean independent scoped rereview,
-  closing the whole-implementation review. Controller gates independently pass
-  458 tests / 1900 assertions, including RED/GREEN regressions. See the
-  [measured assessment](docs/assessments/worker-lifecycle.md).
-- No automatic merge, package release or deployment.
-
-## Local GitHub Ingress
-
-Tasks 1-7, whole-branch review and final controller verification are complete:
-native authority, immutable SQLite evidence, bounded local CLI/listener and
-recovery qualification. The final controller run passed 935 tests and six
-typechecks. This is local acceptance, not merge or live readiness. See the
-[controller closure](docs/evidence/local-github-ingress/controller-closure.md).
-Fresh final-fix evidence is separate from historical `b7f5d4e` qualification.
-See the [local-only runbook](docs/runbooks/local-github-ingress.md),
-[assessment](docs/assessments/local-github-ingress.md) and
-[source-bound evidence](docs/evidence/local-github-ingress.json).
-Named Cloudflare tunnel infrastructure has been provisioned under separate
-approval. The bounded live rehearsal passed its five approved scenarios; this
-does not qualify worker execution, PRs, always-on operation or production durability.
-Webhook delivery, connector and listener are off; the local profile remains Disabled.
-
-## Proposed First Slice
-
-A manually requested FoldKit migration from an immutable base revision, executed
-in disposable workers. Initially export the patch and evidence without opening a
-live pull request.
-
-1. Validate the request against a reviewed central repository profile.
-2. Establish an unchanged baseline; existing failures block qualification.
-3. Apply the dependency update and bounded source migration.
-4. Freeze the candidate and independently run the approved acceptance checks.
-5. Export a receipt binding results to the exact source, patch and toolchain.
-6. Obtain maintainer review before any separately approved publication.
-
-Profiles describe toolchains, companion dependencies, allowed changes, protected
-acceptance files, qualification commands and required evidence. Repository code
-must not execute with publication credentials. Agent completion is not proof of
-qualification.
-
-The detailed workflow, isolation, credential, storage and recovery designs still
-require review. The proposed pilot effort and spending limits are not approved
-execution budgets.
-
-## Planning Checklist
-
-- [x] Agree the dedicated service boundary and initial dogfood repositories.
-- [x] Lock Bun first and retain Flue at the core.
-- [x] Create the local Leviathan repository.
-- [x] Agree the Effect, pure-domain and Flue ownership direction.
-- [x] Review and accept the written Effect and domain-boundary ADR.
-- [x] Require a Moon-managed Bun workspace monorepo.
-- [ ] Approve the manual workflow and repository profile contract.
-- [ ] Approve worker isolation, credentials, persistence and recovery design.
-- [ ] Select a historical migration and define acceptance evidence and budgets.
-- [ ] Review the written design specification.
-- [x] Review an implementation plan and select execution method (compatibility probe only).
-- [ ] Implement and qualify the first dry run.
-- [ ] Separately approve a GitHub remote, app installation and draft PR publication.
-
-## Product Plan
-
-[Bun First Agent Upgrade Platform Product Plan](https://chatgpt.com/space/page_f7bcb77a27c08191af1b7a6621fb7c9b)
-
-The product plan contains the proposed pilot roadmap, evaluation thresholds and
-stop conditions. Its budgets and later phases remain proposals, not authority to
-run paid jobs or change external systems.
-
-[Local delivery roadmap](docs/roadmap.md) tracks the next slices, including later
-organisation discovery and config-only self-PRs against Ceirean for new repos.
-Discovery does not automatically enable migrations or grant execution access.
-
-## Offline GitHub Admission
-
-The owner approved the conversational design for an offline `/leviathan assess`
-issue-comment admission probe. The
-[written spec](docs/superpowers/specs/2026-10-20-github-admission-design.md)
-and [implementation plan](docs/superpowers/plans/2026-10-20-github-admission.md)
-were approved on 2026-10-20 with subagent-driven execution and controller-owned
-independent review. The original published-artifact failure remains in the
-[historical blocked assessment](docs/assessments/github-admission.md); only the
-subsequently approved [patched local cohort](docs/assessments/github-admission-repair.md)
-is admitted. Tasks 2-4 now provide reviewed pure policy, an inferred admission
-service and a scoped native SQLite inbox, with 549 local tests / 3810 assertions
-at the Task 4 baseline.
-
-[Task 5 verified ingress](docs/assessments/github-verified-ingress.md) is complete
-at `f5b96ba`, with clean independent review after the async-reader cleanup fix:
-635 local tests / 4124 assertions, all four types and lint/format pass.
-Task 6's [recovery assessment](docs/assessments/github-admission-recovery.md)
-completes the amended offline admission plan: 645 tests / 4226 assertions,
-process-kill evidence, source-bound measured report and clean independent
-whole-branch review with fresh gates. This is local fixture qualification only.
-Models, a public endpoint, worker execution and GitHub writes remain out of scope;
-the CLI-first direction is unchanged.
+Moon owns the project graph and tasks; Bun owns workspace dependencies, the
+lockfile and execution. Domain, engine and the probes are private workspaces. Do
+not scaffold empty production packages. Evidence tasks run uncached with no
+automatic retries, and Moon is neither Ceirean's durable run coordinator nor its
+container security boundary.
 
 ## Architecture
 
-[The model](docs/architecture/ceirean.c4) is the current architecture, written in
-LikeC4. Every element carries its real status as a tag, and the tag sets its
-colour, because what this project most needs to communicate is not the shape of
-the pipeline but where the approval gates fall across it: green is built and
-evidenced, indigo is vendored upstream source, orange needs an explicit separate
-approval, red is a known missing check, stone is deliberately parked, and slate
-is not ours. Node text is kept terse so a view reads at a glance.
+[`docs/architecture/ceirean.c4`](docs/architecture/ceirean.c4) is the current
+architecture, written in LikeC4. Every element carries its real status as a tag
+and the tag sets its colour, because what this project most needs to communicate
+is not the shape of the pipeline but where the approval gates fall across it:
+green is built and evidenced, indigo is vendored upstream source, orange needs an
+explicit separate approval, red is a known missing check, stone is deliberately
+parked, slate is not ours.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/architecture/views/index-dark.png">
@@ -246,147 +101,69 @@ required-secret preflight.
 </picture>
 
 [All six views](docs/architecture/README.md), including the admission path, the
-verdict chain and one showing only what sits behind a gate. The images are
-derived; when they and the model disagree, the model is right. Regenerating them
-needs the LikeC4 CLI, which this repository does not depend on, and acquiring it
-is a separate gate. The source validates and all six views lay out under LikeC4
-1.61.0.
+verdict chain, and one showing only what sits behind a gate. The images are
+derived: when they and the model disagree, the model is right.
 
-The shape itself was settled on 2026-11-21: vendor the Astro Factory substrate,
-keep the acceptance contract and the migration capability ours. See
-[the assessment](docs/assessments/astro-factory-foundation-20261121.md) and
-[the vendoring design](docs/superpowers/specs/2026-11-21-factory-substrate-vendoring-design.md).
-Slices 1 to 4 are delivered and local. Everything that runs a container, touches
-Cloudflare, installs a GitHub App or uses a credential is slice 5, and each of
-those is its own approval gate.
+## Checks
 
-The earlier
-[Internal Upgrade Service Design](docs/superpowers/specs/2026-10-18-internal-upgrade-service-design.md)
-is retained as history. It proposed a single-owner CLI, isolated workers,
-separate run and Flue storage, immutable qualification and dry-run evidence; the
-vendoring decision supersedes its substrate, not its safety requirements.
-
-## Architecture Decisions
-
-[ADR-0001 Adopt Effect orchestration and pure domain decisions](docs/decisions/0001-adopt-effect-and-domain-boundaries.md)
-
-Status: accepted on 2026-10-18. It defines service ownership, dependency
-boundaries and the scope of the Bun/Effect/Flue compatibility probe. The pure
-fixture, Flue/Effect tool loop, same-host completed-receipt restart and synthetic
-cancellation semantics are tested. Real providers, containers and production
-architecture remain unqualified.
-
-[ADR-0002 Adopt XState Effect for worker lifecycle](docs/decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md)
-
-Status: accepted by the owner on 2026-10-19.
-It narrows the additional-engine deferral to allow an Effect-hosted local worker
-statechart, retaining the ledger as durable authority. The owner approved plan
-execution; Task 1's clean review admits the pinned cohort locally, not live workers
-or durable recovery.
-
-## First Implementation Plan
-
-[Bun Effect Flue Compatibility](docs/superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
-
-Approved for inline execution in an isolated worktree. Its four phases pass with
-the approved Valibot 1.5.0 correction and probe-local `skipLibCheck` policy. A
-fresh whole-branch review found no issues and independently reran the tests and
-typecheck. The plan covers a credential-free offline probe using
-the real Flue runtime with a synthetic provider; it does not implement the
-upgrade service or qualify real models, containers or deployment.
-
-## Next Application Design
-
-[Qualification Gate Tracer](docs/superpowers/specs/2026-10-18-qualification-gate-design.md)
-
-The qualification-gate written spec is approved, with property-based domain tests
-preferred using Effect's built-in Arbitrary support and inferred port contracts
-preserving the universal lint policy. The
-[implementation plan](docs/superpowers/plans/2026-10-18-qualification-gate.md)
-was executed through Task 4 Step 7 in the existing qualification-gate worktree.
-Private domain and engine packages implement the synthetic tracer. The review of
-`6809192..e7d9d25` found no actionable issues; the exact range and independent
-controller results are recorded in the measured assessment. Real providers,
-workers, durable application storage and publication stay outside this slice.
-The subsequent documentation closure was separately approved through `742a5df`;
-later docs-only corrections do not extend that reviewed range.
-
-## Worker Lifecycle Design
-
-The offline lifecycle design is
-[Worker Ownership And XState Effect Lifecycle](docs/superpowers/specs/2026-10-19-worker-lifecycle-design.md).
-The written spec, ADR and plan execution are approved. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
-and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The implementation is
-an offline actor/memory-journal tracer, not Docker or durable recovery.
-The [implementation plan](docs/superpowers/plans/2026-10-19-worker-lifecycle.md)
-records clean independent reviews of all six tasks and the final fix through
-`f38b0e4`.
-The [measured qualification](docs/assessments/worker-lifecycle.md) separates pinned
-package admission from real statechart/service tests with controlled fakes,
-stateful Effect Arbitrary laws and simulated service reconstruction. The offline
-plan is complete: task reviews, whole-implementation review, scoped final-fix
-rereview and controller verification are clean. The reviewed work was
-fast-forwarded into local `main` at `9723c33`; nothing has been pushed.
-No browser/manual, native Docker isolation/cleanup, durable journal/host-loss,
-deployment, real migration or throughput/scaling proof is claimed.
-
-## Monorepo Layout
-
-```text
-.moon/                      Project graph, toolchains and development tasks
-.prototools                 Exact Moon, Bun and development-only Node pins
-package.json                Private Bun workspace root
-bun.lock                    One root dependency lockfile
-apps/github-ingress/        Signed GitHub admission, verification and the operator CLI
-apps/replay/                Replay of a frozen profile against recorded evidence
-packages/domain/            Pure qualification evidence and run decisions
-packages/engine/            Qualification coordinator, verification plan and ports
-packages/github-adapter/    GitHub transport behind the engine's ports
-packages/infrastructure/    Gated Alchemy stack declaration (not deployed)
-packages/migration-storage/ Run and migration persistence contracts
-probes/                     Evidence fixtures: bun-effect-flue, cloudflare-executor,
-                            cloudflare-ledger, colima-readiness, factory-binding,
-                            github-admission
-vendor/factory/             Vendored Astro Factory substrate (MIT, provenance recorded)
-patches/                    Version-scoped declaration-only dependency repairs
-profiles/                   Frozen replay profiles
-qualification/              Inactive CI workflows and run worksheets
-docs/                       Architecture, decisions, specifications, plans and evidence
-```
-
-The root Moon project owns quality tasks; domain, engine and probe are private workspaces.
-Do not scaffold empty production packages. Evidence tasks run uncached with no automatic retries;
-Moon is not Ceirean's durable run coordinator or container security boundary.
-
-## Quality Gates
-
-Install the exact tools in `.prototools` with `moon setup`, then install dependencies
-with `bun install --frozen-lockfile --ignore-scripts`. Node 24.15.0 runs developer
-tooling only: standalone Oxlint needs Node for its JavaScript plugin and TypeScript
-config. Application and probe execution remain Bun 1.4.2; Node is not a runtime
-fallback. Moon does not automatically install workspace dependencies.
+Every pull request runs [the gate](.github/workflows/check.yml) — lint and
+format, 14 typecheck targets, and 13 test targets as one job each so a single run
+reports every failure. `main` requires its aggregate `Gate` check and refuses
+direct pushes. The gate can also be run on demand:
 
 ```sh
-bun run check                     # Oxlint, then oxfmt check
-bun run lint:fix                  # Apply available lint fixes, then review
-bun run format                    # Format owned source, config and docs
-moon run workspace:check --force --no-actions
-moon run domain:typecheck --force --no-actions
-moon run engine:typecheck --force --no-actions
-moon run probe:typecheck --force --no-actions
-moon run github-admission:typecheck --force --no-actions
-moon run domain:test --force --no-actions
-moon run engine:test --force --no-actions
-moon run probe:test --force --no-actions
-moon run github-admission:test --force --no-actions
+gh workflow run check.yml --ref main
 ```
+
+Locally, install the pinned tools with `moon setup`, then dependencies with
+`bun install --frozen-lockfile --ignore-scripts`:
+
+```sh
+bun run check                 # Oxlint, then oxfmt --check
+bun run lint:fix              # Apply available fixes, then review them
+bun run format                # Format owned source, config and docs
+moon run :typecheck           # Every typecheck target
+moon run :test                # Every test target
+moon run engine:test          # One project
+```
+
+Bun 1.4.2 runs applications and tests. Node 24.15.0 is developer tooling only —
+standalone Oxlint needs it for its JavaScript plugin and TypeScript config — and
+is not a runtime fallback. Moon does not install workspace dependencies for you.
 
 `oxlint.config.ts` enables every Effect 4-applicable rule from
 `@opsydyn/oxlint-effect@2.0.1`: 141 rules, all errors, including the 20 beyond
-`recommendedRules`. There are no blanket source/test exclusions or rule disables.
-Native adapter and test boundaries are explicit paths. Warnings fail the gate.
-`oxfmt@0.73.0` owns formatting; `oxlint@1.88.0` owns linting. Use `bun run lint`,
-not an assumed Bun-native linter. Type-aware Oxlint extensions are not enabled.
+`recommendedRules`. There are no blanket source or test exclusions and no rule
+disables; native adapter and test boundaries are explicit paths, and warnings
+fail the gate. `oxfmt@0.73.0` owns formatting and `oxlint@1.88.0` owns linting.
 
-[Quality tooling evidence](docs/assessments/code-quality-tooling.md) records the
-baseline, fixes, checks and remaining qualification limits.
+## Documentation
+
+| Where                                                | What it holds                                   | Add to it when                                  |
+| ---------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
+| [`docs/architecture/`](docs/architecture/README.md)  | The LikeC4 model and its six rendered views     | The shape of the system changes                 |
+| [`docs/decisions/`](docs/decisions/)                 | Numbered ADRs                                   | A consequential, hard-to-reverse choice is made |
+| [`docs/roadmap.md`](docs/roadmap.md)                 | The active delivery map                         | A slice is planned, delivered or parked         |
+| [`docs/superpowers/specs/`](docs/superpowers/specs/) | Approved designs, dated                         | A slice is designed before it is built          |
+| [`docs/superpowers/plans/`](docs/superpowers/plans/) | Approved implementation plans, dated            | A design becomes an ordered task list           |
+| [`docs/assessments/`](docs/assessments/)             | What was measured, and what it does not qualify | Work finishes and its limits need recording     |
+| [`docs/evidence/`](docs/evidence/)                   | Source-bound run records and receipts           | A run produces evidence worth citing            |
+| [`docs/runbooks/`](docs/runbooks/)                   | Operator procedures and approval worksheets     | A person has a sequence to follow               |
+
+The [documentation index](docs/README.md) describes each of these in full,
+including which are historical and must not be edited in place.
+
+## Status
+
+[The roadmap](docs/roadmap.md) is the active map; its checkboxes record evidence,
+not permission to execute. Slices 1 to 4 are delivered and local. Everything that
+runs a container, touches Cloudflare, installs a GitHub App or uses a credential
+is slice 5, and each of those is its own approval gate. The owned executor
+runtime is parked as of 2026-11-18; see the roadmap's parking record before
+planning another runtime slice.
+
+There is no deployed application and no scheduled job. Live controls are off, and
+the [rehearsal approval worksheet](docs/runbooks/ceirean-rehearsal-approval.md)
+governs resuming ingress or selecting any real target. Historical status prose,
+including what each completed slice did and did not qualify, is kept verbatim in
+the [README history](docs/readme-history-20261123.md).

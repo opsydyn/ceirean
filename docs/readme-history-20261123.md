@@ -1,0 +1,293 @@
+# README History (to 2026-11-23)
+
+These sections stood in the repository README until the documentation
+restructure of 2026-11-23. They are kept verbatim, as the
+[roadmap history](roadmap-history-20261027.md) is kept, because they record
+approval boundaries and what each slice did and did not qualify — statements that
+are deliberate and should not be summarised away. They describe the state at
+`bee8d60` and are not maintained.
+
+Current material lives in the [README](../README.md), the
+[roadmap](roadmap.md), the [architecture model](architecture/README.md) and the
+[documentation index](README.md). Where this record and those disagree, they are
+right.
+
+Two things changed in moving these lines: link paths were rewritten for this
+file's location in `docs/`, and the repository formatter collapsed two blank
+lines. No wording was edited, and the body is otherwise byte-identical to the
+README at `bee8d60`.
+
+## Status
+
+The product and private workspace packages are now Ceirean (`@ceirean/*`).
+The local checkout may remain named `Leviathan`; directory names are not product
+identity. The repository remote is [opsydyn/ceirean](https://github.com/opsydyn/ceirean).
+Git publication is separate from live GitHub App/ingress approval.
+The exact GitHub command is `/ceirean assess`, without a legacy alias.
+The default state root is `$HOME/Library/Application Support/Ceirean`.
+Existing ledgers are never discovered, copied, initialized or migrated implicitly;
+an existing compatible ledger requires explicit configuration and operator approval.
+The on-disk format and ownership identifiers are unchanged.
+
+Historical assessments, source hashes and qualification artifacts retain the
+Leviathan name and qualify only their recorded revisions, not renamed source.
+The local ingress work was merged into main at `4877a8a`; older branch-status
+statements below describe historical checkpoints. A separately approved bounded
+live rehearsal passed admission, replay, restart and local-profile rejection;
+see the [live evidence](evidence/local-github-ingress/live-rehearsal-20261021-r2.md).
+All live controls are now off. Use the
+[rehearsal approval worksheet](runbooks/ceirean-rehearsal-approval.md) before
+resuming ingress or selecting/changing any real target.
+
+The first [Fallow report-only audit](assessments/fallow-20261021.md) is
+recorded separately: 29 findings, no removals, suppressions or new CI gate.
+Use the documented clean-snapshot procedure for a secret-free, network-denied
+scan; there is no working-directory convenience command or CI integration.
+The [internal export cleanup](assessments/internal-export-cleanup-20261021.md)
+reduces that report from 29 to five findings while retaining implementations and
+compatibility dependencies; the remaining declarations are not suppressed.
+The subsequent [unused-declaration cleanup](assessments/unused-declaration-cleanup-20261021.md)
+removes those four dead declarations. The current audit exits 0 with only the
+required MCP compatibility-peer warning retained, without suppressions.
+The [security repair](assessments/dependabot-security-20261021.md) updates
+that peer to 1.32.0 for five GitHub alerts and records the additional transitive
+registry findings separately; it does not claim the full graph is vulnerability-free.
+
+Named-tunnel preparation is isolated in
+[`@ceirean/infrastructure`](../packages/infrastructure/README.md). It is a guarded
+preparation workspace. The three approved Cloudflare resources are provisioned
+and independently verified, with zero connectors and no active origin. The
+entrypoint refuses registration outside the verified stage, mode and protected
+local directories. Connector/listener/webhook activation requires separate approval.
+Its infrastructure-only third-party
+declaration exception is owner-approved; source remains strict. The
+[offline ownership report](runbooks/alchemy-tunnel-ownership-report.md)
+records the reproduced failures; no connector, listener or webhook was activated.
+
+The offline compatibility probe's 36 tests cover pure decisions, real Flue tools
+through Effect, process-kill recovery and distinct read/abort semantics. The
+canonical typecheck passes with strict source checking and the owner-approved
+probe-local vendor declaration policy. This does not qualify production use.
+There is no deployed production application or scheduled job; tunnel-only
+infrastructure preparation is not application activation.
+
+The new private GitHub channel probe retains strict vendor declaration checking.
+Its owner-approved compatibility repair is tracked in
+[GitHub Channel Compatibility Repair](assessments/github-admission-repair.md),
+including the two declaration-only Bun patches and Google's explicit optional
+MCP type peer. This does not implement the GitHub admission service.
+
+The separately approved [pure GitHub command policy](assessments/github-command-policy.md)
+defines exact command parsing, identity/authority schemas and explicit-time
+preview decisions. It is not an inbox, verified HTTP endpoint or permission to
+execute work.
+
+The reviewed [in-memory command admission contract](assessments/github-inbox-contract.md) adds
+an inferred Effect service and test-only replay/authority fixture. That memory
+result alone does not qualify native SQLite, verified ingress or restart recovery.
+
+The reviewed [local SQLite inbox](assessments/github-sqlite-inbox.md) is
+locally qualified, with scoped handles, native transactions and revision
+history. Same-process close/reopen is not process-kill or host-loss evidence.
+
+The reviewed [verified ingress bridge](assessments/github-verified-ingress.md)
+connects bounded signed fixtures to that inbox through one application runtime.
+It remains an in-process offline harness, not a listening service or live GitHub
+permission integration.
+
+The synthetic qualification-gate tracer is implemented and locally verified:
+119 domain tests, 55 engine tests, and 36 unchanged probe tests pass (210 total).
+Its 31 domain properties evaluate 93,000 cases per full run. Controlled Effect
+races use a test-only in-memory repository, not a durable application adapter.
+Task 4 Step 7 is complete: the whole-branch review is clean through `e7d9d25`,
+and the controller independently passed all nine acceptance commands at that head.
+This remains local-only on `codex/qualification-gate`, not merged to main or pushed.
+
+[Measured qualification-gate evidence](assessments/qualification-gate.md)
+records the exact tested-code commit, lock identities, gates and exclusions.
+
+[Measured compatibility checkpoint](assessments/bun-effect-flue-compatibility.md)
+records exact pins, measured results, dependency declaration limitations and
+excluded systems.
+
+The initial product outcome is a reviewable dependency migration with reproducible
+qualification evidence and less maintainer effort. Producing more version-bump
+pull requests is not the success measure.
+
+## Agreed Direction
+
+- Bun and TypeScript first, with Flue at the core of bounded agent reasoning.
+- Moon owns the monorepo project graph and development tasks; Bun owns workspace
+  dependencies, the lockfile and application execution.
+- Effect for application orchestration, with pure domain decisions and explicit
+  infrastructure adapters, recorded in accepted ADR-0001.
+- A dedicated central service, independent of its consumer repositories.
+- FoldKit experiments first; the postcode client second; wider internal adoption
+  only after successful dogfooding.
+- Keep the public Astro and Viz packages independent of service machinery.
+- Rust is parked pending a measured bottleneck and a separate decision.
+- Alchemy Domain and additional workflow engines are deferred for the pilot.
+- The owner selected `@xstate/effect` for local worker lifecycle orchestration,
+  not another durable coordinator. The written spec and ADR-0002 are approved;
+  execution is approved, and Task 1's exact-cohort gate is committed and reviewed
+  clean at `91c0f01`. All six task reviews are complete and clean through
+  `781c71c`. Final review found I1: normal released ownership was incorrectly
+  reported as ActorFailed. Fix `f38b0e4` has clean independent scoped rereview,
+  closing the whole-implementation review. Controller gates independently pass
+  458 tests / 1900 assertions, including RED/GREEN regressions. See the
+  [measured assessment](assessments/worker-lifecycle.md).
+- No automatic merge, package release or deployment.
+
+## Local GitHub Ingress
+
+Tasks 1-7, whole-branch review and final controller verification are complete:
+native authority, immutable SQLite evidence, bounded local CLI/listener and
+recovery qualification. The final controller run passed 935 tests and six
+typechecks. This is local acceptance, not merge or live readiness. See the
+[controller closure](evidence/local-github-ingress/controller-closure.md).
+Fresh final-fix evidence is separate from historical `b7f5d4e` qualification.
+See the [local-only runbook](runbooks/local-github-ingress.md),
+[assessment](assessments/local-github-ingress.md) and
+[source-bound evidence](evidence/local-github-ingress.json).
+Named Cloudflare tunnel infrastructure has been provisioned under separate
+approval. The bounded live rehearsal passed its five approved scenarios; this
+does not qualify worker execution, PRs, always-on operation or production durability.
+Webhook delivery, connector and listener are off; the local profile remains Disabled.
+
+## Proposed First Slice
+
+A manually requested FoldKit migration from an immutable base revision, executed
+in disposable workers. Initially export the patch and evidence without opening a
+live pull request.
+
+1. Validate the request against a reviewed central repository profile.
+2. Establish an unchanged baseline; existing failures block qualification.
+3. Apply the dependency update and bounded source migration.
+4. Freeze the candidate and independently run the approved acceptance checks.
+5. Export a receipt binding results to the exact source, patch and toolchain.
+6. Obtain maintainer review before any separately approved publication.
+
+Profiles describe toolchains, companion dependencies, allowed changes, protected
+acceptance files, qualification commands and required evidence. Repository code
+must not execute with publication credentials. Agent completion is not proof of
+qualification.
+
+The detailed workflow, isolation, credential, storage and recovery designs still
+require review. The proposed pilot effort and spending limits are not approved
+execution budgets.
+
+## Planning Checklist
+
+- [x] Agree the dedicated service boundary and initial dogfood repositories.
+- [x] Lock Bun first and retain Flue at the core.
+- [x] Create the local Leviathan repository.
+- [x] Agree the Effect, pure-domain and Flue ownership direction.
+- [x] Review and accept the written Effect and domain-boundary ADR.
+- [x] Require a Moon-managed Bun workspace monorepo.
+- [ ] Approve the manual workflow and repository profile contract.
+- [ ] Approve worker isolation, credentials, persistence and recovery design.
+- [ ] Select a historical migration and define acceptance evidence and budgets.
+- [ ] Review the written design specification.
+- [x] Review an implementation plan and select execution method (compatibility probe only).
+- [ ] Implement and qualify the first dry run.
+- [ ] Separately approve a GitHub remote, app installation and draft PR publication.
+
+## Product Plan
+
+[Bun First Agent Upgrade Platform Product Plan](https://chatgpt.com/space/page_f7bcb77a27c08191af1b7a6621fb7c9b)
+
+The product plan contains the proposed pilot roadmap, evaluation thresholds and
+stop conditions. Its budgets and later phases remain proposals, not authority to
+run paid jobs or change external systems.
+
+[Local delivery roadmap](roadmap.md) tracks the next slices, including later
+organisation discovery and config-only self-PRs against Ceirean for new repos.
+Discovery does not automatically enable migrations or grant execution access.
+
+## Offline GitHub Admission
+
+The owner approved the conversational design for an offline `/leviathan assess`
+issue-comment admission probe. The
+[written spec](superpowers/specs/2026-10-20-github-admission-design.md)
+and [implementation plan](superpowers/plans/2026-10-20-github-admission.md)
+were approved on 2026-10-20 with subagent-driven execution and controller-owned
+independent review. The original published-artifact failure remains in the
+[historical blocked assessment](assessments/github-admission.md); only the
+subsequently approved [patched local cohort](assessments/github-admission-repair.md)
+is admitted. Tasks 2-4 now provide reviewed pure policy, an inferred admission
+service and a scoped native SQLite inbox, with 549 local tests / 3810 assertions
+at the Task 4 baseline.
+
+[Task 5 verified ingress](assessments/github-verified-ingress.md) is complete
+at `f5b96ba`, with clean independent review after the async-reader cleanup fix:
+635 local tests / 4124 assertions, all four types and lint/format pass.
+Task 6's [recovery assessment](assessments/github-admission-recovery.md)
+completes the amended offline admission plan: 645 tests / 4226 assertions,
+process-kill evidence, source-bound measured report and clean independent
+whole-branch review with fresh gates. This is local fixture qualification only.
+Models, a public endpoint, worker execution and GitHub writes remain out of scope;
+the CLI-first direction is unchanged.
+
+## Architecture Decisions
+
+[ADR-0001 Adopt Effect orchestration and pure domain decisions](decisions/0001-adopt-effect-and-domain-boundaries.md)
+
+Status: accepted on 2026-10-18. It defines service ownership, dependency
+boundaries and the scope of the Bun/Effect/Flue compatibility probe. The pure
+fixture, Flue/Effect tool loop, same-host completed-receipt restart and synthetic
+cancellation semantics are tested. Real providers, containers and production
+architecture remain unqualified.
+
+[ADR-0002 Adopt XState Effect for worker lifecycle](decisions/0002-adopt-xstate-effect-for-worker-lifecycle.md)
+
+Status: accepted by the owner on 2026-10-19.
+It narrows the additional-engine deferral to allow an Effect-hosted local worker
+statechart, retaining the ledger as durable authority. The owner approved plan
+execution; Task 1's clean review admits the pinned cohort locally, not live workers
+or durable recovery.
+
+## First Implementation Plan
+
+[Bun Effect Flue Compatibility](superpowers/plans/2026-10-18-bun-effect-flue-compatibility.md)
+
+Approved for inline execution in an isolated worktree. Its four phases pass with
+the approved Valibot 1.5.0 correction and probe-local `skipLibCheck` policy. A
+fresh whole-branch review found no issues and independently reran the tests and
+typecheck. The plan covers a credential-free offline probe using
+the real Flue runtime with a synthetic provider; it does not implement the
+upgrade service or qualify real models, containers or deployment.
+
+## Next Application Design
+
+[Qualification Gate Tracer](superpowers/specs/2026-10-18-qualification-gate-design.md)
+
+The qualification-gate written spec is approved, with property-based domain tests
+preferred using Effect's built-in Arbitrary support and inferred port contracts
+preserving the universal lint policy. The
+[implementation plan](superpowers/plans/2026-10-18-qualification-gate.md)
+was executed through Task 4 Step 7 in the existing qualification-gate worktree.
+Private domain and engine packages implement the synthetic tracer. The review of
+`6809192..e7d9d25` found no actionable issues; the exact range and independent
+controller results are recorded in the measured assessment. Real providers,
+workers, durable application storage and publication stay outside this slice.
+The subsequent documentation closure was separately approved through `742a5df`;
+later docs-only corrections do not extend that reviewed range.
+
+## Worker Lifecycle Design
+
+The offline lifecycle design is
+[Worker Ownership And XState Effect Lifecycle](superpowers/specs/2026-10-19-worker-lifecycle-design.md).
+The written spec, ADR and plan execution are approved. The selected evaluation pins are `@xstate/effect@0.1.0-alpha.6`
+and `xstate@6.0.0-alpha.64`, with existing Effect `4.0.5`. The implementation is
+an offline actor/memory-journal tracer, not Docker or durable recovery.
+The [implementation plan](superpowers/plans/2026-10-19-worker-lifecycle.md)
+records clean independent reviews of all six tasks and the final fix through
+`f38b0e4`.
+The [measured qualification](assessments/worker-lifecycle.md) separates pinned
+package admission from real statechart/service tests with controlled fakes,
+stateful Effect Arbitrary laws and simulated service reconstruction. The offline
+plan is complete: task reviews, whole-implementation review, scoped final-fix
+rereview and controller verification are clean. The reviewed work was
+fast-forwarded into local `main` at `9723c33`; nothing has been pushed.
+No browser/manual, native Docker isolation/cleanup, durable journal/host-loss,
+deployment, real migration or throughput/scaling proof is claimed.
