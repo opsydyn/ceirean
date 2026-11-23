@@ -58,7 +58,7 @@ export function preparePayloadInputs(repository: string) {
     const browser = yield* prepareHarnessSource();
     const fs = yield* FileSystem.FileSystem;
     const output = yield* fs.makeTempDirectory({
-      directory: '/private/tmp',
+      directory: '/tmp',
       prefix: 'ceirean-offline-inputs-',
     });
     function* persist() {

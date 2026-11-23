@@ -72,7 +72,7 @@ test('usage errors including activate perform zero dependency calls', usage);
 async function report() {
   const f = fixture();
   const program = runCli(
-    ['preflight', '--config', '/private/tmp/owned/ceirean/colima.yaml'],
+    ['preflight', '--config', '/tmp/owned/ceirean/colima.yaml'],
     f.dependencies,
   );
   const provided = Effect.provide(program, BunServices.layer);
@@ -82,12 +82,12 @@ async function report() {
   expect(decodeReport(output.stdout)).toMatchObject({
     canExecuteReplay: false,
     nativeReadiness: 'Unqualified',
-    config: { proposedEndpoint: { endpoint: 'unix:///private/tmp/owned/ceirean/docker.sock' } },
+    config: { proposedEndpoint: { endpoint: 'unix:///tmp/owned/ceirean/docker.sock' } },
     host: { cpuCount: { _tag: 'Known', value: 8 } },
   });
   const home = (f.calls[0] as { home: string }).home;
-  expect(home).toStartWith('/private/tmp/ceirean-preflight-home-');
-  expect(f.calls).toEqual([{ home }, { root: '/private/tmp/owned', home }]);
+  expect(home).toStartWith('/tmp/ceirean-preflight-home-');
+  expect(f.calls).toEqual([{ home }, { root: '/tmp/owned', home }]);
   const filesystem = Effect.provide(FileSystem.FileSystem, BunServices.layer);
   const fs = await Effect.runPromise(filesystem);
   expect(await Effect.runPromise(fs.exists(home))).toBe(false);
@@ -162,7 +162,7 @@ async function productionGuards() {
       const program = Effect.die('INSTALLED_CLIENT_MUST_NOT_RUN');
       return program;
     }
-    const reader = productionDependencies.makeReader('/private/tmp/owned', '/private/tmp/home');
+    const reader = productionDependencies.makeReader('/tmp/owned', '/tmp/home');
     for (const tool of ['Colima', 'Docker'] as const) {
       const reading = reader.runVersion(tool).pipe(Effect.result);
       const result = yield* Effect.provideService(

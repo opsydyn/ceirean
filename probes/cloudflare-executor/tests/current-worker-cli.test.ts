@@ -8,8 +8,8 @@ const decodeFrame = Schema.decodeUnknownSync(JsonFrame);
 const script = new URL('../scripts/current-baseline-worker.ts', import.meta.url).pathname;
 async function invoke(args: readonly string[]) {
   const child = Bun.spawn([process.execPath, '--no-env-file', '--no-install', script, ...args], {
-    cwd: '/private/tmp',
-    env: { PATH: '/usr/bin:/bin', HOME: '/private/tmp' },
+    cwd: '/tmp',
+    env: { PATH: '/usr/bin:/bin', HOME: '/tmp' },
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 10000,

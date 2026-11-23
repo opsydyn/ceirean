@@ -106,7 +106,7 @@ export function prepareCurrentRegistryCandidates(
     const inventory = yield* currentDependencyInventory(repository);
     const fs = yield* FileSystem.FileSystem;
     const directory = yield* Effect.acquireRelease(
-      fs.makeTempDirectory({ directory: '/private/tmp', prefix: 'ceirean-current-registry-' }),
+      fs.makeTempDirectory({ directory: '/tmp', prefix: 'ceirean-current-registry-' }),
       (directory, exit) =>
         Exit.match(exit, {
           onSuccess: () => Effect.void,

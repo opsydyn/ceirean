@@ -22,7 +22,7 @@ async function spawn(cwd: string, args: ReadonlyArray<string>) {
   return { code, stdout, stderr };
 }
 async function successfulExit() {
-  const result = await spawn('/private/tmp', [fixture]);
+  const result = await spawn('/tmp', [fixture]);
   expect(result.stderr).toBe('');
   expect(decode(result.stdout)).toMatchObject({
     _tag: 'ManifestDeclarationReport',

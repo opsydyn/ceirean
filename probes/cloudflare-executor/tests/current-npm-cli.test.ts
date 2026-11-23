@@ -3,8 +3,8 @@ import { expect, test } from 'bun:test';
 const script = new URL('../scripts/prepare-current-npm.ts', import.meta.url).pathname;
 async function invoke(args: readonly string[]) {
   const child = Bun.spawn([process.execPath, '--no-env-file', '--no-install', script, ...args], {
-    cwd: '/private/tmp',
-    env: { PATH: '/usr/bin:/bin', HOME: '/private/tmp' },
+    cwd: '/tmp',
+    env: { PATH: '/usr/bin:/bin', HOME: '/tmp' },
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 10000,
@@ -29,7 +29,7 @@ for (const args of [
   });
 }
 test('current npm preparation refuses missing source with no secret-bearing stack', async () => {
-  expect(await invoke(['/private/tmp', '/private/tmp/node'])).toEqual({
+  expect(await invoke(['/tmp', '/tmp/node'])).toEqual({
     code: 1,
     stdout: '',
     stderr: '{"_tag":"CurrentNpmPreparationRefused","activation":"Blocked"}\n',

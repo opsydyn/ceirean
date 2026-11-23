@@ -1,5 +1,5 @@
 import { Database } from 'bun:sqlite';
-import { expect, test } from 'bun:test';
+import { expect } from 'bun:test';
 import { afterEach, mock, spyOn } from 'bun:test';
 
 import { AttemptId, WorkerOperationId } from '@ceirean/domain';
@@ -23,7 +23,7 @@ import {
   makeWorkerIntent,
 } from '../../engine/tests/worker-fixtures.ts';
 import * as Ledger from '../src/index.ts';
-import { ownedConfig, platform } from './fixtures.ts';
+import { hostTest as test, ownedConfig, platform } from './fixtures.ts';
 
 const seed = makeSnapshot();
 const registration = { state: seed.state, contract: seed.contract };

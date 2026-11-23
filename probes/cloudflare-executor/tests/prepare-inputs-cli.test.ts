@@ -33,7 +33,7 @@ for (const args of [
   });
 }
 test('missing pinned source refuses without emitting a partial payload or raw Git diagnostics', async () => {
-  const result = await invoke(['--source-repository', '/private/tmp']);
+  const result = await invoke(['--source-repository', '/tmp']);
   expect(result).toEqual({
     code: 1,
     stdout: '',
@@ -42,7 +42,7 @@ test('missing pinned source refuses without emitting a partial payload or raw Gi
 });
 
 test('missing current source has the same sanitized refusal without a revision override', async () => {
-  const result = await invoke(['--current-source-repository', '/private/tmp']);
+  const result = await invoke(['--current-source-repository', '/tmp']);
   expect(result).toEqual({
     code: 1,
     stdout: '',

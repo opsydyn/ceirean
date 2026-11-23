@@ -1,4 +1,4 @@
-import { expect, test } from 'bun:test';
+import { expect } from 'bun:test';
 
 import { AttemptId, FrozenRun, decideCancellation } from '@ceirean/domain';
 import {
@@ -14,7 +14,7 @@ import { validateCheckResult } from '../../domain/tests/properties.ts';
 import { makeCancelledChange, makeSnapshot } from '../../engine/tests/fixtures.ts';
 import { makeWorkerCase } from '../../engine/tests/worker-fixtures.ts';
 import * as Ledger from '../src/index.ts';
-import { ownedConfig, platform } from './fixtures.ts';
+import { hostTest as test, ownedConfig, platform } from './fixtures.ts';
 
 const arbitrary = Arbitrary.all({
   replace: Arbitrary.schema(Schema.Boolean),

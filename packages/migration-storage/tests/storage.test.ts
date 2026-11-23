@@ -1,11 +1,11 @@
 import { Database } from 'bun:sqlite';
-import { afterEach, expect, mock, spyOn, test } from 'bun:test';
+import { afterEach, expect, mock, spyOn } from 'bun:test';
 
 import { Cause, Data, Effect, Exit, Match, Schema } from 'effect';
 
 import { openOwnedMigrationDatabase } from '../src/database.ts';
 import { initializeMigrationLedger, readMigrationLedgerStatus } from '../src/index.ts';
-import { ownedConfig, platform } from './fixtures.ts';
+import { hostTest as test, ownedConfig, platform } from './fixtures.ts';
 
 afterEach(() => mock.restore());
 class InjectedNativeFailure extends Data.TaggedError('InjectedNativeFailure')<{

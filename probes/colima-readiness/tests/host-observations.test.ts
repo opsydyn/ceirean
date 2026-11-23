@@ -26,7 +26,7 @@ async function syntheticObservations() {
       } as unknown as ChildProcessSpawner.ChildProcessHandle);
       return program;
     }
-    const collecting = collectHostObservations('/private/tmp/synthetic-home');
+    const collecting = collectHostObservations('/tmp/synthetic-home');
     const host = yield* Effect.provideService(collecting, ChildProcessSpawner.ChildProcessSpawner, {
       ...spawner,
       spawn,
@@ -49,8 +49,8 @@ async function syntheticObservations() {
         options: {
           shell: false,
           extendEnv: false,
-          env: { HOME: '/private/tmp/synthetic-home' },
-          cwd: '/private/tmp/synthetic-home',
+          env: { HOME: '/tmp/synthetic-home' },
+          cwd: '/tmp/synthetic-home',
           stdin: 'ignore',
         },
       });
@@ -81,7 +81,7 @@ async function unavailableObservations() {
         } as unknown as ChildProcessSpawner.ChildProcessHandle);
         return program;
       }
-      const collecting = collectHostObservations('/private/tmp/synthetic-home');
+      const collecting = collectHostObservations('/tmp/synthetic-home');
       const host = yield* Effect.provideService(
         collecting,
         ChildProcessSpawner.ChildProcessSpawner,
@@ -92,7 +92,7 @@ async function unavailableObservations() {
       expect(host.freeMemoryBytes).toBeUndefined();
       expect(commands.length).toBeLessThanOrEqual(5);
     }
-    const collecting = collectHostObservations('/private/tmp/synthetic-home');
+    const collecting = collectHostObservations('/tmp/synthetic-home');
     const failed = yield* Effect.provideService(
       collecting,
       ChildProcessSpawner.ChildProcessSpawner,
@@ -125,7 +125,7 @@ async function freePageRecords(text: string, expected: number | undefined) {
       } as unknown as ChildProcessSpawner.ChildProcessHandle);
       return program;
     }
-    const collecting = collectHostObservations('/private/tmp/synthetic-home');
+    const collecting = collectHostObservations('/tmp/synthetic-home');
     const host = yield* Effect.provideService(collecting, ChildProcessSpawner.ChildProcessSpawner, {
       ...spawner,
       spawn,
@@ -200,7 +200,7 @@ async function boundedObservationLifetime() {
         const program = Effect.acquireRelease(acquire, () => release);
         return program;
       }
-      const collecting = collectHostObservations('/private/tmp/synthetic-home');
+      const collecting = collectHostObservations('/tmp/synthetic-home');
       const provided = Effect.provideService(collecting, ChildProcessSpawner.ChildProcessSpawner, {
         ...spawner,
         spawn,
@@ -261,7 +261,7 @@ async function boundedInvalidStreams() {
         } as unknown as ChildProcessSpawner.ChildProcessHandle);
         return program;
       }
-      const collecting = collectHostObservations('/private/tmp/synthetic-home');
+      const collecting = collectHostObservations('/tmp/synthetic-home');
       const result = yield* Effect.provideService(
         collecting,
         ChildProcessSpawner.ChildProcessSpawner,

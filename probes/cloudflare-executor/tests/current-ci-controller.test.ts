@@ -219,7 +219,7 @@ function cliProcessIsInert() {
     const child = Bun.spawnSync(
       [process.execPath, '--no-env-file', '--no-install', script, ...argv],
       {
-        cwd: '/private/tmp',
+        cwd: '/tmp',
         env: { PATH: '/usr/bin:/bin' },
         timeout: 5000,
       },

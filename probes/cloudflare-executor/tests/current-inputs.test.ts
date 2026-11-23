@@ -15,7 +15,7 @@ import { readSourceAt } from '../src/source-payload.ts';
 
 const withPlatform = Effect.provide(BunServices.layer);
 async function refusesMissingSource() {
-  const reading = prepareCurrentPayloadInputs('/private/tmp');
+  const reading = prepareCurrentPayloadInputs('/tmp');
   const result = await Effect.runPromise(reading.pipe(Effect.result, withPlatform));
   expect(result._tag).toBe('Failure');
 }

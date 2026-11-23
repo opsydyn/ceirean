@@ -1,0 +1,142 @@
+# The verification gate for this repository.
+#
+# Everything it runs already existed as a Moon task and had only ever run on a
+# maintainer's laptop. That was the gap it closes: three evidence records
+# reached `main` unformatted through pull request 4 because `oxfmt --check` was
+# never executed anywhere a merge could see it.
+#
+# It runs the same targets as a local `moon run :typecheck :test`, through Moon
+# rather than open-coded `bun` invocations, so a green check here means what a
+# green run means on the laptop.
+#
+# One job per test target, rather than one job for all of them. Moon stops the
+# remaining tasks at the first failure, which is right for a gate but means a
+# single run reports a single task's problems: five consecutive failures took
+# five rounds to find, one task at a time. `fail-fast: false` below reports all
+# of them at once, and the suite stops being serialised behind `engine`, which
+# alone accounts for 4m15s of a 4m20s local run.
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A superseded commit's result cannot gate anything, so stop paying for it.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: Lint and format
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out the candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Full history: Moon's CI changed-files query needs a resolvable
+          # `origin/main`, which a shallow checkout does not provide.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - run: moon run workspace:check
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out the candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Full history: Moon's CI changed-files query needs a resolvable
+          # `origin/main`, which a shallow checkout does not provide.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - run: moon run :typecheck --concurrency 4
+
+  # Derived rather than listed, so a new project with a `test` task joins the
+  # gate by existing. A hardcoded list would let one escape silently, which is
+  # the failure mode this whole workflow exists to prevent.
+  targets:
+    name: Enumerate test targets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      list: ${{ steps.enumerate.outputs.list }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: enumerate
+        run: |
+          set -euo pipefail
+          targets=()
+          while read -r name path; do
+            [ -f "$path/moon.yml" ] || continue
+            if awk '/^tasks:/{t=1;next} /^[^[:space:]]/{t=0} t && /^  test:/{found=1} END{exit !found}' "$path/moon.yml"; then
+              targets+=("$name:test")
+            fi
+          done < <(awk '/^projects:/{p=1;next} /^[^[:space:]]/{p=0} p && NF==2 {gsub(/:$/,"",$1); print $1, $2}' .moon/workspace.yml)
+          if [ "${#targets[@]}" -eq 0 ]; then
+            echo 'BLOCKED: no test targets found; the gate would pass by running nothing.'
+            exit 1
+          fi
+          list="$(printf '%s\n' "${targets[@]}" | sort | python3 -I -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')"
+          printf 'targets: %s\n' "$list"
+          printf 'list=%s\n' "$list" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: ${{ matrix.target }}
+    needs: targets
+    runs-on: ubuntu-24.04
+    # engine is the longest at roughly four minutes locally and the runner is
+    # about 3.9x slower on property-based laws.
+    timeout-minutes: 30
+    strategy:
+      # The point of the matrix: report every failing target in one run.
+      fail-fast: false
+      matrix:
+        target: ${{ fromJSON(needs.targets.outputs.list) }}
+    steps:
+      - name: Check out the candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # Full history: Moon's CI changed-files query needs a resolvable
+          # `origin/main`, which a shallow checkout does not provide.
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - run: moon run ${{ matrix.target }}
+
+  # One stable context for branch protection to require. The matrix job names
+  # change whenever a project is added or removed, so requiring them
+  # individually would silently stop covering new ones; this job's name does
+  # not change, and it fails unless every other job succeeded.
+  gate:
+    name: Gate
+    needs: [check, typecheck, test]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - run: |
+          printf 'lint/format: %s\ntypecheck:   %s\ntests:       %s\n' \
+            '${{ needs.check.result }}' '${{ needs.typecheck.result }}' '${{ needs.test.result }}'
+          if [ '${{ needs.check.result }}' != success ] \
+            || [ '${{ needs.typecheck.result }}' != success ] \
+            || [ '${{ needs.test.result }}' != success ]; then
+            echo 'BLOCKED: at least one required job did not succeed.'
+            exit 1
+          fi
+          echo 'All required jobs succeeded.'
