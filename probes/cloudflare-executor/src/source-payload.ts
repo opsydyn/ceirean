@@ -168,14 +168,13 @@ export function packSourceFiles(input: unknown) {
       '/usr/bin/tar',
       [
         '--format=ustar',
-        '--uid',
-        '0',
-        '--gid',
-        '0',
-        '--uname',
-        'root',
-        '--gname',
-        'root',
+        // `--owner`/`--group` rather than libarchive's `--uid`/`--uname` pair:
+        // GNU tar, which is what Linux provides, rejects the latter, and this
+        // archive has to be reproducible on either host. Verified byte-identical
+        // under bsdtar 3.5.3, so no recorded digest moves. Do not add
+        // `--numeric-owner`; it changes the bytes.
+        '--owner=root:0',
+        '--group=root:0',
         '-cf',
         archive,
         '-C',
