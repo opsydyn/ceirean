@@ -1,0 +1,40 @@
+# Shared toolchain preparation for every job in the gate.
+#
+# It exists so the Bun pin, the lockfile install and the task-runner version are
+# stated once. Four jobs repeating them would drift, and a gate whose jobs do not
+# agree on their toolchain is not one gate.
+#
+# It deliberately does NOT check out the repository. A local action is loaded
+# from the workspace, so it cannot run before the checkout that puts it there;
+# each job checks out first and then calls this.
+name: Prepare the toolchain
+description: Install the pinned Bun and Moon and install dependencies from the committed lockfile.
+
+runs:
+  using: composite
+  steps:
+    - name: Install the pinned Bun
+      uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      with:
+        bun-version: 1.4.2
+
+    # The version above is a literal, so it can drift from the toolchain pin.
+    # Refuse rather than verifying the candidate on another runtime.
+    - name: Refuse a Bun that disagrees with the toolchain pin
+      shell: bash
+      run: |
+        pinned="$(sed -n 's/^bun = "=\(.*\)"$/\1/p' .prototools)"
+        actual="$(bun --version)"
+        if [ "$pinned" != "$actual" ]; then
+          printf 'BLOCKED: .prototools pins bun %s, runner has %s\n' "$pinned" "$actual"
+          exit 1
+        fi
+        printf 'bun %s matches the toolchain pin\n' "$actual"
+
+    - name: Install dependencies from the committed lockfile
+      shell: bash
+      run: bun install --frozen-lockfile
+
+    - name: Install the pinned task runner
+      shell: bash
+      run: npm install --global @moonrepo/cli@2.5.4
