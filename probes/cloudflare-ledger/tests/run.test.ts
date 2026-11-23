@@ -128,7 +128,7 @@ function runSuite(root: string, file: string, phase: string, policy = '') {
 function* runProbe() {
   const fs = yield* FileSystem.FileSystem;
   const root = yield* fs.makeTempDirectoryScoped({
-    directory: '/private/tmp',
+    directory: '/tmp',
     prefix: 'ceirean-do-',
   });
   yield* fs.chmod(root, 0o700);

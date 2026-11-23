@@ -50,7 +50,7 @@ export function prepareCurrentOfflineCaches(
     yield* verifyRetainedRegistryInputs(retainedRoot, plan.base);
     const fs = yield* FileSystem.FileSystem;
     const directory = yield* Effect.acquireRelease(
-      fs.makeTempDirectory({ directory: '/private/tmp', prefix: 'ceirean-current-offline-' }),
+      fs.makeTempDirectory({ directory: '/tmp', prefix: 'ceirean-current-offline-' }),
       (directory, exit) =>
         Exit.match(exit, {
           onSuccess: () => Effect.void,

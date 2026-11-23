@@ -3,8 +3,8 @@ import { expect, test } from 'bun:test';
 const script = new URL('../scripts/prepare-current-cache.ts', import.meta.url).pathname;
 async function invoke(args: readonly string[]) {
   const child = Bun.spawn([process.execPath, '--no-env-file', '--no-install', script, ...args], {
-    cwd: '/private/tmp',
-    env: { PATH: '/usr/bin:/bin', HOME: '/private/tmp' },
+    cwd: '/tmp',
+    env: { PATH: '/usr/bin:/bin', HOME: '/tmp' },
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 10000,
@@ -28,7 +28,7 @@ for (const args of [
   });
 }
 test('offline cache CLI refuses missing fixed source with a sanitized diagnostic', async () => {
-  expect(await invoke(['--prepare', '/private/tmp', '/private/tmp', '/private/tmp/node'])).toEqual({
+  expect(await invoke(['--prepare', '/tmp', '/tmp', '/tmp/node'])).toEqual({
     code: 1,
     stdout: '',
     stderr: '{"_tag":"CurrentCachePreparationRefused","activation":"Blocked"}\n',

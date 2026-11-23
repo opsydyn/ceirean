@@ -31,7 +31,7 @@ export function ownedConfig() {
   function* acquire() {
     const fs = yield* FileSystem.FileSystem;
     const directory = yield* fs.makeTempDirectoryScoped({
-      directory: '/private/tmp',
+      directory: '/tmp',
       prefix: 'migration-task3-',
     });
     const root = yield* fs.realPath(directory);

@@ -72,7 +72,7 @@ export function prepareCurrentNpm(
     cohort.set('foldkit@0.169.0', { identity: 'foldkit@0.169.0' });
     const fs = yield* FileSystem.FileSystem;
     const directory = yield* Effect.acquireRelease(
-      fs.makeTempDirectory({ directory: '/private/tmp', prefix: 'ceirean-current-npm-' }),
+      fs.makeTempDirectory({ directory: '/tmp', prefix: 'ceirean-current-npm-' }),
       (directory, exit) =>
         Exit.match(exit, {
           onSuccess: () => Effect.void,

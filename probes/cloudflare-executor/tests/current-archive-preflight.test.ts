@@ -8,8 +8,8 @@ import { inspectCurrentOfflineArchives } from '../src/current-archive-preflight.
 const script = new URL('../scripts/check-current-archives.ts', import.meta.url).pathname;
 async function invoke(args: readonly string[]) {
   const child = Bun.spawn([process.execPath, '--no-env-file', '--no-install', script, ...args], {
-    cwd: '/private/tmp',
-    env: { PATH: '/usr/bin:/bin', HOME: '/private/tmp' },
+    cwd: '/tmp',
+    env: { PATH: '/usr/bin:/bin', HOME: '/tmp' },
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 10000,
@@ -32,7 +32,7 @@ for (const args of [
   });
 }
 test('archive preflight refuses missing fixed input without exposing a stack', async () => {
-  expect(await invoke(['--inspect', '/private/tmp'])).toEqual({
+  expect(await invoke(['--inspect', '/tmp'])).toEqual({
     code: 1,
     stdout: '',
     stderr: '{"_tag":"ArchivePreflightInputRefused","activation":"Blocked"}\n',

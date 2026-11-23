@@ -23,7 +23,7 @@ const encode = Schema.encodeSync(Schema.fromJsonString(Schema.Unknown));
 async function portableLauncher() {
   function* scenario() {
     const fs = yield* FileSystem.FileSystem;
-    const root = yield* fs.makeTempDirectoryScoped({ directory: '/private/tmp' });
+    const root = yield* fs.makeTempDirectoryScoped({ directory: '/tmp' });
     const path = `${root}/client`;
     yield* writeFixtureLauncher(path, '/synthetic/other-bun');
     const source = yield* fs.readFileString(path);
@@ -42,7 +42,7 @@ test(
 
 function* fixture() {
   const fs = yield* FileSystem.FileSystem;
-  const root = yield* fs.makeTempDirectoryScoped({ directory: '/private/tmp' });
+  const root = yield* fs.makeTempDirectoryScoped({ directory: '/tmp' });
   yield* fs.makeDirectory(`${root}/ceirean`);
   yield* fs.makeDirectory(`${root}/home`);
   const path = `${root}/ceirean/colima.yaml`;
@@ -263,8 +263,8 @@ async function preIoGuards() {
     const fs = yield* FileSystem.FileSystem;
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
     const base = {
-      colimaRoot: '/private/tmp/synthetic-colima',
-      home: '/private/tmp/synthetic-home',
+      colimaRoot: '/tmp/synthetic-colima',
+      home: '/tmp/synthetic-home',
       parentDirectoriesTrusted: true,
       executableCandidates: {
         Colima: { path: '/synthetic/colima', semantics: 'ClientOnlyVersion' as const },

@@ -47,7 +47,7 @@ export function prepareCurrentPayloadInputs(repository: string) {
     yield* requirePayload(contractSha256 === image.contractSha256);
     const fs = yield* FileSystem.FileSystem;
     const directory = yield* Effect.acquireRelease(
-      fs.makeTempDirectory({ directory: '/private/tmp', prefix: 'ceirean-current-inputs-' }),
+      fs.makeTempDirectory({ directory: '/tmp', prefix: 'ceirean-current-inputs-' }),
       (directory, exit) =>
         Exit.match(exit, {
           onSuccess: () => Effect.void,

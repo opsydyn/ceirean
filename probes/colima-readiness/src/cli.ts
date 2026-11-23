@@ -78,7 +78,7 @@ export function runCli(argv: ReadonlyArray<string>, dependencies: CliDependencie
   function* collect(colimaRoot: string) {
     const fs = yield* FileSystem.FileSystem;
     const home = yield* fs.makeTempDirectoryScoped({
-      directory: '/private/tmp',
+      directory: '/tmp',
       prefix: 'ceirean-preflight-home-',
     });
     const host = yield* dependencies.collectHost(home);

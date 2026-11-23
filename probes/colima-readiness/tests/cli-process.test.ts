@@ -19,7 +19,7 @@ afterEach(async () => {
 async function ownedRoot() {
   const fs = await filesystem();
   const root = await Effect.runPromise(
-    fs.makeTempDirectory({ directory: '/private/tmp', prefix: 'ceirean-cli-fixture-' }),
+    fs.makeTempDirectory({ directory: '/tmp', prefix: 'ceirean-cli-fixture-' }),
   );
   roots.push(root);
   await Effect.runPromise(fs.makeDirectory(`${root}/ceirean`));
