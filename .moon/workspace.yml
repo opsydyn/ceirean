@@ -14,3 +14,8 @@ projects:
   cloudflare-executor: probes/cloudflare-executor
   vendor-factory: vendor/factory
   factory-binding: probes/factory-binding
+
+# This repository has never had a `master`; Moon's default sent its base-branch
+# diff looking for one, which resolved differently on a laptop than on a runner.
+vcs:
+  defaultBranch: main
