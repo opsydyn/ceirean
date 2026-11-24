@@ -41,7 +41,7 @@ not proof of qualification.
 .
 ├── .github/
 │   ├── actions/setup/         Composite toolchain step: Bun, Moon, frozen install
-│   └── workflows/check.yml    The gate: lint, 14 typechecks, 13 test targets
+│   └── workflows/check.yml    The gate: lint, 15 typechecks, 14 test targets
 ├── .moon/                     Project graph, toolchains and task definitions
 ├── apps/
 │   ├── github-ingress/        Signed GitHub admission, verification, operator CLI
@@ -58,6 +58,7 @@ not proof of qualification.
 │   ├── cloudflare-ledger/     Durable-object ledger semantics
 │   ├── colima-readiness/      Local container host readiness
 │   ├── factory-binding/       Astro Factory substrate binding
+│   ├── flue-migration-tools/  Confined patch-generation tools for a Flue agent
 │   └── github-admission/      Offline `/ceirean assess` command admission
 ├── vendor/factory/            Vendored Astro Factory substrate; MIT, provenance per file
 ├── patches/                   Version-scoped, declaration-only dependency repairs
@@ -107,7 +108,7 @@ derived: when they and the model disagree, the model is right.
 ## Checks
 
 Every pull request runs [the gate](.github/workflows/check.yml) — lint and
-format, 14 typecheck targets, and 13 test targets as one job each so a single run
+format, 15 typecheck targets, and 14 test targets as one job each so a single run
 reports every failure. `main` requires its aggregate `Gate` check and refuses
 direct pushes. The gate can also be run on demand:
 
