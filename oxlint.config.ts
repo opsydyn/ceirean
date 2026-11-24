@@ -18,6 +18,7 @@ export default defineConfig({
           'probes/bun-effect-flue/src/flue-probe.ts',
           'probes/bun-effect-flue/src/restart-child.ts',
           'probes/bun-effect-flue/tests/process.ts',
+          'probes/flue-migration-tools/tests/checkout.ts',
           '**/*.test.ts',
         ],
       },

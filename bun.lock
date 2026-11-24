@@ -134,6 +134,16 @@
         "@cloudflare/workers-types": "5.20261021.1",
       },
     },
+    "probes/flue-migration-tools": {
+      "name": "@ceirean/flue-migration-tools",
+      "dependencies": {
+        "@earendil-works/pi-ai": "1.3.0",
+        "@effect/platform-bun": "4.0.5",
+        "@flue/runtime": "2.3.0",
+        "effect": "4.0.5",
+        "valibot": "1.5.0",
+      },
+    },
     "probes/github-admission": {
       "name": "@ceirean/github-admission-probe",
       "dependencies": {
@@ -234,6 +244,8 @@
     "@ceirean/engine": ["@ceirean/engine@workspace:packages/engine"],
 
     "@ceirean/factory-binding-probe": ["@ceirean/factory-binding-probe@workspace:probes/factory-binding"],
+
+    "@ceirean/flue-migration-tools": ["@ceirean/flue-migration-tools@workspace:probes/flue-migration-tools"],
 
     "@ceirean/github-adapter": ["@ceirean/github-adapter@workspace:packages/github-adapter"],
 
