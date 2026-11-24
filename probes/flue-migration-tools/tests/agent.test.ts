@@ -17,6 +17,15 @@ function settled(context: Transcript) {
   return fauxAssistantMessage(failed ? 'refused' : 'done');
 }
 
+/** Records the whole transcript Flue hands the model, then ends the turn. */
+function capturing(seen: string[]) {
+  function capture(context: Transcript) {
+    seen.push(Bun.inspect(context.messages));
+    return fauxAssistantMessage('read');
+  }
+  return capture;
+}
+
 async function withAgent(
   policy: MigrationToolPolicy,
   body: (agent: MigrationAgentHandle) => Promise<void>,
@@ -102,6 +111,39 @@ test('the agent reaches run_check and an unknown name is refused', async () => {
         { tool: 'run_check', refused: undefined, message: undefined },
         { tool: 'run_check', refused: 'UnknownCheck', message: 'Refused: UnknownCheck' },
       ]);
+    });
+  });
+});
+
+test('nothing in the transcript the model reads carries an absolute path', async () => {
+  await withCheckout(async ({ root, policy }) => {
+    const checks = [
+      {
+        name: 'noisy',
+        executable: '/bin/sh',
+        args: [
+          '-c',
+          `echo "${root}/src/a.ts:1:1 broken"; echo "/etc/shadow unreadable" >&2; exit 1`,
+        ],
+        timeoutSeconds: 5,
+      },
+    ];
+    await withAgent({ ...policy, checks }, async (agent) => {
+      // Whatever Flue put in front of the model, in full. ADR-0003's rules are
+      // about this text, not about the tool's return value alone.
+      const seen: string[] = [];
+      agent.script([
+        fauxAssistantMessage(fauxToolCall('run_check', { name: 'noisy' }), {
+          stopReason: 'toolUse',
+        }),
+        capturing(seen),
+      ]);
+      expect(await agent.dispatch('run the noisy check')).toBe('read');
+      const transcript = seen.join('');
+      expect(transcript).toContain('src/a.ts:1:1 broken');
+      expect(transcript).toContain('<path> unreadable');
+      expect(transcript).not.toContain(root);
+      expect(transcript).not.toContain('/etc/shadow');
     });
   });
 });

@@ -1,7 +1,7 @@
 # flue-migration-tools
 
 The tool surface a Flue agent uses to produce a migration patch, and the
-confinement around it. Slice 1 of
+confinement around it. Slices 1 and 2 of
 [the Flue patch-generation design](../../docs/superpowers/specs/2026-11-23-flue-patch-generation-design.md):
 offline, no credential, no spend.
 
@@ -39,6 +39,37 @@ refused. `search_files` takes a literal substring, never a pattern, because a
 regular expression composed by a model is a denial-of-service surface and
 nothing in the migration task needs one.
 
+## Check output
+
+Slice 1 discarded a check's output. An agent given only an exit code cannot tell
+a lint failure from a test failure from a crash, and the pilot's real surface —
+18 files rather than 7 — was discovered from checker output naming the files it
+objected to. [ADR-0003](../../docs/decisions/0003-bounded-redacted-check-output.md)
+decided to return it, bounded and redacted:
+
+```
+run_check -> { name, exitCode, timedOut, output: { stdout, stderr, omitted } }
+```
+
+That reopens a channel closed on purpose, so [`src/redact.ts`](src/redact.ts) is
+a security module and [`tests/redact.test.ts`](tests/redact.test.ts) holds its
+rules rather than examples of them. The order is fixed: decode, strip escapes,
+remove secrets, rewrite paths, then bound — bounding first could cut a secret in
+half and pass both halves through as ordinary text.
+
+- **No absolute path reaches the agent.** A path under the root is rewritten
+  relative to it, and anything else becomes `<path>`. Normalising before the
+  comparison is what makes `<root>/../outside/secret.ts` land outside rather
+  than being rewritten into a readable relative path.
+- **The root never appears**, including on its own, where it becomes `.`.
+- **Escape sequences and control characters are stripped.** A carriage return
+  becomes a newline, so output that used it to overwrite a progress line arrives
+  as two readable lines rather than one misleading one.
+- **Decoding is lossy**, unlike `read_file`, which refuses invalid UTF-8 to
+  protect file fidelity. A checker that emits odd bytes still says something.
+- **Each line is bounded as well as the total**, and the total keeps the head and
+  the tail with the dropped byte count between them.
+
 A refusal reaching the agent carries a code and nothing else — no path, no root,
 no errno. [`src/agent.ts`](src/agent.ts) narrows every failure to
 `Refused: <code>`, which is what Flue serialises into the tool result the model
@@ -47,10 +78,19 @@ reading error text.
 
 ## What this does not qualify
 
-- **`run_check` reports an exit code and nothing else.** An agent cannot tell a
-  lint failure from a test failure from a crash. That is gap 2 in the design
-  document and the subject of slice 2, not an omission here; `stdout` and
-  `stderr` are discarded at the child, so no unredacted output exists to leak.
+- **Redaction is pattern matching, not entropy analysis.** It catches the
+  credential shapes a checker is likely to echo — `ghp_`, `sk-`, `Bearer`, a PEM
+  header, an environment assignment naming a key — and does not claim to catch
+  an arbitrary secret. The real control is that the child's environment holds
+  none: `PATH`, `LANG`, `LC_ALL` and `HOME` only, with `extendEnv: false`.
+- **A secret straddling the capture ceiling can survive in halves.** Memory has
+  to be bounded before anything can be redacted, so there are two bounds and
+  only the output bound runs after redaction.
+  [`src/capture.ts`](src/capture.ts) records why, and the ceiling is set where a
+  check would have to be pathological to reach it.
+- **A relative path that escapes is not rewritten.** `../outside/x` passes
+  through, because it discloses no absolute structure. Only absolute paths are
+  placed.
 - **No model has been called.** The provider is `fauxProvider` and `env` is
   empty, so there is no credential to read and no provider that could reach the
   network. Every test scripts the model's turns. Nothing here measures whether
@@ -72,9 +112,10 @@ reading error text.
 
 ```sh
 moon run flue-migration-tools:policy      # Confinement properties
+moon run flue-migration-tools:redact      # The redaction rules, adversarially
 moon run flue-migration-tools:tools       # The four tools and their bounds
 moon run flue-migration-tools:agent       # The tools as a Flue agent reaches them
-moon run flue-migration-tools:test        # All three
+moon run flue-migration-tools:test        # All four
 ```
 
 `tests/checkout.ts` builds the fixture checkout and `tests/run.ts` is the one

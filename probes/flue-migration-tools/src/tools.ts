@@ -1,6 +1,7 @@
-import { Effect, FileSystem, Option } from 'effect';
+import { Effect, FileSystem, Option, Stream } from 'effect';
 import { ChildProcess } from 'effect/process';
 
+import { type Capture, openCapture } from './capture.ts';
 import {
   contain,
   type MigrationCheck,
@@ -10,6 +11,7 @@ import {
   resolveForRead,
   resolveForWrite,
 } from './policy.ts';
+import { redactOutput } from './redact.ts';
 
 /**
  * The exit code a timed-out check reports. It matches `TIMEOUT_EXIT_CODE` in
@@ -29,6 +31,12 @@ export const TIMEOUT_EXIT_CODE = 124;
  * search is cheap.
  */
 const SEARCH_ENTRY_LIMIT = 2048;
+
+/**
+ * The memory ceiling for one captured stream, far above what an agent is shown.
+ * `src/capture.ts` explains why there are two bounds and what the ceiling costs.
+ */
+const CAPTURE_CEILING = 1048576;
 
 export type ToolMatch = Readonly<{ path: string; line: number; text: string }>;
 
@@ -145,14 +153,43 @@ export function openToolSurface(policy: MigrationToolPolicy) {
    * Run one check the policy names. The agent supplies a name, never a command
    * line, so there is no shell, no argument composition and no path lookup.
    *
-   * Slice 1 returns an exit code and nothing else. That is the recorded limit,
-   * not an omission: an agent cannot tell a lint failure from a test failure
-   * from a crash here, which is gap 2 in the design document and the whole
-   * subject of slice 2. `stdout` and `stderr` are discarded at the child rather
-   * than collected and dropped, so no unredacted output exists to leak.
+   * Output is captured, redacted and bounded, per
+   * [ADR-0003](../../../docs/decisions/0003-bounded-redacted-check-output.md).
+   * Slice 1 discarded both streams at the child; an agent given only an exit
+   * code cannot tell a lint failure from a test failure from a crash, and the
+   * pilot's real surface was discovered from checker output naming files.
+   *
+   * Everything a stream produces is drained, including bytes past the ceiling,
+   * so a check that writes more than its ceiling fails on its own terms instead
+   * of stalling on a full pipe.
    */
   function runCheck(name: string) {
+    function drain(stream: Stream.Stream<Uint8Array, unknown>, sink: Capture) {
+      function* keep(chunk: Uint8Array) {
+        sink.push(chunk);
+        // An explicit step rather than `Effect.sync` around the push. The sink
+        // enforces its own bound, so there is nothing to decide here and
+        // nothing that can fail.
+        yield* Effect.void;
+      }
+      const consumption = Stream.runForEach(stream, (chunk) => Effect.gen(() => keep(chunk)));
+      return consumption;
+    }
+
+    function reported(sink: Capture) {
+      const { bytes, dropped } = sink.taken();
+      const bounds = { total: policy.outputMaximum, line: policy.outputLineMaximum };
+      const redacted = redactOutput(bytes, policy.root, bounds);
+      return { text: redacted.text, omitted: redacted.omitted + dropped };
+    }
+
     function spawn(check: MigrationCheck) {
+      // The sinks are created outside the timed effect on purpose. A timeout
+      // interrupts the spawn, and anything created inside it goes with it, so
+      // a killed check would report nothing — which is the one case where its
+      // last output matters most.
+      const out = openCapture(CAPTURE_CEILING);
+      const error = openCapture(CAPTURE_CEILING);
       function* run() {
         const child = yield* ChildProcess.make(check.executable, check.args, {
           cwd: policy.root,
@@ -160,25 +197,43 @@ export function openToolSurface(policy: MigrationToolPolicy) {
           extendEnv: false,
           env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C', HOME: policy.root },
           stdin: 'ignore',
-          stdout: 'ignore',
-          stderr: 'ignore',
+          stdout: 'pipe',
+          stderr: 'pipe',
           killSignal: 'SIGKILL',
           forceKillAfter: 0,
         });
-        return yield* child.exitCode;
+        const [, , code] = yield* Effect.all(
+          [drain(child.stdout, out), drain(child.stderr, error), child.exitCode],
+          { concurrency: 3 },
+        );
+        return code;
       }
       const execution = Effect.gen(run);
       // The scope closes on timeout, which is what kills the child.
       const scoped = Effect.scoped(execution);
       const bounded = Effect.timeoutOption(scoped, `${check.timeoutSeconds} seconds`);
-      const reported = bounded.pipe(
-        Effect.map((code) => ({
-          name: check.name,
-          exitCode: Number(Option.getOrElse(code, () => TIMEOUT_EXIT_CODE)),
-          timedOut: Option.isNone(code),
-        })),
+      const described = bounded.pipe(
+        Effect.map((code) => settle(check, code, reported(out), reported(error))),
       );
-      return reported;
+      return described;
+    }
+
+    function settle(
+      check: MigrationCheck,
+      code: Option.Option<number>,
+      stdout: { text: string; omitted: number },
+      stderr: { text: string; omitted: number },
+    ) {
+      return {
+        name: check.name,
+        exitCode: Number(Option.getOrElse(code, () => TIMEOUT_EXIT_CODE)),
+        timedOut: Option.isNone(code),
+        output: {
+          stdout: stdout.text,
+          stderr: stderr.text,
+          omitted: stdout.omitted + stderr.omitted,
+        },
+      };
     }
 
     function* select() {

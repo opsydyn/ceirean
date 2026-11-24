@@ -125,20 +125,28 @@ test('search_files refuses an empty query rather than returning the whole checko
   });
 });
 
-test('run_check reports an exit code and nothing else', async () => {
+test('run_check reports its exit code and the output of the check', async () => {
   await withCheckout(async ({ policy }) => {
     const checks = [
       { name: 'passes', executable: '/usr/bin/true', args: [], timeoutSeconds: 5 },
       { name: 'fails', executable: '/usr/bin/false', args: [], timeoutSeconds: 5 },
     ];
     const tools = prepare({ ...policy, checks });
-    // Exact equality is the assertion that matters: no stdout, no stderr, no
-    // message. Slice 1 cannot say why a check failed, and this pins that.
     expect(await tools.check('passes')).toEqual({
-      value: { name: 'passes', exitCode: 0, timedOut: false },
+      value: {
+        name: 'passes',
+        exitCode: 0,
+        timedOut: false,
+        output: { stdout: '', stderr: '', omitted: 0 },
+      },
     });
     expect(await tools.check('fails')).toEqual({
-      value: { name: 'fails', exitCode: 1, timedOut: false },
+      value: {
+        name: 'fails',
+        exitCode: 1,
+        timedOut: false,
+        output: { stdout: '', stderr: '', omitted: 0 },
+      },
     });
   });
 });
@@ -152,12 +160,122 @@ test('run_check refuses a name the policy does not list', async () => {
   });
 });
 
-test('run_check reports a timeout rather than hanging', async () => {
+test('a lint failure, a test failure and a timeout are distinguishable', async () => {
   await withCheckout(async ({ policy }) => {
-    const checks = [{ name: 'slow', executable: '/bin/sleep', args: ['30'], timeoutSeconds: 1 }];
+    const checks = [
+      {
+        name: 'lint',
+        executable: '/bin/sh',
+        args: ['-c', 'echo "src/a.ts:12:3 unexpected token" >&2; exit 1'],
+        timeoutSeconds: 5,
+      },
+      {
+        name: 'unit',
+        executable: '/bin/sh',
+        args: ['-c', 'echo "1 fail: expected 2, got 1 (tests/a.test.ts)"; exit 1'],
+        timeoutSeconds: 5,
+      },
+      { name: 'slow', executable: '/bin/sleep', args: ['30'], timeoutSeconds: 1 },
+    ];
     const tools = prepare({ ...policy, checks });
+
+    // This is the point of the slice. Before it, all three were a bare `1` or
+    // `124` and an agent could not tell which problem it was looking at.
+    expect(await tools.check('lint')).toEqual({
+      value: {
+        name: 'lint',
+        exitCode: 1,
+        timedOut: false,
+        output: { stdout: '', stderr: 'src/a.ts:12:3 unexpected token\n', omitted: 0 },
+      },
+    });
+    expect(await tools.check('unit')).toEqual({
+      value: {
+        name: 'unit',
+        exitCode: 1,
+        timedOut: false,
+        output: {
+          stdout: '1 fail: expected 2, got 1 (tests/a.test.ts)\n',
+          stderr: '',
+          omitted: 0,
+        },
+      },
+    });
     expect(await tools.check('slow')).toEqual({
-      value: { name: 'slow', exitCode: 124, timedOut: true },
+      value: {
+        name: 'slow',
+        exitCode: 124,
+        timedOut: true,
+        output: { stdout: '', stderr: '', omitted: 0 },
+      },
+    });
+  });
+});
+
+test('a check that names an absolute path inside the checkout is rewritten', async () => {
+  await withCheckout(async ({ root, policy }) => {
+    const checks = [
+      {
+        name: 'absolute',
+        executable: '/bin/sh',
+        args: ['-c', `echo "${root}/src/a.ts:1:1 broken"; echo "/etc/shadow unreadable" >&2`],
+        timeoutSeconds: 5,
+      },
+    ];
+    const outcome = await prepare({ ...policy, checks }).check('absolute');
+    expect(outcome).toEqual({
+      value: {
+        name: 'absolute',
+        exitCode: 0,
+        timedOut: false,
+        output: { stdout: 'src/a.ts:1:1 broken\n', stderr: '<path> unreadable\n', omitted: 0 },
+      },
+    });
+  });
+});
+
+test('a check that floods its output is bounded and says how much went', async () => {
+  await withCheckout(async ({ policy }) => {
+    const checks = [
+      {
+        name: 'flood',
+        executable: '/bin/sh',
+        args: [
+          '-c',
+          'echo FIRST; for i in $(seq 1 4000); do echo "noise line $i"; done; echo LAST',
+        ],
+        timeoutSeconds: 15,
+      },
+    ];
+    const tools = prepare({ ...policy, outputMaximum: 2048, checks });
+    const outcome = await tools.check('flood');
+    const value = 'value' in outcome ? outcome.value : undefined;
+    expect(value?.exitCode).toBe(0);
+    expect(value?.output.stdout).toContain('FIRST');
+    expect(value?.output.stdout).toContain('LAST');
+    expect(value?.output.omitted).toBeGreaterThan(0);
+    expect(new TextEncoder().encode(value?.output.stdout).byteLength).toBeLessThanOrEqual(2048);
+  });
+});
+
+test('a check killed by its timeout still reports what it had written', async () => {
+  await withCheckout(async ({ policy }) => {
+    const checks = [
+      {
+        name: 'partial',
+        executable: '/bin/sh',
+        args: ['-c', 'echo "started src/a.ts"; sleep 30'],
+        timeoutSeconds: 2,
+      },
+    ];
+    const outcome = await prepare({ ...policy, checks }).check('partial');
+    expect(outcome).toEqual({
+      value: {
+        name: 'partial',
+        exitCode: 124,
+        timedOut: true,
+        output: { stdout: 'started src/a.ts\n', stderr: '', omitted: 0 },
+      },
     });
   });
 });

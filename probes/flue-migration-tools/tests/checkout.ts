@@ -51,6 +51,8 @@ export async function withCheckout(body: (checkout: Checkout) => Promise<void>) 
     writeMaximum: 65536,
     searchMatches: 64,
     searchMatchBytes: 512,
+    outputMaximum: 8192,
+    outputLineMaximum: 512,
     checks: [],
   };
   await Promise.resolve()

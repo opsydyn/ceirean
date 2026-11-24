@@ -68,7 +68,13 @@ is blind in exactly the loop this slice exists to test. It would also make
 failure indistinguishable: a lint error, a test failure and a timeout all arrive
 as a non-zero integer, and only the timeout is separable, by `TIMEOUT_EXIT_CODE`.
 
-Three ways out, to be decided rather than assumed:
+**Resolved 2026-11-24** by
+[ADR-0003](../../decisions/0003-bounded-redacted-check-output.md): option 1,
+bounded redacted capture. The pilot decides it as a matter of evidence — its
+first two failures were checkers that named the files they objected to, and that
+output is how the real surface was found. Option 3 remains available at no cost,
+since `read_file` already reads a report file a check writes. The three options
+as they were put:
 
 1. **Bounded redacted capture.** Return output alongside the exit code, length-
    capped and filtered, as the sandbox already caps and filters elsewhere. The
@@ -138,7 +144,9 @@ picks a compatibility policy has failed even if the checks pass.
    human-agent patch at `d30bbf5a`.
 
 Slices 1 and 2 need no credential and no spend. They are the implementable part
-of this document.
+of this document, and both are built: slice 1 in
+`probes/flue-migration-tools` and slice 2 as the redaction and capture in the
+same package.
 
 ## Separate gates
 

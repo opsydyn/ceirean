@@ -35,6 +35,10 @@ export type MigrationToolPolicy = Readonly<{
   writeMaximum: number;
   searchMatches: number;
   searchMatchBytes: number;
+  /** Bytes of a check's output the agent may see, per stream. */
+  outputMaximum: number;
+  /** Bytes of any one output line, so a single huge line cannot fill the budget. */
+  outputLineMaximum: number;
   checks: ReadonlyArray<MigrationCheck>;
 }>;
 
