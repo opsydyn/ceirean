@@ -28,14 +28,14 @@ durable authority. No framework/platform migration is needed to advance.
 
 ## What Is Actually Proven
 
-| Capability                                                                | Evidence                                                                               | Limit                                                                |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Domain, ledger, worker lifecycle and Flue compatibility foundations       | [Historical delivery record](roadmap-history-20261027.md)                              | Local/offline proof, not a hosted repair run                         |
-| Signed GitHub admission, durable execution, accepted replay and teardown  | [30 October hosted smoke](evidence/readonly-hosted/accepted-replay-20261030-084800.md) | Fixed `node --version`, not repository checks                        |
-| Pinned dependency declaration inventory                                   | [Manifest evidence](evidence/manifest-report/baseline-1183e3c.md)                      | Local Git objects, not installed versions or compatibility           |
-| Vendored Factory substrate, our router, plan, projection and verifier     | [Factory substrate evidence](evidence/factory-substrate/)                              | Local and typecheck-only; no container, deploy or credential         |
-| One accepted breaking upgrade, verified by the target repository's own CI | [The migration pilot](evidence/foldkit-pilot/migration-pilot-20261121.md)              | A human-triggered agent and foreign CI, not Flue or the owned worker |
-| Repository baseline and browser evidence from an owned executor           | Not yet demonstrated                                                                   | Parked; the pilot used the target repository's CI instead            |
+| Capability                                                                | Evidence                                                                                                                            | Limit                                                                                                                            |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Domain, ledger, worker lifecycle and Flue compatibility foundations       | [Historical delivery record](roadmap-history-20261027.md)                                                                           | Local/offline proof, not a hosted repair run                                                                                     |
+| Signed GitHub admission, durable execution, accepted replay and teardown  | [30 October hosted smoke](evidence/readonly-hosted/accepted-replay-20261030-084800.md)                                              | Fixed `node --version`, not repository checks                                                                                    |
+| Pinned dependency declaration inventory                                   | [Manifest evidence](evidence/manifest-report/baseline-1183e3c.md)                                                                   | Local Git objects, not installed versions or compatibility                                                                       |
+| Vendored Factory substrate, our router, plan, projection and verifier     | [Factory substrate evidence](evidence/factory-substrate/)                                                                           | Local and typecheck-only; no container, deploy or credential                                                                     |
+| One accepted breaking upgrade, verified by the target repository's own CI | [The pilot](evidence/foldkit-pilot/migration-pilot-20261121.md) and [its acceptance](evidence/foldkit-pilot/acceptance-20261123.md) | A human-triggered agent and foreign CI, not Flue or the owned worker; green on the candidate pull request did not mean published |
+| Repository baseline and browser evidence from an owned executor           | Not yet demonstrated                                                                                                                | Parked; the pilot used the target repository's CI instead                                                                        |
 
 The last hosted teardown was verified private/expired. This is retained evidence,
 not a fresh provider-state read. No current roadmap entry authorizes activation.
@@ -99,7 +99,7 @@ toolchain, image and cleanup identities attached.
 See [the active execution path](roadmaps/first-hosted-e2e.md). Do not substitute a
 hosted manifest/stdin demo for this milestone. No new hosted run is approved here.
 
-### 2. Useful Migration Patch: Next
+### 2. Useful Migration Patch: Accepted 2026-11-23, One Item Open
 
 While the runtime is parked, this milestone runs as the FoldKit migration pilot:
 the patch comes from a human-triggered agent and the verdict comes from the
@@ -113,7 +113,16 @@ Substitute those two steps; keep the scope, evidence and acceptance requirements
 - [ ] Give Flue only the existing restricted worker tools and approved model budget.
       Substituted for the pilot: the patch came from a human-triggered agent. No
       model key, provider call or budget was used, so this item is untested rather
-      than met.
+      than met. It is now the only open item in this milestone and the next slice,
+      ahead of publication, decided on 2026-11-23. Scoping it found that its own
+      premise does not hold: there are no existing restricted worker tools. The
+      repository defines exactly one Flue tool, `record_token` in the
+      compatibility probe, which records a synthetic token against a faux
+      provider with an empty environment; and no model budget has been approved
+      anywhere, the recorded $0.13 per candidate being the vendored substrate's
+      container cost, not model spend. See
+      [the design](superpowers/specs/2026-11-23-flue-patch-generation-design.md)
+      for the three gaps and the decisions they need.
 - [x] Freeze a scope-valid patch and independently rerun the baseline contract.
       Substituted for the pilot: the patch is frozen at `d30bbf5a` and the verdict
       comes from the target repository's own CI, base against candidate under the
@@ -121,11 +130,13 @@ Substitute those two steps; keep the scope, evidence and acceptance requirements
 - [x] Return the patch, before/after browser evidence and concise review report.
       That CI's own Playwright browser and visual checks are the before/after
       evidence, green on base and candidate alike; the pilot record is the report.
-- [ ] Record maintainer acceptance and active supervision/review effort.
+- [x] Record maintainer acceptance and active supervision/review effort.
       Four rework rounds and the maintainer's peer-widening decision are recorded.
-      Acceptance itself is outstanding: all four jobs on
-      [PR 188](https://github.com/opsydyn/fold-kit-experiments/pull/188) pass and
-      the merge decision is the maintainer's.
+      [PR 188](https://github.com/opsydyn/fold-kit-experiments/pull/188) was
+      merged at 2026-11-23T08:51:52Z as `058d3e5` and `foldkit` is `0.171.0` on
+      that branch. Acceptance did not leave the repository correct, which is
+      recorded separately in
+      [the acceptance record](evidence/foldkit-pilot/acceptance-20261123.md).
 
 Status 2026-11-22: the pilot ran and is recorded. Its central finding is that a
 manifest-only patch, which is what a dependency bot produces, fails this
@@ -133,10 +144,28 @@ repository's own consistency checkers twice before reaching a test, because the
 version also lives in skill assets, Markdown prose and generated-starter
 templates. The real patch is 18 files, not the 7 manifests a bot would touch.
 
+Status 2026-11-23: accepted, and the acceptance extended that finding. The
+merge commit's own `ci` run failed although all four jobs on the pull request had
+passed, and
+[PR 189](https://github.com/opsydyn/fold-kit-experiments/pull/189) was needed to
+repair two READMEs that contradicted the packages they ship with and, more
+seriously, to publish the widened peer range at all: `chore:` does not bump, so
+release-please never released, and npm kept serving `<0.171.0`. A correct,
+reviewed, accepted 18-file patch did not deliver the upgrade. The acceptance
+contract therefore needs a notion of published, not only of green, and the
+verdict cannot be the candidate pull request alone.
+
 Success means an accepted, verified migration, not merely a version bump or a PR.
 No model key, provider call or repository write is authorized by this roadmap.
 
-### 3. Reliable Publication: After Patch Acceptance
+### 3. Reliable Publication: After The Flue Slice
+
+Acceptance has happened, so this milestone's precondition is met in name. It is
+sequenced behind the Flue item above by a decision of 2026-11-23: publication
+automates the last mile, and 2026-11-23 showed that a bundle green on its own
+pull request can both break the target's `main` and fail to reach consumers, so
+automating that verdict would industrialise an incomplete signal. The first mile,
+Flue producing the patch at all, is unproven.
 
 - [ ] Add an isolated least-privilege publisher with explicit owner authorization.
 - [ ] Create one draft PR from the verified immutable bundle; reconcile uncertain
